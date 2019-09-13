@@ -1,11 +1,17 @@
-# pltfmdev-doc-gen
+# DocGen Service
 
-A document generation service.
+A document generation service that transforms document templates in a remote BitBucket repository into PDF documents.
+
+## Distribute
+
+```
+./gradlew shadowJar
+```
 
 ## Run
 
 ```
-./gradlew joobyRun
+./gradlew run
 ```
 
 ## Test
@@ -13,6 +19,10 @@ A document generation service.
 ```
 ./gradlew test
 ```
+
+## Document Templates
+
+When processing a template `type` at a specific `version`, and data into a document, the DocGen service expects the BitBucket repository to have a `release/${version}` branch that contains the template type at `/templates/${type}.html.tmpl`.
 
 ## Requirements
 
