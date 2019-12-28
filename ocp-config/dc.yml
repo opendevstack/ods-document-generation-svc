@@ -63,6 +63,12 @@ spec:
               memory: 2Gi
             requests:
               memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 300
   triggers:
     - type: ConfigChange
     - imageChangeParams:
