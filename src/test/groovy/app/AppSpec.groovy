@@ -13,6 +13,8 @@ class AppSpec extends SpecHelper {
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT", "myProject")
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_REPO", "myRepo")
         env.set("BITBUCKET_URL", "http://localhost:9001")
+        env.set("BITBUCKET_USERNAME", "user")
+        env.set("BITBUCKET_PASSWORD", "pass")
     }
 
     def "POST /document"() {
