@@ -67,7 +67,7 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 120
+            initialDelaySeconds: 180
             periodSeconds: 300
   triggers:
     - type: ConfigChange
