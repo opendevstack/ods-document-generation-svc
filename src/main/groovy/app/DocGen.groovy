@@ -71,7 +71,7 @@ class DocGen implements Jooby.Module {
                 // Remove line separator and tab characters in partial template
                 return template.replaceAll(System.getProperty("line.separator"), "").replaceAll("\t", "")
             }
-        
+
             // Transform paths to partial templates to paths to rendered HTML files
             partials = partials.collectEntries { name, path ->
                 // Write an .html file next to the .tmpl file containing the executed template
@@ -81,7 +81,7 @@ class DocGen implements Jooby.Module {
             }
 
             // Convert the exected templates into a PDF document
-            result = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer)
+            result = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer, data)
         } catch (Throwable e) {
             throw e
         } finally {
@@ -134,33 +134,38 @@ class DocGen implements Jooby.Module {
                 .compile(path.toString())
                 .apply(data)
         }
-        
+
         // Convert a HTML document, with an optional header and footer, into a PDF
-        static private def byte[] convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null) {
+        static private def byte[] convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
             def documentPDFFile = null
 
             try {
                 documentPDFFile = Files.createTempFile("document", ".pdf")
 
-                def cmd = new StringBuilder("wkhtmltopdf")
-                cmd << " -T 40 -R 25 -B 25 -L 25"
-                cmd << " --encoding UTF-8"
-                cmd << " --no-outline"
-                cmd << " --print-media-type"
+                def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+                cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
 
-                if (headerHtmlFile != null) {
-                    cmd << " --header-html ${headerHtmlFile.toFile().absolutePath}"
+                if (data.metadata.header) {
+                    if (data.metadata.header.size() > 1) {
+                        cmd.addAll(["--header-center", """${data.metadata.header[0]}
+${data.metadata.header[1]}"""])
+                    } else {
+                        cmd.addAll(["--header-center", data.metadata.header[0]])
+                    }
+
+                    cmd.addAll(["--header-font-size", "10"])
                 }
 
-                if (footerHtmlFile != null) {
-                    cmd << " --footer-html ${footerHtmlFile.toFile().absolutePath}"
-                }
+                cmd.addAll(["--footer-center", "Page [page] of [topage]", "--footer-font-size", "10"])
 
-                cmd << " ${documentHtmlFile.toFile().absolutePath}"
-                cmd << " ${documentPDFFile.toFile().absolutePath}"
+                cmd << documentHtmlFile.toFile().absolutePath
+                cmd << documentPDFFile.toFile().absolutePath
 
-                def result = Util.shell(cmd.toString())
+                println "[INFO]: executing cmd: ${cmd}"
+                def result = Util.shell(cmd)
                 if (result.rc != 0) {
+                    println "[ERROR]: ${cmd} has exited with code ${result.rc}"
+                    println "[ERROR]: ${result.stderr}"
                     throw new IllegalStateException(result.stderr)
                 }
 
@@ -175,7 +180,7 @@ class DocGen implements Jooby.Module {
         }
 
         // Execute a command in the shell
-        static private def Map shell(String cmd) {
+        static private def Map shell(List<String> cmd) {
             def proc = cmd.execute()
             proc.waitFor()
 
