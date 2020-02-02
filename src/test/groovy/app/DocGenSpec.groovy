@@ -39,8 +39,15 @@ class DocGenSpec extends SpecHelper {
         def headerHtmlFile = Files.createTempFile("header", ".html") << "<html>header</html>"
         def footerHtmlFile = Files.createTempFile("footer", ".html") << "<html>footer</html>"
 
+        def data = [
+            name: "Project Phoenix",
+            metadata: [
+                header: "header"
+            ]
+        ]
+
         when:
-        def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile)
+        def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile, data)
 
         then:
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
@@ -55,13 +62,20 @@ class DocGenSpec extends SpecHelper {
         given:
         def version = "1.0"
 
+        def data = [
+            name: "Project Phoenix",
+            metadata: [
+                header: "header"
+            ]
+        ]
+
         mockTemplatesZipArchiveDownload(
             new BitBucketDocumentTemplatesStore()
                 .getZipArchiveDownloadURI(version)
         )
 
         when:
-        def result = new DocGen().generate("InstallationReport", version, [ name: "Project Phoenix" ])
+        def result = new DocGen().generate("InstallationReport", version, data)
 
         then:
         assertThat(new String(result), startsWith("%PDF-1.4\n"))

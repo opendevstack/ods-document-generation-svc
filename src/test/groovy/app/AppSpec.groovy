@@ -31,7 +31,12 @@ class AppSpec extends SpecHelper {
             .contentType(ContentType.JSON)
             .body(JsonOutput.toJson([
                 metadata: [ type: "InstallationReport", version: version ],
-                data: [ name: "Project Phoenix" ]
+                data: [
+                    name: "Project Phoenix",
+                    metadata: [
+                        header: "header"
+                    ]
+                ]
             ]))
         .when()
             .port(this.appConfig.getInt("application.port"))
