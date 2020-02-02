@@ -145,7 +145,7 @@ class DocGen implements Jooby.Module {
                 def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
                 cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
 
-                if (data.metadata.header) {
+                if (data?.metadata?.header) {
                     if (data.metadata.header.size() > 1) {
                         cmd.addAll(["--header-center", """${data.metadata.header[0]}
 ${data.metadata.header[1]}"""])
