@@ -153,7 +153,7 @@ ${data.metadata.header[1]}"""])
                         cmd.addAll(["--header-center", data.metadata.header[0]])
                     }
 
-                    cmd.addAll(["--header-font-size", "10"])
+                    cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
                 }
 
                 cmd.addAll(["--footer-center", "Page [page] of [topage]", "--footer-font-size", "10"])
