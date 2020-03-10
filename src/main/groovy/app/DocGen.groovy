@@ -158,6 +158,10 @@ ${data.metadata.header[1]}"""])
 
                 cmd.addAll(["--footer-center", "Page [page] of [topage]", "--footer-font-size", "10"])
 
+                if (data?.metadata?.orientation) {
+                    cmd.addAll(["--orientation", data.metadata.orientation])
+                }
+
                 cmd << documentHtmlFile.toFile().absolutePath
                 cmd << documentPDFFile.toFile().absolutePath
 
