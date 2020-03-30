@@ -8,7 +8,7 @@ node {
   odsImageTag = env.ODS_IMAGE_TAG ?: 'latest'
 }
 
-@Library('ods-jenkins-shared-library@$2.x') _
+@Library('ods-jenkins-shared-library@2.x') _
 
 /*
   See readme of shared library for usage and customization
