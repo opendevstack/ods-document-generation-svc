@@ -9,7 +9,8 @@ node {
   odsImageTag = env.ODS_IMAGE_TAG ?: 'latest'
 }
 
-@Library('ods-jenkins-shared-library@2.x') _
+@properties([parameters([string(name: 'ODS_GIT_REF', defaultValue: '2.x')])])
+@Library("ods-jenkins-shared-library@${params.ODS_GIT_REF}") _
 
 /*
   See readme of shared library for usage and customization
