@@ -11,7 +11,7 @@ node {
   odsGitRef = env.ODS_GIT_REF ?: 'production'
 }
 
-@Library('ods-jenkins-shared-library@${odsGitRef}') _
+@Library("ods-jenkins-shared-library@${odsGitRef}") _
 
 /*
   See readme of shared library for usage and customization
