@@ -40,6 +40,12 @@ def stageBuild(def context) {
 
   stage('Build') {
     withEnv(["TAGVERSION=${context.tagversion}", "NEXUS_HOST=${context.nexusHost}", "NEXUS_USERNAME=${context.nexusUsername}", "NEXUS_PASSWORD=${context.nexusPassword}", "JAVA_OPTS=${javaOpts}","GRADLE_TEST_OPTS=${gradleTestOpts}"]) {
+	
+	  // get wkhtml
+	  sh "curl -kLO https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
+      sh "tar vxf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
+	  sh "mv wkhtmltox/bin/wkhtmlto* /usr/bin"
+	
       def status = sh(script: "./gradlew clean test shadowJar --stacktrace --no-daemon", returnStatus: true)
       if (status != 0) {
         error "Build failed!"
