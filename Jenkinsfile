@@ -1,18 +1,15 @@
-/* generated jenkins file used for building and deploying doc-gen in projects pltfmdev */
+/* generated jenkins file used for building ODS Document generation service in the prov-dev namespace */
+def odsImageTag = env.ODS_IMAGE_TAG ?: 'latest'
+def odsGitRef = env.ODS_GIT_REF ?: 'production'
 def final projectId = 'prov' // Change if you want to build it elsewhere ...
 def final componentId = 'docgen'
 def final credentialsId = "${projectId}-cd-cd-user-with-password"
-def sharedLibraryRepository
 def dockerRegistry
 node {
-  sharedLibraryRepository = env.SHARED_LIBRARY_REPOSITORY
   dockerRegistry = env.DOCKER_REGISTRY
 }
 
-library identifier: 'ods-library@production', retriever: modernSCM(
-  [$class: 'GitSCMSource',
-   remote: sharedLibraryRepository,
-   credentialsId: credentialsId])
+@Library('ods-jenkins-shared-library@${odsGitRef}') _
 
 /*
   See readme of shared library for usage and customization
@@ -22,7 +19,7 @@ library identifier: 'ods-library@production', retriever: modernSCM(
   https://github.com/opendevstack/ods-project-quickstarters/tree/master/jenkins-slaves/maven
  */ 
 odsPipeline(
-  image: "${dockerRegistry}/cd/jenkins-slave-maven",
+  image: "${dockerRegistry}/cd/jenkins-slave-maven:${odsImageTag}",
   projectId: projectId,
   componentId: componentId,
   sonarQubeBranch: "*",
