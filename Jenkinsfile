@@ -25,6 +25,7 @@ odsPipeline(
   image: "${dockerRegistry}/cd/jenkins-slave-maven",
   projectId: projectId,
   componentId: componentId,
+  sonarQubeBranch: "*",
   branchToEnvironmentMapping: [
     '*': 'dev'
   ]
