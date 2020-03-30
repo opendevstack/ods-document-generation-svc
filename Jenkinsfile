@@ -30,6 +30,7 @@ odsPipeline(
   ]
 ) { context ->
   stageBuild(context)
+  stageScanForSonarqube(context)  
   stageStartOpenshiftBuild(context)
 }
 
@@ -39,7 +40,7 @@ def stageBuild(def context) {
 
   stage('Build') {
     withEnv(["TAGVERSION=${context.tagversion}", "NEXUS_HOST=${context.nexusHost}", "NEXUS_USERNAME=${context.nexusUsername}", "NEXUS_PASSWORD=${context.nexusPassword}", "JAVA_OPTS=${javaOpts}","GRADLE_TEST_OPTS=${gradleTestOpts}"]) {
-      def status = sh(script: "./gradlew clean shadowJar --stacktrace --no-daemon", returnStatus: true)
+      def status = sh(script: "./gradlew clean test shadowJar --stacktrace --no-daemon", returnStatus: true)
       if (status != 0) {
         error "Build failed!"
       }
