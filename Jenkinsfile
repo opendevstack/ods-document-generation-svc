@@ -1,17 +1,13 @@
 /* generated jenkins file used for building ODS Document generation service in the prov-dev namespace */
-def odsImageTag
-def odsGitRef
 def final projectId = 'prov' // Change if you want to build it elsewhere ...
 def final componentId = 'docgen'
 def final credentialsId = "${projectId}-cd-cd-user-with-password"
 def dockerRegistry
 node {
   dockerRegistry = env.DOCKER_REGISTRY
-  odsImageTag = env.ODS_IMAGE_TAG ?: 'latest'
-  odsGitRef = env.ODS_GIT_REF ?: 'production'
 }
 
-@Library("ods-jenkins-shared-library@${odsGitRef}") _
+@Library('ods-jenkins-shared-library@$2.x') _
 
 /*
   See readme of shared library for usage and customization
