@@ -1,4 +1,4 @@
-namespace CD
+namespace cd
 selector app=doc-gen
 param-file ../../../ods-configuration/ods-core.env
 ignore-path bc:/spec/output/to/name
