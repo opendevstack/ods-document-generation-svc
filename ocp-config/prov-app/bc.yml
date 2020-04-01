@@ -9,7 +9,7 @@ objects:
   metadata:
     labels:
       app: doc-gen
-    name: doc-gen
+    name: docgen
   spec:
     nodeSelector: null
     output:
