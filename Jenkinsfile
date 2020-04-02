@@ -1,18 +1,16 @@
-/* generated jenkins file used for building and deploying doc-gen in projects pltfmdev */
+/* generated jenkins file used for building ODS Document generation service in the prov-dev namespace */
 def final projectId = 'prov' // Change if you want to build it elsewhere ...
 def final componentId = 'docgen'
 def final credentialsId = "${projectId}-cd-cd-user-with-password"
-def sharedLibraryRepository
 def dockerRegistry
+def odsGitRef 
 node {
-  sharedLibraryRepository = env.SHARED_LIBRARY_REPOSITORY
   dockerRegistry = env.DOCKER_REGISTRY
+  odsImageTag = env.ODS_IMAGE_TAG ?: 'latest'
+  odsGitRef = env.ODS_GIT_REF ?: 'production'
 }
 
-library identifier: 'ods-library@production', retriever: modernSCM(
-  [$class: 'GitSCMSource',
-   remote: sharedLibraryRepository,
-   credentialsId: credentialsId])
+library("ods-jenkins-shared-library@${odsGitRef}")
 
 /*
   See readme of shared library for usage and customization
@@ -22,14 +20,17 @@ library identifier: 'ods-library@production', retriever: modernSCM(
   https://github.com/opendevstack/ods-project-quickstarters/tree/master/jenkins-slaves/maven
  */ 
 odsPipeline(
-  image: "${dockerRegistry}/cd/jenkins-slave-maven",
+  image: "${dockerRegistry}/cd/jenkins-slave-maven:${odsImageTag}",
   projectId: projectId,
   componentId: componentId,
+  sonarQubeBranch: "*",
   branchToEnvironmentMapping: [
-    '*': 'dev'
+    '*': 'dev',
+	"${odsGitRef}" : 'test'
   ]
 ) { context ->
   stageBuild(context)
+  stageScanForSonarqube(context)  
   stageStartOpenshiftBuild(context)
 }
 
@@ -39,7 +40,13 @@ def stageBuild(def context) {
 
   stage('Build') {
     withEnv(["TAGVERSION=${context.tagversion}", "NEXUS_HOST=${context.nexusHost}", "NEXUS_USERNAME=${context.nexusUsername}", "NEXUS_PASSWORD=${context.nexusPassword}", "JAVA_OPTS=${javaOpts}","GRADLE_TEST_OPTS=${gradleTestOpts}"]) {
-      def status = sh(script: "./gradlew clean shadowJar --stacktrace --no-daemon", returnStatus: true)
+	
+	  // get wkhtml
+      sh "curl -kLO https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
+      sh "tar vxf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
+      sh "mv wkhtmltox/bin/wkhtmlto* /usr/bin"
+	
+      def status = sh(script: "./gradlew clean test shadowJar --stacktrace --no-daemon", returnStatus: true)
       if (status != 0) {
         error "Build failed!"
       }

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Template
+parameters:
+- name: ODS_IMAGE_TAG
+  required: true
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: doc-gen
+    name: docgen
+  spec:
+    nodeSelector: null
+    output:
+      imageLabels:
+      - name: "ods.application.name"
+        value: "Document Generation Service"    
+      to:
+        kind: ImageStreamTag
+        name: docgen:${ODS_IMAGE_TAG}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      dockerStrategy: {}
+      type: Docker
+    triggers: []
