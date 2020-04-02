@@ -42,11 +42,12 @@ def stageBuild(def context) {
   stage('Build') {
     withEnv(["TAGVERSION=${context.tagversion}", "NEXUS_HOST=${context.nexusHost}", "NEXUS_USERNAME=${context.nexusUsername}", "NEXUS_PASSWORD=${context.nexusPassword}", "JAVA_OPTS=${javaOpts}","GRADLE_TEST_OPTS=${gradleTestOpts}"]) {
 	
+      sh ("env | grep library.ods-jenkins-shared-library.version")
+	  
 	  // get wkhtml
-	  sh "curl -kLO https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
+      sh "curl -kLO https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
       sh "tar vxf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
-	  sh "mv wkhtmltox/bin/wkhtmlto* /usr/bin"
-	  sh "env"
+      sh "mv wkhtmltox/bin/wkhtmlto* /usr/bin"
 	
       def status = sh(script: "./gradlew clean test shadowJar --stacktrace --no-daemon", returnStatus: true)
       if (status != 0) {
@@ -62,9 +63,11 @@ def stageBuild(def context) {
 }
 
 def stageTagToCDNamespace (def context) {
-	echo ("built ${context.gitBranch} vs. configured ref ${odsGitRef}, target: ${context.environment}")
-	
-	if (${context.environment} == 'test') {
-		sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test ")
+	node {
+		echo ("built ${context.gitBranch} vs. configured ref ${odsGitRef}, target: ${context.environment}")
+		
+		if (${context.environment} == 'test') {
+			sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test ")
+		}
 	}
 }
