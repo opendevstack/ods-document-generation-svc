@@ -32,7 +32,6 @@ odsPipeline(
   stageBuild(context)
   stageScanForSonarqube(context)  
   stageStartOpenshiftBuild(context)
-  stageTagToCDNamespace (context)
 }
 
 def stageBuild(def context) {
@@ -58,13 +57,4 @@ def stageBuild(def context) {
       }
     }
   }
-}
-
-def stageTagToCDNamespace (def context) {
-	echo ("built ${context.gitBranch}, target: ${context.environment}")
-	
-	if ("test".equals(context.environment)) {
-		sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:latest",
-			label: "tag ${context.componentId}:{context.tagversion} to cd namespace")
-	}
 }
