@@ -26,7 +26,7 @@ odsPipeline(
   sonarQubeBranch: "*",
   branchToEnvironmentMapping: [
     '*': 'dev',
-	${odsGitRef} : 'test'
+	"${odsGitRef}" : 'test'
   ]
 ) { context ->
   stageBuild(context)
