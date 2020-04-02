@@ -25,12 +25,14 @@ odsPipeline(
   componentId: componentId,
   sonarQubeBranch: "*",
   branchToEnvironmentMapping: [
-    '*': 'dev'
+    '*': 'dev',
+	${odsGitRef} : 'test'
   ]
 ) { context ->
   stageBuild(context)
   stageScanForSonarqube(context)  
   stageStartOpenshiftBuild(context)
+  stageTagToCDNamespace (context)
 }
 
 def stageBuild(def context) {
@@ -44,6 +46,7 @@ def stageBuild(def context) {
 	  sh "curl -kLO https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
       sh "tar vxf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz"
 	  sh "mv wkhtmltox/bin/wkhtmlto* /usr/bin"
+	  sh "env"
 	
       def status = sh(script: "./gradlew clean test shadowJar --stacktrace --no-daemon", returnStatus: true)
       if (status != 0) {
@@ -56,4 +59,12 @@ def stageBuild(def context) {
       }
     }
   }
+}
+
+def stageTagToCDNamespace (def context) {
+	echo ("built ${context.gitBranch} vs. configured ref ${odsGitRef}, target: ${context.environment}")
+	
+	if (${context.environment} == 'test') {
+		sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test ")
+	}
 }
