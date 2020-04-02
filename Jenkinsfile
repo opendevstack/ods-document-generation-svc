@@ -61,11 +61,9 @@ def stageBuild(def context) {
 }
 
 def stageTagToCDNamespace (def context) {
-	node {
-		echo ("built ${context.gitBranch} vs. configured ref ${odsGitRef}, target: ${context.environment}")
-		
-		if (${context.environment} == 'test') {
-			sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test ")
-		}
+	echo ("built ${context.gitBranch}, target: ${context.environment}")
+	
+	if (${context.environment} == 'test') {
+		sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test")
 	}
 }
