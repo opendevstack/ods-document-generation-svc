@@ -63,7 +63,8 @@ def stageBuild(def context) {
 def stageTagToCDNamespace (def context) {
 	echo ("built ${context.gitBranch}, target: ${context.environment}")
 	
-	if (${context.environment} == 'test') {
-		sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test")
+	if ("test".equals(context.environment) {
+		sh (script: "oc -n ${context.targetEnvironment} tag ${context.componentId}:{context.tagversion} cd/${context.componentId}:test",
+			label: "tag ${context.componentId}:{context.tagversion} to cd namespace")
 	}
 }
