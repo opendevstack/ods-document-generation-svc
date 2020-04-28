@@ -1,6 +1,15 @@
 apiVersion: v1
 kind: Template
+  app: '${PROJECT}-${COMPONENT}'
 parameters:
+- name: PROJECT
+  displayName: Application
+  description: The name of the application project.
+  required: true
+- name: COMPONENT
+  displayName: Component
+  description: The name of the application component.
+  required: true
 - name: ODS_IMAGE_TAG
   required: true
 objects:
@@ -8,17 +17,17 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      app: doc-gen
-    name: docgen
+      app: ${COMPONENT}
+    name: ${COMPONENT}
   spec:
     nodeSelector: null
     output:
       imageLabels:
       - name: "ods.application.name"
-        value: "Document Generation Service"    
+        value: "Document Generation Service"
       to:
         kind: ImageStreamTag
-        name: docgen:${ODS_IMAGE_TAG}
+        name: ${COMPONENT}:${ODS_IMAGE_TAG}
     postCommit: {}
     resources: {}
     runPolicy: Serial

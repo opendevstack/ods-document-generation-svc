@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Template
+  app: '${PROJECT}-${COMPONENT}'
+parameters:
+- name: PROJECT
+  displayName: Application
+  description: The name of the application project.
+  required: true
+- name: COMPONENT
+  displayName: Component
+  description: The name of the application component.
+  required: true
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${COMPONENT}
+    name: ${COMPONENT}
+  spec:
+    dockerImageRepository: ${COMPONENT}
+    lookupPolicy:
+      local: false
