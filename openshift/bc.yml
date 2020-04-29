@@ -10,6 +10,10 @@ parameters:
   description: The name of the application component.
   required: true
 - name: ODS_IMAGE_TAG
+  value: 2.x
+- name: ENV
+  displayName: Environment
+  description: The environment stage.
   required: true
 objects:
 - apiVersion: v1

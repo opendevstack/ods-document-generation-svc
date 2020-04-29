@@ -9,6 +9,10 @@ parameters:
   displayName: Component
   description: The name of the application component.
   required: true
+- name: ENV
+  displayName: Environment
+  description: The environment stage.
+  required: true  
 objects:
 - apiVersion: v1
   kind: ImageStream
