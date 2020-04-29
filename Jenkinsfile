@@ -1,4 +1,3 @@
-/* generated jenkins file used for building ODS Document generation service in the prov-dev namespace */
 def odsGitRef 
 def odsImageTag
 node {
@@ -15,7 +14,7 @@ library("ods-jenkins-shared-library@${odsGitRef}")
   the maven/gradle slave used here - the code of the slave can be found at
   https://github.com/opendevstack/ods-project-quickstarters/tree/master/jenkins-slaves/maven
  */ 
-odsPipeline(
+odsComponentPipeline(
   imageStreamTag: 'cd/jenkins-slave-maven:${odsImageTag}',
   sonarQubeBranch: "*",
   branchToEnvironmentMapping: [
