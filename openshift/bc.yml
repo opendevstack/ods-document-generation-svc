@@ -1,5 +1,8 @@
 apiVersion: v1
 kind: Template
+labels:
+  template: 'ods-document-generation-service'
+  app: '${PROJECT}-${COMPONENT}'
 parameters:
 - name: PROJECT
   displayName: Application

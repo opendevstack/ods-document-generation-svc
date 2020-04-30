@@ -22,7 +22,7 @@ A document generation service that transforms document templates in a remote Bit
 
 ## Document Templates
 
-When processing a template `type` at a specific `version`, and data into a document, the service expects the Bitbucket repository to have a `release/${version}` branch that contains the template type at `/templates/${type}.html.tmpl`.
+When processing a template `type` at a specific `version`, and data into a document, the DocGen service expects the BitBucket repository to have a `release/${version}` branch that contains the template type at `/templates/${type}.html.tmpl`.
 
 ## Requirements
 
