@@ -23,7 +23,7 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      app: ${COMPONENT}
+      app: '${PROJECT}-${COMPONENT}'
     name: ${COMPONENT}
   spec:
     nodeSelector: null
