@@ -1,4 +1,4 @@
-name: Provisioning App Build
+name: Document Generation Service
 
 on: [ push, pull_request ]
 
@@ -32,7 +32,8 @@ jobs:
     - name: copy created artifacts into docker context
       run: | 
         cp build/libs/*-all.jar ./docker/app.jar
-    - name: docker build doc gen service
-      working-directory: docker
-      run: |
-        docker build -t document-generation-service .
+# enable once we have clarity on the image
+#    - name: docker build doc gen service
+#      working-directory: docker
+#      run: |
+#        docker build -t document-generation-service .
