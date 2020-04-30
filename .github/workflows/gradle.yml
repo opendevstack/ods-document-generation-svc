@@ -35,4 +35,4 @@ jobs:
     - name: docker build doc gen service
       working-directory: docker
       run: |
-        docker build -t document-generation-service
+        docker build -t document-generation-service .
