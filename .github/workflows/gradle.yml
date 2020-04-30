@@ -20,7 +20,7 @@ jobs:
         sudo tar vxf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
         sudo mv wkhtmltox/bin/wkhtmlto* /usr/bin
     - name: Build with Gradle
-      run: ./gradlew clean test --no-daemon --stacktrace
+      run: ./gradlew clean test shadowJar --stacktrace --no-daemon
       env:
         NO_NEXUS: true
     - uses: actions/cache@v1
@@ -29,3 +29,10 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: copy created artifacts into docker context
+      run: | 
+        cp build/libs/*-all.jar ./docker/app.jar
+    - name: docker build doc gen service
+      working-directory: docker
+      run: |
+        docker build -t document-generation-service
