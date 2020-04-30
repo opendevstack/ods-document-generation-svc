@@ -1,3 +1,5 @@
 is,bc
 
+selector app=ods-doc-gen-svc
+
 preserve bc:/spec/output/to/name,bc:/spec/output/imageLabels

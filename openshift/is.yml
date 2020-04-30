@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Template
 labels:
   template: 'ods-document-generation-service'
-  app: '${PROJECT}-${COMPONENT}'
+  app: 'ods-doc-gen-svc'
 parameters:
 - name: PROJECT
   displayName: Application
@@ -21,7 +21,7 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      app: '${PROJECT}-${COMPONENT}'
+      app: 'ods-doc-gen-svc'
     name: ${COMPONENT}
   spec:
     dockerImageRepository: ${COMPONENT}
