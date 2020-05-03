@@ -45,7 +45,7 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
     // Get a URI to download document templates of a specific version
     def URI getZipArchiveDownloadURI(String version) {
         return new URIBuilder("https://www.github.com")
-            .setPath("/opendevstack/ods-document-generation-templates/archive/v{version}.zip")
+            .setPath("/opendevstack/ods-document-generation-templates/archive/v${version}.zip")
             .build()
     }
     

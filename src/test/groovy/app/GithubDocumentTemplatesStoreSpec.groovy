@@ -15,8 +15,6 @@ class GithubDocumentTemplatesStoreSpec extends SpecHelper {
         def targetDir = Files.createTempDirectory("doc-gen-templates-")
         def version = "1.0"
 
-//        mockTemplatesZipArchiveDownload(store.getZipArchiveDownloadURI(version))
-
         when:
         def path = store.getTemplatesForVersion(version, targetDir)
 
@@ -29,4 +27,16 @@ class GithubDocumentTemplatesStoreSpec extends SpecHelper {
         cleanup:
         targetDir.toFile().deleteDir()
     }
+
+    def "getRightUrlForVersion"() {
+        given:
+        def store = new GithubDocumentTemplatesStore()
+  
+        when:
+        def url = store.getZipArchiveDownloadURI("1.0")
+  
+        then:
+        "https://www.github.com/opendevstack/ods-document-generation-templates/archive/v1.0.zip".equals(url)
+    }
+
 }
