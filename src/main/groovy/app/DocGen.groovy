@@ -25,7 +25,6 @@ class DocGen implements Jooby.Module {
 
     Config config
     Cache<String, Path> templatesCache
-    DocumentTemplatesStore templatesStore
 
     // TODO: use dependency injection
     DocGen() {
@@ -38,13 +37,6 @@ class DocGen implements Jooby.Module {
                 FileUtils.deleteDirectory(path.toFile())
             })
             .build()
-
-        DocumentTemplatesStore bbStore = new BitBucketDocumentTemplatesStore();
-        if (!bbStore.isApplicableToSystemConfig()) {
-          
-        } else {
-          this.templatesStore = bbStore
-        }
     }
 
     void configure(Env env, Config config, Binder binder) {
@@ -52,9 +44,15 @@ class DocGen implements Jooby.Module {
 
     // Get document templates for a specific version
     private Path getTemplates(def version) {
+        DocumentTemplatesStore store = new BitBucketDocumentTemplatesStore()
+        if (!store.isApplicableToSystemConfig()) {
+            store = new GithubDocumentTemplatesStore()
+        } 
+        println ("Using templates @${store.getZipArchiveDownloadURI(version)}")
+
         def path = templatesCache.getIfPresent(version)
         if (path == null) {
-            path = templatesStore.getTemplatesForVersion(version, getPathForTemplatesVersion(version))
+            path = store.getTemplatesForVersion(version, getPathForTemplatesVersion(version))
             templatesCache.put(version, path)
         }
 

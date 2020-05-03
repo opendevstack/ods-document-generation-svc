@@ -76,14 +76,6 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
           missingEnvs << "BITBUCKET_URL"
         }
 
-        if (!System.getenv("BITBUCKET_USERNAME")) {
-          missingEnvs << "BITBUCKET_USERNAME"
-        }
-
-        if (!System.getenv("BITBUCKET_PASSWORD")) {
-          missingEnvs << "BITBUCKET_PASSWORD"
-        }
-
         if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")) {
           missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_PROJECT"
         }
