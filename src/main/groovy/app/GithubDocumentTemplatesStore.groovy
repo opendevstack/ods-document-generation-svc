@@ -39,6 +39,9 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
         def zipArchiveContent = store.getTemplatesZipArchiveForVersion(
             version
         )
+        
+        println ("github content: ${zipArchiveContent.length()}")
+        
         return DocUtils.extractZipArchive(zipArchiveContent, targetDir)
     }
 

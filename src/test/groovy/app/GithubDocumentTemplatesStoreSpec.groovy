@@ -36,7 +36,8 @@ class GithubDocumentTemplatesStoreSpec extends SpecHelper {
         def url = store.getZipArchiveDownloadURI("1.0")
   
         then:
-        "https://www.github.com/opendevstack/ods-document-generation-templates/archive/v1.0.zip".equals(url)
+        "https://www.github.com/opendevstack/ods-document-generation-templates/archive/v1.0.zip".
+          equals(url.toString())
     }
 
 }
