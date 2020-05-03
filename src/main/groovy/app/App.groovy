@@ -20,8 +20,6 @@ class App extends Jooby {
         use(new DocGen())
 
         post(this, "/document", { req, rsp ->
-            validateEnvironmentVars()
-
             def body = new JsonSlurper().parseText(req.body().value())
             validateRequestParams(body)
 
@@ -74,28 +72,6 @@ class App extends Jooby {
             rsp.status(statusCode).send(result)
         })
         .produces(MediaType.json)
-    }
-
-    private static void validateEnvironmentVars() {
-        if (!System.getenv("BITBUCKET_URL")) {
-            throw new IllegalArgumentException("missing environment variable 'BITBUCKET_URL'")
-        }
-
-        if (!System.getenv("BITBUCKET_USERNAME")) {
-            throw new IllegalArgumentException("missing environment variable 'BITBUCKET_USERNAME'")
-        }
-
-        if (!System.getenv("BITBUCKET_PASSWORD")) {
-            throw new IllegalArgumentException("missing environment variable 'BITBUCKET_PASSWORD'")
-        }
-
-        if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")) {
-            throw new IllegalArgumentException("missing environment variable 'BITBUCKET_DOCUMENT_TEMPLATES_PROJECT'")
-        }
-
-        if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")) {
-            throw new IllegalArgumentException("missing environment variable 'BITBUCKET_DOCUMENT_TEMPLATES_REPO'")
-        }
     }
 
     private static void validateRequestParams(Map body) {

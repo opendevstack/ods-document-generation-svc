@@ -39,7 +39,12 @@ class DocGen implements Jooby.Module {
             })
             .build()
 
-        this.templatesStore = new BitBucketDocumentTemplatesStore()
+        DocumentTemplatesStore bbStore = new BitBucketDocumentTemplatesStore();
+        if (!bbStore.isApplicableToSystemConfig()) {
+          
+        } else {
+          this.templatesStore = bbStore
+        }
     }
 
     void configure(Env env, Config config, Binder binder) {

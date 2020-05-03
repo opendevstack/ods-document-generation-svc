@@ -1,5 +1,6 @@
 package app
 
+import util.DocUtils
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -33,28 +34,6 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
         this.config = ConfigFactory.load()
     }
 
-    // Extract some Zip archive content into a target directory
-    private static def Path extractZipArchive(byte[] zipArchiveContent, Path targetDir) {
-        def tmpFile = Files.createTempFile("archive-", ".zip")
-
-        try {
-            // Write content to a temp file
-            Files.write(tmpFile, zipArchiveContent)
-
-            // Create a ZipFile from the temp file
-            ZipFile zipFile = new ZipFile(tmpFile.toFile())
-
-            // Extract the ZipFile into targetDir
-            zipFile.extractAll(targetDir.toString())
-        } catch (Throwable e) {
-            throw e
-        } finally {
-            Files.delete(tmpFile)
-        }
-
-        return targetDir
-    }
-
     // Get document templates of a specific version into a target directory
     def Path getTemplatesForVersion(String version, Path targetDir) {
         def uri = getZipArchiveDownloadURI(version)
@@ -78,7 +57,7 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
             System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO"),
             version
         )
-        return extractZipArchive(zipArchiveContent, targetDir)
+        return DocUtils.extractZipArchive(zipArchiveContent, targetDir)
     }
 
     // Get a URI to download document templates of a specific version
@@ -88,5 +67,36 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
             .addParameter("at", "refs/heads/release/v${version}")
             .addParameter("format", "zip")
             .build()
+    }
+    
+    boolean isApplicableToSystemConfig () 
+    {
+        List missingEnvs = [ ]
+        if (!System.getenv("BITBUCKET_URL")) {
+          missingEnvs << "BITBUCKET_URL"
+        }
+
+        if (!System.getenv("BITBUCKET_USERNAME")) {
+          missingEnvs << "BITBUCKET_USERNAME"
+        }
+
+        if (!System.getenv("BITBUCKET_PASSWORD")) {
+          missingEnvs << "BITBUCKET_PASSWORD"
+        }
+
+        if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")) {
+          missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_PROJECT"
+        }
+
+        if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")) {
+          missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_REPO"
+        }
+
+        if (missingEnvs.size() > 0) {
+          println "[ERROR]: Bitbucket adapter not applicable - missing config '${missingEnvs}'"
+          return false
+        }
+        
+        return true
     }
 }
