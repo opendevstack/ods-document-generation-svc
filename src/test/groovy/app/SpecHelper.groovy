@@ -57,6 +57,19 @@ class SpecHelper extends Specification {
             ))
     }
 
+    // Starts a WireMock server to serve the github templates.zip test resource at URI
+    def mockGithubTemplatesZipArchiveDownload(URI uri) {
+        def zipArchiveContent = getResource("github-ods-document-generation-templates-1.0.zip").readBytes()
+
+        // Configure and start WireMock server to serve the Zip archive content at URI
+        startWireMockServer(uri).stubFor(WireMock.get(urlPathMatching(uri.getPath()))
+            .withHeader("Accept", equalTo("application/octet-stream"))
+            .willReturn(aResponse()
+                .withBody(zipArchiveContent)
+                .withStatus(200)
+            ))
+    }
+
     // Starts and configures a WireMock server
     def WireMockServer startWireMockServer(URI uri) {
         this.wireMockServer = new WireMockServer(options()

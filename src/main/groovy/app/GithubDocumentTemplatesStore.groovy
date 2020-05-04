@@ -28,7 +28,6 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
     // Get document templates of a specific version into a target directory
     def Path getTemplatesForVersion(String version, Path targetDir) {
         def uri = getZipArchiveDownloadURI(version)
-
         Feign.Builder builder = Feign.builder()
 
         GithubDocumentTemplatesStoreHttpAPI store = builder.target(
@@ -40,14 +39,15 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
             version
         )
         
-        println ("github content: ${zipArchiveContent.length()}")
-        
-        return DocUtils.extractZipArchive(zipArchiveContent, targetDir)
+        return DocUtils.extractZipArchive(
+          zipArchiveContent, targetDir, "ods-document-generation-templates-${version}")
     }
 
     // Get a URI to download document templates of a specific version
     def URI getZipArchiveDownloadURI(String version) {
-        return new URIBuilder("https://www.github.com")
+        // for testing
+        String githubUrl = System.getenv("GITHUB_HOST") ?: "https://www.github.com"
+        return new URIBuilder(githubUrl)
             .setPath("/opendevstack/ods-document-generation-templates/archive/v${version}.zip")
             .build()
     }
