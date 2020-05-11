@@ -32,8 +32,15 @@ jobs:
     - name: copy created artifacts into docker context
       run: | 
         cp build/libs/*-all.jar ./docker/app.jar
-# enable once we have clarity on the image
-#    - name: docker build doc gen service
-#      working-directory: docker
-#      run: |
-#        docker build -t document-generation-service .
+    - name: Build docker image
+      if: success()
+      run: docker build -t ods-document-generation-svc:local .
+      working-directory: docker
+    - name: Push docker image
+      if: success() && github.repository == 'opendevstack/ods-document-generation-svc' && github.event_name == 'push'
+      shell: bash
+      env:
+        DOCKER_USER: ${{ secrets.DockerHubUser }}
+        DOCKER_PASS: ${{ secrets.DockerHubPass }}
+      run: ./.github/workflows/push-image.sh ${{ github.ref }} "$DOCKER_USER" "$DOCKER_PASS"
+
