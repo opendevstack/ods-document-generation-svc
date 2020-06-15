@@ -10,6 +10,7 @@ import feign.Headers
 import feign.Param
 import feign.RequestLine
 import feign.auth.BasicAuthRequestInterceptor;
+import feign.FeignException
 
 import java.net.URI
 import java.nio.file.Files
@@ -40,9 +41,10 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
 
         Feign.Builder builder = Feign.builder()
 
-        if (System.getenv("BITBUCKET_USERNAME") && System.getenv("BITBUCKET_PASSWORD")) {
+        def bitbucketUserName = System.getenv("BITBUCKET_USERNAME")
+        if (bitbucketUserName && System.getenv("BITBUCKET_PASSWORD")) {
             builder.requestInterceptor(new BasicAuthRequestInterceptor(
-                System.getenv("BITBUCKET_USERNAME"),
+                bitbucketUserName,
                 System.getenv("BITBUCKET_PASSWORD")
             ))
         }
@@ -52,11 +54,32 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
             uri.getScheme() + "://" + uri.getAuthority()
         )
 
-        def zipArchiveContent = store.getTemplatesZipArchiveForVersion(
-            System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT"),
-            System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO"),
-            version
-        )
+        def bitbucketRepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
+        def bitbucketProject = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")
+        def zipArchiveContent
+        try {
+            zipArchiveContent = store.getTemplatesZipArchiveForVersion(
+                bitbucketProject,
+                bitbucketRepo,
+                version
+            )
+        } catch (FeignException callException) {
+            def baseErrMessage = "Could not get document zip from '${uri}'!"
+            def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${bitbucketRepo}' - "
+            if (callException instanceof FeignException.BadRequest) {
+                throw new RuntimeException ("${baseRepoErrMessage}" +
+                    "is there a correct release branch configured, called 'release/v${version}'?")
+            } else if (callException instanceof FeignException.Unauthorized) {
+                def bbUserNameError = bitbucketUserName ?: 'Anyone'
+                throw new RuntimeException ("${baseRepoErrMessage}" +
+                    "does '${bbUserNameError}' have access?")
+            } else if (callException instanceof FeignException.NotFound) {
+                throw new RuntimeException ("${baseErrMessage}" +
+                    "\rDoes repository '${bitbucketRepo}' in project: '${bitbucketProject}' exist?")
+            } else {
+                throw callException
+            }
+        }
         return DocUtils.extractZipArchive(zipArchiveContent, targetDir)
     }
 
@@ -68,7 +91,7 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
             .addParameter("format", "zip")
             .build()
     }
-    
+
     boolean isApplicableToSystemConfig () 
     {
         List missingEnvs = [ ]

@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 
 import java.nio.file.Files
 import java.nio.file.Paths
+import feign.FeignException
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 
@@ -35,4 +36,53 @@ class BitBucketDocumentTemplatesStoreSpec extends SpecHelper {
         cleanup:
         targetDir.toFile().deleteDir()
     }
+
+    def "getTemplatesForVersionNonExistantBranch400"() {
+        given:
+        def store = new BitBucketDocumentTemplatesStore()
+        def targetDir = Files.createTempDirectory("doc-gen-templates-")
+        def version = "1.0"
+  
+        mockTemplatesZipArchiveDownload(store.getZipArchiveDownloadURI(version), 400)
+  
+        when:
+        store.getTemplatesForVersion(version, targetDir)
+  
+        then:
+        def e = thrown(RuntimeException)
+        e.message.contains("is there a correct release branch configured, called 'release/v${version}'")
+    }
+
+    def "getTemplatesForVersionNonExistantBranch401"() {
+        given:
+        def store = new BitBucketDocumentTemplatesStore()
+        def targetDir = Files.createTempDirectory("doc-gen-templates-")
+        def version = "1.0"
+  
+        mockTemplatesZipArchiveDownload(store.getZipArchiveDownloadURI(version), 401)
+  
+        when:
+        store.getTemplatesForVersion(version, targetDir)
+  
+        then:
+        def e = thrown(RuntimeException)
+        def bbrepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
+        e.message.contains("In repository '${bbrepo}' - does 'Anyone' have access?")
+    }
+
+    def "getTemplatesForVersionNonExistantBranch500"() {
+        given:
+        def store = new BitBucketDocumentTemplatesStore()
+        def targetDir = Files.createTempDirectory("doc-gen-templates-")
+        def version = "1.0"
+  
+        mockTemplatesZipArchiveDownload(store.getZipArchiveDownloadURI(version), 500)
+  
+        when:
+        store.getTemplatesForVersion(version, targetDir)
+  
+        then:
+        def e = thrown(FeignException.InternalServerError)
+    }
+
 }

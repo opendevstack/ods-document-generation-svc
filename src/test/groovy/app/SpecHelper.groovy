@@ -45,7 +45,7 @@ class SpecHelper extends Specification {
     }
 
     // Starts a WireMock server to serve the templates.zip test resource at URI
-    def mockTemplatesZipArchiveDownload(URI uri) {
+    def mockTemplatesZipArchiveDownload(URI uri, int returnStatus = 200) {
         def zipArchiveContent = getResource("templates.zip").readBytes()
 
         // Configure and start WireMock server to serve the Zip archive content at URI
@@ -53,7 +53,7 @@ class SpecHelper extends Specification {
             .withHeader("Accept", equalTo("application/octet-stream"))
             .willReturn(aResponse()
                 .withBody(zipArchiveContent)
-                .withStatus(200)
+                .withStatus(returnStatus)
             ))
     }
 
