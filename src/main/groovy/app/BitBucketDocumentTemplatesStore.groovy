@@ -42,10 +42,10 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
         Feign.Builder builder = Feign.builder()
 
         def bitbucketUserName = System.getenv("BITBUCKET_USERNAME")
-        if (bitbucketUserName && System.getenv("BITBUCKET_PASSWORD")) {
+        def bitbucketPassword = System.getenv("BITBUCKET_PASSWORD")
+        if (bitbucketUserName && bitbucketPassword) {
             builder.requestInterceptor(new BasicAuthRequestInterceptor(
-                bitbucketUserName,
-                System.getenv("BITBUCKET_PASSWORD")
+                bitbucketUserName, bitbucketPassword
             ))
         }
 

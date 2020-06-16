@@ -164,23 +164,3 @@ jacocoTestReport {
 sourceSets.main.resources {
   srcDirs = ["conf", "public"]
 }
-
-/*
-bootJar {
-  archiveName    "app.jar"
-  destinationDir  file("$buildDir/../docker")
-}
-
-uploadArchives {
-    repositories{
-        mavenDeployer {
-            repository(url: "${nexus_url}/repository/${nexus_folder}/") {
-                 authentication(userName: "${nexus_user}", password: "${nexus_pw}")
-            }
-            pom.artifactId = 'doc-gen'
-            pom.groupId = 'com.bix-digital.pltfmdev'
-            pom.version="${System.getenv("TAGVERSION")}" // we will get a TAGVERSION from environment
-        }
-    }
-}
-*/
