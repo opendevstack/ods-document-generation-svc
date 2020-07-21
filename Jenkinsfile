@@ -12,13 +12,15 @@ library("ods-jenkins-shared-library@${odsGitRef}")
 odsComponentPipeline(
   imageStreamTag: "${odsNamespace}/jenkins-agent-maven:${odsImageTag}",
   branchToEnvironmentMapping: [
-    '*': 'dev',
+    '*' : 'dev',
     "${odsGitRef}" : 'test'
-  ]
+  ],
+  debug: true
 ) { context ->
   stageBuild(context)
   odsComponentStageScanWithSonar(context, [branch: '*'])
   odsComponentStageBuildOpenShiftImage(context)
+  stageCreatedImageTagLatest(context)
 }
 
 def stageBuild(def context) {
@@ -40,6 +42,7 @@ def stageBuild(def context) {
 
       def status = sh(
         script: "./gradlew clean test shadowJar --stacktrace --no-daemon",
+        label : "gradle build",
         returnStatus: true
       )
       if (status != 0) {
@@ -48,6 +51,7 @@ def stageBuild(def context) {
 
       status = sh(
         script: "cp build/libs/*-all.jar ./docker/app.jar",
+        label : "copy resources into docker context",
         returnStatus: true
       )
       if (status != 0) {
@@ -55,4 +59,14 @@ def stageBuild(def context) {
       }
     }
   }
+}
+
+def stageCreatedImageTagLatest(def context) {
+	stage('Tag created image') {
+		def targetImageTag = context.gitBranch.replace('/','_').replace('-','_')
+		sh(
+			script: "oc -n ${context.targetProject} tag ${context.componentId}:${imageTag} ${context.componentId}:${targetImageTag}",
+			label: "Set tag 'latest' on is/${context.componentId}"
+		)
+	}
 }
