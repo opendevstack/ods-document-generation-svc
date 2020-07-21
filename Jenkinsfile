@@ -65,7 +65,7 @@ def stageCreatedImageTagLatest(def context) {
 	stage('Tag created image') {
 		def targetImageTag = context.gitBranch.replace('/','_').replace('-','_')
 		sh(
-			script: "oc -n ${context.targetProject} tag ${context.componentId}:${context.imageTag} ${context.componentId}:${targetImageTag}",
+			script: "oc -n ${context.targetProject} tag ${context.componentId}:${context.shortGitCommit} ${context.componentId}:${targetImageTag}",
 			label: "Set tag '${targetImageTag}' on is/${context.componentId}"
 		)
 	}
