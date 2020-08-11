@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [3.0] - 2020-08-11
 
 ### Added
 - Add tagging of doc gen image into jenkinsfile ([#36](https://github.com/opendevstack/ods-document-generation-svc/pull/36))
