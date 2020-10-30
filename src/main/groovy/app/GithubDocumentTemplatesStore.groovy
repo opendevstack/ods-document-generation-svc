@@ -30,7 +30,7 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
     // Get document templates of a specific version into a target directory
     def Path getTemplatesForVersion(String version, Path targetDir) {
         def uri = getZipArchiveDownloadURI(version)
-        Feign.Builder builder = createBuilder()
+        Feign.Builder builder = createBuilder()['builder']
 
         GithubDocumentTemplatesStoreHttpAPI store = builder.target(
             GithubDocumentTemplatesStoreHttpAPI.class,
@@ -54,16 +54,20 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
             .build()
     }
 
-    Feign.Builder createBuilder () {
+    // proxy setup, we return a map for testing
+    Map createBuilder () {
         String[] httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.split(':')
         if (httpProxyHost && !System.getenv("GITHUB_HOST")) {
             int httpProxyPort = httpProxyHost.size() == 2 ? Integer.parseInt(httpProxyHost[1]) : 80
             Proxy proxy = new Proxy(Proxy.Type.HTTP, 
                 new InetSocketAddress(httpProxyHost[0], httpProxyPort));
             OkHttpClient okHttpClient = new OkHttpClient().newBuilder().proxy(proxy).build();
-            return Feign.builder().client(new feign.okhttp.OkHttpClient(okHttpClient));
+            return [ 
+                'builder': Feign.builder().client(new feign.okhttp.OkHttpClient(okHttpClient)),
+                'proxy' : proxy
+            ]
         } else {
-            return Feign.builder()
+            return ['builder' : Feign.builder()]
         }
     }
 
