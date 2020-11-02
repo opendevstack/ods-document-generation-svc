@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.XX.XXX.configuration_stack.adapter.client.forwarder.ForwarderClientTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2020-09-25T11:18:52" hostname="WKS0000621516" time="24.857">
+  <properties/>
+  <testcase name="XXXP214 Build component does login and retry after receiving unauthorized" classname="com.XX.XXX.configuration_stack.adapter.client.forwarder.ForwarderClientTest" time="1.823"/>
+  <testcase name="XXXP214 Get build status does login and retry after receiving unauthorized" classname="com.XX.XXX.configuration_stack.adapter.client.forwarder.ForwarderClientTest" time="2.252"/>
+  <testcase name="XXXP210 When getBuildStatus returns a timeout, the client retries the call" classname="com.XX.XXX.configuration_stack.adapter.client.forwarder.ForwarderClientTest" time="10.927"/>
+  <testcase name="XXXP210 When Build component returns a timeout, the client retries the call" classname="com.XX.XXX.configuration_stack.adapter.client.forwarder.ForwarderClientTest" time="9.265"/>
+  <testcase name="XXXP229 XXXP240 XXXP287 should delete component" classname="com.XX.XXX.configuration_stack.adapter.client.forwarder.ForwarderClientTest" time="0.589"/>
+  <system-out><![CDATA[13:18:52.354 [qtp781595164-96] DEBUG org.eclipse.jetty.util.thread.QueuedThreadPool - ran qtp781595164-96-acceptor-2@1c4b627c-NetworkTrafficServerConnector@71b0284a{​​​​​HTTP/1.1, (http/1.1)}​​​​​{​​​​​0.0.0.0:8080}​​​​​ in QueuedThreadPool[qtp781595164]@2e96321c{​​​​​STOPPED,8<=0<=14,i=5,r=-1,q=0}​​​​​[NO_TRY]
+13:18:52.354 [qtp781595164-96] DEBUG org.eclipse.jetty.util.thread.QueuedThreadPool - Thread[qtp781595164-96,5,main] exited for QueuedThreadPool[qtp781595164]@2e96321c{​​​​​STOPPED,8<=0<=14,i=5,r=-1,q=0}​​​​​[NO_TRY]
+13:18:52.355 [qtp781595164-94] DEBUG org.eclipse.jetty.util.thread.QueuedThreadPool - ran qtp781595164-94-acceptor-0@18c19611-NetworkTrafficServerConnector@71b0284a{​​​​​HTTP/1.1, (http/1.1)}​​​​​{​​​​​0.0.0.0:8080}​​​​​ in QueuedThreadPool[qtp781595164]@2e96321c{​​​​​STOPPED,8<=0<=14,i=5,r=-1,q=0}​​​​​[NO_TRY]
+...
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
