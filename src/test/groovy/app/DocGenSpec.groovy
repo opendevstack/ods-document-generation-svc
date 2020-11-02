@@ -1,9 +1,8 @@
 package app
 
 import com.github.tomakehurst.wiremock.client.WireMock
-
+import groovy.util.slurpersupport.GPathResult
 import java.nio.file.Files
-
 import spock.lang.*
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
@@ -80,4 +79,33 @@ class DocGenSpec extends SpecHelper {
         then:
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
     }
+
+    def "generateFromXunit"() {
+        given:
+        def version = "1.0"
+        File xunitresults = new File ("src/test/resources/xunit-wiremock.xml")
+        GPathResult xmlResult = new XmlSlurper().parse(xunitresults)
+        String xmlData = new XmlNodePrinter().print(xmlResult)
+
+        def data = [
+            name: "Project Phoenix",
+            metadata: [
+                header: "header",
+                description: "${xmlData}" 
+            ]
+        ]
+  
+        mockTemplatesZipArchiveDownload(
+            new BitBucketDocumentTemplatesStore()
+                .getZipArchiveDownloadURI(version)
+        )
+  
+        when:
+        def result = new DocGen().generate("InstallationReport", version, data)
+  
+        then:
+        xunitresults.exists()
+        assertThat(new String(result), startsWith("%PDF-1.4\n"))
+    }
+
 }
