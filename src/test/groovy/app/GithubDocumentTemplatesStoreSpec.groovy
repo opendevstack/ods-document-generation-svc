@@ -4,10 +4,15 @@ import com.github.tomakehurst.wiremock.client.WireMock
 
 import java.nio.file.Files
 import java.nio.file.Paths
-
+import java.net.Proxy
+import org.junit.Rule
+import org.junit.contrib.java.lang.system.EnvironmentVariables
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 class GithubDocumentTemplatesStoreSpec extends SpecHelper {
+
+    @Rule
+    public EnvironmentVariables envVars 
 
     def "getTemplatesForVersionMock"() {
         given:
@@ -31,6 +36,57 @@ class GithubDocumentTemplatesStoreSpec extends SpecHelper {
         cleanup:
          targetDir.toFile().deleteDir()
          env.clear("GITHUB_HOST")
+    }
+
+    def "verifyProxyInBuilderWPort" () {
+        given:
+        envVars.set("HTTP_PROXY", "testproxy:443")
+        GithubDocumentTemplatesStore store = new GithubDocumentTemplatesStore()
+  
+        when:
+        Map builderMap = store.createBuilder()
+
+        then:
+        builderMap.size() == 2
+        Proxy testProxy = ((Proxy)builderMap['proxy'])
+        ((InetSocketAddress)testProxy.address()).hostName == 'testproxy'
+        ((InetSocketAddress)testProxy.address()).port == 443
+        builderMap['builder'] instanceof feign.Feign.Builder
+        
+        cleanup:
+         envVars.clear("HTTP_PROXY")
+    }
+
+    def "verifyProxyInBuilderNoPort" () {
+        given:
+        envVars.set("HTTP_PROXY", "testproxy")
+        GithubDocumentTemplatesStore store = new GithubDocumentTemplatesStore()
+  
+        when:
+        Map builderMap = store.createBuilder()
+  
+        then:
+        builderMap.size() == 2
+        Proxy testProxy = ((Proxy)builderMap['proxy'])
+        ((InetSocketAddress)testProxy.address()).hostName == 'testproxy'
+        ((InetSocketAddress)testProxy.address()).port == 80
+        builderMap['builder'] instanceof feign.Feign.Builder
+        
+        cleanup:
+         envVars.clear("HTTP_PROXY")
+    }
+
+    def "verifyNOProxyInBuilder" () {
+        given:
+        envVars.clear("HTTP_PROXY")
+        GithubDocumentTemplatesStore store = new GithubDocumentTemplatesStore()
+  
+        when:
+        Map builderMap = store.createBuilder()
+  
+        then:
+        builderMap.size() == 1
+        builderMap['builder'] instanceof feign.Feign.Builder
     }
 
     def "getTemplatesForVersion"() {
