@@ -114,13 +114,9 @@ class DocGenSpec extends SpecHelper {
         println ("generating doc")
         def result = new DocGen().generate("DTR", version, data)
 
-        def resultFile = new File ('src/test/resources/dtr_temp.pdf') << result
-        resultFile.deleteOnExit()
-
         then:
         println ("asserting generated file")
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
-        assertTrue(resultFile.length() == 5098778)
     }
 
 }
