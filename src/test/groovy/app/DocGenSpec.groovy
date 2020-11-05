@@ -90,8 +90,7 @@ class DocGenSpec extends SpecHelper {
         xunitresults.each { xunit ->
           println ("--< Using file: ${xunit}")
           File xunitFile = new File (xunit)
-          //xunits << [name: xunitFile.name, path: xunitFile.path, text: XmlUtil.serialize(xunitFile.text) ]
-          xunits << [name: xunitFile.name, path: xunitFile.path, text: xunitFile.text ]
+          xunits << [name: xunitFile.name, path: xunitFile.path, text: XmlUtil.serialize(xunitFile.text) ]
         }
           
         def data = [
