@@ -8,6 +8,7 @@ import spock.lang.*
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.startsWith
+import static org.junit.Assert.*
 
 import groovy.xml.XmlUtil
 
@@ -112,10 +113,14 @@ class DocGenSpec extends SpecHelper {
         when:
         println ("generating doc")
         def result = new DocGen().generate("DTR", version, data)
-        new File ('src/test/resources/dtr.pdf') << result
-        
+
+        def resultFile = new File ('src/test/resources/dtr_temp.pdf') << result
+        resultFile.deleteOnExit()
+
         then:
+        println ("asserting generated file")
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
+        assertTrue(resultFile.length() == 5098778)
     }
 
 }
