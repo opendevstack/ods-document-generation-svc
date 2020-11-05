@@ -32,3 +32,6 @@ out/
 .vscode/
 /gradle.properties
 /bin/
+/wkhtmltopdf
+/wkhtmltopdf.6.exe
+/wkhtmltopdf.exe

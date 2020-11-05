@@ -146,6 +146,7 @@ class DocGen implements Jooby.Module {
                 documentPDFFile = Files.createTempFile("document", ".pdf")
 
                 def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+                cmd << "--enable-local-file-access"
                 cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
 
                 if (data?.metadata?.header) {
@@ -159,7 +160,7 @@ ${data.metadata.header[1]}"""])
                     cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
                 }
 
-                cmd.addAll(["--footer-center", "Page [page] of [topage]", "--footer-font-size", "10"])
+                cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
 
                 if (data?.metadata?.orientation) {
                     cmd.addAll(["--orientation", data.metadata.orientation])
@@ -189,12 +190,23 @@ ${data.metadata.header[1]}"""])
         // Execute a command in the shell
         static private def Map shell(List<String> cmd) {
             def proc = cmd.execute()
-            proc.waitFor()
+            // for some VERY complex docs - the process implementation hangs on wait() ...
+            // switching to the below - seem to work but gets a weird NPE... 
+            // java.lang.NullPointerException: Cannot invoke method call() on null object
+            // at app.DocGen$Util.shell(DocGen.groovy:193)
+            ByteArrayOutputStream bosOut = new ByteArrayOutputStream()
+            ByteArrayOutputStream bosErr = new ByteArrayOutputStream()
+            try 
+            {
+                proc.waitForProcessOutput(bosOut, bosErr)
+            } catch (NullPointerException wtfEx) {
+                //
+            }
 
             return [
                 rc: proc.exitValue(),
-                stderr: proc.err.text,
-                stdout: proc.in.text
+                stderr: bosErr.toByteArray(),
+                stdout: bosOut.toByteArray()
             ]
         }
     }

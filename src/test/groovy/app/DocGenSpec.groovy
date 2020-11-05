@@ -9,6 +9,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.startsWith
 
+import groovy.xml.XmlUtil
+
 class DocGenSpec extends SpecHelper {
 
     def setup() {
@@ -83,28 +85,37 @@ class DocGenSpec extends SpecHelper {
     def "generateFromXunit"() {
         given:
         def version = "1.0"
-        File xunitresults = new File ("src/test/resources/xunit-wiremock.xml")
-        GPathResult xmlResult = new XmlSlurper().parse(xunitresults)
-        String xmlData = new XmlNodePrinter().print(xmlResult)
-
+        def xunitresults = new FileNameFinder().getFileNames('src/test/resources/data', '*.xml')
+        def xunits = [[:]]
+        xunitresults.each { xunit ->
+          println ("--< Using file: ${xunit}")
+          File xunitFile = new File (xunit)
+          //xunits << [name: xunitFile.name, path: xunitFile.path, text: XmlUtil.serialize(xunitFile.text) ]
+          xunits << [name: xunitFile.name, path: xunitFile.path, text: xunitFile.text ]
+        }
+          
         def data = [
             name: "Project Phoenix",
             metadata: [
                 header: "header",
-                description: "${xmlData}" 
+            ],
+            data : [
+                testFiles : xunits
             ]
         ]
-  
+
+        println ("downloading templates")
         mockTemplatesZipArchiveDownload(
             new BitBucketDocumentTemplatesStore()
                 .getZipArchiveDownloadURI(version)
         )
   
         when:
-        def result = new DocGen().generate("InstallationReport", version, data)
-  
+        println ("generating doc")
+        def result = new DocGen().generate("DTR", version, data)
+        new File ('src/test/resources/dtr.pdf') << result
+        
         then:
-        xunitresults.exists()
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
     }
 
