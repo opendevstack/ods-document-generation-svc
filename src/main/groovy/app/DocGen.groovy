@@ -205,8 +205,8 @@ ${data.metadata.header[1]}"""])
 
             return [
                 rc: proc.exitValue(),
-                stderr: bosErr.toByteArray(),
-                stdout: bosOut.toByteArray()
+                stderr: bosErr.toString(),
+                stdout: bosOut.toString()
             ]
         }
     }
