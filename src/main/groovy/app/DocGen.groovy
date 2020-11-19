@@ -174,7 +174,8 @@ ${data.metadata.header[1]}"""])
                 if (result.rc != 0) {
                     println "[ERROR]: ${cmd} has exited with code ${result.rc}"
                     println "[ERROR]: ${result.stderr}"
-                    throw new IllegalStateException(result.stderr)
+                    throw new IllegalStateException(
+                      "PDF Creation of ${documentHtmlFile} failed!\r:${result.stderr}\r:Error code:${result.rc}")
                 }
 
                 return Files.readAllBytes(documentPDFFile)
