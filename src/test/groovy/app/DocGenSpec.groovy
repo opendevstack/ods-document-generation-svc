@@ -1,14 +1,16 @@
 package app
 
 import com.github.tomakehurst.wiremock.client.WireMock
-
+import groovy.util.slurpersupport.GPathResult
 import java.nio.file.Files
-
 import spock.lang.*
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.startsWith
+import static org.junit.Assert.*
+
+import groovy.xml.XmlUtil
 
 class DocGenSpec extends SpecHelper {
 
@@ -80,4 +82,41 @@ class DocGenSpec extends SpecHelper {
         then:
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
     }
+
+    def "generateFromXunit"() {
+        given:
+        def version = "1.0"
+        def xunitresults = new FileNameFinder().getFileNames('src/test/resources/data', '*.xml')
+        def xunits = [[:]]
+        xunitresults.each { xunit ->
+          println ("--< Using file: ${xunit}")
+          File xunitFile = new File (xunit)
+          xunits << [name: xunitFile.name, path: xunitFile.path, text: XmlUtil.serialize(xunitFile.text) ]
+        }
+          
+        def data = [
+            name: "Project Phoenix",
+            metadata: [
+                header: "header",
+            ],
+            data : [
+                testFiles : xunits
+            ]
+        ]
+
+        println ("downloading templates")
+        mockTemplatesZipArchiveDownload(
+            new BitBucketDocumentTemplatesStore()
+                .getZipArchiveDownloadURI(version)
+        )
+  
+        when:
+        println ("generating doc")
+        def result = new DocGen().generate("DTR", version, data)
+
+        then:
+        println ("asserting generated file")
+        assertThat(new String(result), startsWith("%PDF-1.4\n"))
+    }
+
 }
