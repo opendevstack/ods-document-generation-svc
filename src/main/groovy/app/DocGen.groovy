@@ -10,6 +10,10 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
 import groovy.json.JsonOutput
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -176,6 +180,8 @@ ${data.metadata.header[1]}"""])
                     throw new IllegalStateException(result.stderr)
                 }
 
+                fixDestinations(documentPDFFile.toFile())
+
                 return Files.readAllBytes(documentPDFFile)
             } catch (Throwable e) {
                 throw e
@@ -197,5 +203,102 @@ ${data.metadata.header[1]}"""])
                 stdout: proc.in.text
             ]
         }
+
+        /**
+         * Fixes malformed PDF documents which use page numbers in local destinations, referencing the same document.
+         * Page numbers should be used only for references to external documents.
+         * These local destinations must use indirect page object references.
+         * Note that these malformed references are not correctly renumbered when merging documents.
+         * This method finds these malformed references and replaces the page numbers by the corresponding
+         * page object references.
+         * If the document is not malformed, this method will leave it unchanged.
+         *
+         * @param file a PDF file.
+         */
+        private static void fixDestinations(File file) {
+            def doc = PDDocument.load(file)
+            fixDestinations(doc)
+            doc.save(file)
+        }
+
+        /**
+         * Fixes malformed PDF documents which use page numbers in local destinations, referencing the same document.
+         * Page numbers should be used only for references to external documents.
+         * These local destinations must use indirect page object references.
+         * Note that these malformed references are not correctly renumbered when merging documents.
+         * This method finds these malformed references and replaces the page numbers by the corresponding
+         * page object references.
+         * If the document is not malformed, this method will leave it unchanged.
+         *
+         * @param doc a PDF document.
+         */
+        private static void fixDestinations(PDDocument doc) {
+            def pages = doc.pages as List // Accessing pages by index is slow. This will make it fast.
+            def catalog = doc.documentCatalog
+            fixNamedDestinations(catalog, pages)
+            fixOutline(catalog, pages)
+            fixExplicitDestinations(pages)
+        }
+
+        private static fixNamedDestinations(catalog, pages) {
+            fixStringDestinations(catalog.names?.dests, pages)
+            fixNameDestinations(catalog.dests, pages)
+        }
+
+        private static fixStringDestinations(node, pages) {
+            if (node) {
+                node.names?.each { name, dest -> fixDestination(dest, pages) }
+                node.kids?.each { fixStringDestinations(it, pages) }
+            }
+        }
+
+        private static fixNameDestinations(dests, pages) {
+            dests?.COSObject?.keySet()*.name.each { name ->
+                def dest = dests.getDestination(name)
+                if (dest in PDPageDestination) {
+                    fixDestination(dest, pages)
+                }
+            }
+        }
+
+        private static fixOutline(catalog, pages) {
+            def outline = catalog.documentOutline
+            if (outline != null) {
+                fixOutlineNode(outline, pages)
+            }
+        }
+
+        private static fixOutlineNode(node, pages) {
+            node.children().each { item ->
+                fixDestinationOrAction(item, pages)
+                fixOutlineNode(item, pages)
+            }
+        }
+
+        private static fixExplicitDestinations(pages) {
+            pages.each { page ->
+                page.getAnnotations { it.subtype == PDAnnotationLink.SUB_TYPE }.each { link ->
+                    fixDestinationOrAction(link, pages)
+                }
+            }
+        }
+
+        private static fixDestinationOrAction(item, pages) {
+            def dest = item.destination
+            if (dest == null && item.action?.subType == PDActionGoTo.SUB_TYPE) {
+                dest = item.action.destination
+            }
+            if (dest in PDPageDestination) {
+                fixDestination(dest, pages)
+            }
+        }
+
+        private static fixDestination(dest, pages) {
+            def pageNum = dest.pageNumber
+            if (pageNum != -1) {
+                dest.setPage(pages[pageNum])
+            }
+        }
+
     }
 }
