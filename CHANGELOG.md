@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+### Fixed
+- Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
 
 ## [3.0] - 2020-08-11
 

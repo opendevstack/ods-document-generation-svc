@@ -57,6 +57,25 @@ class GithubDocumentTemplatesStoreSpec extends SpecHelper {
          envVars.clear("HTTP_PROXY")
     }
 
+    def "verifyProxyWithProtocolInBuilderWPort" () {
+        given:
+        envVars.set("HTTP_PROXY", "http://testproxy:443")
+        GithubDocumentTemplatesStore store = new GithubDocumentTemplatesStore()
+  
+        when:
+        Map builderMap = store.createBuilder()
+
+        then:
+        builderMap.size() == 2
+        Proxy testProxy = ((Proxy)builderMap['proxy'])
+        ((InetSocketAddress)testProxy.address()).hostName == 'testproxy'
+        ((InetSocketAddress)testProxy.address()).port == 443
+        builderMap['builder'] instanceof feign.Feign.Builder
+        
+        cleanup:
+         envVars.clear("HTTP_PROXY")
+    }
+
     def "verifyProxyInBuilderNoPort" () {
         given:
         envVars.set("HTTP_PROXY", "testproxy")
