@@ -1,6 +1,12 @@
 package app
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import org.apache.pdfbox.cos.COSName
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
 
 import java.nio.file.Files
 
@@ -79,5 +85,57 @@ class DocGenSpec extends SpecHelper {
 
         then:
         assertThat(new String(result), startsWith("%PDF-1.4\n"))
+        checkResult(result)
+    }
+
+    private void checkResult(byte[] result) {
+        def resultDoc = PDDocument.load(result)
+        resultDoc.withCloseable { PDDocument doc ->
+            doc.pages?.each { page ->
+                page.getAnnotations { it.subtype == PDAnnotationLink.SUB_TYPE }
+                        ?.each { PDAnnotationLink link ->
+                            def dest = link.destination
+                            if (dest == null && link.action?.subType == PDActionGoTo.SUB_TYPE) {
+                                dest = link.action.destination
+                            }
+                            if (dest in PDPageDestination) {
+                                assert dest.page != null
+                            }
+                        }
+            }
+            def catalog = doc.getDocumentCatalog()
+            def dests = catalog.dests
+            dests?.COSObject?.keySet()*.name.each { name ->
+                def dest = dests.getDestination(name)
+                if (dest in PDPageDestination) {
+                    assert dest.page != null
+                }
+            }
+            def checkStringDest
+            checkStringDest = { node ->
+                if (node) {
+                    node.names?.each { name, dest -> assert dest.page != null }
+                    node.kids?.each { checkStringDest(it) }
+                }
+            }
+            checkStringDest(catalog.names?.dests)
+            def checkOutlineNode
+            checkOutlineNode = { node ->
+                node.children().each { item ->
+                    def dest = item.destination
+                    if (dest == null && item.action?.subType == PDActionGoTo.SUB_TYPE) {
+                        dest = item.action.destination
+                    }
+                    if (dest in PDPageDestination) {
+                        assert dest.page != null
+                    }
+                    checkOutlineNode(item)
+                }
+            }
+            def outline = catalog.documentOutline
+            if (outline != null) {
+                checkOutlineNode(outline)
+            }
+        }
     }
 }
