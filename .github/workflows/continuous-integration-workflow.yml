@@ -29,6 +29,12 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: TestReport
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+          name: JUnit Report
+          path: /build/reports/tests/test/index.html          
     - name: copy created artifacts into docker context
       run: | 
         cp build/libs/*-all.jar ./docker/app.jar
