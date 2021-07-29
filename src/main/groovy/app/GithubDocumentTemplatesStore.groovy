@@ -57,8 +57,8 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
     // proxy setup, we return a map for testing
     Map createBuilder () {
         String[] httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.replace('http://','')?.split(':')
-        println ("Proxy setup: ${httpProxyHost}")
-        if (httpProxyHost.size() > 0 && !System.getenv("GITHUB_HOST")) {
+        println ("Proxy setup: ${httpProxyHost ?: 'not found' }")
+        if (httpProxyHost && !System.getenv("GITHUB_HOST")) {
             int httpProxyPort = httpProxyHost.size() == 2 ? Integer.parseInt(httpProxyHost[1]) : 80
             Proxy proxy = new Proxy(Proxy.Type.HTTP, 
                 new InetSocketAddress(httpProxyHost[0], httpProxyPort));
