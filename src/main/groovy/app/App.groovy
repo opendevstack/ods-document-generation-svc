@@ -1,18 +1,18 @@
 package app
 
 import com.typesafe.config.ConfigFactory
-
 import groovy.json.JsonSlurper
-
-import java.nio.file.Files
-
+import groovy.util.logging.Slf4j
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
 
+import java.nio.file.Files
+
 import static org.jooby.JoobyExtension.get
 import static org.jooby.JoobyExtension.post
 
+@Slf4j
 class App extends Jooby {
 
     {
@@ -21,6 +21,12 @@ class App extends Jooby {
 
         post(this, "/document", { req, rsp ->
             def body = new JsonSlurper().parseText(req.body().value())
+
+            if (log.isInfoEnabled()) {
+                log.info("Input request body before send it to convert it to a pdf: ");
+                log.info(body.toString());
+            }
+
             validateRequestParams(body)
 
             def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
