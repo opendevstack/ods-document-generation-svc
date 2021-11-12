@@ -6,9 +6,10 @@
 ### Fixed
 - Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
 
-## [3.0] - 2020-08-11
+# [3.0] - 2020-08-11
 
 ### Added
+- Add log to print input to /document endpoint
 - Add tagging of doc gen image into jenkinsfile ([#36](https://github.com/opendevstack/ods-document-generation-svc/pull/36))
 - Add better error messages for bitbucket adapter ([#33](https://github.com/opendevstack/ods-document-generation-svc/pull/33))
 - Publish docgen svc to dockerhub ([#24](https://github.com/opendevstack/ods-document-generation-svc/issues/24))
@@ -16,6 +17,7 @@
 - Add Travis configuration ([#7](https://github.com/opendevstack/ods-document-generation-svc/pull/7))
 
 ### Changed
+- Incresed maxRequestSize from 100m to 200m
 - Set default branch to master instead of production ([#27](https://github.com/opendevstack/ods-document-generation-svc/pull/27))
 - Doc Gen service should shop its ocp config in openshift directory ([#20](https://github.com/opendevstack/ods-document-generation-svc/issues/20))
 - Adjust document orientation ([#15](https://github.com/opendevstack/ods-document-generation-svc/issues/15))
