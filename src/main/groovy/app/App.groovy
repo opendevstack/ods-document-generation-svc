@@ -23,7 +23,7 @@ class App extends Jooby {
             def body = new JsonSlurper().parseText(req.body().value())
 
             if (log.isInfoEnabled()) {
-                log.info("Input document before send it to convert it to a pdf: ");
+                log.info("Input request body before send it to convert it to a pdf: ");
                 log.info(body.toString());
             }
 

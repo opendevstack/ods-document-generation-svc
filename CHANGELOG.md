@@ -2,11 +2,17 @@
 
 ## Unreleased
 - Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
-- Added log to print input to /document endpoint
-- Changed maxRequestSize from 100m to 200m
 
 ### Fixed
 - Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
+
+## [4.0] - 2021-12-11
+
+### Added
+- Added log to print /document endpoint input
+
+### Changed
+- Updated maxRequestSize value from 100m to 200m
 
 ## [3.0] - 2020-08-11
 
