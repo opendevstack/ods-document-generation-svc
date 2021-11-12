@@ -6,6 +6,14 @@
 ### Fixed
 - Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
 
+## [4.0] - 2021-15-11
+
+### Added
+- Added log to print /document endpoint input
+
+### Changed
+- Updated maxRequestSize value from 100m to 200m
+
 ## [3.0] - 2020-08-11
 
 ### Added
@@ -27,3 +35,4 @@
 - Doc gen Service jenkins lacks Sonarqube config / scan ([#17](https://github.com/opendevstack/ods-document-generation-svc/issues/17))
 - fix yml to adopt for quickstarter ([#22](https://github.com/opendevstack/ods-document-generation-svc/pull/22))
 - Using HTML headers and footers causes large documents to fail ([#9](https://github.com/opendevstack/ods-document-generation-svc/issues/9))
+
