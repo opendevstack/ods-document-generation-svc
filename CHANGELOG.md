@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
+- Fix wkhtmltox hangs ([#66](https://github.com/opendevstack/ods-document-generation-svc/pull/66))
 
 ### Fixed
 - Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
