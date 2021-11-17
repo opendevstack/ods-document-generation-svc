@@ -2,11 +2,11 @@ package app
 
 import com.typesafe.config.ConfigFactory
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.IOUtils
 import org.apache.groovy.json.internal.LazyMap
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
+import util.DocUtils
 
 import java.nio.file.Files
 
@@ -47,10 +47,10 @@ class App extends Jooby {
                             data: tmp.text
                     ])
                 } finally {
-                    Files.delete(tmp)
+                    DocUtils.tryDelete(tmp)
                 }
             } finally {
-                pdf.delete()
+                DocUtils.tryDelete(pdf)
             }
 
         })
@@ -59,8 +59,6 @@ class App extends Jooby {
 
         get(this, "/health", { req, rsp ->
             def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
-            def headerHtmlFile = Files.createTempFile("header", ".html") << "<html>header</html>"
-            def footerHtmlFile = Files.createTempFile("footer", ".html") << "<html>footer</html>"
 
             def message = null
             def status = "passing"
@@ -68,21 +66,19 @@ class App extends Jooby {
 
             def data
             try {
-                data = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile)
+                data = DocGen.Util.convertHtmlToPDF(documentHtmlFile, null).bytes
+
+                if (!new String(data).startsWith("%PDF-1.4\n")) {
+                    message = "conversion form HTML to PDF failed"
+                    status = "failing"
+                    statusCode = 500
+                }
             } catch (e) {
                 message = e.message
                 status = "failing"
                 statusCode = 500
             } finally {
                 Files.delete(documentHtmlFile)
-                Files.delete(headerHtmlFile)
-                Files.delete(footerHtmlFile)
-            }
-
-            if (!new String(data).startsWith("%PDF-1.4\n")) {
-                message = "conversion form HTML to PDF failed"
-                status = "failing"
-                statusCode = 500
             }
 
             def result = [

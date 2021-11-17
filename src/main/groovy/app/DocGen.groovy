@@ -5,22 +5,18 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.io.FileTemplateLoader
 import com.google.inject.Binder
-import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-
-import groovy.json.JsonOutput
 import org.apache.commons.io.output.TeeOutputStream
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
+import util.DocUtils
 
-import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 import java.time.Duration
 
 import org.apache.commons.io.FileUtils
@@ -76,7 +72,7 @@ class DocGen implements Jooby.Module {
             FileUtils.copyDirectory(getTemplates(version).toFile(), tmpDir.toFile())
 
             // Get partial templates from the temporary location and manipulate in-memory as needed
-            def partials = getPartialTemplates(tmpDir, type, version) { name, template ->
+            def partials = getPartialTemplates(tmpDir, type) { name, template ->
                 // Remove line separator and tab characters in partial template
                 return template.replaceAll(System.getProperty("line.separator"), "").replaceAll("\t", "")
             }
@@ -90,7 +86,7 @@ class DocGen implements Jooby.Module {
             }
 
             // Convert the exected templates into a PDF document
-            resultFile = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer, data)
+            resultFile = Util.convertHtmlToPDF(partials.document, data)
         } finally {
             FileUtils.deleteDirectory(tmpDir.toFile())
         }
@@ -99,7 +95,7 @@ class DocGen implements Jooby.Module {
     }
 
     // Read partial templates for a template type and version from the basePath directory
-    private Map<String, Path> getPartialTemplates(Path basePath, String type, String version, Closure visitor) {
+    private static Map<String, Path> getPartialTemplates(Path basePath, String type, Closure visitor) {
         def partials = [
             document: Paths.get(basePath.toString(), "templates", "${type}.html.tmpl"),
             header: Paths.get(basePath.toString(), "templates", "header.inc.html.tmpl"),
@@ -132,7 +128,7 @@ class DocGen implements Jooby.Module {
 
     class Util {
         // Execute a document template with the necessary data
-        static private def String executeTemplate(Path path, Object data) {
+        static private String executeTemplate(Path path, Object data) {
             // TODO: throw if template variables are not provided
             def loader = new FileTemplateLoader("", "")
             return new Handlebars(loader)
@@ -141,8 +137,8 @@ class DocGen implements Jooby.Module {
         }
 
         // Convert a HTML document, with an optional header and footer, into a PDF
-        static private File convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
-            File documentPDFFile
+        static File convertHtmlToPDF(Path documentHtmlFile, Object data) {
+            File documentPDFFile = null
             def documentPDFFilePath = Files.createTempFile("document", ".pdf")
 
             try {
@@ -173,7 +169,7 @@ ${data.metadata.header[1]}"""])
 
                 println "[INFO]: executing cmd: ${cmd}"
 
-                def result = Util.shell(cmd)
+                def result = shell(cmd)
                 if (result.rc != 0) {
                     println "[ERROR]: ${cmd} has exited with code ${result.rc}"
                     println "[ERROR]: ${result.stderr}"
@@ -182,13 +178,8 @@ ${data.metadata.header[1]}"""])
                 }
 
                 fixDestinations(documentPDFFile)
-            } catch (Exception e) {
-                try {
-                    Files.delete(documentPDFFilePath)
-                } catch (Exception suppressed) {
-                    e.addSuppressed(suppressed)
-                }
-                throw e
+            } catch (Throwable t) {
+                DocUtils.tryDeleteAndRethrow(documentPDFFilePath, t)
             }
 
             return documentPDFFile
@@ -208,7 +199,7 @@ ${data.metadata.header[1]}"""])
                 }
                 stderr = tempFilePath.text
             } finally {
-                Files.delete(tempFilePath)
+                DocUtils.tryDelete(tempFilePath)
             }
 
             return [

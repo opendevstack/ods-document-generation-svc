@@ -45,8 +45,6 @@ class DocGenSpec extends SpecHelper {
     def "Util.convertHtmlToPDF"() {
         given:
         def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
-        def headerHtmlFile = Files.createTempFile("header", ".html") << "<html>header</html>"
-        def footerHtmlFile = Files.createTempFile("footer", ".html") << "<html>footer</html>"
 
         def data = [
             name: "Project Phoenix",
@@ -56,7 +54,7 @@ class DocGenSpec extends SpecHelper {
         ]
 
         when:
-        def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile, data)
+        def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, data)
 
         then:
         def firstLine
@@ -65,8 +63,6 @@ class DocGenSpec extends SpecHelper {
 
         cleanup:
         Files.delete(documentHtmlFile)
-        Files.delete(headerHtmlFile)
-        Files.delete(footerHtmlFile)
     }
 
     def "generate"() {
