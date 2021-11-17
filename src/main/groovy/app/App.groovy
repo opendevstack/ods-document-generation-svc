@@ -32,16 +32,24 @@ class App extends Jooby {
                 log.debug("Input request body data before send it to convert it to a pdf: ")
                 log.debug(prettyPrint(toJson(body.data)))
             }
-
             def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
-            try{
-                pdf.withInputStream { is ->
-                    byte[] pdfBytes = IOUtils.toByteArray(is)
+            try {
+                def tmp = Files.createTempFile('docGenB64Enc', null)
+                try {
+                    tmp.withOutputStream { os ->
+                        Base64.getEncoder().wrap(os).withStream { encOs ->
+                            Files.copy(pdf.toPath(), encOs)
+                            encOs.flush()
+                        }
+                        os.flush()
+                    }
                     rsp.send([
-                            data: Base64.getEncoder().encodeToString(pdfBytes)
+                            data: tmp.text
                     ])
+                } finally {
+                    Files.delete(tmp)
                 }
-            }finally{
+            } finally {
                 pdf.delete()
             }
 

@@ -69,11 +69,10 @@ class DocGen implements Jooby.Module {
     // Generate a PDF document for a combination of template type, version and data
     File generate(String type, String version, Object data) {
         File resultFile = null
-        def tmpDir = null
 
+        // Copy the templates directory including with any assets into a temporary location
+        def tmpDir = Files.createTempDirectory("${type}-v${version}")
         try {
-            // Copy the templates directory including with any assets into a temporary location
-            tmpDir = Files.createTempDirectory("${type}-v${version}")
             FileUtils.copyDirectory(getTemplates(version).toFile(), tmpDir.toFile())
 
             // Get partial templates from the temporary location and manipulate in-memory as needed
@@ -92,12 +91,8 @@ class DocGen implements Jooby.Module {
 
             // Convert the exected templates into a PDF document
             resultFile = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer, data)
-        } catch (Throwable e) {
-            throw e
         } finally {
-            if (tmpDir) {
-                FileUtils.deleteDirectory(tmpDir.toFile())
-            }
+            FileUtils.deleteDirectory(tmpDir.toFile())
         }
 
         return resultFile
@@ -148,51 +143,52 @@ class DocGen implements Jooby.Module {
         // Convert a HTML document, with an optional header and footer, into a PDF
         static private File convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
             def documentPDFFilePath = Files.createTempFile("document", ".pdf")
-
-            def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
-            cmd << "--enable-local-file-access"
-            cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
-
-            if (data?.metadata?.header) {
-                if (data.metadata.header.size() > 1) {
-                    cmd.addAll(["--header-center", """${data.metadata.header[0]}
-${data.metadata.header[1]}"""])
-                } else {
-                    cmd.addAll(["--header-center", data.metadata.header[0]])
-                }
-
-                cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
-            }
-
-            cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
-
-            if (data?.metadata?.orientation) {
-                cmd.addAll(["--orientation", data.metadata.orientation])
-            }
-
-            cmd << documentHtmlFile.toFile().absolutePath
-            cmd << documentPDFFilePath.toFile().absolutePath
-
-            println "[INFO]: executing cmd: ${cmd}"
-
-            def result = Util.shell(cmd)
-            try{
-                if (result.rc != 0) {
-                    String stderr = result.stderr.text
-                    println "[ERROR]: ${cmd} has exited with code ${result.rc}"
-                    println "[ERROR]: ${stderr}"
-                    throw new IllegalStateException(
-                            "PDF Creation of ${documentHtmlFile} failed!\r:${stderr}\r:Error code:${result.rc}")
-                }
-            }finally{
-                if(result!=null){
-                    result.stderr.close()
-                }
-            }
-
-
             File documentPDFFile = documentPDFFilePath.toFile()
-            fixDestinations(documentPDFFile)
+
+            try {
+                def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+                cmd << "--enable-local-file-access"
+                cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
+
+                if (data?.metadata?.header) {
+                    if (data.metadata.header.size() > 1) {
+                        cmd.addAll(["--header-center", """${data.metadata.header[0]}
+${data.metadata.header[1]}"""])
+                    } else {
+                        cmd.addAll(["--header-center", data.metadata.header[0]])
+                    }
+
+                    cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
+                }
+
+                cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
+
+                if (data?.metadata?.orientation) {
+                    cmd.addAll(["--orientation", data.metadata.orientation])
+                }
+
+                cmd << documentHtmlFile.toFile().absolutePath
+                cmd << documentPDFFilePath.toFile().absolutePath
+
+                println "[INFO]: executing cmd: ${cmd}"
+
+                def result = Util.shell(cmd)
+                if (result.rc != 0) {
+                    println "[ERROR]: ${cmd} has exited with code ${result.rc}"
+                    println "[ERROR]: ${result.stderr}"
+                    throw new IllegalStateException(
+                            "PDF Creation of ${documentHtmlFile} failed!\r:${result.stderr}\r:Error code:${result.rc}")
+                }
+
+                fixDestinations(documentPDFFile)
+            } catch (Exception e) {
+                try {
+                    Files.delete(documentPDFFilePath)
+                } catch (Exception suppressed) {
+                    e.addSuppressed(suppressed)
+                }
+                throw e
+            }
 
             return documentPDFFile
         }
@@ -202,20 +198,15 @@ ${data.metadata.header[1]}"""])
 
             def proc = cmd.execute()
             Path tempFilePath = Files.createTempFile("shell", ".bin")
-            File tempFile = tempFilePath.toFile()
-            FileOutputStream tempFileOutputStream = new FileOutputStream(tempFile)
-            def errOutputStream = new TeeOutputStream(tempFileOutputStream, System.err)
-
-            try
-            {
-                proc.waitForProcessOutput(System.out, errOutputStream)
-            }finally{
-                tempFileOutputStream.close()
+            Files.newOutputStream(tempFilePath).withStream { tempFileOutputStream ->
+                new TeeOutputStream(System.err, tempFileOutputStream).withStream { errOutputStream ->
+                    proc.waitForProcessOutput(System.out, errOutputStream)
+                }
             }
 
             return [
                 rc: proc.exitValue(),
-                stderr: Files.newInputStream(tempFilePath, StandardOpenOption.DELETE_ON_CLOSE)
+                stderr: tempFilePath.text
             ]
         }
 
@@ -233,10 +224,10 @@ ${data.metadata.header[1]}"""])
          * @param file a PDF file.
          */
         private static void fixDestinations(File file) {
-            def doc = PDDocument.load(file)
-            fixDestinations(doc)
-            doc.save(file)
-            doc.close()
+            PDDocument.load(file).withCloseable { doc ->
+                fixDestinations(doc)
+                doc.save(file)
+            }
         }
 
         /**
