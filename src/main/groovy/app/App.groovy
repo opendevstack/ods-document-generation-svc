@@ -1,14 +1,16 @@
 package app
 
 import com.typesafe.config.ConfigFactory
-import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import org.apache.groovy.json.internal.LazyMap
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
 
 import java.nio.file.Files
 
+import static groovy.json.JsonOutput.prettyPrint
+import static groovy.json.JsonOutput.toJson
 import static org.jooby.JoobyExtension.get
 import static org.jooby.JoobyExtension.post
 
@@ -20,14 +22,15 @@ class App extends Jooby {
         use(new DocGen())
 
         post(this, "/document", { req, rsp ->
-            def body = new JsonSlurper().parseText(req.body().value())
 
-            if (log.isInfoEnabled()) {
-                log.info("Input request body before send it to convert it to a pdf: ");
-                log.info(body.toString());
-            }
+            def body = req.body().to(LazyMap.class)
 
             validateRequestParams(body)
+
+            if (log.isDebugEnabled()) {
+                log.debug("Input request body data before send it to convert it to a pdf: ")
+                log.debug(prettyPrint(toJson(body.data)))
+            }
 
             def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
             rsp.send([
