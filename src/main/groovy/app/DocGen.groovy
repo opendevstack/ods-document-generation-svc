@@ -165,7 +165,7 @@ ${data.metadata.header[1]}"""])
                 }
 
                 cmd << documentHtmlFile.toFile().absolutePath
-                cmd << documentPDFFilePath.toFile().absolutePath
+                cmd << documentPDFFile.absolutePath
 
                 println "[INFO]: executing cmd: ${cmd}"
 
