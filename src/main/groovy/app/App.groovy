@@ -39,9 +39,7 @@ class App extends Jooby {
                     tmp.withOutputStream { os ->
                         Base64.getEncoder().wrap(os).withStream { encOs ->
                             Files.copy(pdf.toPath(), encOs)
-                            encOs.flush()
                         }
-                        os.flush()
                     }
                     rsp.send([
                             data: tmp.text
