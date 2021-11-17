@@ -142,10 +142,11 @@ class DocGen implements Jooby.Module {
 
         // Convert a HTML document, with an optional header and footer, into a PDF
         static private File convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
+            File documentPDFFile
             def documentPDFFilePath = Files.createTempFile("document", ".pdf")
-            File documentPDFFile = documentPDFFilePath.toFile()
 
             try {
+                documentPDFFile = documentPDFFilePath.toFile()
                 def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
                 cmd << "--enable-local-file-access"
                 cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
@@ -194,19 +195,25 @@ ${data.metadata.header[1]}"""])
         }
 
         // Execute a command in the shell
-        static private def Map shell(List<String> cmd) {
+        static private Map shell(List<String> cmd) {
 
             def proc = cmd.execute()
-            Path tempFilePath = Files.createTempFile("shell", ".bin")
-            Files.newOutputStream(tempFilePath).withStream { tempFileOutputStream ->
-                new TeeOutputStream(System.err, tempFileOutputStream).withStream { errOutputStream ->
-                    proc.waitForProcessOutput(System.out, errOutputStream)
+            def stderr = null
+            Path tempFilePath = Files.createTempFile("shell", ".stderr")
+            try {
+                tempFilePath.withOutputStream { tempFileOutputStream ->
+                    new TeeOutputStream(System.err, tempFileOutputStream).withStream { errOutputStream ->
+                        proc.waitForProcessOutput(System.out, errOutputStream)
+                    }
                 }
+                stderr = tempFilePath.text
+            } finally {
+                Files.delete(tempFilePath)
             }
 
             return [
                 rc: proc.exitValue(),
-                stderr: tempFilePath.text
+                stderr: stderr
             ]
         }
 
