@@ -36,7 +36,7 @@ class App extends Jooby {
             def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
             try{
                 pdf.withInputStream { is ->
-                    byte[] pdfBytes = IOUtils.toByteArray(is);
+                    byte[] pdfBytes = IOUtils.toByteArray(is)
                     rsp.send([
                             data: Base64.getEncoder().encodeToString(pdfBytes)
                     ])
