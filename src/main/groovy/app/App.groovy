@@ -3,6 +3,7 @@ package app
 import com.typesafe.config.ConfigFactory
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.IOUtils
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
@@ -22,6 +23,7 @@ class App extends Jooby {
         post(this, "/document", { req, rsp ->
             def body = new JsonSlurper().parseText(req.body().value())
 
+
             if (log.isInfoEnabled()) {
                 log.info("Input request body before send it to convert it to a pdf: ");
                 log.info(body.toString());
@@ -30,9 +32,17 @@ class App extends Jooby {
             validateRequestParams(body)
 
             def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
-            rsp.send([
-                data: pdf.encodeBase64().toString()
-            ])
+            try{
+                pdf.withInputStream { is ->
+                    byte[] pdfBytes = IOUtils.toByteArray(is);
+                    rsp.send([
+                            data: Base64.getEncoder().encodeToString(pdfBytes)
+                    ])
+                }
+            }finally{
+                pdf.delete()
+            }
+
         })
         .consumes(MediaType.json)
         .produces(MediaType.json)

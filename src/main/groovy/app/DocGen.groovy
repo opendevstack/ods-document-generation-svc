@@ -10,14 +10,17 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
 import groovy.json.JsonOutput
+import org.apache.commons.io.output.TeeOutputStream
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 
+import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import java.time.Duration
 
 import org.apache.commons.io.FileUtils
@@ -64,8 +67,8 @@ class DocGen implements Jooby.Module {
     }
 
     // Generate a PDF document for a combination of template type, version and data
-    def byte[] generate(String type, String version, Object data) {
-        def result = []
+    File generate(String type, String version, Object data) {
+        File resultFile = null
         def tmpDir = null
 
         try {
@@ -88,7 +91,7 @@ class DocGen implements Jooby.Module {
             }
 
             // Convert the exected templates into a PDF document
-            result = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer, data)
+            resultFile = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer, data)
         } catch (Throwable e) {
             throw e
         } finally {
@@ -97,7 +100,7 @@ class DocGen implements Jooby.Module {
             }
         }
 
-        return result
+        return resultFile
     }
 
     // Read partial templates for a template type and version from the basePath directory
@@ -143,79 +146,80 @@ class DocGen implements Jooby.Module {
         }
 
         // Convert a HTML document, with an optional header and footer, into a PDF
-        static private def byte[] convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
-            def documentPDFFile = null
+        static private File convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
+            def documentPDFFilePath = Files.createTempFile("document", ".pdf")
 
-            try {
-                documentPDFFile = Files.createTempFile("document", ".pdf")
+            def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+            cmd << "--enable-local-file-access"
+            cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
 
-                def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
-                cmd << "--enable-local-file-access"
-                cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
-
-                if (data?.metadata?.header) {
-                    if (data.metadata.header.size() > 1) {
-                        cmd.addAll(["--header-center", """${data.metadata.header[0]}
+            if (data?.metadata?.header) {
+                if (data.metadata.header.size() > 1) {
+                    cmd.addAll(["--header-center", """${data.metadata.header[0]}
 ${data.metadata.header[1]}"""])
-                    } else {
-                        cmd.addAll(["--header-center", data.metadata.header[0]])
-                    }
-
-                    cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
+                } else {
+                    cmd.addAll(["--header-center", data.metadata.header[0]])
                 }
 
-                cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
+                cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
+            }
 
-                if (data?.metadata?.orientation) {
-                    cmd.addAll(["--orientation", data.metadata.orientation])
-                }
+            cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
 
-                cmd << documentHtmlFile.toFile().absolutePath
-                cmd << documentPDFFile.toFile().absolutePath
+            if (data?.metadata?.orientation) {
+                cmd.addAll(["--orientation", data.metadata.orientation])
+            }
 
-                println "[INFO]: executing cmd: ${cmd}"
-                def result = Util.shell(cmd)
+            cmd << documentHtmlFile.toFile().absolutePath
+            cmd << documentPDFFilePath.toFile().absolutePath
+
+            println "[INFO]: executing cmd: ${cmd}"
+
+            def result = Util.shell(cmd)
+            try{
                 if (result.rc != 0) {
+                    String stderr = result.stderr.text
                     println "[ERROR]: ${cmd} has exited with code ${result.rc}"
-                    println "[ERROR]: ${result.stderr}"
+                    println "[ERROR]: ${stderr}"
                     throw new IllegalStateException(
-                      "PDF Creation of ${documentHtmlFile} failed!\r:${result.stderr}\r:Error code:${result.rc}")
+                            "PDF Creation of ${documentHtmlFile} failed!\r:${stderr}\r:Error code:${result.rc}")
                 }
-
-                fixDestinations(documentPDFFile.toFile())
-
-                return Files.readAllBytes(documentPDFFile)
-            } catch (Throwable e) {
-                throw e
-            } finally {
-                if (documentPDFFile) {
-                    Files.delete(documentPDFFile)
+            }finally{
+                if(result!=null){
+                    result.stderr.close()
                 }
             }
+
+
+            File documentPDFFile = documentPDFFilePath.toFile()
+            fixDestinations(documentPDFFile)
+
+            return documentPDFFile
         }
 
         // Execute a command in the shell
         static private def Map shell(List<String> cmd) {
+
             def proc = cmd.execute()
-            // for some VERY complex docs - the process implementation hangs on wait() ...
-            // switching to the below - seem to work but gets a weird NPE... 
-            // java.lang.NullPointerException: Cannot invoke method call() on null object
-            // at app.DocGen$Util.shell(DocGen.groovy:193)
-            ByteArrayOutputStream bosOut = new ByteArrayOutputStream()
-            ByteArrayOutputStream bosErr = new ByteArrayOutputStream()
-            try 
+            Path tempFilePath = Files.createTempFile("shell", ".bin")
+            File tempFile = tempFilePath.toFile()
+            FileOutputStream tempFileOutputStream = new FileOutputStream(tempFile)
+            def errOutputStream = new TeeOutputStream(tempFileOutputStream, System.err)
+
+            try
             {
-                proc.waitForProcessOutput(bosOut, bosErr)
-            } catch (NullPointerException wtfEx) {
-                //
+                proc.waitForProcessOutput(System.out, errOutputStream)
+            }finally{
+                tempFileOutputStream.close()
             }
 
             return [
                 rc: proc.exitValue(),
-                stderr: bosErr.toString(),
-                stdout: bosOut.toString()
+                stderr: Files.newInputStream(tempFilePath, StandardOpenOption.DELETE_ON_CLOSE)
             ]
         }
+
+
 
         /**
          * Fixes malformed PDF documents which use page numbers in local destinations, referencing the same document.
@@ -232,6 +236,7 @@ ${data.metadata.header[1]}"""])
             def doc = PDDocument.load(file)
             fixDestinations(doc)
             doc.save(file)
+            doc.close()
         }
 
         /**
