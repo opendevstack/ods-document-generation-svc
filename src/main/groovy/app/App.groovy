@@ -45,10 +45,10 @@ class App extends Jooby {
                             data: tmp.text
                     ])
                 } finally {
-                    DocUtils.tryDelete(tmp)
+                    DocUtils.tryDeleteThrowErrors(tmp)
                 }
             } finally {
-                DocUtils.tryDelete(pdf)
+                DocUtils.tryDeleteThrowErrors(pdf)
             }
 
         })

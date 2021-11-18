@@ -179,7 +179,7 @@ ${data.metadata.header[1]}"""])
 
                 fixDestinations(documentPDFFile)
             } catch (Throwable t) {
-                DocUtils.tryDeleteAndRethrow(documentPDFFilePath, t)
+                DocUtils.tryDeleteThrowErrors(documentPDFFilePath, t)
             }
 
             return documentPDFFile
@@ -199,7 +199,7 @@ ${data.metadata.header[1]}"""])
                 }
                 stderr = tempFilePath.text
             } finally {
-                DocUtils.tryDelete(tempFilePath)
+                DocUtils.tryDeleteThrowErrors(tempFilePath)
             }
 
             return [

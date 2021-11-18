@@ -7,56 +7,79 @@ import org.apache.commons.io.FileUtils
 import net.lingala.zip4j.core.ZipFile
 
 class DocUtils {
-    static void tryDeleteAndRethrow(Path path, Throwable t) {
-        Throwable suppressed
-        try {
-            suppressed = tryDelete(path)
-        } catch (Error e) {
-            if (t instanceof Error) {
-                suppressed = e
-            } else {
-                e.addSuppressed(t)
-                throw e
-            }
+    static Exception tryDeleteThrowErrors(Path path, Throwable t) {
+        t = t ? tryDelete(path, t) : tryDelete(path)
+        if (t instanceof Error) {
+            throw t
         }
-        if (suppressed) {
-            t.addSuppressed(suppressed)
-        }
-        throw t
+        return (Exception) t
     }
 
-    static Exception tryDelete(Path path) {
+    static Exception tryDeleteThrowErrors(File file, Throwable t) {
+        t = t ? tryDelete(file, t) : tryDelete(file)
+        if (t instanceof Error) {
+            throw t
+        }
+        return (Exception) t
+    }
+
+    static Throwable tryDelete(Path path, Throwable t) {
+        Throwable suppressed = tryDelete(path)
+        Throwable thrown = processSecondThrowable(t, suppressed)
+        return thrown
+    }
+
+    static Throwable tryDelete(File file, Throwable t) {
+        Throwable suppressed = tryDelete(file)
+        Throwable thrown = processSecondThrowable(t, suppressed)
+        return thrown
+    }
+
+    static Throwable tryDelete(Path path) {
+        Throwable thrown = null
         try {
             Files.delete(path)
         } catch (Throwable t) {
             try {
                 path.toFile().deleteOnExit()
-            } catch (Exception suppressed) {
-                t.addSuppressed(suppressed)
+            } catch (Throwable suppressed) {
+                t = processSecondThrowable(t, suppressed)
             }
-            if (t instanceof Error) {
-                throw t
-            }
-            return (Exception) t
+            thrown = t
         }
-        return null
+        return thrown
     }
 
-    static Exception tryDelete(File file) {
+    static Throwable tryDelete(File file) {
+        Throwable thrown = null
         try {
             file.delete()
         } catch (Throwable t) {
             try {
                 file.deleteOnExit()
-            } catch (Exception suppressed) {
+            } catch (Throwable suppressed) {
+                t = processSecondThrowable(t, suppressed)
+            }
+            thrown = t
+        }
+        return thrown
+    }
+
+    static Throwable processSecondThrowable(Throwable first, Throwable second) {
+        Throwable t = first
+        if (t == null) {
+            t = second
+        } else {
+            Throwable suppressed = second
+            if (suppressed != null) {
+                if ((second instanceof Error) && (first instanceof Exception)) {
+                    t = second
+                    suppressed = first
+                }
                 t.addSuppressed(suppressed)
             }
-            if (t instanceof Error) {
-                throw t
-            }
-            return (Exception) t
         }
-        return null
+        return t
     }
 
     // Extract some Zip archive content into a target directory
