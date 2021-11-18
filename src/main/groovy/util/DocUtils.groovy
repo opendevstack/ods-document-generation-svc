@@ -27,7 +27,7 @@ class DocUtils {
      *     }
      *     def suppressed = DocUtils.tryDelete(path) // Only reached, if no Throwable was caught
      *     // Execution continues normally, even if file deletion failed with an Exception.
-     *     // The suppressed exception is available, for example, to log a warning.
+     *     // The suppressed exception is available, for example, to log a warning or to be rethrown, if desired.
      *     }
      * </pre>
      *
@@ -73,7 +73,7 @@ class DocUtils {
      *     }
      *     def suppressed = DocUtils.tryDelete(file) // Only reached, if no Throwable was caught
      *     // Execution continues normally, even if file deletion failed with an Exception.
-     *     // The suppressed Exception is available, for example, to log a warning.
+     *     // The suppressed exception is available, for example, to log a warning or to be rethrown, if desired.
      *     }
      * </pre>
      *
