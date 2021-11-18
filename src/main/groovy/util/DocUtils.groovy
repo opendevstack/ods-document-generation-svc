@@ -7,6 +7,34 @@ import org.apache.commons.io.FileUtils
 import net.lingala.zip4j.core.ZipFile
 
 class DocUtils {
+    /**
+     * Tries to delete the file given by <code>path</code>.
+     * If file deletion throws an <code>Exception</code> this exception is suppressed and execution continues normally.
+     * If an <code>Error</code> is thrown, it will however be propagated.
+     * If the optional <code>Throwable t</code> is given, it will be thrown and the method will never return.
+     * If <code>t</code> is an <code>Exception</code> and file deletion throws an <code>Error</code>,
+     * then <code>t</code> will be suppressed and the <code>Error</code> will be thrown instead.
+     *
+     * The <code>t</code> parameter is typically used when trying to delete a file inside a <code>catch</code> block.
+     * <pre>
+     *     Typical usage:
+     *     {@code
+     *     def path = Files.crateTempFile('prefix', null)
+     *     try {
+     *         // Do something with the temp file
+     *     } catch (Throwable t) {
+     *         DocUtils.tryDelete(path, t) // Never returns
+     *     }
+     *     DocUtils.tryDelete(path) // Only reached, if no Throwable was caught
+     *     }
+     * </pre>
+     *
+     * @param path <code>Path</code> to the file to try to delete.
+     * @param t optional <code>Throwable</code> to be thrown after trying to delete the file.
+     * @return the suppressed <code>Exception</code> thrown by the file deletion, if any.
+     * @throws Error if <code>t</code> is an <code>Error</code> or an <code>Error</code> is thrown by the file deletion.
+     * @throws Exception if <code>t</code> is an <code>Exception</code>.
+     */
     static Exception tryDelete(Path path, Throwable t = null) {
         Exception suppressed = null
         try {
@@ -23,6 +51,34 @@ class DocUtils {
         return suppressed
     }
 
+    /**
+     * Tries to delete the <code>File</code> given by <code>file</code>.
+     * If file deletion throws an <code>Exception</code> this exception is suppressed and execution continues normally.
+     * If an <code>Error</code> is thrown, it will however be propagated.
+     * If the optional <code>Throwable t</code> is given, it will be thrown and the method will never return.
+     * If <code>t</code> is an <code>Exception</code> and file deletion throws an <code>Error</code>,
+     * then <code>t</code> will be suppressed and the <code>Error</code> will be thrown instead.
+     *
+     * The <code>t</code> parameter is typically used when trying to delete a file inside a <code>catch</code> block.
+     * <pre>
+     *     Typical usage:
+     *     {@code
+     *     def file = File.crateTempFile('prefix', null)
+     *     try {
+     *         // Do something with the temp file
+     *     } catch (Throwable t) {
+     *         DocUtils.tryDelete(file, t) // Never returns
+     *     }
+     *     DocUtils.tryDelete(file) // Only reached, if no Throwable was caught
+     *     }
+     * </pre>
+     *
+     * @param file <code>File</code> to try to delete.
+     * @param t optional <code>Throwable</code> to be thrown after trying to delete the file.
+     * @return the suppressed <code>Exception</code> thrown by the file deletion, if any.
+     * @throws Error if <code>t</code> is an <code>Error</code> or an <code>Error</code> is thrown by the file deletion.
+     * @throws Exception if <code>t</code> is an <code>Exception</code>.
+     */
     static Exception tryDelete(File file, Throwable t = null) {
         Exception suppressed = null
         try {
