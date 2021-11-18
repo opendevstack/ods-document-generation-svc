@@ -24,14 +24,22 @@ class DocUtils {
     }
 
     static Throwable tryDelete(Path path, Throwable t) {
-        Throwable suppressed = Files.delete(path)
-        Throwable thrown = processSecondThrowable(t, suppressed)
+        Throwable thrown = t
+        try {
+            Files.delete(path)
+        } catch (Throwable suppressed) {
+            thrown = processSecondThrowable(t, suppressed)
+        }
         return thrown
     }
 
     static Throwable tryDelete(File file, Throwable t) {
-        Throwable suppressed = file.delete()
-        Throwable thrown = processSecondThrowable(t, suppressed)
+        Throwable thrown = t
+        try {
+            file.delete()
+        } catch (Throwable suppressed) {
+            thrown = processSecondThrowable(t, suppressed)
+        }
         return thrown
     }
 

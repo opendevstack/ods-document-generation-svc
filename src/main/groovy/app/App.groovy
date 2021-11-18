@@ -2,11 +2,9 @@ package app
 
 import com.typesafe.config.ConfigFactory
 import groovy.util.logging.Slf4j
-import org.apache.groovy.json.internal.LazyMap
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
-import util.DocUtils
 
 import java.nio.file.Files
 
