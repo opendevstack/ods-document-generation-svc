@@ -199,7 +199,7 @@ ${data.metadata.header[1]}"""])
                 }
                 stderr = tempFilePath.text
             } finally {
-                DocUtils.tryDeleteThrowErrors(tempFilePath)
+                Files.delete(tempFilePath)
             }
 
             return [

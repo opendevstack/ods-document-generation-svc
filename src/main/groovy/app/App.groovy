@@ -24,7 +24,7 @@ class App extends Jooby {
 
         post(this, "/document", { req, rsp ->
 
-            def body = req.body().to(LazyMap.class)
+            def body = req.body().to(HashMap.class)
 
             validateRequestParams(body)
 
@@ -45,10 +45,10 @@ class App extends Jooby {
                             data: tmp.text
                     ])
                 } finally {
-                    DocUtils.tryDeleteThrowErrors(tmp)
+                    Files.delete(tmp)
                 }
             } finally {
-                DocUtils.tryDeleteThrowErrors(pdf)
+                pdf.delete()
             }
 
         })

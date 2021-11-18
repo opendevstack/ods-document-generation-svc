@@ -8,60 +8,30 @@ import net.lingala.zip4j.core.ZipFile
 
 class DocUtils {
     static Exception tryDeleteThrowErrors(Path path, Throwable t) {
-        t = t ? tryDelete(path, t) : tryDelete(path)
-        if (t instanceof Error) {
-            throw t
+        Throwable thrown = tryDelete(path, t)
+        if (thrown instanceof Error) {
+            throw thrown
         }
-        return (Exception) t
+        return (Exception) thrown
     }
 
     static Exception tryDeleteThrowErrors(File file, Throwable t) {
-        t = t ? tryDelete(file, t) : tryDelete(file)
-        if (t instanceof Error) {
-            throw t
+        Throwable thrown = tryDelete(file, t)
+        if (thrown instanceof Error) {
+            throw thrown
         }
-        return (Exception) t
+        return (Exception) thrown
     }
 
     static Throwable tryDelete(Path path, Throwable t) {
-        Throwable suppressed = tryDelete(path)
+        Throwable suppressed = Files.delete(path)
         Throwable thrown = processSecondThrowable(t, suppressed)
         return thrown
     }
 
     static Throwable tryDelete(File file, Throwable t) {
-        Throwable suppressed = tryDelete(file)
+        Throwable suppressed = file.delete()
         Throwable thrown = processSecondThrowable(t, suppressed)
-        return thrown
-    }
-
-    static Throwable tryDelete(Path path) {
-        Throwable thrown = null
-        try {
-            Files.delete(path)
-        } catch (Throwable t) {
-            try {
-                path.toFile().deleteOnExit()
-            } catch (Throwable suppressed) {
-                t = processSecondThrowable(t, suppressed)
-            }
-            thrown = t
-        }
-        return thrown
-    }
-
-    static Throwable tryDelete(File file) {
-        Throwable thrown = null
-        try {
-            file.delete()
-        } catch (Throwable t) {
-            try {
-                file.deleteOnExit()
-            } catch (Throwable suppressed) {
-                t = processSecondThrowable(t, suppressed)
-            }
-            thrown = t
-        }
         return thrown
     }
 
