@@ -39,15 +39,15 @@ class DocUtils {
         return suppressed
     }
 
-    private static void processError(Throwable t, Error suppressed) {
+    private static void processError(Throwable t, Error e) {
         if (t == null) {
-            throw suppressed
+            throw e
         }
         if (t instanceof Exception) {
-            suppressed.addSuppressed(t)
-            throw suppressed
+            e.addSuppressed(t)
+            throw e
         }
-        processSuppressed(t, suppressed)
+        processSuppressed(t, e)
     }
 
     private static void processSuppressed(Throwable t, Throwable suppressed) {
