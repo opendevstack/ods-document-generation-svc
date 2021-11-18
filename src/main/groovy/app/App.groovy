@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
+import util.DocUtils
 
 import java.nio.file.Files
 
@@ -42,12 +43,14 @@ class App extends Jooby {
                     rsp.send([
                             data: tmp.text
                     ])
-                } finally {
-                    Files.delete(tmp)
+                } catch (Throwable t) {
+                    DocUtils.tryDelete(tmp, t)
                 }
-            } finally {
-                pdf.delete()
+                DocUtils.tryDelete(tmp)
+            } catch (Throwable t) {
+                DocUtils.tryDelete(pdf, t)
             }
+            DocUtils.tryDelete(pdf)
 
         })
         .consumes(MediaType.json)

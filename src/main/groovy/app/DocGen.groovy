@@ -179,7 +179,7 @@ ${data.metadata.header[1]}"""])
 
                 fixDestinations(documentPDFFile)
             } catch (Throwable t) {
-                DocUtils.tryDeleteThrowErrors(documentPDFFilePath, t)
+                DocUtils.tryDelete(documentPDFFilePath, t)
             }
 
             return documentPDFFile
@@ -198,9 +198,10 @@ ${data.metadata.header[1]}"""])
                     }
                 }
                 stderr = tempFilePath.text
-            } finally {
-                Files.delete(tempFilePath)
+            } catch (Throwable t) {
+                DocUtils.tryDelete(tempFilePath, t)
             }
+            DocUtils.tryDelete(tempFilePath)
 
             return [
                 rc: proc.exitValue(),

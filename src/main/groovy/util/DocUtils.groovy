@@ -7,57 +7,53 @@ import org.apache.commons.io.FileUtils
 import net.lingala.zip4j.core.ZipFile
 
 class DocUtils {
-    static Exception tryDeleteThrowErrors(Path path, Throwable t) {
-        Throwable thrown = tryDelete(path, t)
-        if (thrown instanceof Error) {
-            throw thrown
-        }
-        return (Exception) thrown
-    }
-
-    static Exception tryDeleteThrowErrors(File file, Throwable t) {
-        Throwable thrown = tryDelete(file, t)
-        if (thrown instanceof Error) {
-            throw thrown
-        }
-        return (Exception) thrown
-    }
-
-    static Throwable tryDelete(Path path, Throwable t) {
-        Throwable thrown = t
+    static Exception tryDelete(Path path, Throwable t = null) {
+        Exception suppressed = null
         try {
             Files.delete(path)
-        } catch (Throwable suppressed) {
-            thrown = processSecondThrowable(t, suppressed)
+        } catch (Error e) {
+            processError(t, e)
+        } catch (Exception e) {
+            processSuppressed(t, e)
+            suppressed = e
         }
-        return thrown
+        if (t != null) {
+            throw t
+        }
+        return suppressed
     }
 
-    static Throwable tryDelete(File file, Throwable t) {
-        Throwable thrown = t
+    static Exception tryDelete(File file, Throwable t = null) {
+        Exception suppressed = null
         try {
             file.delete()
-        } catch (Throwable suppressed) {
-            thrown = processSecondThrowable(t, suppressed)
+        } catch (Error e) {
+            processError(t, e)
+        } catch (Exception e) {
+            processSuppressed(t, e)
+            suppressed = e
         }
-        return thrown
+        if (t != null) {
+            throw t
+        }
+        return suppressed
     }
 
-    static Throwable processSecondThrowable(Throwable first, Throwable second) {
-        Throwable t = first
+    private static void processError(Throwable t, Error suppressed) {
         if (t == null) {
-            t = second
-        } else {
-            Throwable suppressed = second
-            if (suppressed != null) {
-                if ((second instanceof Error) && (first instanceof Exception)) {
-                    t = second
-                    suppressed = first
-                }
-                t.addSuppressed(suppressed)
-            }
+            throw suppressed
         }
-        return t
+        if (t instanceof Exception) {
+            suppressed.addSuppressed(t)
+            throw suppressed
+        }
+        processSuppressed(t, suppressed)
+    }
+
+    private static void processSuppressed(Throwable t, Throwable suppressed) {
+        if (t != null) {
+            t.addSuppressed(suppressed)
+        }
     }
 
     // Extract some Zip archive content into a target directory
