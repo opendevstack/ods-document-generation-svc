@@ -25,7 +25,9 @@ class DocUtils {
      *     } catch (Throwable t) {
      *         DocUtils.tryDelete(path, t) // Never returns
      *     }
-     *     DocUtils.tryDelete(path) // Only reached, if no Throwable was caught
+     *     def suppressed = DocUtils.tryDelete(path) // Only reached, if no Throwable was caught
+     *     // Execution continues normally, even if file deletion failed with an Exception.
+     *     // The suppressed exception is available, for example, to log a warning.
      *     }
      * </pre>
      *
@@ -69,7 +71,9 @@ class DocUtils {
      *     } catch (Throwable t) {
      *         DocUtils.tryDelete(file, t) // Never returns
      *     }
-     *     DocUtils.tryDelete(file) // Only reached, if no Throwable was caught
+     *     def suppressed = DocUtils.tryDelete(file) // Only reached, if no Throwable was caught
+     *     // Execution continues normally, even if file deletion failed with an Exception.
+     *     // The suppressed Exception is available, for example, to log a warning.
      *     }
      * </pre>
      *
