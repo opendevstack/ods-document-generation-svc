@@ -21,4 +21,4 @@ USER 1001
 
 EXPOSE 8080
 
-CMD ["java", "-Xmx512m", "-jar", "app.jar"]
+CMD ["java","-XX:+UseCompressedOops", "-Xmx1g", "-jar", "app.jar"]
