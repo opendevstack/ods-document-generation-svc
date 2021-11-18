@@ -56,7 +56,9 @@ class DocGenSpec extends SpecHelper {
         def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile, data)
 
         then:
-        assertThat(new String(result), startsWith("%PDF-1.4\n"))
+        def firstLine
+        result.withReader { firstLine = it.readLine()}
+        assertThat(firstLine, startsWith("%PDF-1.4"))
 
         cleanup:
         Files.delete(documentHtmlFile)
@@ -81,15 +83,22 @@ class DocGenSpec extends SpecHelper {
         )
 
         when:
-        def result = new DocGen().generate("InstallationReport", version, data)
+        def resultFile = new DocGen().generate("InstallationReport", version, data)
 
         then:
-        assertThat(new String(result), startsWith("%PDF-1.4\n"))
-        checkResult(result)
+        def firstLine
+        resultFile.withReader { firstLine = it.readLine()}
+        assertThat(firstLine, startsWith("%PDF-1.4"))
+        def is = new FileInputStream(resultFile);
+        checkResult(is)
+
+        cleanup:
+        if(is!=null)is.close()
+        if(resultFile!=null)resultFile.delete()
     }
 
-    private void checkResult(byte[] result) {
-        def resultDoc = PDDocument.load(result)
+    private void checkResult(InputStream inputStream) {
+        def resultDoc = PDDocument.load(inputStream)
         resultDoc.withCloseable { PDDocument doc ->
             doc.pages?.each { page ->
                 page.getAnnotations { it.subtype == PDAnnotationLink.SUB_TYPE }

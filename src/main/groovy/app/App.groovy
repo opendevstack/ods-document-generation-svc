@@ -2,6 +2,7 @@ package app
 
 import com.typesafe.config.ConfigFactory
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.IOUtils
 import org.apache.groovy.json.internal.LazyMap
 import org.jooby.Jooby
 import org.jooby.MediaType
@@ -33,9 +34,17 @@ class App extends Jooby {
             }
 
             def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
-            rsp.send([
-                data: pdf.encodeBase64().toString()
-            ])
+            try{
+                pdf.withInputStream { is ->
+                    byte[] pdfBytes = IOUtils.toByteArray(is)
+                    rsp.send([
+                            data: Base64.getEncoder().encodeToString(pdfBytes)
+                    ])
+                }
+            }finally{
+                pdf.delete()
+            }
+
         })
         .consumes(MediaType.json)
         .produces(MediaType.json)
