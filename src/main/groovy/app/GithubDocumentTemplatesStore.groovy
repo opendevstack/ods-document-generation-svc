@@ -1,7 +1,7 @@
 package app
 
-import java.nio.file.Path
-import java.net.Proxy
+import feign.Response
+import feign.codec.ErrorDecoder
 import okhttp3.OkHttpClient
 import org.apache.http.client.utils.URIBuilder
 import com.typesafe.config.Config
@@ -11,11 +11,16 @@ import feign.Headers
 import feign.Param
 import feign.RequestLine
 import util.DocUtils
+import util.FileTools
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 
 interface GithubDocumentTemplatesStoreHttpAPI {
   @Headers("Accept: application/octet-stream")
   @RequestLine("GET /opendevstack/ods-document-generation-templates/archive/v{version}.zip")
-  byte[] getTemplatesZipArchiveForVersion(@Param("version") String version)
+  Response getTemplatesZipArchiveForVersion(@Param("version") String version)
 }
 
 class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
@@ -28,7 +33,7 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
     }
 
     // Get document templates of a specific version into a target directory
-    def Path getTemplatesForVersion(String version, Path targetDir) {
+    Path getTemplatesForVersion(String version, Path targetDir) {
         def uri = getZipArchiveDownloadURI(version)
         Feign.Builder builder = createBuilder()['builder']
 
@@ -37,16 +42,28 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
             uri.getScheme() + "://" + uri.getAuthority()
         )
 
-        def zipArchiveContent = store.getTemplatesZipArchiveForVersion(
+        def response = store.getTemplatesZipArchiveForVersion(
             version
         )
-        
-        return DocUtils.extractZipArchive(
-          zipArchiveContent, targetDir, "ods-document-generation-templates-${version}")
+        if (response.status() >= 300) {
+            def methodKey =
+                    'GithubDocumentTemplatesStoreHttpAPI#getTemplatesZipArchiveForVersion(String)'
+            throw new ErrorDecoder.Default().decode(methodKey, response)
+        }
+
+        return FileTools.withTempFile('tmpl', 'zip') { zipArchive ->
+            response.body().withCloseable { body ->
+                body.asInputStream().withStream { is ->
+                    Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+            return DocUtils.extractZipArchive(
+                    zipArchive, targetDir, "ods-document-generation-templates-${version}")
+        }
     }
 
     // Get a URI to download document templates of a specific version
-    def URI getZipArchiveDownloadURI(String version) {
+    URI getZipArchiveDownloadURI(String version) {
         // for testing
         String githubUrl = System.getenv("GITHUB_HOST") ?: "https://www.github.com"
         return new URIBuilder(githubUrl)
@@ -61,8 +78,8 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
         if (httpProxyHost && !System.getenv("GITHUB_HOST")) {
             int httpProxyPort = httpProxyHost.size() == 2 ? Integer.parseInt(httpProxyHost[1]) : 80
             Proxy proxy = new Proxy(Proxy.Type.HTTP, 
-                new InetSocketAddress(httpProxyHost[0], httpProxyPort));
-            OkHttpClient okHttpClient = new OkHttpClient().newBuilder().proxy(proxy).build();
+                new InetSocketAddress(httpProxyHost[0], httpProxyPort))
+            OkHttpClient okHttpClient = new OkHttpClient().newBuilder().proxy(proxy).build()
             return [ 
                 'builder': Feign.builder().client(new feign.okhttp.OkHttpClient(okHttpClient)),
                 'proxy' : proxy

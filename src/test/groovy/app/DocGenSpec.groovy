@@ -1,23 +1,16 @@
 package app
 
-import com.github.tomakehurst.wiremock.client.WireMock
-import groovy.util.slurpersupport.GPathResult
-import org.apache.pdfbox.cos.COSName
+
+import groovy.xml.XmlUtil
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
-import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
+import util.DocUtils
 
 import java.nio.file.Files
-import spock.lang.*
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.startsWith
-import static org.junit.Assert.*
-
-import groovy.xml.XmlUtil
+import static org.junit.Assert.assertEquals
 
 class DocGenSpec extends SpecHelper {
 
@@ -30,23 +23,23 @@ class DocGenSpec extends SpecHelper {
     def "Util.executeTemplate"() {
         given:
         def templateFile = Files.createTempFile("document", ".html.tmpl") << "<html>{{name}}</html>"
+        def result = Files.createTempFile('document', '.html')
         def data = [ name: "Hello, Handlebars!" ]
 
         when:
-        def result = DocGen.Util.executeTemplate(templateFile, data)
+        DocGen.Util.executeTemplate(templateFile, result, data)
 
         then:
-        result == "<html>Hello, Handlebars!</html>"
+        result.text == "<html>Hello, Handlebars!</html>"
 
         cleanup:
         Files.delete(templateFile)
+        Files.delete(result)
     }
 
     def "Util.convertHtmlToPDF"() {
         given:
         def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
-        def headerHtmlFile = Files.createTempFile("header", ".html") << "<html>header</html>"
-        def footerHtmlFile = Files.createTempFile("footer", ".html") << "<html>footer</html>"
 
         def data = [
             name: "Project Phoenix",
@@ -56,17 +49,18 @@ class DocGenSpec extends SpecHelper {
         ]
 
         when:
-        def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile, data)
+        def result = DocGen.Util.convertHtmlToPDF(documentHtmlFile, data)
 
         then:
-        def firstLine
-        result.withReader { firstLine = it.readLine()}
-        assertThat(firstLine, startsWith("%PDF-1.4"))
+        def header = DocUtils.getPDFHeader(result)
+        assertEquals('%PDF-1.4', header)
+        def is = Files.newInputStream(result)
+        checkResult(is)
 
         cleanup:
+        if(is!=null)is.close()
         Files.delete(documentHtmlFile)
-        Files.delete(headerHtmlFile)
-        Files.delete(footerHtmlFile)
+        if(result!=null)Files.deleteIfExists(result)
     }
 
     def "generate"() {
@@ -89,15 +83,14 @@ class DocGenSpec extends SpecHelper {
         def resultFile = new DocGen().generate("InstallationReport", version, data)
 
         then:
-        def firstLine
-        resultFile.withReader { firstLine = it.readLine()}
-        assertThat(firstLine, startsWith("%PDF-1.4"))
-        def is = new FileInputStream(resultFile);
+        def header = DocUtils.getPDFHeader(resultFile)
+        assertEquals('%PDF-1.4', header)
+        def is = Files.newInputStream(resultFile)
         checkResult(is)
 
         cleanup:
         if(is!=null)is.close()
-        if(resultFile!=null)resultFile.delete()
+        if(resultFile!=null)Files.deleteIfExists(resultFile)
     }
 
     def "generateFromXunit"() {
@@ -133,30 +126,29 @@ class DocGenSpec extends SpecHelper {
 
         then:
         println ("asserting generated file")
-        def firstLine
-        resultFile.withReader { firstLine = it.readLine()}
-        assertThat(firstLine, startsWith("%PDF-1.4"))
+        def header = DocUtils.getPDFHeader(resultFile)
+        assertEquals('%PDF-1.4', header)
 
-        def is = new FileInputStream(resultFile);
+        def is = Files.newInputStream(resultFile)
         checkResult(is)
 
 
         cleanup:
         if(is!=null)is.close()
-        if(resultFile!=null)resultFile.delete()
+        if(resultFile!=null)Files.deleteIfExists(resultFile)
     }
 
-    private void checkResult(InputStream inputStream) {
+    private static void checkResult(InputStream inputStream) {
         def resultDoc = PDDocument.load(inputStream)
         resultDoc.withCloseable { PDDocument doc ->
             doc.pages?.each { page ->
-                page.getAnnotations { it.subtype == PDAnnotationLink.SUB_TYPE }
-                        ?.each { PDAnnotationLink link ->
+                page.getAnnotations { it instanceof PDAnnotationLink }
+                        ?.each { link ->
                             def dest = link.destination
-                            if (dest == null && link.action?.subType == PDActionGoTo.SUB_TYPE) {
+                            if (dest == null && link.action instanceof PDActionGoTo) {
                                 dest = link.action.destination
                             }
-                            if (dest in PDPageDestination) {
+                            if (dest instanceof PDPageDestination) {
                                 assert dest.page != null
                             }
                         }
@@ -165,7 +157,7 @@ class DocGenSpec extends SpecHelper {
             def dests = catalog.dests
             dests?.COSObject?.keySet()*.name.each { name ->
                 def dest = dests.getDestination(name)
-                if (dest in PDPageDestination) {
+                if (dest instanceof PDPageDestination) {
                     assert dest.page != null
                 }
             }
@@ -184,7 +176,7 @@ class DocGenSpec extends SpecHelper {
                     if (dest == null && item.action?.subType == PDActionGoTo.SUB_TYPE) {
                         dest = item.action.destination
                     }
-                    if (dest in PDPageDestination) {
+                    if (dest instanceof PDPageDestination) {
                         assert dest.page != null
                     }
                     checkOutlineNode(item)
@@ -194,6 +186,7 @@ class DocGenSpec extends SpecHelper {
             if (outline != null) {
                 checkOutlineNode(outline)
             }
+            return null
         }
     }
 

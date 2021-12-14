@@ -1,7 +1,8 @@
 package app
 
+import feign.Response
+import feign.codec.ErrorDecoder
 import util.DocUtils
-import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
@@ -9,21 +10,20 @@ import feign.Feign
 import feign.Headers
 import feign.Param
 import feign.RequestLine
-import feign.auth.BasicAuthRequestInterceptor;
+import feign.auth.BasicAuthRequestInterceptor
 import feign.FeignException
 
-import java.net.URI
+import org.apache.http.client.utils.URIBuilder
+import util.FileTools
+
 import java.nio.file.Files
 import java.nio.file.Path
-
-import net.lingala.zip4j.core.ZipFile
-
-import org.apache.http.client.utils.URIBuilder
+import java.nio.file.StandardCopyOption
 
 interface BitBucketDocumentTemplatesStoreHttpAPI {
   @Headers("Accept: application/octet-stream")
   @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/release/v{version}&format=zip")
-  byte[] getTemplatesZipArchiveForVersion(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
+  Response getTemplatesZipArchiveForVersion(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
 }
 
 class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
@@ -36,7 +36,7 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
     }
 
     // Get document templates of a specific version into a target directory
-    def Path getTemplatesForVersion(String version, Path targetDir) {
+    Path getTemplatesForVersion(String version, Path targetDir) {
         def uri = getZipArchiveDownloadURI(version)
 
         Feign.Builder builder = Feign.builder()
@@ -54,15 +54,21 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
             uri.getScheme() + "://" + uri.getAuthority()
         )
 
+
         def bitbucketRepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
         def bitbucketProject = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")
-        def zipArchiveContent
+        def response
         try {
-            zipArchiveContent = store.getTemplatesZipArchiveForVersion(
+            response = store.getTemplatesZipArchiveForVersion(
                 bitbucketProject,
                 bitbucketRepo,
                 version
             )
+            if (response.status() >= 300) {
+                def methodKey =
+                        'BitBucketDocumentTemplatesStoreHttpAPI#getTemplatesZipArchiveForVersion(String,String,String)'
+                throw new ErrorDecoder.Default().decode(methodKey, response)
+            }
         } catch (FeignException callException) {
             def baseErrMessage = "Could not get document zip from '${uri}'!"
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${bitbucketRepo}' - "
@@ -80,11 +86,18 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
                 throw callException
             }
         }
-        return DocUtils.extractZipArchive(zipArchiveContent, targetDir)
+        return FileTools.withTempFile('tmpl', 'zip') { zipArchive ->
+            response.body().withCloseable { body ->
+                body.asInputStream().withStream { is ->
+                    Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+            return DocUtils.extractZipArchive(zipArchive, targetDir)
+        }
     }
 
     // Get a URI to download document templates of a specific version
-    def URI getZipArchiveDownloadURI(String version) {
+    URI getZipArchiveDownloadURI(String version) {
         return new URIBuilder(System.getenv("BITBUCKET_URL"))
             .setPath("/rest/api/latest/projects/${System.getenv('BITBUCKET_DOCUMENT_TEMPLATES_PROJECT')}/repos/${System.getenv('BITBUCKET_DOCUMENT_TEMPLATES_REPO')}/archive")
             .addParameter("at", "refs/heads/release/v${version}")

@@ -5,25 +5,27 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.io.FileTemplateLoader
 import com.google.inject.Binder
-import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-
-import groovy.json.JsonOutput
+import org.apache.commons.io.file.PathUtils
 import org.apache.commons.io.output.TeeOutputStream
+import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDDocumentNameDestinationDictionary
+import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.common.PDNameTreeNode
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode
+import util.FileTools
 
-import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
+import java.nio.file.StandardCopyOption
 import java.time.Duration
 
-import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.jooby.Env
 import org.jooby.Jooby
@@ -41,7 +43,7 @@ class DocGen implements Jooby.Module {
             .expireAfterWrite(Duration.ofDays(1))
             .removalListener({ key, graph, cause ->
                 def path = getPathForTemplatesVersion(key)
-                FileUtils.deleteDirectory(path.toFile())
+                PathUtils.deleteDirectory(path)
             })
             .build()
     }
@@ -67,44 +69,29 @@ class DocGen implements Jooby.Module {
     }
 
     // Generate a PDF document for a combination of template type, version and data
-    File generate(String type, String version, Object data) {
-        File resultFile = null
-        def tmpDir = null
+    Path generate(String type, String version, Object data) {
+        // Copy the templates directory including with any assets into a temporary location
+        return FileTools.withTempDir("${type}-v${version}") { tmpDir ->
+            PathUtils.copyDirectory(getTemplates(version), tmpDir)
 
-        try {
-            // Copy the templates directory including with any assets into a temporary location
-            tmpDir = Files.createTempDirectory("${type}-v${version}")
-            FileUtils.copyDirectory(getTemplates(version).toFile(), tmpDir.toFile())
-
-            // Get partial templates from the temporary location and manipulate in-memory as needed
-            def partials = getPartialTemplates(tmpDir, type, version) { name, template ->
-                // Remove line separator and tab characters in partial template
-                return template.replaceAll(System.getProperty("line.separator"), "").replaceAll("\t", "")
-            }
+            // Get partial templates from the temporary location and manipulate as needed
+            def partials = getPartialTemplates(tmpDir, type)
 
             // Transform paths to partial templates to paths to rendered HTML files
             partials = partials.collectEntries { name, path ->
                 // Write an .html file next to the .tmpl file containing the executed template
-                def htmlFile = new File(FilenameUtils.removeExtension(path.toString()))
-                htmlFile.setText(Util.executeTemplate(path, data))
-                return [ name, htmlFile.toPath() ]
+                def htmlFile = Paths.get(FilenameUtils.removeExtension(path.toString()))
+                Util.executeTemplate(path, htmlFile, data)
+                return [ name, htmlFile ]
             }
 
-            // Convert the exected templates into a PDF document
-            resultFile = Util.convertHtmlToPDF(partials.document, partials.header, partials.footer, data)
-        } catch (Throwable e) {
-            throw e
-        } finally {
-            if (tmpDir) {
-                FileUtils.deleteDirectory(tmpDir.toFile())
-            }
+            // Convert the executed templates into a PDF document
+            return Util.convertHtmlToPDF(partials.document, data)
         }
-
-        return resultFile
     }
 
     // Read partial templates for a template type and version from the basePath directory
-    private Map<String, Path> getPartialTemplates(Path basePath, String type, String version, Closure visitor) {
+    private static Map<String, Path> getPartialTemplates(Path basePath, String type) {
         def partials = [
             document: Paths.get(basePath.toString(), "templates", "${type}.html.tmpl"),
             header: Paths.get(basePath.toString(), "templates", "header.inc.html.tmpl"),
@@ -113,17 +100,20 @@ class DocGen implements Jooby.Module {
 
         partials.each { name, path ->
             // Check if the partial template exists
-            def file = path.toFile()
-            if (!file.exists()) {
+            if (!Files.exists(path)) {
                 throw new FileNotFoundException("could not find required template part '${name}' at '${path}'")
             }
 
-            def template = file.text
-            def templateNew = visitor(name, template)
-            // Check if the template has been modified through the visitor
-            if (template != templateNew) {
-                // Write back the modified template contents
-                file.text = templateNew
+            FileTools.newTempFile("${name}_tmpl") { tmp ->
+                path.withReader { reader ->
+                    tmp.withWriter { writer ->
+                        reader.eachLine { line ->
+                            def replaced = line.replaceAll('\t', '')
+                            writer.write(replaced)
+                        }
+                    }
+                }
+                Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING)
             }
         }
 
@@ -137,18 +127,18 @@ class DocGen implements Jooby.Module {
 
     class Util {
         // Execute a document template with the necessary data
-        static private def String executeTemplate(Path path, Object data) {
+        static private void executeTemplate(Path path, Path dest, Object data) {
             // TODO: throw if template variables are not provided
             def loader = new FileTemplateLoader("", "")
-            return new Handlebars(loader)
-                .compile(path.toString())
-                .apply(data)
+            dest.withWriter { writer ->
+                new Handlebars(loader)
+                        .compile(path.toString())
+                        .apply(data, writer)
+            }
         }
 
         // Convert a HTML document, with an optional header and footer, into a PDF
-        static private File convertHtmlToPDF(Path documentHtmlFile, Path headerHtmlFile = null, Path footerHtmlFile = null, Object data) {
-            def documentPDFFilePath = Files.createTempFile("document", ".pdf")
-
+        static Path convertHtmlToPDF(Path documentHtmlFile, Object data) {
             def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
             cmd << "--enable-local-file-access"
             cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
@@ -170,56 +160,50 @@ ${data.metadata.header[1]}"""])
                 cmd.addAll(["--orientation", data.metadata.orientation])
             }
 
-            cmd << documentHtmlFile.toFile().absolutePath
-            cmd << documentPDFFilePath.toFile().absolutePath
+            cmd << documentHtmlFile.toAbsolutePath().toString()
 
-            println "[INFO]: executing cmd: ${cmd}"
+            return FileTools.newTempFile("document", ".pdf") { documentPDFFile ->
+                cmd << documentPDFFile.toAbsolutePath().toString()
 
-            def result = Util.shell(cmd)
-            try{
+                println "[INFO]: executing cmd: ${cmd}"
+
+                def result = shell(cmd)
                 if (result.rc != 0) {
-                    String stderr = result.stderr.text
                     println "[ERROR]: ${cmd} has exited with code ${result.rc}"
-                    println "[ERROR]: ${stderr}"
+                    println "[ERROR]: ${result.stderr}"
                     throw new IllegalStateException(
-                            "PDF Creation of ${documentHtmlFile} failed!\r:${stderr}\r:Error code:${result.rc}")
+                            "PDF Creation of ${documentHtmlFile} failed!\r:${result.stderr}\r:Error code:${result.rc}")
                 }
-            }finally{
-                if(result!=null){
-                    result.stderr.close()
-                }
+
+                fixDestinations(documentPDFFile.toFile())
             }
-
-
-            File documentPDFFile = documentPDFFilePath.toFile()
-            fixDestinations(documentPDFFile)
-
-            return documentPDFFile
         }
 
         // Execute a command in the shell
-        static private def Map shell(List<String> cmd) {
+        static private Map shell(List<String> cmd) {
 
             def proc = cmd.execute()
-            Path tempFilePath = Files.createTempFile("shell", ".bin")
-            File tempFile = tempFilePath.toFile()
-            FileOutputStream tempFileOutputStream = new FileOutputStream(tempFile)
-            def errOutputStream = new TeeOutputStream(tempFileOutputStream, System.err)
-
-            try
-            {
-                proc.waitForProcessOutput(System.out, errOutputStream)
-            }finally{
-                tempFileOutputStream.close()
+            def stderr = null
+            def rc = FileTools.withTempFile("shell", ".stderr") { tempFile ->
+                tempFile.withOutputStream { tempFileOutputStream ->
+                    new TeeOutputStream(System.err, tempFileOutputStream).withStream { errOutputStream ->
+                        proc.waitForProcessOutput(System.out, errOutputStream)
+                    }
+                }
+                def exitValue = proc.exitValue()
+                if (exitValue) {
+                    stderr = tempFile.text
+                }
+                return exitValue
             }
 
             return [
-                rc: proc.exitValue(),
-                stderr: Files.newInputStream(tempFilePath, StandardOpenOption.DELETE_ON_CLOSE)
+                rc: rc,
+                stderr: stderr
             ]
         }
 
-
+        private static final long MAX_MEMORY_TO_FIX_DESTINATIONS = 8192L
 
         /**
          * Fixes malformed PDF documents which use page numbers in local destinations, referencing the same document.
@@ -230,13 +214,14 @@ ${data.metadata.header[1]}"""])
          * page object references.
          * If the document is not malformed, this method will leave it unchanged.
          *
-         * @param file a PDF file.
+         * @param pdf a PDF file.
          */
-        private static void fixDestinations(File file) {
-            def doc = PDDocument.load(file)
-            fixDestinations(doc)
-            doc.save(file)
-            doc.close()
+        private static void fixDestinations(File pdf) {
+            def memoryUsageSetting = MemoryUsageSetting.setupMixed(MAX_MEMORY_TO_FIX_DESTINATIONS)
+            PDDocument.load(pdf, memoryUsageSetting).withCloseable { doc ->
+                fixDestinations(doc)
+                doc.save(pdf)
+            }
         }
 
         /**
@@ -252,31 +237,23 @@ ${data.metadata.header[1]}"""])
          */
         private static void fixDestinations(PDDocument doc) {
             def pages = doc.pages as List // Accessing pages by index is slow. This will make it fast.
+            fixExplicitDestinations(pages)
             def catalog = doc.documentCatalog
             fixNamedDestinations(catalog, pages)
             fixOutline(catalog, pages)
-            fixExplicitDestinations(pages)
+        }
+
+        private static fixExplicitDestinations(pages) {
+            pages.each { page ->
+                page.getAnnotations { it instanceof PDAnnotationLink }.each { link ->
+                    fixDestinationOrAction(link, pages)
+                }
+            }
         }
 
         private static fixNamedDestinations(catalog, pages) {
             fixStringDestinations(catalog.names?.dests, pages)
             fixNameDestinations(catalog.dests, pages)
-        }
-
-        private static fixStringDestinations(node, pages) {
-            if (node) {
-                node.names?.each { name, dest -> fixDestination(dest, pages) }
-                node.kids?.each { fixStringDestinations(it, pages) }
-            }
-        }
-
-        private static fixNameDestinations(dests, pages) {
-            dests?.COSObject?.keySet()*.name.each { name ->
-                def dest = dests.getDestination(name)
-                if (dest in PDPageDestination) {
-                    fixDestination(dest, pages)
-                }
-            }
         }
 
         private static fixOutline(catalog, pages) {
@@ -286,32 +263,43 @@ ${data.metadata.header[1]}"""])
             }
         }
 
-        private static fixOutlineNode(node, pages) {
+        private static fixStringDestinations(PDNameTreeNode<PDPageDestination> node, pages) {
+            if (node) {
+                node.names?.each { name, dest -> fixDestination(dest, pages) }
+                node.kids?.each { fixStringDestinations(it, pages) }
+            }
+        }
+
+        private static fixNameDestinations(PDDocumentNameDestinationDictionary dests, pages) {
+            dests?.COSObject?.keySet()*.name.each { name ->
+                def dest = dests.getDestination(name)
+                if (dest instanceof PDPageDestination) {
+                    fixDestination(dest, pages)
+                }
+            }
+        }
+
+        private static fixOutlineNode(PDOutlineNode node, pages) {
             node.children().each { item ->
                 fixDestinationOrAction(item, pages)
                 fixOutlineNode(item, pages)
             }
         }
 
-        private static fixExplicitDestinations(pages) {
-            pages.each { page ->
-                page.getAnnotations { it.subtype == PDAnnotationLink.SUB_TYPE }.each { link ->
-                    fixDestinationOrAction(link, pages)
-                }
-            }
-        }
-
         private static fixDestinationOrAction(item, pages) {
             def dest = item.destination
-            if (dest == null && item.action?.subType == PDActionGoTo.SUB_TYPE) {
-                dest = item.action.destination
+            if (dest == null) {
+                def action = item.action
+                if (action instanceof PDActionGoTo) {
+                    dest = action.destination
+                }
             }
-            if (dest in PDPageDestination) {
+            if (dest instanceof PDPageDestination) {
                 fixDestination(dest, pages)
             }
         }
 
-        private static fixDestination(dest, pages) {
+        private static fixDestination(PDPageDestination dest, List<PDPage> pages) {
             def pageNum = dest.pageNumber
             if (pageNum != -1) {
                 dest.setPage(pages[pageNum])

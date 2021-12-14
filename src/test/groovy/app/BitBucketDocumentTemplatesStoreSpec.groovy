@@ -51,6 +51,9 @@ class BitBucketDocumentTemplatesStoreSpec extends SpecHelper {
         then:
         def e = thrown(RuntimeException)
         e.message.contains("is there a correct release branch configured, called 'release/v${version}'")
+
+        cleanup:
+        targetDir.toFile().deleteDir()
     }
 
     def "getTemplatesForVersionNonExistantBranch401"() {
@@ -68,6 +71,9 @@ class BitBucketDocumentTemplatesStoreSpec extends SpecHelper {
         def e = thrown(RuntimeException)
         def bbrepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
         e.message.contains("In repository '${bbrepo}' - does 'Anyone' have access?")
+
+        cleanup:
+        targetDir.toFile().deleteDir()
     }
 
     def "getTemplatesForVersionNonExistantBranch500"() {
@@ -83,6 +89,9 @@ class BitBucketDocumentTemplatesStoreSpec extends SpecHelper {
   
         then:
         def e = thrown(FeignException.InternalServerError)
+
+        cleanup:
+        targetDir.toFile().deleteDir()
     }
 
 }

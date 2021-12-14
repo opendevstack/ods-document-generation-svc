@@ -2,13 +2,14 @@ package app
 
 import com.typesafe.config.ConfigFactory
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.IOUtils
-import org.apache.groovy.json.internal.LazyMap
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.json.Jackson
+import util.DocUtils
+import util.FileTools
 
 import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 
 import static groovy.json.JsonOutput.prettyPrint
 import static groovy.json.JsonOutput.toJson
@@ -19,12 +20,13 @@ import static org.jooby.JoobyExtension.post
 class App extends Jooby {
 
     {
+
         use(new Jackson())
         use(new DocGen())
 
         post(this, "/document", { req, rsp ->
 
-            def body = req.body().to(LazyMap.class)
+            Map body = req.body().to(HashMap.class)
 
             validateRequestParams(body)
 
@@ -33,16 +35,26 @@ class App extends Jooby {
                 log.debug(prettyPrint(toJson(body.data)))
             }
 
-            def pdf = new DocGen().generate(body.metadata.type, body.metadata.version, body.data)
-            try{
-                pdf.withInputStream { is ->
-                    byte[] pdfBytes = IOUtils.toByteArray(is)
-                    rsp.send([
-                            data: Base64.getEncoder().encodeToString(pdfBytes)
-                    ])
+            FileTools.newTempFile('document', '.b64') { dataFile ->
+                new DocGen().generate(body.metadata.type, body.metadata.version, body.data).withFile { pdf ->
+                    body = null // Not used anymore. Let it be garbage-collected.
+                    dataFile.withOutputStream { os ->
+                        Base64.getEncoder().wrap(os).withStream { encOs ->
+                            Files.copy(pdf, encOs)
+                        }
+                    }
                 }
-            }finally{
-                pdf.delete()
+                def dataLength = Files.size(dataFile)
+                rsp.length(dataLength + RES_PREFIX.length + RES_SUFFIX.length)
+                rsp.type(MediaType.json)
+                def prefixIs = new ByteArrayInputStream(RES_PREFIX)
+                def suffixIs = new ByteArrayInputStream(RES_SUFFIX)
+                Files.newInputStream(dataFile, StandardOpenOption.DELETE_ON_CLOSE).initResource { dataIs ->
+                    // Jooby is asynchronous. Upon return of the send method, the response has not necessarily
+                    // been sent. For this reason, we rely on Jooby to close the InputStream and the temporary file
+                    // will be deleted on close.
+                    rsp.send(new SequenceInputStream(Collections.enumeration([prefixIs, dataIs, suffixIs])))
+                }
             }
 
         })
@@ -50,29 +62,27 @@ class App extends Jooby {
         .produces(MediaType.json)
 
         get(this, "/health", { req, rsp ->
-            def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
-            def headerHtmlFile = Files.createTempFile("header", ".html") << "<html>header</html>"
-            def footerHtmlFile = Files.createTempFile("footer", ".html") << "<html>footer</html>"
-
             def message = null
             def status = "passing"
             def statusCode = 200
 
-            def data
             try {
-                data = DocGen.Util.convertHtmlToPDF(documentHtmlFile, headerHtmlFile, footerHtmlFile)
+                FileTools.withTempFile("document", ".html") { documentHtmlFile ->
+                    documentHtmlFile  << "<html>document</html>"
+
+                    DocGen.Util.convertHtmlToPDF(documentHtmlFile, null).withFile { pdf ->
+                        def header = DocUtils.getPDFHeader(pdf)
+                        if (header != PDF_HEADER) {
+                            message = "conversion form HTML to PDF failed"
+                            status = "failing"
+                            statusCode = 500
+                        }
+                        return null
+                    }
+
+                }
             } catch (e) {
                 message = e.message
-                status = "failing"
-                statusCode = 500
-            } finally {
-                Files.delete(documentHtmlFile)
-                Files.delete(headerHtmlFile)
-                Files.delete(footerHtmlFile)
-            }
-
-            if (!new String(data).startsWith("%PDF-1.4\n")) {
-                message = "conversion form HTML to PDF failed"
                 status = "failing"
                 statusCode = 500
             }
@@ -91,6 +101,10 @@ class App extends Jooby {
         })
         .produces(MediaType.json)
     }
+
+    private static final RES_PREFIX = '{"data":"'.getBytes('US-ASCII')
+    private static final RES_SUFFIX = '"}'.getBytes('US-ASCII')
+    private static final PDF_HEADER = '%PDF-1.4'
 
     private static void validateRequestParams(Map body) {
         if (body?.metadata?.type == null) {
