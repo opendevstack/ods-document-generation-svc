@@ -16,6 +16,9 @@ class DocUtils {
   static Path extractZipArchive(Path zipArchive, Path targetDir, String startAtDir = null) {
       // Create a ZipFile from the archive Path
       ZipFile zipFile = new ZipFile(zipArchive.toFile())
+      if (Files.exists(targetDir)) {
+          PathUtils.deleteDirectory(targetDir)
+      }
 
       if (startAtDir) {
           // Extract the ZipFile into targetDir from a given subDir
@@ -24,10 +27,9 @@ class DocUtils {
               zipFile.extractAll(tmpDir.toString())
               def sourceDir = tmpDir.resolve(startAtDir)
               try {
-                  Files.move(sourceDir, targetDir, StandardCopyOption.REPLACE_EXISTING)
+                  Files.move(sourceDir, targetDir)
               } catch (DirectoryNotEmptyException ignore) {
-                  // Fallback in case targetDir is not in the same file system as sourceDir,
-                  // or targetDir is not empty. Both cases should be rare.
+                  // Fallback in case targetDir is not in the same file system as sourceDir.
                   PathUtils.copyDirectory(sourceDir, targetDir)
               }
           }
