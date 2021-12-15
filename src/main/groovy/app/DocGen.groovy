@@ -43,7 +43,9 @@ class DocGen implements Jooby.Module {
             .expireAfterWrite(Duration.ofDays(1))
             .removalListener({ key, graph, cause ->
                 def path = getPathForTemplatesVersion(key)
-                PathUtils.deleteDirectory(path)
+                if (Files.exists(path)) {
+                    PathUtils.deleteDirectory(path)
+                }
             })
             .build()
     }
@@ -72,7 +74,7 @@ class DocGen implements Jooby.Module {
     Path generate(String type, String version, Object data) {
         // Copy the templates directory including with any assets into a temporary location
         return FileTools.withTempDir("${type}-v${version}") { tmpDir ->
-            PathUtils.copyDirectory(getTemplates(version), tmpDir)
+            PathUtils.copyDirectory(getTemplates(version), tmpDir, StandardCopyOption.REPLACE_EXISTING)
 
             // Get partial templates from the temporary location and manipulate as needed
             def partials = getPartialTemplates(tmpDir, type)

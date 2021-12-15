@@ -8,7 +8,6 @@ import org.apache.commons.io.file.PathUtils
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 
 class DocUtils {
 
