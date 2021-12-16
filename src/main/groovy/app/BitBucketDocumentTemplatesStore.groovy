@@ -57,17 +57,25 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
 
         def bitbucketRepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
         def bitbucketProject = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")
-        def response
         try {
-            response = store.getTemplatesZipArchiveForVersion(
+            return store.getTemplatesZipArchiveForVersion(
                 bitbucketProject,
                 bitbucketRepo,
                 version
-            )
-            if (response.status() >= 300) {
-                def methodKey =
+            ).withCloseable { response ->
+                if (response.status() >= 300) {
+                    def methodKey =
                         'BitBucketDocumentTemplatesStoreHttpAPI#getTemplatesZipArchiveForVersion(String,String,String)'
-                throw new ErrorDecoder.Default().decode(methodKey, response)
+                    throw new ErrorDecoder.Default().decode(methodKey, response)
+                }
+                return FileTools.withTempFile('tmpl', 'zip') { zipArchive ->
+                    response.body().withCloseable { body ->
+                        body.asInputStream().withStream { is ->
+                            Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
+                        }
+                    }
+                    return DocUtils.extractZipArchive(zipArchive, targetDir)
+                }
             }
         } catch (FeignException callException) {
             def baseErrMessage = "Could not get document zip from '${uri}'!"
@@ -85,14 +93,6 @@ class BitBucketDocumentTemplatesStore implements DocumentTemplatesStore {
             } else {
                 throw callException
             }
-        }
-        return FileTools.withTempFile('tmpl', 'zip') { zipArchive ->
-            response.body().withCloseable { body ->
-                body.asInputStream().withStream { is ->
-                    Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
-                }
-            }
-            return DocUtils.extractZipArchive(zipArchive, targetDir)
         }
     }
 

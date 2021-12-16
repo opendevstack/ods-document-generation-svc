@@ -42,23 +42,21 @@ class GithubDocumentTemplatesStore implements DocumentTemplatesStore {
             uri.getScheme() + "://" + uri.getAuthority()
         )
 
-        def response = store.getTemplatesZipArchiveForVersion(
-            version
-        )
-        if (response.status() >= 300) {
-            def methodKey =
-                    'GithubDocumentTemplatesStoreHttpAPI#getTemplatesZipArchiveForVersion(String)'
-            throw new ErrorDecoder.Default().decode(methodKey, response)
-        }
-
-        return FileTools.withTempFile('tmpl', 'zip') { zipArchive ->
-            response.body().withCloseable { body ->
-                body.asInputStream().withStream { is ->
-                    Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
-                }
+        return store.getTemplatesZipArchiveForVersion(version).withCloseable { response ->
+            if (response.status() >= 300) {
+                def methodKey =
+                        'GithubDocumentTemplatesStoreHttpAPI#getTemplatesZipArchiveForVersion(String)'
+                throw new ErrorDecoder.Default().decode(methodKey, response)
             }
-            return DocUtils.extractZipArchive(
-                    zipArchive, targetDir, "ods-document-generation-templates-${version}")
+            return FileTools.withTempFile('tmpl', 'zip') { zipArchive ->
+                response.body().withCloseable { body ->
+                    body.asInputStream().withStream { is ->
+                        Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
+                    }
+                }
+                return DocUtils.extractZipArchive(
+                        zipArchive, targetDir, "ods-document-generation-templates-${version}")
+            }
         }
     }
 
