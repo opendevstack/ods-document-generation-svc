@@ -23,6 +23,6 @@ USER 1001
 EXPOSE 8080
 ENV JAVA_MEM_XMX="512m" \
     JAVA_MEM_XMS="128m" \
-    JAVA_OPTS="-XX:+UseCompressedOops -XX:+UseG1GC -XX:MaxGCPauseMillis=1000"
+    JAVA_OPTS="-XX:+UseCompressedOops -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxGCPauseMillis=1000"
 
 ENTRYPOINT /app/entrypoint.sh

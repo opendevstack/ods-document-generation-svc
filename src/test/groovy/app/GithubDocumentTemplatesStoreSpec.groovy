@@ -1,13 +1,11 @@
 package app
 
-import com.github.tomakehurst.wiremock.client.WireMock
+
+import org.junit.Rule
+import org.junit.contrib.java.lang.system.EnvironmentVariables
 
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.net.Proxy
-import org.junit.Rule
-import org.junit.contrib.java.lang.system.EnvironmentVariables
-import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 class GithubDocumentTemplatesStoreSpec extends SpecHelper {
 
