@@ -25,6 +25,8 @@ import org.codehaus.plexus.util.IOUtil
 import org.gradle.api.file.FileTreeElement
 
 /**
+ * Modified from https://github.com/johnrengelman/shadow/blob/7.1.1/src/main/groovy/com/github/jengelman/gradle/plugins/shadow/transformers/GroovyExtensionModuleTransformer.groovy
+ * ---
  * Modified from eu.appsatori.gradle.fatjar.tasks.PrepareFiles.groovy
  * <p>
  * Resource transformer that merges Groovy extension module descriptor files into a single file. If there are several
