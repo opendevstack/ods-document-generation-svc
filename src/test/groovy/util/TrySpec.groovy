@@ -220,11 +220,21 @@ class TrySpec extends Specification {
     def "test withDir_File"() {
         given:
         def dir
+        def contents
         def ret
         def e
 
-        when: 'The closure completes successfully'
+        when: 'The closure completes successfully. Delete the contents only.'
         dir = File.createTempDir()
+        contents = File.createTempFile('tst', null, dir)
+        ret = dir.withDir(true) { return 1 }
+
+        then: 'The return value is that of the closure and the directory only has been deleted'
+        ret == 1
+        dir.exists()
+        !contents.exists()
+
+        when: 'The closure completes successfully'
         File.createTempFile('tst', null, dir)
         ret = dir.withDir { return 1 }
 
@@ -232,8 +242,17 @@ class TrySpec extends Specification {
         ret == 1
         !dir.exists()
 
-        when: 'The closure throws an exception'
+        when: 'The closure throws an exception. Delete the contents only.'
         dir = File.createTempDir()
+        contents = File.createTempFile('tst', null, dir)
+        dir.withDir(true) { throw new IndexOutOfBoundsException() }
+
+        then: 'The exception is propagated and the directory contents only has been deleted'
+        thrown(IndexOutOfBoundsException)
+        dir.exists()
+        !contents.exists()
+
+        when: 'The closure throws an exception'
         File.createTempFile('tst', null, dir)
         dir.withDir { throw new IndexOutOfBoundsException() }
 
@@ -278,25 +297,37 @@ class TrySpec extends Specification {
         thrown(IllegalArgumentException)
 
         cleanup:
-        dir.delete()
+        dir?.delete()
+        contents?.delete()
     }
 
     def "test initDir_File"() {
         given:
         def dir
+        def contents
         def ret
         def e
 
         when: 'The closure completes successfully'
         dir = File.createTempDir()
-        File.createTempFile('tst', null, dir)
+        contents = File.createTempFile('tst', null, dir)
         ret = dir.initDir { return 1 }
 
-        then: 'The return value is that of the closure and the directory has not been deleted'
+        then: 'The return value is that of the closure and neither the directory nor its contents have been deleted'
         ret == 1
         dir.exists()
+        contents.exists()
+
+        when: 'The closure throws an exception. Delete the contents only'
+        dir.initDir(true) { throw new IndexOutOfBoundsException() }
+
+        then: 'The exception is propagated and the directory contents only has been deleted'
+        thrown(IndexOutOfBoundsException)
+        dir.exists()
+        !contents.exists()
 
         when: 'The closure throws an exception'
+        File.createTempFile('tst', null, dir)
         dir.initDir { throw new IndexOutOfBoundsException() }
 
         then: 'The exception is propagated and the directory has been deleted'
@@ -327,17 +358,28 @@ class TrySpec extends Specification {
         e.suppressed[0] instanceof IllegalArgumentException
 
         cleanup:
-        dir.delete()
+        dir?.delete()
+        contents?.delete()
     }
 
     def "test withDir_Path"() {
         given:
         def path
+        def contents
         def ret
         def e
 
-        when: 'The closure completes successfully'
+        when: 'The closure completes successfully. Delete contents only.'
         path = Files.createTempDirectory('tst')
+        contents = Files.createTempFile(path, 'tst', null)
+        ret = path.withDir(true) { return 1 }
+
+        then: 'The return value is that of the closure and the directory contents only has been deleted'
+        ret == 1
+        Files.exists(path)
+        Files.notExists(contents)
+
+        when: 'The closure completes successfully'
         Files.createTempFile(path, 'tst', null)
         ret = path.withDir { return 1 }
 
@@ -345,8 +387,17 @@ class TrySpec extends Specification {
         ret == 1
         Files.notExists(path)
 
-        when: 'The closure throws an exception'
+        when: 'The closure throws an exception. Delete contents only.'
         path = Files.createTempDirectory('tst')
+        contents = Files.createTempFile(path, 'tst', null)
+        path.withDir(true) { throw new IndexOutOfBoundsException() }
+
+        then: 'The exception is propagated and the directory contents only has been deleted'
+        thrown(IndexOutOfBoundsException)
+        Files.exists(path)
+        Files.notExists(contents)
+
+        when: 'The closure throws an exception'
         Files.createTempFile(path, 'tst', null)
         path.withDir { throw new IndexOutOfBoundsException() }
 
@@ -372,46 +423,58 @@ class TrySpec extends Specification {
         path = Files.createTempFile('tst', null)
         path.withDir { return 3 }
 
-        then: 'The IllegalArgumentException thrown when trying to delete the file is propagated'
+        then: 'The IllegalArgumentException thrown when trying to delete the directory is propagated'
         thrown(IllegalArgumentException)
 
         when: 'The closure throws an exception and the path is not a directory'
         path.withDir { throw new IndexOutOfBoundsException() }
 
-        then: 'The exception is propagated and IllegalArgumentException is suppressed when trying to delete the file'
+        then: 'The exception is propagated and IllegalArgumentException is suppressed when trying to delete the directory'
         e = thrown(IndexOutOfBoundsException)
         e.suppressed[0] instanceof IllegalArgumentException
 
         cleanup:
-        Files.deleteIfExists(path)
+        if (path) Files.deleteIfExists(path)
+        if (contents) Files.deleteIfExists(contents)
     }
 
     def "test initDir_Path"() {
         given:
         def path
+        def contents
         def ret
         def e
 
         when: 'The closure completes successfully'
         path = Files.createTempDirectory('tst')
-        Files.createTempFile(path, 'tst', null)
+        contents = Files.createTempFile(path, 'tst', null)
         ret = path.initDir { return 1 }
 
-        then: 'The return value is that of the closure and the file has not been deleted'
+        then: 'The return value is that of the closure and neither the directory not its contents have been deleted'
         ret == 1
         Files.exists(path)
+        Files.exists(contents)
+
+        when: 'The closure throws an exception. Delete contents only.'
+        path.initDir(true) { throw new IndexOutOfBoundsException() }
+
+        then: 'The exception is propagated and the directory contents only has been deleted'
+        thrown(IndexOutOfBoundsException)
+        Files.exists(path)
+        Files.notExists(contents)
 
         when: 'The closure throws an exception'
+        Files.createTempFile(path, 'tst', null)
         path.initDir { throw new IndexOutOfBoundsException() }
 
-        then: 'The exception is propagated and the file has been deleted'
+        then: 'The exception is propagated and the directory has been deleted'
         thrown(IndexOutOfBoundsException)
         Files.notExists(path)
 
-        when: 'The closure throws an exception and the file does not exist'
+        when: 'The closure throws an exception and the directory does not exist'
         path.initDir { throw new IndexOutOfBoundsException() }
 
-        then: 'The exception is propagated and no exception is suppressed when trying to delete the file'
+        then: 'The exception is propagated and no exception is suppressed when trying to delete the directory'
         e = thrown(IndexOutOfBoundsException)
         e.suppressed.length == 0
 
@@ -419,7 +482,7 @@ class TrySpec extends Specification {
         path = Files.createTempFile('tst', null)
         path.initDir { throw new IndexOutOfBoundsException() }
 
-        then: 'The exception is propagated and IllegalArgumentException is suppressed when trying to delete the file'
+        then: 'The exception is propagated and IllegalArgumentException is suppressed when trying to delete the directory'
         e = thrown(IndexOutOfBoundsException)
         e.suppressed[0] instanceof IllegalArgumentException
 

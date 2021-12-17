@@ -77,7 +77,7 @@ class App extends Jooby {
                             status = "failing"
                             statusCode = 500
                         }
-                        return null
+                        return pdf
                     }
 
                 }

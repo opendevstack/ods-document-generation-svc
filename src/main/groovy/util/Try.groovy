@@ -28,6 +28,12 @@ class Try {
         dir.toPath() // Validate path.
         FileUtils.deleteDirectory(dir)
     }
+    private static final Closure<?> deleteDirContents = { File dir ->
+        if (Files.exists(dir.toPath())) {
+            FileUtils.cleanDirectory(dir)
+        }
+        return null
+    }
     private static final Closure<?> deleteDirPath = { Path dir ->
         if (Files.notExists(dir)) {
             return null
@@ -36,6 +42,15 @@ class Try {
             throw new IllegalArgumentException("Not a directory: ${dir}")
         }
         PathUtils.deleteDirectory(dir)
+    }
+    private static final Closure<?> deleteDirContentsPath = { Path dir ->
+        if (Files.notExists(dir)) {
+            return null
+        }
+        if (!Files.isDirectory(dir)) {
+            throw new IllegalArgumentException("Not a directory: ${dir}")
+        }
+        PathUtils.cleanDirectory(dir)
     }
 
     private Try() {}
@@ -70,7 +85,7 @@ class Try {
      *         In the case of the default provider, and a security manager is
      *         installed, the {@code SecurityManager.checkDelete(String)} method
      *         is invoked to check delete access to the file.
-     * @throws Exception 
+     * @throws Exception
      *         if thrown by the closure.
      */
     static <T> T withFile(Path self, @ClosureParams(value = FirstParam.class) Closure<T> block) throws IOException {
@@ -186,6 +201,8 @@ class Try {
      * }
      *
      * @param self                           the {@code Path}.
+     * @param cleanContentsOnly              if true, the contents will be deleted, but not the directory itself.
+     *                                       Default: false.
      * @param block                          the closure taking the {@code Path} as parameter.
      * @return                               the value returned by the closure.
      * @throws IllegalArgumentException      if the file is not a directory.
@@ -195,8 +212,10 @@ class Try {
      *                                       is invoked to check delete access to the directory and its contents.
      * @throws Exception                     if thrown by the closure.
      */
-    static <T> T withDir(Path self, @ClosureParams(value = FirstParam.class) Closure<T> block) throws IOException {
-        return withResource(self, deleteDirPath, block)
+    static <T> T withDir(Path self,
+                         boolean cleanContentsOnly = false,
+                         @ClosureParams(value = FirstParam.class) Closure<T> block) throws IOException {
+        return withResource(self, cleanContentsOnly ? deleteDirContentsPath : deleteDirPath, block)
     }
 
     /**
@@ -219,6 +238,8 @@ class Try {
      * }
      *
      * @param self                      the {@code File}.
+     * @param cleanContentsOnly         if true, the contents will be deleted, but not the directory itself.
+     *                                  Default: false.
      * @param block                     the closure taking the {@code File} as parameter.
      * @return                          the value returned by the closure.
      * @throws IllegalArgumentException if this abstract path is not a valid path
@@ -229,8 +250,10 @@ class Try {
      *                                  is invoked to check delete access to the directory and its contents.
      * @throws Exception                if thrown by the closure.
      */
-    static <T> T withDir(File self, @ClosureParams(value = FirstParam.class) Closure<T> block) throws IOException {
-        return withResource(self, deleteDir, block)
+    static <T> T withDir(File self,
+                         boolean cleanContentsOnly = false,
+                         @ClosureParams(value = FirstParam.class) Closure<T> block) throws IOException {
+        return withResource(self, cleanContentsOnly ? deleteDirContents : deleteDir, block)
     }
 
     /**
@@ -255,13 +278,17 @@ class Try {
      * // The directory has been successfully initialized and is available for usage.
      * }
      *
-     * @param self       the {@code Path}.
-     * @param block      the closure taking the {@code Path} as parameter.
-     * @return           the value returned by the closure.
-     * @throws Exception if thrown by the closure.
+     * @param self              the {@code Path}.
+     * @param cleanContentsOnly if true, in case of exception, the contents will be deleted,
+     *                          but not the directory itself. Default: false.
+     * @param block             the closure taking the {@code Path} as parameter.
+     * @return                  the value returned by the closure.
+     * @throws Exception        if thrown by the closure.
      */
-    static <T> T initDir(Path self, @ClosureParams(value = FirstParam.class) Closure<T> block) {
-        return initResource(self, deleteDirPath, block)
+    static <T> T initDir(Path self,
+                         boolean cleanContentsOnly = false,
+                         @ClosureParams(value = FirstParam.class) Closure<T> block) {
+        return initResource(self, cleanContentsOnly ? deleteDirContentsPath : deleteDirPath, block)
     }
 
     /**
@@ -286,13 +313,17 @@ class Try {
      * // The directory has been successfully initialized and is available for usage.
      * }
      *
-     * @param self       the {@code File}.
-     * @param block      the closure taking the {@code File} as parameter.
-     * @return           the value returned by the closure.
-     * @throws Exception if thrown by the closure.
+     * @param self              the {@code File}.
+     * @param cleanContentsOnly if true, in case of exception, the contents will be deleted,
+     *                          but not the directory itself. Default: false.
+     * @param block             the closure taking the {@code File} as parameter.
+     * @return                  the value returned by the closure.
+     * @throws Exception        if thrown by the closure.
      */
-    static <T> T initDir(File self, @ClosureParams(value = FirstParam.class) Closure<T> block) {
-        return initResource(self, deleteDir, block)
+    static <T> T initDir(File self,
+                         boolean cleanContentsOnly = false,
+                         @ClosureParams(value = FirstParam.class) Closure<T> block) {
+        return initResource(self, cleanContentsOnly ? deleteDirContents : deleteDir, block)
     }
 
     /**
