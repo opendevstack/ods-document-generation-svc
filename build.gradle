@@ -1,5 +1,10 @@
 buildscript {
   ext {
+    groovyallVersion = '3.0.9'
+    springbootVersion = "2.6.2"
+    spockCoreVersion = "2.0-groovy-3.0"
+    spockReportsVersion = '2.1-groovy-3.0'
+
     nexus_url = "${project.findProperty('nexus_url') ?: System.getenv('NEXUS_HOST')}"
     nexus_user = "${project.findProperty('nexus_user') ?: System.getenv('NEXUS_USERNAME')}"
     nexus_pw = "${project.findProperty('nexus_pw') ?: System.getenv('NEXUS_PASSWORD')}"
@@ -7,14 +12,6 @@ buildscript {
     if (!no_nexus && (nexus_url == "null" || nexus_user == "null" || nexus_pw == "null")) {
       throw new GradleException("property no_nexus='false' (or not defined) but at least one of the properties nexus_url, nexus_user or nexus_pw is not configured. Please configure those properties!")
     }
-
-    def folderRel = (String)("${project.findProperty('nexus_folder_releases') ?: System.getenv('NEXUS_FOLDER_RELEASES')}")
-    nexusFolderReleases = folderRel == "null" ? "maven-releases" : folderRel
-
-    def folderSnaps = (String)("${project.findProperty('nexus_folder_snapshots') ?: System.getenv('NEXUS_FOLDER_SNAPSHOTS')}")
-    nexusFolderSnapshots = folderSnaps == "null" ? "maven-snapshots" : folderSnaps
-
-    snippetsDir = file('build/generated-snippets')
   }
 
   repositories {
@@ -51,32 +48,21 @@ buildscript {
   }
 }
 
-buildscript {
-  ext {
-    joobyVersion = "1.6.6"
-  }
-
-  dependencies {
-    classpath "org.jooby:jooby-gradle-plugin:$joobyVersion"
-  }
-}
-
 plugins {
-  id "com.github.johnrengelman.shadow"
-  id "com.google.osdetector" version "1.6.2"
-  id "io.spring.dependency-management" version "1.0.8.RELEASE"
+  id "groovy"
+  id 'com.adarshr.test-logger' version '3.1.0'
+  id 'jacoco'
+  id 'org.springframework.boot' version "${springbootVersion}"
+  id 'com.bmuschko.docker-spring-boot-application' version '7.1.0'
+  id "io.gatling.gradle" version "3.7.3"
 }
-
-apply plugin: "application"
-apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "groovy"
-apply plugin: "jooby"
-apply plugin: "jacoco"
+// related to gatling and Springboot
+ext['netty.version'] = '4.0.51.Final'
 
 repositories {
+  mavenCentral()
   if (no_nexus) {
     println("using repositories 'jcenter' and 'mavenCentral', because property no_nexus=$no_nexus")
-    jcenter()
     mavenCentral()
   } else {
     println("using nexus repositories")
@@ -107,74 +93,143 @@ repositories {
 }
 
 group = 'org.ods'
-version = '0.1'
-mainClassName = "app.App"
-sourceCompatibility = 1.8
+version = '1.0'
 
-dependencyManagement {
-  imports {
-    mavenBom "org.jooby:jooby-bom:$joobyVersion"
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(11))
   }
+}
+
+compileGroovy {
+  groovyOptions.javaAnnotationProcessing = true
 }
 
 dependencies {
-  implementation "com.github.ben-manes.caffeine:caffeine:2.7.0"
-  implementation "com.github.jknack:handlebars:4.1.2"
-  implementation "commons-io:commons-io:2.11.0"
-  implementation "io.github.openfeign:feign-core:10.2.3"
-  implementation "io.github.openfeign:feign-gson:10.2.3"
-  implementation "io.github.openfeign:feign-okhttp:10.2.3"
-  implementation "net.lingala.zip4j:zip4j:1.3.3"
-  implementation "org.apache.httpcomponents:httpclient:4.5.8"
-  implementation "org.codehaus.groovy:groovy-all:2.5.7"
-  implementation "org.jooby:jooby-jackson"
-  implementation "org.jooby:jooby-netty"
+  implementation (group: 'org.codehaus.groovy', name: 'groovy-all', version: groovyallVersion){
+    exclude group: "org.codehaus.groovy", module: "groovy-test-junit5"
+  }
 
-  implementation "io.netty:netty-transport-native-epoll:${dependencyManagement.importedProperties['netty.version']}:${osdetector.classifier.contains('linux') ? 'linux-x86_64' : ''}"
-  implementation "io.netty:netty-tcnative-boringssl-static:${dependencyManagement.importedProperties['boringssl.version']}"
+  implementation "org.springframework.boot:spring-boot-starter:${springbootVersion}"
+  implementation "org.springframework.boot:spring-boot-starter-web:${springbootVersion}"
+  implementation "org.springframework.boot:spring-boot-starter-cache:${springbootVersion}"
 
+  implementation("javax.inject:javax.inject:1")
+  implementation("javax.cache:cache-api:1.1.1")
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.github.ben-manes.caffeine:caffeine:3.0.5'
+  implementation 'com.github.jknack:handlebars:4.3.0'
+  implementation 'commons-io:commons-io:2.11.0'
+  implementation 'io.github.openfeign:feign-core:11.8'
+  implementation 'io.github.openfeign:feign-gson:11.8'
+  implementation 'io.github.openfeign:feign-okhttp:11.8'
+  implementation 'net.lingala.zip4j:zip4j:2.9.1'
+  implementation 'org.apache.httpcomponents:httpclient:4.5.13'
   implementation "org.apache.pdfbox:pdfbox:2.0.24"
 
-  testImplementation "junit:junit:4.12"
-  testImplementation "com.github.stefanbirkner:system-rules:1.19.0" // for managing environment variables
-  testImplementation "com.github.tomakehurst:wiremock:2.23.2"       // for mocking HTTP server reponses
-  testImplementation "io.rest-assured:rest-assured:4.0.0"           // for validating REST services
-  testImplementation "org.spockframework:spock-core:1.3-groovy-2.5"
+  testImplementation "org.junit.jupiter:junit-jupiter-api"
+  testImplementation "org.junit.jupiter:junit-jupiter-engine"
+  testImplementation("uk.org.webcompere:system-stubs-core:1.2.0")
+  testImplementation "org.testcontainers:spock:1.16.2"
+  testImplementation("org.testcontainers:testcontainers:1.16.2")
 
-  testImplementation "cglib:cglib-nodep:3.3.0"                      // for mocking classes
-  testImplementation "org.objenesis:objenesis:3.1"
-}
+  testImplementation("org.spockframework:spock-core:${spockCoreVersion}")
+  testImplementation ("com.athaydes:spock-reports:$spockReportsVersion"){ transitive = false }
+  testImplementation "org.spockframework:spock-spring:${spockCoreVersion}"
+  testImplementation "org.springframework.boot:spring-boot-starter-test:${springbootVersion}"
 
-import com.github.jengelman.gradle.plugins.shadow.transformers.NewGroovyExtensionModuleTransformer
+  testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
+  testImplementation 'com.github.tomakehurst:wiremock:2.27.2'
+  testImplementation 'io.rest-assured:rest-assured:4.4.0'
 
-shadowJar {
-  mergeServiceFiles()
-  mergeGroovyExtensionModules()
-  transform(NewGroovyExtensionModuleTransformer)
+  gatlingImplementation 'org.awaitility:awaitility:4.1.1'
+  gatlingImplementation 'io.rest-assured:rest-assured:4.4.0'
 }
 
 test {
-  outputs.dir snippetsDir
-
-  // Use overrides in conf/application.test.conf in ConfigFactory.load()
-  // TODO: setting application.env should be enough, but apparently isn't
-  systemProperty "application.env", "test"
-  systemProperty "config.resource", "application.test.conf"
-
   testLogging {
     showStandardStreams = true
+    exceptionFormat = 'full'
   }
+  filter {
+    includeTestsMatching "*Spec"
+  }
+  systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
+  maxHeapSize = "2048m"
+  jvmArgs "-XX:MaxPermSize=256m"
+  useJUnitPlatform()
 
   finalizedBy jacocoTestReport
 }
 
+task dockerTest(type: Test) {
+  dependsOn(test)
+  group("verification")
+  filter {
+    includeTestsMatching "*IT"
+  }
+  systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
+  useJUnitPlatform()
+}
+
 jacocoTestReport {
+  dependsOn test
   reports {
     xml.enabled true
+    html.enabled true
   }
 }
 
-/** We diverge from the default resources structure to adopt the Jooby standard: */
-sourceSets.main.resources {
-  srcDirs = ["conf", "public"]
+jacocoTestCoverageVerification {
+  dependsOn jacocoTestReport
+  violationRules {
+    rule {
+      limit {
+        minimum = 0.7
+      }
+    }
+  }
 }
+
+import com.bmuschko.gradle.docker.tasks.image.*
+task buildImage(type: DockerBuildImage) {
+  inputDir = file("src/main/resources")
+  images.add('docgen-base:latest')
+}
+
+docker {
+  springBootApplication {
+    baseImage = 'docgen-base:latest'
+    ports = [9090, 8080]
+    images = ['ods-document-generation-svc:local']
+    jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
+  }
+}
+buildImage.dependsOn(bootJar)
+dockerBuildImage.dependsOn(buildImage)
+dockerTest.dependsOn(dockerBuildImage)
+
+import com.bmuschko.gradle.docker.tasks.container.*
+
+task createDocGenServer(type: DockerCreateContainer) {
+  dependsOn dockerBuildImage
+  targetImageId dockerBuildImage.getImageId()
+  hostConfig.portBindings = ['8080:8080']
+  hostConfig.autoRemove = true
+}
+
+task startDocGenServer(type: DockerStartContainer) {
+  dependsOn createDocGenServer
+  targetContainerId createDocGenServer.getContainerId()
+}
+
+task stopDocGenServer(type: DockerStopContainer) {
+  targetContainerId createDocGenServer.getContainerId()
+}
+
+gatlingRun.group("verification")
+gatlingRun.dependsOn(dockerTest, startDocGenServer)
+gatlingRun.finalizedBy(stopDocGenServer)
+
+check.dependsOn(jacocoTestCoverageVerification, gatlingRun)

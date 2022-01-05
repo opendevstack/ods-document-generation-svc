@@ -4,14 +4,20 @@
 - Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
 - Fix wkhtmltox hangs ([#66](https://github.com/opendevstack/ods-document-generation-svc/pull/66))
 - Improve memory management and error handling ([#70](https://github.com/opendevstack/ods-document-generation-svc/pull/70))
+- Use Markdown Architectural Decision Records https://adr.github.io/madr/
+- Improve maintainability by adding SpringBoot framework
+- Added IT (Docker tests)
+- Added performance tests
+- logback.xml can be overridden from command line
 
-### Fixed
-- Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
-
-## [4.0] - 2021-15-11
+## [4.0] - 2021-18-11
 
 ### Added
 - Added log to print /document endpoint input
+
+### Fixed
+- Github template tests fail in proxy environment ([#56](https://github.com/opendevstack/ods-document-generation-svc/issues/56))
+- Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
 
 ### Changed
 - Updated maxRequestSize value from 100m to 200m
