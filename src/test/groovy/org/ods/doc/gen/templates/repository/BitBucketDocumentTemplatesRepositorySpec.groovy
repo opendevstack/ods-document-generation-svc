@@ -1,18 +1,15 @@
 package org.ods.doc.gen.templates.repository
 
-import feign.Feign
+
 import feign.FeignException
 import feign.Request
 import feign.RequestTemplate
-import org.junit.Rule
 import org.springframework.core.env.Environment
 import spock.lang.Specification
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
-
 class BitBucketDocumentTemplatesRepositorySpec extends Specification {
 
-    @Rule
     EnvironmentVariables env = new EnvironmentVariables()
 
     def setup(){

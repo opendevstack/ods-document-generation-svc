@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false"  debug="false">
+  <appender name="STDOUT"
+            class="ch.qos.logback.core.ConsoleAppender">
+    <param name="locationInfo" value="true" />
+    <includeCallerData>true</includeCallerData>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <Pattern>
+        %d{HH:mm:ss.SSS} %highlight(%-5level) [%blue(%t)] %yellow(%class.%method:%line): %msg%n%throwable
+      </Pattern>
+    </layout>
+  </appender>
+
+  <!-- https://logback.qos.ch/manual/configuration.html#defaultValuesForVariables -->
+  <logger name="org.ods" level="${ODS_LOG_LEVEL:-DEBUG}" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <root  name="org.ods"  level="${ROOT_LOG_LEVEL:-ERROR}">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

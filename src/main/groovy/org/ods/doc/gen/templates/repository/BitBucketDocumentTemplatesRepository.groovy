@@ -63,7 +63,7 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
         }
 
         if (missingEnvs.size() > 0) {
-            log.error "Bitbucket adapter not applicable - missing config '${missingEnvs}'"
+            log.warn "Bitbucket adapter not applicable - missing config '${missingEnvs}'"
             return false
         }
 

@@ -1,19 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="15 seconds" debug="false">
-  <appender name="STDOUT"
-            class="ch.qos.logback.core.ConsoleAppender">
-    <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>
-        %d{HH:mm:ss.SSS} %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
-      </Pattern>
-    </layout>
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %yellow(%logger{36}) - %msg%throwable%n</pattern>
+    </encoder>
   </appender>
 
-  <!-- https://logback.qos.ch/manual/configuration.html#defaultValuesForVariables -->
-  <logger name="org.ods" level="${ODS_LOG_LEVEL:-INFO}" additivity="false">
+  <logger name="org.ods" level="${ODS_LOG_LEVEL:-DEBUG}" additivity="false">
     <appender-ref ref="STDOUT"/>
   </logger>
-  <root level="${ROOT_LOG_LEVEL:-INFO}">
+  <root  name="org.ods"  level="${ROOT_LOG_LEVEL:-ERROR}">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

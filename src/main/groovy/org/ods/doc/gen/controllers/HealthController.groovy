@@ -1,6 +1,6 @@
 package org.ods.doc.gen.controllers
 
-
+import groovy.util.logging.Slf4j
 import org.ods.doc.gen.pdf.conversor.HtmlToPDFService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 import javax.inject.Inject
 import java.nio.file.Files
 
+@Slf4j
 @RestController
 class HealthController {
 
@@ -20,6 +21,7 @@ class HealthController {
 
     @GetMapping( "/health")
     Map check( ) {
+        log.info("health executed")
         generatePdfData()
         Map result = [
                 service: "docgen",
