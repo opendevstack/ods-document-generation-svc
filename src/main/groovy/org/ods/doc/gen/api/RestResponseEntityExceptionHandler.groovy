@@ -1,6 +1,7 @@
 package org.ods.doc.gen.api
 
 import groovy.util.logging.Slf4j
+import org.springframework.core.convert.ConversionFailedException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,4 +25,5 @@ class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler 
         log.error("ExceptionHandler, runtimeError:${ex.message}", ex)
         return handleExceptionInternal(ex, ex.message, new HttpHeaders(), HttpStatus.CONFLICT, request)
     }
+
 }

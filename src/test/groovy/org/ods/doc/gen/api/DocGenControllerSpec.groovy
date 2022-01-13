@@ -18,9 +18,9 @@ import static org.mockito.Mockito.when
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(LevaDocController.class)
+@WebMvcTest(DocGenController.class)
 @Slf4j
-class LevaDocControllerSpec extends Specification {
+class DocGenControllerSpec extends Specification {
 
     @TempDir
     public Path tempFolder

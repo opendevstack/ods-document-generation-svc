@@ -8,6 +8,7 @@ import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
 import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Repository
@@ -31,9 +32,9 @@ class GithubDocumentTemplatesRepository implements DocumentTemplatesRepository {
     private String basePath
 
     @Inject
-    GithubDocumentTemplatesRepository(ZipFacade zipFacade, Environment environment){
+    GithubDocumentTemplatesRepository(ZipFacade zipFacade, @Value('${documents.cache.basePath}') String basePath){
         this.zipFacade = zipFacade
-        this.basePath = environment.getProperty("application.documents.cache.basePath")
+        this.basePath = basePath
     }
 
     Path getTemplatesForVersion(String version) {

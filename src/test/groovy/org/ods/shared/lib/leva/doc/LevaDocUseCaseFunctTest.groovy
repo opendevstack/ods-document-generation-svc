@@ -103,7 +103,6 @@ class LevaDocUseCaseFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
-    @Unroll
     def "create #projectFixture.docType with tests files for project: #projectFixture.project"() {
         given: "There's a LeVADocument service"
         PipelineProcess pipeline = buildLevaDocUseCasePipeline(projectFixture)
@@ -182,15 +181,15 @@ class LevaDocUseCaseFunctTest extends Specification {
             .getResource(BitbucketTraceabilityUseCaseSpec.EXPECTED_BITBUCKET_CSV).getAbsolutePath()
 
         return new LevaDocUseCaseFactory(
-            jiraServer,
-            docGenServer,
-            nexusServer,
-            sonarServer,
-            env,
-            tempFolder,
-            jenkins,
-            gitService,
-            bbT,
+                jiraServer,
+                docGenServer,
+                nexusServer,
+                sonarServer,
+                env,
+                tempFolder,
+                jenkins,
+                gitService,
+                bbT,
                 docGenService)
     }
 

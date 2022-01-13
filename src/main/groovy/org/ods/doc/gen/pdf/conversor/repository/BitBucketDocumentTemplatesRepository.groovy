@@ -8,6 +8,7 @@ import feign.RequestLine
 import feign.auth.BasicAuthRequestInterceptor
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Repository
@@ -31,8 +32,8 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
     private String basePath
 
     @Inject
-    BitBucketDocumentTemplatesRepository(ZipFacade zipFacade, Environment environment){
-        this.basePath = environment.getProperty("application.documents.cache.basePath")
+    BitBucketDocumentTemplatesRepository(ZipFacade zipFacade, @Value('${documents.cache.basePath}') String basePath){
+        this.basePath = basePath
         this.zipFacade = zipFacade
     }
 

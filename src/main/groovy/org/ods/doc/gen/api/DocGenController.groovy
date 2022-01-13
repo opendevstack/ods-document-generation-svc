@@ -19,12 +19,12 @@ import static groovy.json.JsonOutput.toJson
 @Slf4j
 @RestController
 @RequestMapping("/document")
-class LevaDocController {
+class DocGenController {
 
     private PdfGenerationService pdfGeneration
 
     @Inject
-    LevaDocController(PdfGenerationService pdfGenerationService){
+    DocGenController(PdfGenerationService pdfGenerationService){
         this.pdfGeneration = pdfGenerationService
     }
 

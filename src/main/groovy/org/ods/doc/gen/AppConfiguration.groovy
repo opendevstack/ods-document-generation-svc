@@ -2,6 +2,7 @@ package org.ods.doc.gen
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import org.apache.commons.io.FileUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.caffeine.CaffeineCacheManager
@@ -16,8 +17,7 @@ import java.time.Duration
 @Configuration
 class AppConfiguration {
     @Bean
-    Caffeine caffeineConfig(Environment environment) {
-        String basePath = environment.getProperty("application.documents.cache.basePath")
+    Caffeine caffeineConfig(@Value('${documents.cache.basePath}') String basePath) {
         return Caffeine.newBuilder()
                 .expireAfterWrite(Duration.ofDays(1))
                 .removalListener({ version, graph, cause ->
