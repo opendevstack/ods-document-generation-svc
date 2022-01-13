@@ -6,20 +6,15 @@ import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.rules.TemporaryFolder
-import org.ods.shared.lib.core.test.LoggerStub
-import org.ods.shared.lib.util.ILogger
-import org.ods.shared.lib.services.ServiceRegistry
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 
 import org.ods.shared.lib.services.JenkinsService
 import org.ods.shared.lib.services.NexusService
-import org.ods.shared.lib.services.OpenShiftService
 import  org.ods.shared.lib.orchestration.service.*
 import  org.ods.shared.lib.orchestration.util.*
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.Logger
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 
@@ -44,11 +39,9 @@ class LeVADocumentUseCaseSpec extends Specification {
     JUnitTestReportsUseCase junit
     LeVADocumentChaptersFileService levaFiles
     NexusService nexus
-    OpenShiftService os
     PDFUtil pdf
     SonarQubeUseCase sq
     LeVADocumentUseCase usecase
-    ILogger logger
     DocumentHistory docHistory
     BitbucketTraceabilityUseCase bbt
 
@@ -66,19 +59,15 @@ class LeVADocumentUseCaseSpec extends Specification {
         junit = Spy(new JUnitTestReportsUseCase(project, steps))
         levaFiles = Mock(LeVADocumentChaptersFileService)
         nexus = Mock(NexusService)
-        os = Mock(OpenShiftService)
         pdf = Mock(PDFUtil)
         sq = Mock(SonarQubeUseCase)
-        logger =  new LoggerStub(log)
-        ServiceRegistry.instance.add(Logger, logger)
         bbt = Mock(BitbucketTraceabilityUseCase)
         usecase = Spy(new LeVADocumentUseCase(project, steps, util, docGen, jenkins, jiraUseCase, junit, levaFiles, nexus, os, pdf, sq, bbt, logger))
         project.getOpenShiftApiUrl() >> 'https://api.dev-openshift.com'
         project.getDocumentTrackingIssuesForHistory(_) >> [[key: 'ID-01', status: 'TODO']]
-        ServiceRegistry.instance.add(Logger, logger)
 
 
-        docHistory = new DocumentHistory(steps, logger, 'D', 'SSD')
+        docHistory = new DocumentHistory(steps, 'D', 'SSD')
         steps.readFile(_) >> { Map args ->
             if (args.file ==~ 'projectData/documentHistory-[DQP]-.*\\.json') {
                 throw new NoSuchFileException(args.file)
@@ -91,8 +80,8 @@ class LeVADocumentUseCaseSpec extends Specification {
 
     def "compute test discrepancies"() {
         given:
-        jiraUseCase = Spy(new JiraUseCase(project, steps, util, Mock(JiraService), logger))
-        usecase = Spy(new LeVADocumentUseCase(project, steps, util, docGen, jenkins, jiraUseCase, junit, levaFiles, nexus, os, pdf, sq, bbt, logger))
+        jiraUseCase = Spy(new JiraUseCase(project, steps, util, Mock(JiraService)))
+        usecase = Spy(new LeVADocumentUseCase(project, steps, util, docGen, jenkins, jiraUseCase, junit, levaFiles, nexus, pdf, sq, bbt))
 
         def name = "myTests"
 

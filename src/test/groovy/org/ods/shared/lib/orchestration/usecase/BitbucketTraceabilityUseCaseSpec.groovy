@@ -2,15 +2,12 @@ package org.ods.shared.lib.orchestration.usecase
 
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
-
 import org.apache.commons.io.FileUtils
 import org.json.JSONArray
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import  org.ods.shared.lib.orchestration.util.Project
-import  org.ods.shared.lib.orchestration.util.StringCleanup
+import org.ods.shared.lib.core.test.wiremock.BitbucketServiceMock
+import org.ods.shared.lib.orchestration.util.Project
+import org.ods.shared.lib.orchestration.util.StringCleanup
 import org.ods.shared.lib.services.BitbucketService
-import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.util.IPipelineSteps
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
@@ -18,11 +15,9 @@ import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.TempDir
 import util.FixtureHelper
-import org.ods.shared.lib.core.test.LoggerStub
 import util.PipelineSteps
-import org.ods.shared.lib.core.test.wiremock.BitbucketServiceMock
 
-import static org.assertj.core.api.Assertions.*
+import static org.assertj.core.api.Assertions.assertThat
 
 @Slf4j
 class BitbucketTraceabilityUseCaseSpec extends Specification {
@@ -41,7 +36,6 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
     BitbucketServiceMock bitbucketServiceMock
     IPipelineSteps steps
     Project project
-    ILogger logger
     BitbucketService bitbucketService
 
     def setup() {
@@ -49,7 +43,6 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
 
         steps = new PipelineSteps()
         steps.env.WORKSPACE = tempFolder.absolutePath
-        logger = new LoggerStub(log)
         project = buildProject(logger)
         bitbucketServiceMock = new BitbucketServiceMock().setUp("csv").startServer(RECORD_WIREMOCK, BB_URL_TO_RECORD)
         bitbucketService = Spy(

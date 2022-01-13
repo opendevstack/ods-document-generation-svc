@@ -2,7 +2,6 @@ package org.ods.shared.lib.orchestration.usecase
 
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.AppConfig
-import org.ods.doc.gen.pdf.conversor.PdfGenerationService
 import org.ods.shared.lib.core.test.usecase.LevaDocUseCaseFactory
 import org.ods.shared.lib.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
 import org.ods.shared.lib.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithComponent
@@ -15,7 +14,6 @@ import org.ods.shared.lib.core.test.wiremock.WiremockServers
 import org.ods.shared.lib.orchestration.service.DocGenService
 import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.services.JenkinsService
-import org.ods.shared.lib.services.OpenShiftService
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -24,7 +22,6 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import util.FixtureHelper
 
 import javax.inject.Inject
-
 /**
  * IMPORTANT: this test use Wiremock files to mock all the external interactions.
  *
@@ -178,7 +175,6 @@ class LevaDocUseCaseFunctTest extends Specification {
         // Mocks generation (spock don't let you add this outside a Spec)
         JenkinsService jenkins = Mock(JenkinsService)
         jenkins.unstashFilesIntoPath(_, _, _) >> true
-        OpenShiftService openShiftService = Mock(OpenShiftService)
         GitService gitService = Mock(GitService)
         BitbucketTraceabilityUseCase bbT = Spy(new BitbucketTraceabilityUseCase(null, null, null))
         bbT.generateSourceCodeReviewFile() >> new FixtureHelper()
@@ -192,7 +188,6 @@ class LevaDocUseCaseFunctTest extends Specification {
             env,
             tempFolder,
             jenkins,
-            openShiftService,
             gitService,
             bbT,
                 docGenService)

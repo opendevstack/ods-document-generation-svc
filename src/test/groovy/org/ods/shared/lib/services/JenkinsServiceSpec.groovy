@@ -2,14 +2,13 @@ package org.ods.shared.lib.services
 
 
 import util.*
-import org.ods.shared.lib.util.Logger
 
 class JenkinsServiceSpec extends SpecHelper {
 
     def "unstash files into path"() {
         given:
         def steps = Spy(util.PipelineSteps)
-        def service = new JenkinsService(steps, new Logger(steps, false))
+        def service = new JenkinsService(steps)
 
         def name = "myStash"
         def path = "myPath"
@@ -31,7 +30,7 @@ class JenkinsServiceSpec extends SpecHelper {
     def "unstash files into path with failure"() {
         given:
         def steps = Spy(util.PipelineSteps)
-        def service = new JenkinsService(steps, new Logger(steps, false))
+        def service = new JenkinsService(steps)
 
         def name = "myStash"
         def path = "myPath"

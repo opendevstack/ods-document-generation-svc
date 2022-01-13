@@ -2,7 +2,6 @@ package org.ods.shared.lib.services
 
 import groovy.util.logging.Slf4j
 import org.ods.shared.lib.PipelineScript
-import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.util.IPipelineSteps
 import org.springframework.stereotype.Service
 

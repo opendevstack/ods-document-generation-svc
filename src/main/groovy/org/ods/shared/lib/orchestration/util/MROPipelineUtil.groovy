@@ -6,10 +6,6 @@ import org.springframework.stereotype.Service
 
 import java.nio.file.Paths
 
-import  org.ods.shared.lib.orchestration.dependency.DependencyGraph
-import org.ods.shared.lib.services.OpenShiftService
-import org.ods.shared.lib.services.ServiceRegistry
-
 import org.yaml.snakeyaml.Yaml
 
 @SuppressWarnings(['LineLength', 'AbcMetric', 'NestedBlockDepth', 'EmptyElseBlock', 'CyclomaticComplexity', 'GStringAsMapKey', 'UseCollectNested'])

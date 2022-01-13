@@ -1,7 +1,6 @@
 package org.ods.shared.lib.services
 
 import org.ods.shared.lib.PipelineScript
-import org.ods.shared.lib.util.Logger
 import util.SpecHelper
 
 class GitServiceSpec extends SpecHelper {
@@ -10,7 +9,7 @@ class GitServiceSpec extends SpecHelper {
         given:
         def version = "0.0.1"
         def script = new PipelineScript()
-        def service = new GitService(script, new Logger(script, false))
+        def service = new GitService(script)
 
         when:
         def releaseBranch = service.getReleaseBranch(version)
@@ -22,7 +21,7 @@ class GitServiceSpec extends SpecHelper {
     def "git skipping commit message"() {
         given:
         def script = new PipelineScript()
-        def service = new GitService(script, new Logger(script, false))
+        def service = new GitService(script)
 
         when:
         def result = service.isCiSkipInCommitMessage(gitCommitMessage)
@@ -42,7 +41,7 @@ class GitServiceSpec extends SpecHelper {
     def "merged branch"() {
         given:
         def script = new PipelineScript()
-        def service = new GitService(script, new Logger(script, false))
+        def service = new GitService(script)
 
         when:
         def result = service.mergedBranch("odm", "odm-components", gitCommitMessage)

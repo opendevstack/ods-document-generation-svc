@@ -9,7 +9,6 @@ import org.ods.shared.lib.orchestration.usecase.JiraUseCase
 import org.ods.shared.lib.orchestration.util.Project
 import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.Logger
 import org.yaml.snakeyaml.Yaml
 
 @InheritConstructors
@@ -143,7 +142,7 @@ class FixtureHelper {
         def steps = new PipelineSteps()
         steps.env.WORKSPACE = ""
 
-        return new FakeProject(steps, new Logger(steps, true))
+        return new FakeProject(steps)
             .init()
             .load(new FakeGitUtil(steps, null), null)
     }

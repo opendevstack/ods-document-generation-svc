@@ -16,7 +16,6 @@ import org.ods.shared.lib.orchestration.util.SortUtil
 import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.services.JenkinsService
 import org.ods.shared.lib.services.NexusService
-import org.ods.shared.lib.services.OpenShiftService
 import org.ods.shared.lib.util.IPipelineSteps
 import org.springframework.stereotype.Service
 
@@ -56,20 +55,18 @@ class LeVADocumentUseCase extends DocGenUseCase {
     final JiraUseCase jiraUseCase
     private final JUnitTestReportsUseCase junit
     private final LeVADocumentChaptersFileService levaFiles
-    private final OpenShiftService os
     private final SonarQubeUseCase sq
     private final BitbucketTraceabilityUseCase bbt
 
     @Inject
     LeVADocumentUseCase(Project project, IPipelineSteps steps, MROPipelineUtil util, DocGenService docGen,
                         JenkinsService jenkins, JiraUseCase jiraUseCase, JUnitTestReportsUseCase junit,
-                        LeVADocumentChaptersFileService levaFiles, NexusService nexus, OpenShiftService os,
+                        LeVADocumentChaptersFileService levaFiles, NexusService nexus,
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
         super(project, steps, util, docGen, nexus, pdf, jenkins)
         this.jiraUseCase = jiraUseCase
         this.junit = junit
         this.levaFiles = levaFiles
-        this.os = os
         this.sq = sq
         this.bbt = bbt
     }

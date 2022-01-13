@@ -9,7 +9,6 @@ import  org.ods.shared.lib.orchestration.usecase.JiraUseCase
 import  org.ods.shared.lib.orchestration.usecase.OpenIssuesException
 import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.services.NexusService
-import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.util.IPipelineSteps
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml

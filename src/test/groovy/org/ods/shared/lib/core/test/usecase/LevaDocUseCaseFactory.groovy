@@ -2,28 +2,24 @@ package org.ods.shared.lib.core.test.usecase
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
-import org.ods.doc.gen.pdf.conversor.PdfGenerationService
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
-import org.ods.shared.lib.core.test.LoggerStub
 import org.ods.shared.lib.core.test.jira.JiraServiceForWireMock
 import org.ods.shared.lib.core.test.wiremock.WiremockManager
 import org.ods.shared.lib.core.test.wiremock.WiremockServers
-import  org.ods.shared.lib.orchestration.service.DocGenService
-import  org.ods.shared.lib.orchestration.service.LeVADocumentChaptersFileService
-import  org.ods.shared.lib.orchestration.usecase.BitbucketTraceabilityUseCase
-import  org.ods.shared.lib.orchestration.usecase.JUnitTestReportsUseCase
-import  org.ods.shared.lib.orchestration.usecase.JiraUseCase
-import  org.ods.shared.lib.orchestration.usecase.LeVADocumentUseCase
-import  org.ods.shared.lib.orchestration.usecase.SonarQubeUseCase
-import  org.ods.shared.lib.orchestration.util.MROPipelineUtil
-import  org.ods.shared.lib.orchestration.util.PDFUtil
-import  org.ods.shared.lib.orchestration.util.Project
+import org.ods.shared.lib.orchestration.service.DocGenService
+import org.ods.shared.lib.orchestration.service.LeVADocumentChaptersFileService
+import org.ods.shared.lib.orchestration.usecase.BitbucketTraceabilityUseCase
+import org.ods.shared.lib.orchestration.usecase.JUnitTestReportsUseCase
+import org.ods.shared.lib.orchestration.usecase.JiraUseCase
+import org.ods.shared.lib.orchestration.usecase.LeVADocumentUseCase
+import org.ods.shared.lib.orchestration.usecase.SonarQubeUseCase
+import org.ods.shared.lib.orchestration.util.MROPipelineUtil
+import org.ods.shared.lib.orchestration.util.PDFUtil
+import org.ods.shared.lib.orchestration.util.Project
 import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.services.JenkinsService
 import org.ods.shared.lib.services.NexusService
-import org.ods.shared.lib.services.OpenShiftService
-import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.util.IPipelineSteps
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import util.PipelineSteps
 
 @Slf4j
@@ -37,7 +33,6 @@ class LevaDocUseCaseFactory {
     private EnvironmentVariables env
     private File tempFolder
     private JenkinsService jenkins
-    private OpenShiftService os
     private GitService gitService
     private Project project
     private BitbucketTraceabilityUseCase bbt
@@ -50,7 +45,6 @@ class LevaDocUseCaseFactory {
                           EnvironmentVariables env,
                           File tempFolder,
                           JenkinsService jenkins,
-                          OpenShiftService os,
                           GitService gitService,
                           BitbucketTraceabilityUseCase bbt,
                           DocGenService docGenService){
@@ -60,8 +54,6 @@ class LevaDocUseCaseFactory {
         this.nexusServer = nexusServer
         this.sonarQuServer = sonarQuServer
         this.gitService = gitService
-
-        this.os = os
         this.bbt = bbt
         this.jenkins = jenkins
         this.tempFolder = tempFolder
@@ -71,8 +63,7 @@ class LevaDocUseCaseFactory {
     def loadProject(Map buildParams) {
         log.info "loadProject with:[${buildParams}]"
         try {
-            def logger = new LoggerStub(log)
-            project = buildProject(buildParams, logger)
+            project = buildProject(buildParams)
             def util = new MROPipelineUtil(project, steps, null)
             def jiraUseCase = new JiraUseCase(project, steps, util, buildJiraServiceForWireMock())
             project.load(gitService, jiraUseCase)
@@ -98,14 +89,13 @@ class LevaDocUseCaseFactory {
                 new JUnitTestReportsUseCase(project, steps),
                 new LeVADocumentChaptersFileService(steps),
                 nexusService,
-                os,
                 new PDFUtil(),
                 new SonarQubeUseCase(project, steps, nexusService),
                 bbt
             )
     }
 
-    private Project buildProject(Map buildParams, ILogger logger) {
+    private Project buildProject(Map buildParams) {
         def tmpWorkspace = tempFolder
         System.setProperty("java.io.tmpdir", tmpWorkspace.absolutePath)
         FileUtils.copyDirectory(new File("src/test/resources/workspace/${buildParams.projectKey}"), tempFolder)

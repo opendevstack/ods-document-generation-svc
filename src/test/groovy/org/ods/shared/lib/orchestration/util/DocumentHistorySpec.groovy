@@ -3,7 +3,6 @@ package org.ods.shared.lib.orchestration.util
 import groovy.json.JsonOutput
 import  org.ods.shared.lib.orchestration.service.leva.ProjectDataBitbucketRepository
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.Logger
 import org.ods.shared.lib.util.PipelineSteps
 import spock.lang.Unroll
 import util.SpecHelper
@@ -13,7 +12,6 @@ import java.nio.file.NoSuchFileException
 class DocumentHistorySpec extends SpecHelper {
 
     IPipelineSteps steps
-    Logger logger
     Map jiraData10
     Map jiraData11_first
     Map jiraDataFix

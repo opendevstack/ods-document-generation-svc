@@ -1,7 +1,5 @@
 package org.ods.shared.lib.services
 
-import org.ods.shared.lib.component.ScanWithAquaStage
-import org.ods.shared.lib.util.Logger
 import spock.lang.Specification
 
 class BitbucketServiceSpec extends Specification {
@@ -13,8 +11,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
 
         def res = readResource(jsonFixture);
@@ -39,8 +36,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
 
         def res = readResource(jsonFixture);
@@ -74,8 +70,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,
@@ -127,8 +122,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,
@@ -174,8 +168,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,
@@ -220,8 +213,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,
@@ -258,8 +250,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,
@@ -318,8 +309,7 @@ class BitbucketServiceSpec extends Specification {
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            new Logger(steps, false)
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,
@@ -359,13 +349,11 @@ class BitbucketServiceSpec extends Specification {
     def "create code insight report with error in call"() {
         given:
         def steps = Spy(util.PipelineSteps)
-        def logger = Spy(new Logger(steps, false))
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
             'FOO',
-            'foo-cd-cd-user-with-password',
-            logger
+            'foo-cd-cd-user-with-password'
         ])
         def data = [
             key: ScanWithAquaStage.BITBUCKET_AQUA_REPORT_KEY,

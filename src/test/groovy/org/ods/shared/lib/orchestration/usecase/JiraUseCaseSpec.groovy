@@ -3,8 +3,6 @@ package org.ods.shared.lib.orchestration.usecase
 
 import  org.ods.shared.lib.orchestration.service.JiraService
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.ILogger
-import org.ods.shared.lib.util.Logger
 import  org.ods.shared.lib.orchestration.util.MROPipelineUtil
 import  org.ods.shared.lib.orchestration.util.Project
 import spock.lang.Ignore
@@ -19,7 +17,6 @@ class JiraUseCaseSpec extends SpecHelper {
     IPipelineSteps steps
     JiraUseCase usecase
     MROPipelineUtil util
-    ILogger logger
 
     def setup() {
         project = Spy(createProject())

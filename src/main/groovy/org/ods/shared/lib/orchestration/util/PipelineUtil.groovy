@@ -5,7 +5,6 @@ import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
 
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.services.GitService
 import org.springframework.stereotype.Service
 

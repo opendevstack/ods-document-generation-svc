@@ -4,7 +4,6 @@ package org.ods.shared.lib.orchestration.util
 import java.nio.file.Paths
 
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.Logger
 import org.ods.shared.lib.services.GitService
 
 import static util.FixtureHelper.*

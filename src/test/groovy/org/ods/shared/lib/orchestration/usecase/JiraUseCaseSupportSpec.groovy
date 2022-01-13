@@ -3,7 +3,6 @@ package org.ods.shared.lib.orchestration.usecase
 import  org.ods.shared.lib.orchestration.service.*
 import  org.ods.shared.lib.orchestration.util.*
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.ILogger
 
 import static util.FixtureHelper.*
 
@@ -11,7 +10,7 @@ import util.*
 
 class JiraUseCaseSupportSpec extends SpecHelper {
 
-    JiraUseCase createUseCase(PipelineSteps steps, MROPipelineUtil util, JiraService jira, ILogger logger) {
+    JiraUseCase createUseCase(PipelineSteps steps, MROPipelineUtil util, JiraService jira) {
         return new JiraUseCase(steps, util, jira, logger)
     }
 

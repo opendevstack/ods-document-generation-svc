@@ -4,7 +4,6 @@ import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.orchestration.parser.JUnitParser
 import  org.ods.shared.lib.orchestration.service.JiraService
 import org.ods.shared.lib.util.IPipelineSteps
-import org.ods.shared.lib.util.ILogger
 import  org.ods.shared.lib.orchestration.util.MROPipelineUtil
 import  org.ods.shared.lib.orchestration.util.Project
 import  org.ods.shared.lib.orchestration.util.Project.JiraDataItem
