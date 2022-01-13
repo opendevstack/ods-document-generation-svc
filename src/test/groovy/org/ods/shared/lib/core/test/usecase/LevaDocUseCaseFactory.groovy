@@ -2,6 +2,7 @@ package org.ods.shared.lib.core.test.usecase
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
+import org.ods.doc.gen.pdf.conversor.PdfGenerationService
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import org.ods.shared.lib.core.test.LoggerStub
 import org.ods.shared.lib.core.test.jira.JiraServiceForWireMock
@@ -40,6 +41,7 @@ class LevaDocUseCaseFactory {
     private GitService gitService
     private Project project
     private BitbucketTraceabilityUseCase bbt
+    private DocGenService docGenService
 
     LevaDocUseCaseFactory(WiremockManager jiraServer,
                           WiremockManager docGenServer,
@@ -50,7 +52,9 @@ class LevaDocUseCaseFactory {
                           JenkinsService jenkins,
                           OpenShiftService os,
                           GitService gitService,
-                          BitbucketTraceabilityUseCase bbt){
+                          BitbucketTraceabilityUseCase bbt,
+                          DocGenService docGenService){
+        this.docGenService = docGenService
         this.docGenServer = docGenServer
         this.jiraServer = jiraServer
         this.nexusServer = nexusServer
@@ -69,8 +73,8 @@ class LevaDocUseCaseFactory {
         try {
             def logger = new LoggerStub(log)
             project = buildProject(buildParams, logger)
-            def util = new MROPipelineUtil(project, steps, null, logger)
-            def jiraUseCase = new JiraUseCase(project, steps, util, buildJiraServiceForWireMock(), logger)
+            def util = new MROPipelineUtil(project, steps, null)
+            def jiraUseCase = new JiraUseCase(project, steps, util, buildJiraServiceForWireMock())
             project.load(gitService, jiraUseCase)
             project.data.openshift.targetApiUrl = "https://openshift-sample"
             project.repositories.each { repo -> repo.metadata = loadMetadata(repo) }
@@ -88,7 +92,7 @@ class LevaDocUseCaseFactory {
                 project,
                 steps,
                 project.jiraUseCase.util,
-                new DocGenService(docGenServer.mock().baseUrl()),
+                    docGenService,
                 jenkins,
                 project.jiraUseCase,
                 new JUnitTestReportsUseCase(project, steps),
@@ -97,8 +101,7 @@ class LevaDocUseCaseFactory {
                 os,
                 new PDFUtil(),
                 new SonarQubeUseCase(project, steps, nexusService),
-                bbt,
-                new LoggerStub(log)
+                bbt
             )
     }
 
@@ -119,7 +122,7 @@ class LevaDocUseCaseFactory {
 
         Project.METADATA_FILE_NAME = 'metadata.yml'
 
-        def project = new Project(steps, logger, [:]).init()
+        def project = new Project(steps).init()
         project.data.metadata.id = buildParams.projectKey
         project.data.buildParams = buildParams
         project.data.git = buildGitData()

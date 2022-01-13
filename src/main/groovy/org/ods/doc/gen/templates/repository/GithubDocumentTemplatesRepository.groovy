@@ -6,6 +6,7 @@ import feign.Param
 import feign.RequestLine
 import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
+import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
@@ -42,7 +43,9 @@ class GithubDocumentTemplatesRepository implements DocumentTemplatesRepository {
 
         GithubDocumentTemplatesStoreHttpAPI store = createStorageClient(uri)
         def zipContent = store.getTemplatesZipArchiveForVersion(version)
-        return zipFacade.extractZipArchive(zipContent, targetDir, "ods-document-generation-templates-${version}")
+        zipFacade.extractZipArchive(zipContent, targetDir)
+        moveContentToRootFolder(targetDir, "ods-document-generation-templates-${version}")
+        return targetDir
     }
 
     boolean isApplicableToSystemConfig () {
@@ -66,7 +69,7 @@ class GithubDocumentTemplatesRepository implements DocumentTemplatesRepository {
 
     private Feign.Builder createFeignBuilder() {
         String[] httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.replace('http://','')?.split(':')
-        log.debug ("Proxy setup: ${httpProxyHost ?: 'not found' }")
+        log.trace ("Proxy setup: ${httpProxyHost ?: 'not found' }")
         if (httpProxyHost && !System.getenv("GITHUB_HOST")) {
             return Feign.builder().client(new feign.okhttp.OkHttpClient(buildHttpClient(httpProxyHost)))
         } else {
@@ -81,4 +84,8 @@ class GithubDocumentTemplatesRepository implements DocumentTemplatesRepository {
         return new OkHttpClient().newBuilder().proxy(proxy).build();
     }
 
+    private void moveContentToRootFolder(targetDir, startAtDir){
+        FileUtils.copyDirectory(new File(targetDir.toFile(), startAtDir), targetDir.toFile())
+        FileUtils.deleteDirectory(new File(targetDir.toFile(), startAtDir))
+    }
 }

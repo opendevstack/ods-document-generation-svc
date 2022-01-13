@@ -1,17 +1,22 @@
 package org.ods.shared.lib.orchestration.usecase
 
-
-
+import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.orchestration.parser.JUnitParser
 import org.ods.shared.lib.util.IPipelineSteps
 import  org.ods.shared.lib.orchestration.util.Project
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 
 @SuppressWarnings(['JavaIoPackageAccess', 'EmptyCatchBlock'])
+@Slf4j
+@Service
 class JUnitTestReportsUseCase {
 
     private final Project project
     private final IPipelineSteps steps
 
+    @Inject
     JUnitTestReportsUseCase(Project project, IPipelineSteps steps) {
         this.project = project
         this.steps = steps

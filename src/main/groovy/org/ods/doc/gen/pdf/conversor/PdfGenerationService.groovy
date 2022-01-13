@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.ods.doc.gen.templates.repository.DocumentTemplateFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 
@@ -16,16 +17,12 @@ class PdfGenerationService {
 
     private final Cache<String, Path> templatesCache
     private final HtmlToPDFService htmlToPDFService
-    private final String basePath
     private final DocumentTemplateFactory documentTemplateFactory
 
     @Inject
-    PdfGenerationService(HtmlToPDFService htmlToPDFService,
-                         DocumentTemplateFactory documentTemplateFactory,
-                         Environment environment) {
+    PdfGenerationService(HtmlToPDFService htmlToPDFService, DocumentTemplateFactory documentTemplateFactory) {
         this.htmlToPDFService = htmlToPDFService
         this.documentTemplateFactory = documentTemplateFactory
-        this.basePath =  environment.getProperty("application.documents.cache.basePath")
     }
 
     Path generatePdfFile(Map metadata, Map data, Path tmpDir) {
@@ -36,10 +33,8 @@ class PdfGenerationService {
     }
 
     private copyTemplatesToTempFolder(String version, Path tmpDir) {
-        FileUtils.copyDirectory(
-                documentTemplateFactory.get().getTemplatesForVersion(version).toFile(),
-                tmpDir.toFile()
-        )
+        File templatesFolder = documentTemplateFactory.get().getTemplatesForVersion(version).toFile()
+        FileUtils.copyDirectory(templatesFolder, tmpDir.toFile())
     }
 
     private Map<String, Path> generateHtmlFromTemplates(Map<String, Path> partials, data) {

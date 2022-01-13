@@ -1,9 +1,15 @@
 package org.ods.shared.lib.services
 
-
+import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.apache.http.client.utils.URIBuilder
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
+
+@Slf4j
+@Service
 class NexusService {
 
     static final String NEXUS_REPO_EXISTS_KEY = 'nexusRepoExists'
@@ -12,7 +18,10 @@ class NexusService {
     final String username
     final String password
 
-    NexusService(String baseURL, String username, String password) {
+    @Inject
+    NexusService(@Value('${nexus.baseURL}') String baseURL,
+                 @Value('${nexus.username}') String username,
+                 @Value('${nexus.password}') String password) {
         if (!baseURL?.trim()) {
             throw new IllegalArgumentException("Error: unable to connect to Nexus. 'baseURL' is undefined.")
         }

@@ -1,12 +1,18 @@
 package org.ods.shared.lib.services
 
 import groovy.json.JsonSlurperClassic
+import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
-import org.ods.shared.lib.util.ILogger
-
 import org.ods.shared.lib.util.AuthUtil
+import org.ods.shared.lib.util.IPipelineSteps
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 
 @SuppressWarnings(['PublicMethodsBeforeNonPublicMethods', 'ParameterCount'])
+@Slf4j
+@Service
 class BitbucketService {
 
     // file name used to write token secret yaml
@@ -40,27 +46,25 @@ class BitbucketService {
     // automatically (by syncing the "tokenSecretName").
     private String tokenCredentialsId
 
-    final ILogger logger
-
-    BitbucketService(def script, String bitbucketUrl, String project,
-                     String passwordCredentialsId, ILogger logger) {
+    @Inject
+    BitbucketService(IPipelineSteps script,
+                     @Value('${bitbucket.baseURL}') String bitbucketUrl,
+                     @Value('${bitbucket.passwordCredentialsId}') String passwordCredentialsId) {
         this.script = script
         this.bitbucketUrl = bitbucketUrl
-        this.project = project
+        this.project = "FRML24113" // TODO s2o
         this.openShiftCdProject = "${project}-cd"
         this.passwordCredentialsId = passwordCredentialsId
         this.tokenSecretName = 'cd-user-bitbucket-token'
-        this.logger = logger
     }
 
     static BitbucketService newFromEnv(
         def script,
         def env,
         String project,
-        String passwordCredentialsId,
-        ILogger logger) {
+        String passwordCredentialsId) {
         def c = readConfigFromEnv(env)
-        new BitbucketService(script, c.bitbucketUrl, project, passwordCredentialsId, logger)
+        new BitbucketService(script, c.bitbucketUrl, project, passwordCredentialsId)
     }
 
     static Map readConfigFromEnv(def env) {
@@ -124,7 +128,7 @@ class BitbucketService {
             reviewerConditions = script.readJSON(text: getDefaultReviewerConditions(repo))
         }
         catch (Exception ex) {
-            logger.warn "Could not understand API response. Error was: ${ex}"
+            log.warn "Could not understand API response. Error was: ${ex}"
             return []
         }
         List<String> reviewers = []
@@ -213,7 +217,7 @@ class BitbucketService {
                 throw new RuntimeException('Field "values" of JSON response must not be empty!')
             }
         } catch (Exception ex) {
-            logger.warn "Could not understand API response. Error was: ${ex}"
+            log.warn "Could not understand API response. Error was: ${ex}"
             return [:]
         }
         for (def i = 0; i < prCandidates.size(); i++) {
@@ -227,7 +231,7 @@ class BitbucketService {
                     ]
                 }
             } catch (Exception ex) {
-                logger.warn "Unexpected API response. Error was: ${ex}"
+                log.warn "Unexpected API response. Error was: ${ex}"
                 return [:]
             }
         }
@@ -283,7 +287,7 @@ class BitbucketService {
 
     @SuppressWarnings('LineLength')
     void setBuildStatus(String buildUrl, String gitCommit, String state, String buildName) {
-        logger.debugClocked("buildstatus-${buildName}-${state}",
+        log.debugClocked("buildstatus-${buildName}-${state}",
             "Setting Bitbucket build status to '${state}' on commit '${gitCommit}' / '${buildUrl}'")
         withTokenCredentials { username, token ->
             def maxAttempts = 3
@@ -304,11 +308,11 @@ class BitbucketService {
                     )
                     return
                 } catch (err) {
-                    logger.warn("Could not set Bitbucket build status to '${state}' due to: ${err}")
+                    log.warn("Could not set Bitbucket build status to '${state}' due to: ${err}")
                 }
             }
         }
-        logger.debugClocked("buildstatus-${buildName}-${state}")
+        log.debugClocked("buildstatus-${buildName}-${state}")
     }
 
     /**
@@ -366,7 +370,7 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
                 )
                 return
             } catch (err) {
-                logger.warn("Could not create Bitbucket Code Insight report due to: ${err}")
+                log.warn("Could not create Bitbucket Code Insight report due to: ${err}")
             }
         }
     }
@@ -391,13 +395,13 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
         def credentialsId = "${openShiftCdProject}-${tokenSecretName}"
 
         if (basicAuthCredentialsIdExists(credentialsId)) {
-            logger.debug "Secret ${tokenSecretName} exists and is synced."
+            log.debug "Secret ${tokenSecretName} exists and is synced."
             this.tokenCredentialsId = credentialsId
             return
         }
 
         def credentialsAvailable = false
-        logger.info "Secret ${tokenSecretName} does not exist yet, it will be created now."
+        log.info "Secret ${tokenSecretName} does not exist yet, it will be created now."
         def token = createUserToken()
         if (token['password']) {
             createUserTokenSecret(token['username'], token['password'])
@@ -411,7 +415,7 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
                 credentialsAvailable = true
                 break
             } else {
-                logger.debug "Waiting ${waitTime} for credentials '${credentialsId}' to become available."
+                log.debug "Waiting ${waitTime} for credentials '${credentialsId}' to become available."
                 script.sleep(waitTime)
                 waitTime = waitTime * 2
             }
@@ -463,7 +467,7 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
                 String token = js['token']
                 tokenMap['password'] = token
             } catch (Exception ex) {
-                logger.warn "Could not understand API response. Error was: ${ex}"
+                log.warn "Could not understand API response. Error was: ${ex}"
             }
         }
         return tokenMap
@@ -527,7 +531,7 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
                 rm ${BB_TOKEN_SECRET}
             """
         } catch (Exception ex) {
-            logger.warn "Could not create secret ${tokenSecretName}. Error was: ${ex}"
+            log.warn "Could not create secret ${tokenSecretName}. Error was: ${ex}"
         }
     }
 

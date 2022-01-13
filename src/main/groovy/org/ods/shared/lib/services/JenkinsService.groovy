@@ -1,25 +1,30 @@
 package org.ods.shared.lib.services
 
-import org.ods.shared.lib.util.ILogger
+import groovy.util.logging.Slf4j
+import org.ods.shared.lib.util.IPipelineSteps
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
+
+@Slf4j
+@Service
 class JenkinsService {
 
     private static final String XUNIT_SYSTEM_RESULT_DIR = 'build/test-results/test'
 
-    private final def script
-    private final ILogger logger
+    private final IPipelineSteps script
 
-    JenkinsService(script, ILogger logger) {
+    @Inject
+    JenkinsService(IPipelineSteps script) {
         this.script = script
-        this.logger = logger
     }
 
     def stashTestResults(String customXunitResultsDir, String stashNamePostFix = 'stash') {
         def contextresultMap = [:]
-        logger.info ('Collecting test results, if available ...')
+        log.info ('Collecting test results, if available ...')
         def xUnitResultDir = XUNIT_SYSTEM_RESULT_DIR
         if (customXunitResultsDir?.trim()?.length() > 0) {
-            logger.debug "Overwritten testresult location: ${customXunitResultsDir}"
+            log.debug "Overwritten testresult location: ${customXunitResultsDir}"
             xUnitResultDir = customXunitResultsDir.trim()
             if (!script.fileExists(xUnitResultDir)) {
                 throw new IOException ("Cannot use custom test directory '${xUnitResultDir}' that does not exist!")
@@ -31,11 +36,11 @@ class JenkinsService {
         }
 
         if (XUNIT_SYSTEM_RESULT_DIR != xUnitResultDir) {
-            logger.debug "Copying (applicable) testresults from location: '${xUnitResultDir}' to " +
+            log.debug "Copying (applicable) testresults from location: '${xUnitResultDir}' to " +
                 " '${XUNIT_SYSTEM_RESULT_DIR}'."
             script.sh(
                 script: """
-                    ${logger.shellScriptDebugFlag}
+                    ${log.shellScriptDebugFlag}
                     cp -rf ${xUnitResultDir}/* ${XUNIT_SYSTEM_RESULT_DIR} | true
                 """,
                 label: "Moving test results to system location: ${XUNIT_SYSTEM_RESULT_DIR}"
@@ -47,7 +52,7 @@ class JenkinsService {
             foundTests = script.findFiles(glob: '**/**.xml').size()
         }
 
-        logger.debug "Found ${foundTests} test files in '${XUNIT_SYSTEM_RESULT_DIR}'"
+        log.debug "Found ${foundTests} test files in '${XUNIT_SYSTEM_RESULT_DIR}'"
 
         contextresultMap.testResultsFolder = XUNIT_SYSTEM_RESULT_DIR
         contextresultMap.testResults = foundTests
@@ -66,7 +71,7 @@ class JenkinsService {
                 allowEmpty: true
             )
         } else {
-            logger.info 'No xUnit results for stashing'
+            log.info 'No xUnit results for stashing'
         }
 
         return contextresultMap
@@ -91,7 +96,7 @@ class JenkinsService {
             try {
                 this.script.unstash(name)
             } catch (e) {
-                logger.info ("Could not find any files of type '${type}' to unstash for name '${name}'")
+                log.info ("Could not find any files of type '${type}' to unstash for name '${name}'")
                 result = false
             }
         }

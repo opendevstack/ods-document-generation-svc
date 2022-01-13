@@ -2,6 +2,7 @@ package org.ods.shared.lib.orchestration.util
 
 
 import groovy.json.JsonOutput
+import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import  org.ods.shared.lib.orchestration.service.leva.ProjectDataBitbucketRepository
 import  org.ods.shared.lib.orchestration.usecase.JiraUseCase
@@ -10,6 +11,7 @@ import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.services.NexusService
 import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.util.IPipelineSteps
+import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.Paths
@@ -24,6 +26,8 @@ import java.nio.file.Paths
         'UseCollectMany',
         'MethodCount',
         'PublicMethodsBeforeNonPublicMethods'])
+@Slf4j
+@Service
 class Project {
 
     static final String DEFAULT_TEMPLATE_VERSION = '1.2'
@@ -264,17 +268,15 @@ class Project {
     protected IPipelineSteps steps
     protected GitService git
     protected JiraUseCase jiraUseCase
-    protected ILogger logger
     protected Map config
     protected String targetProject
     protected Boolean isVersioningEnabled = false
 
     Map data = [:]
 
-    Project(IPipelineSteps steps, ILogger logger, Map config = [:]) {
+    Project(IPipelineSteps steps) {
         this.steps = steps
-        this.config = config
-        this.logger = logger
+        this.config =  [:]
 
         this.data.build = [
             hasFailingTests: false,
@@ -330,7 +332,7 @@ class Project {
             message: git.getCommitMessage(),
             time: git.getCommitTime(),
         ]
-        this.logger.debug "Using release manager commit: ${this.data.git.commit}"
+        this.log.debug "Using release manager commit: ${this.data.git.commit}"
     }
 
     Project load(GitService git, JiraUseCase jiraUseCase) {
@@ -373,7 +375,7 @@ class Project {
         }
 
         if(this.jiraUseCase.jira) {
-            logger.debug("Verify that each unit test in Jira project ${this.key} has exactly one component assigned.")
+            log.debug("Verify that each unit test in Jira project ${this.key} has exactly one component assigned.")
             def faultMap = [:]
             this.data.jira.tests
                 .findAll { it.value.get("testType") == "Unit" }
@@ -1095,11 +1097,11 @@ class Project {
             this.isVersioningEnabled = this.checkIfVersioningIsEnabled(projectKey, currentVersion)
             if (this.isVersioningEnabled) {
                 // We detect the correct version even if the build is WIP
-                logger.info("Project has versioning enabled.")
+                log.info("Project has versioning enabled.")
                 result = this.loadJiraDataForCurrentVersion(projectKey, currentVersion)
             } else {
                 // TODO remove in ODS 4.0 version
-                logger.info("Versioning not supported for this release")
+                log.info("Versioning not supported for this release")
                 result = this.loadFullJiraData(projectKey)
             }
         }
@@ -1159,13 +1161,13 @@ class Project {
         }
 
         if (previousVersionId) {
-            logger.info("Found a predecessor project version with ID '${previousVersionId}'. Loading its data.")
+            log.info("Found a predecessor project version with ID '${previousVersionId}'. Loading its data.")
             def savedDataFromOldVersion = this.loadSavedJiraData(previousVersionId)
             def mergedData = this.mergeJiraData(savedDataFromOldVersion, newData)
             result << this.addKeyAndVersionToComponentsWithout(mergedData)
             result.previousVersion = previousVersionId
         } else {
-            logger.info("No predecessor project version found. Loading only data from Jira.")
+            log.info("No predecessor project version found. Loading only data from Jira.")
             result << this.addKeyAndVersionToComponentsWithout(newData)
         }
 
@@ -1355,7 +1357,7 @@ class Project {
 
             // Resolve repo URL, if not provided
             if (!repo.url?.trim()) {
-                this.logger.debug("Could not determine Git URL for repo '${repo.id}' " +
+                this.log.debug("Could not determine Git URL for repo '${repo.id}' " +
                         'from project meta data. Attempting to resolve automatically...')
 
                 def gitURL = this.getGitURLFromPath(this.steps.env.WORKSPACE, 'origin')
@@ -1366,12 +1368,12 @@ class Project {
                     repo.url = gitURL.resolve("${result.id.toLowerCase()}-${repo.id}.git").toString()
                 }
 
-                this.logger.debug("Resolved Git URL for repo '${repo.id}' to '${repo.url}'")
+                this.log.debug("Resolved Git URL for repo '${repo.id}' to '${repo.url}'")
             }
 
             // Resolve repo branch, if not provided
             if (!repo.branch?.trim()) {
-                this.logger.debug("Could not determine Git branch for repo '${repo.id}' " +
+                this.log.debug("Could not determine Git branch for repo '${repo.id}' " +
                         "from project meta data. Assuming 'master'.")
                 repo.branch = 'master'
             }
@@ -1549,7 +1551,7 @@ class Project {
                               'docs',
                              'precedingVersions',]
         def dataToSave = this.data.jira.findAll { savedEntities.contains(it.key) }
-        logger.debug('Saving Jira data for the version ' + JsonOutput.toJson(this.getVersionName()))
+        log.debug('Saving Jira data for the version ' + JsonOutput.toJson(this.getVersionName()))
 
         repository.save(dataToSave, this.getVersionName())
     }

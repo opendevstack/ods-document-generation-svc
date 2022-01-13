@@ -1,15 +1,19 @@
 package org.ods.shared.lib.orchestration.util
 
-
-
+import groovy.util.logging.Slf4j
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
 
 import org.ods.shared.lib.util.IPipelineSteps
 import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.services.GitService
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 
 @SuppressWarnings(['JavaIoPackageAccess', 'PublicMethodsBeforeNonPublicMethods'])
+@Slf4j
+@Service
 class PipelineUtil {
 
     static final String ARTIFACTS_BASE_DIR = 'artifacts'
@@ -20,14 +24,12 @@ class PipelineUtil {
     protected Project project
     protected IPipelineSteps steps
     protected GitService git
-    protected ILogger logger
 
-    PipelineUtil(Project project, IPipelineSteps steps, GitService git,
-        ILogger logger) {
+    @Inject
+    PipelineUtil(Project project, IPipelineSteps steps, GitService git) {
         this.project = project
         this.steps = steps
         this.git = git
-        this.logger = logger
     }
 
     void archiveArtifact(String path, byte[] data) {
@@ -158,12 +160,12 @@ class PipelineUtil {
 
     void failBuild(String message) {
         this.steps.currentBuild.result = 'FAILURE'
-        this.logger.warn(message)
+        this.log.warn(message)
     }
 
     void warnBuild(String message) {
         this.steps.currentBuild.result = 'UNSTABLE'
-        this.logger.warn(message)
+        this.log.warn(message)
     }
 
     def loadGroovySourceFile(String path) {

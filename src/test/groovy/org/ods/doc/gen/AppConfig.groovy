@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySource
 
 @TestConfiguration
 @PropertySource("classpath:application.properties")
-@ComponentScan("org.ods.doc.gen")
+@ComponentScan("org.ods")
 class AppConfig {
 
 }

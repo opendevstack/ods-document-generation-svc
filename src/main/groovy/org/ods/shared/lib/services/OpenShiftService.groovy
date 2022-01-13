@@ -1,18 +1,21 @@
 package org.ods.shared.lib.services
 
-
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import org.ods.shared.lib.util.ILogger
+import groovy.util.logging.Slf4j
 import org.ods.shared.lib.util.IPipelineSteps
 import org.ods.shared.lib.util.PodData
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
 import java.security.SecureRandom
 
 @SuppressWarnings(['ClassSize', 'MethodCount'])
 @TypeChecked
+@Slf4j
+@Service
 class OpenShiftService {
 
     static final String EXPORTED_TEMPLATE_FILE = 'template.yml'
@@ -22,11 +25,10 @@ class OpenShiftService {
     static final String DEPLOYMENT_KIND = 'Deployment'
 
     private final IPipelineSteps steps
-    private final ILogger logger
 
-    OpenShiftService(IPipelineSteps steps, ILogger logger) {
+    @Inject
+    OpenShiftService(IPipelineSteps steps) {
         this.steps = steps
-        this.logger = logger
     }
 
     static void createProject(IPipelineSteps steps, String name) {
@@ -165,7 +167,7 @@ class OpenShiftService {
     String rollout(String project, String kind, String name, int priorRevision, int timeoutMinutes) {
         def revision = getRevision(project, kind, name)
         if (revision > priorRevision) {
-            logger.info "Rollout of deployment for '${name}' has been triggered automatically."
+            log.info "Rollout of deployment for '${name}' has been triggered automatically."
         } else {
             if (kind == OpenShiftService.DEPLOYMENTCONFIG_KIND) {
                 startRollout(project, name, revision)
@@ -192,7 +194,7 @@ class OpenShiftService {
                 "Observed related event messages:\n${getRolloutEventMessages(project, podManagerKind, podManagerName)}"
             )
         } else {
-            logger.info "Rollout #${revision} of ${kind} '${name}' successful."
+            log.info "Rollout #${revision} of ${kind} '${name}' successful."
         }
         podManagerName
     }
@@ -268,11 +270,7 @@ class OpenShiftService {
     }
 
     int startBuild(String project, String name, String dir) {
-        steps.sh(
-            script: "oc -n ${project} start-build ${name} --from-dir ${dir} ${logger.ocDebugFlag}",
-            label: "Start Openshift build ${name}",
-            returnStdout: true
-        ).toString().trim()
+        // TODO s2o
         return getLastBuildVersion(project, name)
     }
 
@@ -303,7 +301,7 @@ class OpenShiftService {
         def retries = 5
         for (def i = 0; i < retries; i++) {
             buildStatus = checkForBuildStatus(project, buildId)
-            logger.debug ("Build: '${buildId}' - status: '${buildStatus}'")
+            log.debug ("Build: '${buildId}' - status: '${buildStatus}'")
             if (buildStatus == 'complete') {
                 return buildStatus
             } else if (buildStatus == 'running') {
@@ -319,46 +317,7 @@ class OpenShiftService {
 
     @SuppressWarnings('LineLength')
     void patchBuildConfig(String project, String name, String tag, Map buildArgs, Map imageLabels) {
-        def odsImageLabels = []
-        for (def key : imageLabels.keySet()) {
-            odsImageLabels << """{"name": "${key}", "value": "${imageLabels[key]}"}"""
-        }
-
-        // Normally we want to replace the imageLabels, but in case they are not
-        // present yet, we need to add them this time.
-        def imageLabelsOp = 'replace'
-        def imageLabelsValue = steps.sh(
-            script: "oc -n ${project} get bc/${name} -o jsonpath='{.spec.output.imageLabels}'",
-            returnStdout: true,
-            label: 'Test existance of path .spec.output.imageLabels'
-        ).toString().trim()
-        if (imageLabelsValue.length() == 0) {
-            imageLabelsOp = 'add'
-        }
-
-        def patches = [
-            '{"op": "replace", "path": "/spec/source", "value": {"type":"Binary"}}',
-            """{"op": "replace", "path": "/spec/output/to/name", "value": "${name}:${tag}"}""",
-            """{"op": "${imageLabelsOp}", "path": "/spec/output/imageLabels", "value": [
-              ${odsImageLabels.join(',')}
-            ]}""",
-        ]
-
-        // Add build args
-        def buildArgsItems = []
-        for (def key : buildArgs.keySet()) {
-            def val = buildArgs[key]
-            buildArgsItems << """{"name": "${key}", "value": "${val}"}"""
-        }
-        if (buildArgsItems.size() > 0) {
-            def buildArgsPatch = """{"op": "replace", "path": "/spec/strategy/dockerStrategy/buildArgs", "value": [${buildArgsItems.join(',')}]}"""
-            patches << buildArgsPatch
-        }
-
-        steps.sh(
-            script: """oc -n ${project} patch bc ${name} --type=json --patch '[${patches.join(',')}]' ${logger.ocDebugFlag} """,
-            label: "Patch BuildConfig ${name}"
-        )
+       // TODO s2o
     }
 
     String getImageReference(String project, String name, String tag) {
@@ -459,11 +418,11 @@ class OpenShiftService {
     // - repository (= OpenShift project in case of image from ImageStream)
     // - name (= ImageStream name in case of image from ImageStream)
     Map<String, String> imageInfoForImageUrl(String url) {
-        def imageInfo = [:]
+        Map<String, String> imageInfo = [:]
         def urlParts = url.split('/').toList()
 
         if (urlParts.size() < 2) {
-            logger.debug "Image URL ${url} does not define the repository explicitly."
+            log.debug "Image URL ${url} does not define the repository explicitly."
             imageInfo.repository = ''
         } else {
             imageInfo.repository = urlParts[-2]
@@ -472,7 +431,7 @@ class OpenShiftService {
         if (urlParts.size() > 2) {
             imageInfo.registry = urlParts[-3]
         } else {
-            logger.debug "Image URL ${url} does not define the registry explicitly."
+            log.debug "Image URL ${url} does not define the registry explicitly."
             imageInfo.registry = ''
         }
 
@@ -483,7 +442,7 @@ class OpenShiftService {
             def tagParts = urlParts[-1].split(':').toList()
             imageInfo.name = tagParts[0]
         }
-        imageInfo
+        return imageInfo
     }
 
     // imageInfoWithShaForImageStreamUrl expects an image URL like one of the following:
@@ -539,15 +498,15 @@ class OpenShiftService {
         Map pods = [:]
         deploymentNames.each { name ->
             Map pod = [:]
-            logger.debug("Verifying images of ${kind} '${name}'")
+            log.debug("Verifying images of ${kind} '${name}'")
             int revision = 0
             try {
                 revision = getRevision(project, kind, name)
             } catch (err) {
-                logger.debug("${kind} '${name}' does not exist!")
+                log.debug("${kind} '${name}' does not exist!")
             }
             if (revision < 1) {
-                logger.debug("No revision of ${kind} '${name}' found")
+                log.debug("No revision of ${kind} '${name}' found")
             } else {
                 def podManagerName = getPodManagerName(project, kind, name, revision)
                 def podData = getPodDataForDeployment(
@@ -569,17 +528,17 @@ class OpenShiftService {
     }
 
     boolean verifyImageSha(String containerName, String definedImage, String actualImageRaw) {
-        logger.debug("Verifiying image of container '${containerName}' ...")
+        log.debug("Verifiying image of container '${containerName}' ...")
         def runningImageSha = imageInfoWithShaForImageStreamUrl(actualImageRaw).sha
         def definedImageSha = definedImage.split('@').last()
         if (runningImageSha != definedImageSha) {
-            logger.debug(
+            log.debug(
                 "Container '${containerName}' is using image '${runningImageSha}' " +
                 "which differs from defined image '${definedImageSha}'."
             )
             return false
         }
-        logger.debug("Container '${containerName}' is using defined image '${definedImageSha}'.")
+        log.debug("Container '${containerName}' is using defined image '${definedImageSha}'.")
         true
     }
 
@@ -632,9 +591,9 @@ class OpenShiftService {
             label += value == null ? '-' : "='${value}'"
             return label
         }.join(' ')
-        if (logger.getDebugMode()) {
-            logger.debug("Setting labels ${labelStr} to resources ${resources} selected by ${selector}")
-        }
+
+        log.debug("Setting labels ${labelStr} to resources ${resources} selected by ${selector}")
+
         def script = "oc label --overwrite ${resources} "
         if (selector) {
             script += "-l ${selector} "
@@ -670,9 +629,7 @@ class OpenShiftService {
         if (!resource) {
             throw new IllegalArgumentException('You must specify the resource to pause')
         }
-        if (logger.getDebugMode()) {
-            logger.debug("Pausing ${resource}")
-        }
+        log.debug("Pausing ${resource}")
         def script = "oc rollout pause ${resource}"
         if (project) {
             script += " -n ${project} "
@@ -726,9 +683,7 @@ class OpenShiftService {
         if (!resource) {
             throw new IllegalArgumentException('You must specify the resource to resume')
         }
-        if (logger.getDebugMode()) {
-            logger.debug("Resuming ${resource}")
-        }
+        log.debug("Resuming ${resource}")
         def script = "oc rollout resume ${resource}"
         if (project) {
             script += " -n ${project} "
@@ -806,10 +761,8 @@ class OpenShiftService {
             }
         }
         def jsonPatch = JsonOutput.toJson(fullPatch)
-        if (logger.getDebugMode()) {
-            def namespace = project ?: 'current'
-            logger.debug("Patching ${resource} in the ${namespace} project with ${jsonPatch}")
-        }
+        def namespace = project ?: 'current'
+        log.debug("Patching ${resource} in the ${namespace} project with ${jsonPatch}")
         def script = "oc patch ${resource} --type='merge' -p '${jsonPatch}'"
         if (project) {
             script += " -n ${project}"
@@ -905,13 +858,13 @@ class OpenShiftService {
     }
 
     private void createBuildConfig(String project, String name, Map<String, String> labels, String tag) {
-        logger.info "Creating BuildConfig ${name} in ${project} ... "
+        log.info "Creating BuildConfig ${name} in ${project} ... "
         def bcYml = buildConfigBinaryYml(name, labels, tag)
         createResource(project, bcYml)
     }
 
     private void createImageStream(String project, String name, Map<String, String> labels) {
-        logger.info "Creating ImageStream ${name} in ${project} ... "
+        log.info "Creating ImageStream ${name} in ${project} ... "
         def isYml = imageStreamYml(name, labels)
         createResource(project, isYml)
     }
@@ -1092,7 +1045,7 @@ class OpenShiftService {
         try {
             managerEventMessages = getEventMessages(project, kind, podManagerName)
         } catch (ex) {
-            logger.debug("Error when retrieving events for ${kind} ${podManagerName}:\n${ex}")
+            log.debug("Error when retrieving events for ${kind} ${podManagerName}:\n${ex}")
         }
         if (!managerEventMessages) {
             return "Could not find any events for ${kind} ${podManagerName}."
@@ -1103,7 +1056,7 @@ class OpenShiftService {
             def label = getPodLabelForPodManager(project, kind, podManagerName)
             pod = getPodsWithLabel(project, label)[0]
         } catch (ex) {
-            logger.debug("Error when retrieving pod for ${kind} ${podManagerName}:\n${ex}")
+            log.debug("Error when retrieving pod for ${kind} ${podManagerName}:\n${ex}")
         }
         if (!pod) {
             return "${managerEventMessages}\nCould not find any pod for ${kind} ${podManagerName}."
@@ -1112,7 +1065,7 @@ class OpenShiftService {
         try {
             podEventMessages = getEventMessages(project, "Pod", pod)
         } catch (ex) {
-            logger.debug("Error when retrieving events for pod ${pod}:\n${ex}")
+            log.debug("Error when retrieving events for pod ${pod}:\n${ex}")
         }
         if (!podEventMessages) {
             return "${managerEventMessages}\nCould not find any events for pod for ${pod}."
@@ -1134,7 +1087,7 @@ class OpenShiftService {
             // do not need to fail.
             def newVersion = getRevision(project, DEPLOYMENTCONFIG_KIND, name)
             if (newVersion > version) {
-                logger.debug("Rollout #${newVersion} has been started by another process")
+                log.debug("Rollout #${newVersion} has been started by another process")
             } else {
                 throw ex
             }
@@ -1146,22 +1099,7 @@ class OpenShiftService {
     // This means this will simply fail on an OpenShift 3.11 cluster.
     // DeploymentConfig resources cannot be targeted using "rollout restart".
     private void restartRollout(String project, String name, int version) {
-        try {
-            steps.sh(
-                script: "oc -n ${project} rollout restart deployment/${name} ${logger.ocDebugFlag}",
-                label: "Rollout restart of deployment/${name}"
-            )
-        } catch (ex) {
-            // It could be that some other process (e.g. image trigger) started
-            // a rollout just before we wanted to start it. In that case, we
-            // do not need to fail.
-            def newVersion = getRevision(project, DEPLOYMENT_KIND, name)
-            if (newVersion > version) {
-                logger.debug("Rollout #${newVersion} has been started by another process")
-            } else {
-                throw ex
-            }
-        }
+       // TODO s2o
     }
 
     private void doWatchRollout(String project, String kind, String name) {
@@ -1172,21 +1110,7 @@ class OpenShiftService {
     }
 
     private void reloginToCurrentClusterIfNeeded() {
-        def kubeUrl = steps.env.KUBERNETES_MASTER ?: 'https://kubernetes.default:443'
-        def success = steps.sh(
-            script: """
-               ${logger.shellScriptDebugFlag}
-                oc login ${kubeUrl} --insecure-skip-tls-verify=true \
-                --token=\$(cat /run/secrets/kubernetes.io/serviceaccount/token) &> /dev/null
-            """,
-            returnStatus: true,
-            label: 'Check if OCP session exists'
-        ) == 0
-        if (!success) {
-            throw new RuntimeException(
-                'Could not (re)login to cluster, this is a systemic failure'
-            )
-        }
+      // TODO s2o
     }
 
     private void importImageFromProject(
@@ -1208,15 +1132,7 @@ class OpenShiftService {
         String targetImageRef) {
         def sourceClusterRegistryHost = getSourceClusterRegistryHost(project, sourceRegistrySecret)
         def sourceImageFull = "${sourceClusterRegistryHost}/${sourceProject}/${sourceImageRef}"
-        steps.sh(
-            script: """
-              oc -n ${project} import-image ${targetImageRef} \
-                --from=${sourceImageFull} \
-                --confirm \
-                ${logger.ocDebugFlag}
-            """,
-            label: "Import image ${sourceImageFull} into ${project}/${targetImageRef}"
-        )
+        //steps.sh(        ) // TODO s2o
     }
 
     @SuppressWarnings(['CyclomaticComplexity', 'AbcMetric'])
@@ -1346,7 +1262,7 @@ class OpenShiftService {
     }
 
     private Map<String, String> imageInfoWithSha(List<String> urlParts) {
-        def imageInfo = [:]
+        Map<String, String> imageInfo = [:]
         def url = urlParts.join('/')
         if (urlParts.size() < 2 || !urlParts[-1].contains('@sha256:')) {
             throw new RuntimeException(
@@ -1356,7 +1272,7 @@ class OpenShiftService {
         if (urlParts.size() > 2) {
             imageInfo.registry = urlParts[-3]
         } else {
-            logger.debug "Image URL ${url} does not define the registry explicitly."
+            log.debug "Image URL ${url} does not define the registry explicitly."
             imageInfo.registry = ''
         }
         imageInfo.repository = urlParts[-2]
@@ -1364,7 +1280,7 @@ class OpenShiftService {
         imageInfo.name = nameParts[0]
         imageInfo.sha = nameParts[1]
         imageInfo.shaStripped = nameParts[1].replace('sha256:', '')
-        imageInfo
+        return imageInfo
     }
 
 }

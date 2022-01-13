@@ -1,17 +1,24 @@
 package org.ods.shared.lib.orchestration.usecase
 
+import groovy.util.logging.Slf4j
 import org.ods.shared.lib.util.IPipelineSteps
 import  org.ods.shared.lib.orchestration.util.Project
 import org.ods.shared.lib.services.NexusService
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 
 @SuppressWarnings(['JavaIoPackageAccess', 'EmptyCatchBlock'])
+@Slf4j
+@Service
 class SonarQubeUseCase {
 
     private Project project
     private NexusService nexus
     private IPipelineSteps steps
 
-    SonarQubeUseCase(Project project, IPipelineSteps steps, nexus) {
+    @Inject
+    SonarQubeUseCase(Project project, IPipelineSteps steps, NexusService nexus) {
         this.project = project
         this.steps = steps
         this.nexus = nexus

@@ -1,6 +1,6 @@
 package org.ods.shared.lib.orchestration.usecase
 
-
+import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.orchestration.parser.JUnitParser
 import  org.ods.shared.lib.orchestration.service.JiraService
 import org.ods.shared.lib.util.IPipelineSteps
@@ -8,8 +8,13 @@ import org.ods.shared.lib.util.ILogger
 import  org.ods.shared.lib.orchestration.util.MROPipelineUtil
 import  org.ods.shared.lib.orchestration.util.Project
 import  org.ods.shared.lib.orchestration.util.Project.JiraDataItem
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 
 @SuppressWarnings(['IfStatementBraces', 'LineLength'])
+@Slf4j
+@Service
 class JiraUseCase {
 
     class IssueTypes {
@@ -42,14 +47,13 @@ class JiraUseCase {
     IPipelineSteps steps
     private AbstractJiraUseCaseSupport support
     private MROPipelineUtil util
-    private ILogger logger
 
-    JiraUseCase(Project project, IPipelineSteps steps, MROPipelineUtil util, JiraService jira, ILogger logger) {
+    @Inject
+    JiraUseCase(Project project, IPipelineSteps steps, MROPipelineUtil util, JiraService jira) {
         this.project = project
         this.steps = steps
         this.util = util
         this.jira = jira
-        this.logger = logger
     }
 
     void setSupport(AbstractJiraUseCaseSupport support) {
@@ -191,7 +195,7 @@ class JiraUseCase {
 
         def result = this.jira.searchByJQLQuery(jqlQuery)
         if (!result || result.total == 0) {
-            this.logger.warn("There are no document chapters assigned to this version. Using JQL query: '${jqlQuery}'.")
+            this.log.warn("There are no document chapters assigned to this version. Using JQL query: '${jqlQuery}'.")
             return [:]
         }
 
@@ -304,14 +308,14 @@ class JiraUseCase {
 
         def testComponent = "${componentName ?: 'project'}"
         def testMessage = componentName ? " for component '${componentName}'" : ''
-        if (logger.debugMode) {
-            logger.debug('Reporting unit test results to corresponding test cases in Jira' +
+        if (log.debugMode) {
+            log.debug('Reporting unit test results to corresponding test cases in Jira' +
                 "${testMessage}. Test type: '${testTypes}'.\nTest results: ${testResults}")
         }
 
-        logger.startClocked("${testComponent}-jira-fetch-tests-${testTypes}")
+        log.startClocked("${testComponent}-jira-fetch-tests-${testTypes}")
         def testIssues = this.project.getAutomatedTests(componentName, testTypes)
-        logger.debugClocked("${testComponent}-jira-fetch-tests-${testTypes}",
+        log.debugClocked("${testComponent}-jira-fetch-tests-${testTypes}",
             "Found automated tests$testMessage. Test type: ${testTypes}: " +
                 "${testIssues?.size()}")
 
@@ -322,11 +326,11 @@ class JiraUseCase {
             }
         }
 
-        logger.startClocked("${testComponent}-jira-report-tests-${testTypes}")
+        log.startClocked("${testComponent}-jira-report-tests-${testTypes}")
         this.support.applyXunitTestResults(testIssues, testResults)
-        logger.debugClocked("${testComponent}-jira-report-tests-${testTypes}")
+        log.debugClocked("${testComponent}-jira-report-tests-${testTypes}")
         if (['Q', 'P'].contains(this.project.buildParams.targetEnvironmentToken)) {
-            logger.startClocked("${testComponent}-jira-report-bugs-${testTypes}")
+            log.startClocked("${testComponent}-jira-report-bugs-${testTypes}")
             // Create bugs for erroneous test issues
             def errors = JUnitParser.Helper.getErrors(testResults)
             this.createBugsForFailedTestIssues(testIssues, errors, this.steps.env.RUN_DISPLAY_URL)
@@ -334,7 +338,7 @@ class JiraUseCase {
             // Create bugs for failed test issues
             def failures = JUnitParser.Helper.getFailures(testResults)
             this.createBugsForFailedTestIssues(testIssues, failures, this.steps.env.RUN_DISPLAY_URL)
-            logger.debugClocked("${testComponent}-jira-report-bugs-${testTypes}")
+            log.debugClocked("${testComponent}-jira-report-bugs-${testTypes}")
         }
     }
 
@@ -365,9 +369,9 @@ class JiraUseCase {
         def releaseStatusIssueReleaseManagerStatusField = releaseStatusIssueFields['Release Manager Status']
         this.jira.updateSelectListFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueReleaseManagerStatusField.id): status])
 
-        logger.startClocked("jira-update-release-${releaseStatusIssueKey}")
+        log.startClocked("jira-update-release-${releaseStatusIssueKey}")
         addCommentInReleaseStatus(message)
-        logger.debugClocked("jira-update-release-${releaseStatusIssueKey}")
+        log.debugClocked("jira-update-release-${releaseStatusIssueKey}")
     }
 
     void addCommentInReleaseStatus(String message) {
@@ -391,7 +395,7 @@ class JiraUseCase {
                 try {
                     versionNumber = version.toLong()
                 } catch (NumberFormatException _) {
-                    this.logger.warn("Document tracking issue '${issue.key}' does not contain a valid numerical" +
+                    this.log.warn("Document tracking issue '${issue.key}' does not contain a valid numerical" +
                         " version. It contains value '${version}'.")
                 }
             }
@@ -400,7 +404,7 @@ class JiraUseCase {
         }
 
         def result = versionList.max()
-        logger.debug("Retrieved max doc version ${versionList.max()} from doc tracking issues " +
+        log.debug("Retrieved max doc version ${versionList.max()} from doc tracking issues " +
             "${trackingIssues.collect { it.key } }")
 
         return result

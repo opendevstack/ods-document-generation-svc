@@ -1,20 +1,27 @@
 package org.ods.shared.lib.services
 
+import groovy.util.logging.Slf4j
+import org.ods.shared.lib.PipelineScript
 import org.ods.shared.lib.util.ILogger
+import org.ods.shared.lib.util.IPipelineSteps
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 
 @SuppressWarnings('MethodCount')
+@Slf4j
+@Service
 class GitService {
 
     @SuppressWarnings('NonFinalPublicField')
     public static String ODS_GIT_TAG_PREFIX = 'ods-generated-'
     public final static String ODS_GIT_BRANCH_PREFIX = 'release/'
 
-    private final def script
-    private final ILogger logger
+    private final IPipelineSteps script
 
-    GitService(script, logger) {
+    @Inject
+    GitService(IPipelineSteps script) {
         this.script = script
-        this.logger = logger
     }
 
     // mergedIssueId gets the issue ID from the merged branch.

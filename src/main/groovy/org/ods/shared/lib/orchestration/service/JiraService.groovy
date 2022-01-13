@@ -4,12 +4,17 @@ package org.ods.shared.lib.orchestration.service
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
+import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.orchestration.util.StringCleanup
 import kong.unirest.Unirest
 
 import org.apache.http.client.utils.URIBuilder
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 
 @SuppressWarnings(['LineLength', 'ParameterName'])
+@Slf4j
+@Service
 class JiraService {
 
     protected static Map CHARACTER_REMOVEABLE = [
@@ -21,7 +26,9 @@ class JiraService {
     String username
     String password
 
-    JiraService(String baseURL, String username, String password) {
+    JiraService(@Value('${jira.baseURL}') String baseURL,
+                @Value('${jira.username}')  String username,
+                @Value('${jira.password}') String password) {
         if (!baseURL?.trim()) {
             throw new IllegalArgumentException('Error: unable to connect to Jira. \'baseURL\' is undefined.')
         }

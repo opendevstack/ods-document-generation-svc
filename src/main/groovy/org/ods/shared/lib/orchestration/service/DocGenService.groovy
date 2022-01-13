@@ -4,19 +4,27 @@ package org.ods.shared.lib.orchestration.service
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
+import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.pdf.conversor.PdfGenerationService
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
 
+@Slf4j
+@Service
 class DocGenService {
 
     URI baseURL
+    private final PdfGenerationService pdfGenerationService
 
-    DocGenService(String baseURL) {
-        if (!baseURL?.trim()) {
+    @Inject
+    DocGenService(PdfGenerationService pdfGenerationService) {
+       /* if (!baseURL?.trim()) {
             throw new IllegalArgumentException("Error: unable to connect to DocGen. 'baseURL' is undefined.")
         }
 
@@ -26,22 +34,23 @@ class DocGenService {
             throw new IllegalArgumentException(
                 "Error: unable to connect to DocGen. '${baseURL}' is not a valid URI."
             ).initCause(e)
-        }
+        }*/
+        this.pdfGenerationService = pdfGenerationService
     }
 
     
     byte[] createDocument(String type, String version, Map data) {
-        def body = JsonOutput.toJson([
+        def body = [
                 metadata: [
                         type   : type,
                         version: version
                 ],
                 data    : data
-        ])
-        def response = Unirest.post("${this.baseURL}/document")
+        ]
+        /*def response = Unirest.post("${this.baseURL}/document")
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
-            .body(body)
+            .body(JsonOutput.toJson(body))
             .asString()
 
         response.ifFailure {
@@ -57,8 +66,8 @@ class DocGenService {
         }
 
         def result = new JsonSlurperClassic().parseText(response.getBody())
-        return decodeBase64(result.data)
-        //return convertToPdf(body)
+        return decodeBase64(result.data)*/
+        return convertToPdf(body)
     }
 
     private byte[] convertToPdf(Map body) {
@@ -67,7 +76,7 @@ class DocGenService {
         Path documentPdf
         try {
             tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
-            documentPdf = pdfGeneration.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
+            documentPdf = pdfGenerationService.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
         } catch (Throwable e) {
             throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.", e)
         } finally {

@@ -1,6 +1,8 @@
 package org.ods.shared.lib.orchestration.usecase
 
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.AppConfig
+import org.ods.doc.gen.pdf.conversor.PdfGenerationService
 import org.ods.shared.lib.core.test.usecase.LevaDocUseCaseFactory
 import org.ods.shared.lib.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
 import org.ods.shared.lib.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithComponent
@@ -10,14 +12,19 @@ import org.ods.shared.lib.core.test.usecase.levadoc.fixture.PipelineProcess
 import org.ods.shared.lib.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.shared.lib.core.test.wiremock.WiremockManager
 import org.ods.shared.lib.core.test.wiremock.WiremockServers
+import org.ods.shared.lib.orchestration.service.DocGenService
 import org.ods.shared.lib.services.GitService
 import org.ods.shared.lib.services.JenkinsService
 import org.ods.shared.lib.services.OpenShiftService
+import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 import util.FixtureHelper
+
+import javax.inject.Inject
+
 /**
  * IMPORTANT: this test use Wiremock files to mock all the external interactions.
  *
@@ -49,6 +56,8 @@ import util.FixtureHelper
  *  - RECORD=true & GENERATE_EXPECTED_PDF_FILES=true will record and generate new pdf expected files
  *
  */
+
+@ContextConfiguration(classes= [AppConfig.class])
 @Slf4j
 class LevaDocUseCaseFunctTest extends Specification {
 
@@ -60,6 +69,9 @@ class LevaDocUseCaseFunctTest extends Specification {
 
     @TempDir
     public File tempFolder
+
+    @Inject
+    DocGenService docGenService
 
     private WiremockManager jiraServer
     private WiremockManager docGenServer
@@ -182,7 +194,8 @@ class LevaDocUseCaseFunctTest extends Specification {
             jenkins,
             openShiftService,
             gitService,
-            bbT)
+            bbT,
+                docGenService)
     }
 
     private PipelineProcess buildLevaDocUseCasePipeline(projectFixture) {

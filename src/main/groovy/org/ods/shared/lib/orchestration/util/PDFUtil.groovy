@@ -4,6 +4,8 @@ package org.ods.shared.lib.orchestration.util
 
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Service
 
 import java.nio.file.Files
 
@@ -22,6 +24,8 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.nio.file.Paths
 
 @SuppressWarnings(['JavaIoPackageAccess', 'LineLength', 'UnnecessaryObjectReferences'])
+@Slf4j
+@Service
 class PDFUtil {
 
     

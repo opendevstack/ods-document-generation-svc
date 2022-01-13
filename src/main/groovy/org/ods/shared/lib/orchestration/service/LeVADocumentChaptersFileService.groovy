@@ -1,16 +1,23 @@
 package org.ods.shared.lib.orchestration.service
 
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Service
+
+import javax.inject.Inject
 import java.nio.file.Paths
 
 import org.ods.shared.lib.util.IPipelineSteps
 import org.yaml.snakeyaml.Yaml
 
+@Slf4j
+@Service
 class LeVADocumentChaptersFileService {
 
     static final String DOCUMENT_CHAPTERS_BASE_DIR = 'docs'
 
     private IPipelineSteps steps
 
+    @Inject
     LeVADocumentChaptersFileService(IPipelineSteps steps) {
         this.steps = steps
     }

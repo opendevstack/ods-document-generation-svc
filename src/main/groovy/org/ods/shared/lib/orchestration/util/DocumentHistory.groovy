@@ -1,17 +1,18 @@
 package org.ods.shared.lib.orchestration.util
 
-
-import  org.ods.shared.lib.orchestration.scheduler.LeVADocumentScheduler
+import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.orchestration.service.leva.ProjectDataBitbucketRepository
 import  org.ods.shared.lib.orchestration.util.Project.JiraDataItem
-import org.ods.shared.lib.util.ILogger
 import org.ods.shared.lib.util.IPipelineSteps
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
 import java.nio.file.NoSuchFileException
 
 /**
  * This class contains the logic for keeping a consistent document version.
  */
+@Slf4j
 class DocumentHistory {
 
     static final String ADD = 'add'
@@ -22,7 +23,6 @@ class DocumentHistory {
     static final String CHANGED = CHANGE + 'd'
 
     protected IPipelineSteps steps
-    protected ILogger logger
     protected List<DocumentHistoryEntry> data = []
     private String sourceEnvironment
     protected String targetEnvironment
@@ -34,9 +34,8 @@ class DocumentHistory {
     protected Boolean allIssuesAreValid = true
     protected String allIssuesAreNotValidMessage = ''
 
-    DocumentHistory(IPipelineSteps steps, ILogger logger, String targetEnvironment, String documentName) {
+    DocumentHistory(IPipelineSteps steps,String targetEnvironment, String documentName) {
         this.steps = steps
-        this.logger = logger
         this.documentName = documentName
         if (!targetEnvironment) {
             throw new RuntimeException('Variable \'targetEnvironment\' cannot be empty for computing Document History')
@@ -54,16 +53,14 @@ class DocumentHistory {
             def docHistories = sortDocHistoriesReversed(this.loadSavedDocHistoryData())
             if (docHistories) {
                 this.latestVersionId = docHistories.first().getEntryId()
-                if (logger.getDebugMode()) {
-                    logger.debug("Retrieved latest ${documentName} version ${latestVersionId} from saved history")
-                }
+                log.debug("Retrieved latest ${documentName} version ${latestVersionId} from saved history")
                 this.data = docHistories
             }
         } catch (NoSuchFileException e) {
             if (sourceEnvironment != targetEnvironment) {
-                this.logger.warn("No saved history found. Exception message: ${e.message}")
-            } else if (logger.getDebugMode()) {
-                this.logger.debug("No saved history found. Exception message: ${e.message}")
+                this.log.warn("No saved history found. Exception message: ${e.message}")
+            } else {
+                this.log.debug("No saved history found. Exception message: ${e.message}")
             }
         }
         // Only update the history if the target environment is the first one where the document is created,
@@ -72,16 +69,14 @@ class DocumentHistory {
             this.latestVersionId += 1L
             def newDocDocumentHistoryEntry = parseJiraDataToDocumentHistoryEntry(jiraData, filterKeys)
             if (this.allIssuesAreValid) {
-                if (logger.getDebugMode()) {
-                    logger.debug("Creating a new history entry with version ${latestVersionId} for ${documentName}")
-                }
+                log.debug("Creating a new history entry with version ${latestVersionId} for ${documentName}")
                 newDocDocumentHistoryEntry.rational = createRational(newDocDocumentHistoryEntry)
                 this.data.add(0, newDocDocumentHistoryEntry)
                 this.data = sortDocHistoriesReversed(this.data)
             } else {
                 // We only want to update the document version when we are actually adding a new entry.
                 this.latestVersionId -= 1L
-                logger.warn("Not all issues for ${documentName} had version. Not creating a new history entry.")
+                log.warn("Not all issues for ${documentName} had version. Not creating a new history entry.")
             }
         }
         return this
@@ -94,7 +89,7 @@ class DocumentHistory {
 
     List<DocumentHistoryEntry> loadSavedDocHistoryData(ProjectDataBitbucketRepository repo = null) {
         def fileName = this.getSavedDocumentName(sourceEnvironment)
-        this.logger.debug("Retrieving saved document history with name '${fileName}' " +
+        this.log.debug("Retrieving saved document history with name '${fileName}' " +
             "in workspace '${this.steps.env.WORKSPACE}'.")
         if (!repo) {
             repo = new ProjectDataBitbucketRepository(steps)
@@ -218,7 +213,7 @@ class DocumentHistory {
     
     private getSourceEnvironment(String documentName, String targetEnvironment) {
         def documentType = LeVADocumentUtil.getTypeFromName(documentName)
-        return LeVADocumentScheduler.getPreviousCreationEnvironment(documentType, targetEnvironment)
+        return Environment.getPreviousCreationEnvironment(documentType, targetEnvironment)
     }
 
     
@@ -320,16 +315,16 @@ class DocumentHistory {
     }
 
     private DocumentHistoryEntry parseJiraDataToDocumentHistoryEntry(Map jiraData, List<String> keysInDocument) {
-        logger.debug("Parsing jira data to document history")
+        log.debug("Parsing jira data to document history")
         def projectVersion = jiraData.version
         def previousProjectVersion = jiraData.previousVersion ?: ''
         this.allIssuesAreValid = true
 
         def versionMap = this.computeEntryData(jiraData, projectVersion, keysInDocument)
         if (!this.allIssuesAreValid){
-            logger.warn(this.allIssuesAreNotValidMessage)
+            log.warn(this.allIssuesAreNotValidMessage)
         }
-        logger.debug("parseJiraDataToDocumentHistoryEntry: versionMap = ${versionMap.toString()}")
+        log.debug("parseJiraDataToDocumentHistoryEntry: versionMap = ${versionMap.toString()}")
         return new DocumentHistoryEntry(versionMap, this.latestVersionId, projectVersion, previousProjectVersion, '')
     }
 
@@ -341,9 +336,7 @@ class DocumentHistory {
         def discontinuations = computeDiscontinuations(jiraData, previousDocumentIssues)
 
         def addUpdDisc = JiraDataItem.TYPES.collectEntries { String issueType ->
-            [(issueType): (additionsAndUpdates[issueType] ?: [])
-                + (discontinuations[issueType] ?: [])
-            ]
+            [(issueType): (additionsAndUpdates[issueType] ?: []) + (discontinuations[issueType] ?: [])]
         } as Map
 
         return this.computeActionsThatBelongToTheCurrentHistoryData(previousDocumentIssues, addUpdDisc, keysInDocument)

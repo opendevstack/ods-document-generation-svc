@@ -2,13 +2,18 @@ package org.ods.shared.lib.orchestration.usecase
 
 import com.xlson.groovycsv.CsvParser
 import com.xlson.groovycsv.PropertyMapper
+import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.orchestration.util.Project
 import  org.ods.shared.lib.orchestration.util.StringCleanup
 import org.ods.shared.lib.services.BitbucketService
 import org.ods.shared.lib.util.IPipelineSteps
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
 import java.text.SimpleDateFormat
 
+@Slf4j
+@Service
 class BitbucketTraceabilityUseCase {
 
     private static final String CSV_FILE = "source-code-review.csv"
@@ -23,6 +28,7 @@ class BitbucketTraceabilityUseCase {
     private final IPipelineSteps steps
     private final Project project
 
+    @Inject
     BitbucketTraceabilityUseCase(BitbucketService bitbucketService, IPipelineSteps steps, Project project) {
         this.steps = steps
         this.project = project

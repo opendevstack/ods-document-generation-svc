@@ -1,6 +1,6 @@
 package org.ods.shared.lib.services
 
-import org.ods.PipelineScript
+import org.ods.shared.lib.PipelineScript
 import org.ods.shared.lib.util.Logger
 import util.SpecHelper
 
