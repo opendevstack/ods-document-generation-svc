@@ -1,17 +1,17 @@
 package org.ods.shared.lib.core.test.workspace
 
 import groovy.util.logging.Slf4j
-import  org.ods.shared.lib.orchestration.usecase.JUnitTestReportsUseCase
-import  org.ods.shared.lib.orchestration.util.PipelineUtil
-import  org.ods.shared.lib.orchestration.util.Project
-import org.ods.shared.lib.util.IPipelineSteps
+import  org.ods.shared.lib.xunit.JUnitTestReportsUseCase
+import  org.ods.shared.lib.jenkins.PipelineUtil
+import org.ods.shared.lib.project.data.TestType
+import org.ods.shared.lib.jenkins.IPipelineSteps
 
 /**
  * Tests results should be at "${steps.env.WORKSPACE}/xunit"
  */
 @Slf4j
 class TestsReports {
-    private final static List TYPES = [Project.TestType.INSTALLATION, Project.TestType.INTEGRATION, Project.TestType.ACCEPTANCE, Project.TestType.UNIT]
+    private final static List TYPES = [TestType.INSTALLATION, TestType.INTEGRATION, TestType.ACCEPTANCE, TestType.UNIT]
     private final JUnitTestReportsUseCase jUnitTestReport
     private final IPipelineSteps steps
 

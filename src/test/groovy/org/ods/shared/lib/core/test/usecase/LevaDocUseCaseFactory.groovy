@@ -5,22 +5,22 @@ import org.apache.commons.io.FileUtils
 import org.ods.shared.lib.core.test.jira.JiraServiceForWireMock
 import org.ods.shared.lib.core.test.wiremock.WiremockManager
 import org.ods.shared.lib.core.test.wiremock.WiremockServers
-import org.ods.shared.lib.orchestration.service.DocGenService
-import org.ods.shared.lib.orchestration.service.LeVADocumentChaptersFileService
-import org.ods.shared.lib.orchestration.usecase.BitbucketTraceabilityUseCase
-import org.ods.shared.lib.orchestration.usecase.JUnitTestReportsUseCase
-import org.ods.shared.lib.orchestration.usecase.JiraUseCase
-import org.ods.shared.lib.orchestration.usecase.LeVADocumentUseCase
-import org.ods.shared.lib.orchestration.usecase.SonarQubeUseCase
-import org.ods.shared.lib.orchestration.util.MROPipelineUtil
-import org.ods.shared.lib.orchestration.util.PDFUtil
-import org.ods.shared.lib.orchestration.util.Project
-import org.ods.shared.lib.services.GitService
-import org.ods.shared.lib.services.JenkinsService
-import org.ods.shared.lib.services.NexusService
-import org.ods.shared.lib.util.IPipelineSteps
+import org.ods.shared.lib.leva.doc.DocGenService
+import org.ods.shared.lib.leva.doc.LeVADocumentChaptersFileService
+import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
+import org.ods.shared.lib.xunit.JUnitTestReportsUseCase
+import org.ods.shared.lib.jira.JiraUseCase
+import org.ods.shared.lib.leva.doc.LeVADocumentUseCase
+import org.ods.shared.lib.sonar.SonarQubeUseCase
+import org.ods.shared.lib.leva.doc.MROPipelineUtil
+import org.ods.shared.lib.leva.doc.PDFUtil
+import org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.git.GitService
+import org.ods.shared.lib.jenkins.JenkinsService
+import org.ods.shared.lib.nexus.NexusService
+import org.ods.shared.lib.jenkins.IPipelineSteps
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
-import util.PipelineSteps
+import org.ods.shared.lib.core.test.PipelineSteps
 
 @Slf4j
 class LevaDocUseCaseFactory {

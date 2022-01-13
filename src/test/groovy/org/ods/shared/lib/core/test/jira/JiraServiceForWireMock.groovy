@@ -1,7 +1,7 @@
 package org.ods.shared.lib.core.test.jira
 
 import groovy.util.logging.Slf4j
-import  org.ods.shared.lib.orchestration.service.JiraService
+import  org.ods.shared.lib.jira.JiraService
 
 @Slf4j
 class JiraServiceForWireMock extends JiraService {

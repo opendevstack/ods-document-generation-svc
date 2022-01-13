@@ -1,14 +1,13 @@
 package org.ods.shared.lib.core.test.usecase.levadoc.fixture
 
 import org.apache.commons.io.FileUtils
-import org.junit.rules.TemporaryFolder
 import org.ods.shared.lib.core.test.pdf.PdfCompare
 import org.ods.shared.lib.core.test.usecase.RepoDataBuilder
 import org.ods.shared.lib.core.test.workspace.TestsReports
-import  org.ods.shared.lib.orchestration.usecase.JUnitTestReportsUseCase
-import  org.ods.shared.lib.orchestration.usecase.LeVADocumentUseCase
-import  org.ods.shared.lib.orchestration.util.Project
-import org.ods.shared.lib.util.IPipelineSteps
+import  org.ods.shared.lib.xunit.JUnitTestReportsUseCase
+import  org.ods.shared.lib.leva.doc.LeVADocumentUseCase
+import  org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.jenkins.IPipelineSteps
 
 class PipelineProcess {
 
@@ -72,7 +71,7 @@ class PipelineProcess {
                 repo.data.documents = [:]
             }
             if (DocTypeProjectFixtureWithComponent.notIsReleaseModule(repo)){
-                // see @org.ods.shared.lib.orchestration.usecase.DocGenUseCase#createOverallDocument -> unstashFilesIntoPath
+                // see @DocGenUseCase#createOverallDocument -> unstashFilesIntoPath
                 repo.data.documents[projectFixture.docType] =  copyPdfToTemp(useCase, repo)
             }
         }
