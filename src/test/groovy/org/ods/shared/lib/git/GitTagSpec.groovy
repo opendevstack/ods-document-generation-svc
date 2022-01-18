@@ -1,6 +1,6 @@
 package org.ods.shared.lib.git
 
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
 class GitTagSpec extends SpecHelper {
 

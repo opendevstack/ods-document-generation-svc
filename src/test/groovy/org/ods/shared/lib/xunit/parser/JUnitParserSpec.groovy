@@ -1,9 +1,9 @@
 package org.ods.shared.lib.xunit.parser
 
 import groovy.json.JsonBuilder
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
-import static org.ods.shared.lib.core.test.fixture.FixtureHelper.*
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
 
 class JUnitParserSpec extends SpecHelper {
 

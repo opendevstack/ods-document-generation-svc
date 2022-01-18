@@ -1,7 +1,7 @@
 package org.ods.shared.lib.sonar
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 import  org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.nexus.NexusService
 import org.springframework.stereotype.Service
@@ -15,10 +15,10 @@ class SonarQubeUseCase {
 
     private Project project
     private NexusService nexus
-    private IPipelineSteps steps
+    private PipelineSteps steps
 
     @Inject
-    SonarQubeUseCase(Project project, IPipelineSteps steps, NexusService nexus) {
+    SonarQubeUseCase(Project project, PipelineSteps steps, NexusService nexus) {
         this.project = project
         this.steps = steps
         this.nexus = nexus

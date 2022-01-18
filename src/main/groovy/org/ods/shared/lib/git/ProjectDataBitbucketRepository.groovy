@@ -2,7 +2,7 @@ package org.ods.shared.lib.git
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 
 import java.nio.file.NoSuchFileException
 
@@ -11,9 +11,9 @@ class ProjectDataBitbucketRepository {
 
     static final String BASE_DIR = 'projectData'
 
-    private IPipelineSteps steps
+    private PipelineSteps steps
 
-    ProjectDataBitbucketRepository(IPipelineSteps steps) {
+    ProjectDataBitbucketRepository(PipelineSteps steps) {
         this.steps = steps
     }
 

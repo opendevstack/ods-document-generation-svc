@@ -4,7 +4,7 @@ import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.ods.shared.lib.jenkins.AuthUtil
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -47,9 +47,9 @@ class BitbucketService {
     private String tokenCredentialsId
 
     @Inject
-    BitbucketService(IPipelineSteps script,
-                     @Value('${bitbucket.baseURL}') String bitbucketUrl,
-                     @Value('${bitbucket.passwordCredentialsId}') String passwordCredentialsId) {
+    BitbucketService(PipelineSteps script,
+                     @Value('${bitbucket.url}') String bitbucketUrl,
+                     @Value('${bitbucket.password}') String passwordCredentialsId) {
         this.script = script
         this.bitbucketUrl = bitbucketUrl
         this.project = "FRML24113" // TODO s2o
@@ -57,28 +57,6 @@ class BitbucketService {
         this.passwordCredentialsId = passwordCredentialsId
         this.tokenSecretName = 'cd-user-bitbucket-token'
     }
-
-    static BitbucketService newFromEnv(
-        def script,
-        def env,
-        String project,
-        String passwordCredentialsId) {
-        def c = readConfigFromEnv(env)
-        new BitbucketService(script, c.bitbucketUrl, project, passwordCredentialsId)
-    }
-
-    static Map readConfigFromEnv(def env) {
-        def config = [:]
-        if (env.BITBUCKET_URL?.trim()) {
-            config.bitbucketUrl = env.BITBUCKET_URL.trim()
-        } else if (env.BITBUCKET_HOST?.trim()) {
-            config.bitbucketUrl = "https://${env.BITBUCKET_HOST.trim()}"
-        } else {
-            throw new IllegalArgumentException("Environment variable 'BITBUCKET_URL' is required")
-        }
-        config
-    }
-
     
     static String userTokenSecretYml(String tokenSecretName, String username, String password) {
         """\

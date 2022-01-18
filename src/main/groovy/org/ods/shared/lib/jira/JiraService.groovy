@@ -1,11 +1,9 @@
 package org.ods.shared.lib.jira
 
-
-
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
-import  org.ods.shared.lib.leva.doc.StringCleanup
+import  org.ods.doc.gen.leva.doc.services.StringCleanup
 import kong.unirest.Unirest
 
 import org.apache.http.client.utils.URIBuilder
@@ -17,16 +15,13 @@ import org.springframework.stereotype.Service
 @Service
 class JiraService {
 
-    protected static Map CHARACTER_REMOVEABLE = [
-        '\u00A0': ' ',
-    ]
+    protected static Map CHARACTER_REMOVEABLE = ['\u00A0': ' ',]
 
     URI baseURL
-
     String username
     String password
 
-    JiraService(@Value('${jira.baseURL}') String baseURL,
+    JiraService(@Value('${jira.url}') String baseURL,
                 @Value('${jira.username}')  String username,
                 @Value('${jira.password}') String password) {
         if (!baseURL?.trim()) {

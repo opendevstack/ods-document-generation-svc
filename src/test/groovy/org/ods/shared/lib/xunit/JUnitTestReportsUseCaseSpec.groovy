@@ -1,19 +1,19 @@
 package org.ods.shared.lib.xunit
 
-import org.ods.shared.lib.core.test.PipelineSteps
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
 import java.nio.file.Files
 
-import static org.ods.shared.lib.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
-import static org.ods.shared.lib.core.test.fixture.FixtureHelper.createProject
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
 class JUnitTestReportsUseCaseSpec extends SpecHelper {
 
     Project project
-    IPipelineSteps steps
+    PipelineSteps steps
     JUnitTestReportsUseCase usecase
 
     def setup() {

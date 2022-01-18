@@ -1,7 +1,7 @@
 package org.ods.shared.lib.nexus
 
-import org.ods.shared.lib.core.test.PipelineSteps
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.shared.lib.jenkins.JenkinsService
 
 class JenkinsServiceSpec extends SpecHelper {

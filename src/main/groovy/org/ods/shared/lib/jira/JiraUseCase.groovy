@@ -1,10 +1,11 @@
 package org.ods.shared.lib.jira
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.IPipelineSteps
-import  org.ods.shared.lib.leva.doc.MROPipelineUtil
+import org.ods.shared.lib.jenkins.PipelineSteps
+import  org.ods.doc.gen.leva.doc.services.MROPipelineUtil
 import  org.ods.shared.lib.project.data.Project
 import  org.ods.shared.lib.project.data.JiraDataItem
+import org.ods.shared.lib.project.data.ProjectData
 import org.ods.shared.lib.xunit.parser.JUnitParser
 import org.springframework.stereotype.Service
 
@@ -15,38 +16,13 @@ import javax.inject.Inject
 @Service
 class JiraUseCase {
 
-    class IssueTypes {
-        static final String DOCUMENTATION_TRACKING = 'Documentation'
-        static final String DOCUMENTATION_CHAPTER = 'Documentation Chapter'
-        static final String RELEASE_STATUS = 'Release Status'
-    }
-
-    class CustomIssueFields {
-        static final String CONTENT = 'EDP Content'
-        static final String HEADING_NUMBER = 'EDP Heading Number'
-        static final String DOCUMENT_VERSION = 'Document Version'
-        static final String RELEASE_VERSION = 'ProductRelease Version'
-    }
-
-    class LabelPrefix {
-        static final String DOCUMENT = 'Doc:'
-    }
-
-    enum TestIssueLabels {
-        Error,
-        Failed,
-        Missing,
-        Skipped,
-        Succeeded
-    }
-
     Project project
     JiraService jira
-    IPipelineSteps steps
+    PipelineSteps steps
     private MROPipelineUtil util
 
     @Inject
-    JiraUseCase(Project project, IPipelineSteps steps, MROPipelineUtil util, JiraService jira) {
+    JiraUseCase(Project project, PipelineSteps steps, MROPipelineUtil util, JiraService jira) {
         this.project = project
         this.steps = steps
         this.util = util
@@ -73,15 +49,15 @@ class JiraUseCase {
         return result
     }
 
-    void createBugsForFailedTestIssues(List testIssues, Set testFailures, String comment) {
+    void createBugsForFailedTestIssues(ProjectData projectData, List testIssues, Set testFailures, String comment) {
         if (!this.jira) return
 
         testFailures.each { failure ->
             // FIXME: this.project.versionFromReleaseStatusIssue loads data from Jira and should therefore be called not more
             // than once. However, it's also called via this.getVersionFromReleaseStatusIssue in Project.groovy.
-            String version = this.project.versionFromReleaseStatusIssue
+            String version = projectData.versionFromReleaseStatusIssue
             def bug = this.jira.createIssueTypeBug(
-                this.project.jiraProjectKey, failure.type, failure.text, version)
+                projectData.jiraProjectKey, failure.type, failure.text, version)
 
             // Maintain a list of all Jira test issues affected by the current bug
             def bugAffectedTestIssues = [:]
@@ -113,108 +89,14 @@ class JiraUseCase {
             ], Project.JiraDataItem.TYPE_BUGS)
 
             // Add JiraDataItem into the Jira data structure
-            this.project.data.jira.bugs[bug.key] = bugJiraDataItem
+            projectData.data.jira.bugs[bug.key] = bugJiraDataItem
 
             // Add the resolved JiraDataItem into the Jira data structure
-            this.project.data.jiraResolved.bugs[bug.key] = bugJiraDataItem.cloneIt()
-            this.project.data.jiraResolved.bugs[bug.key].tests = bugAffectedTestIssues.values() as List
+            projectData.data.jiraResolved.bugs[bug.key] = bugJiraDataItem.cloneIt()
+            projectData.data.jiraResolved.bugs[bug.key].tests = bugAffectedTestIssues.values() as List
 
             this.jira.appendCommentToIssue(bug.key, comment)
         }
-    }
-
-    /**
-     * Obtains all document chapter data attached attached to a given version
-     * @param versionName the version name from jira
-     * @return Map (key: issue) with all the document chapter issues and its relevant content
-     */
-    @SuppressWarnings(['AbcMetric'])
-    Map<String, Map> getDocumentChapterData(String projectKey, String versionName = null) {
-        if (!this.jira) return [:]
-
-        def docChapterIssueFields = this.project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER)
-        def contentField = docChapterIssueFields[CustomIssueFields.CONTENT].id
-        def headingNumberField = docChapterIssueFields[CustomIssueFields.HEADING_NUMBER].id
-
-        def jql = "project = ${projectKey} " +
-            "AND issuetype = '${JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER}'"
-
-        if (versionName) {
-            jql = jql + " AND fixVersion = '${versionName}'"
-        }
-
-        def jqlQuery = [
-            fields: ['key', 'status', 'summary', 'labels', 'issuelinks', contentField, headingNumberField],
-            jql: jql,
-            expand: ['renderedFields'],
-        ]
-
-        def result = this.jira.searchByJQLQuery(jqlQuery)
-        if (!result || result.total == 0) {
-            this.log.warn("There are no document chapters assigned to this version. Using JQL query: '${jqlQuery}'.")
-            return [:]
-        }
-
-        return result.issues.collectEntries { issue ->
-            def number = issue.fields.find { field ->
-                headingNumberField == field.key && field.value
-            }
-            if (!number) {
-                throw new IllegalArgumentException("Error: could not find heading number for issue '${issue.key}'.")
-            }
-            number = number.getValue().trim()
-
-            def content = issue.renderedFields.find { field ->
-                contentField == field.key && field.value
-            }
-            content = content ? content.getValue() : ""
-
-            this.thumbnailImageReplacement(content)
-
-            def documentTypes = (issue.fields.labels ?: [])
-                .findAll { String l -> l.startsWith(LabelPrefix.DOCUMENT) }
-                .collect { String l -> l.replace(LabelPrefix.DOCUMENT, '') }
-            if (documentTypes.size() == 0) {
-                throw new IllegalArgumentException("Error: issue '${issue.key}' of type " +
-                    "'${JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER}' contains no " +
-                    "document labels. There should be at least one label starting with '${LabelPrefix.DOCUMENT}'")
-            }
-
-            def predecessorLinks = issue.fields.issuelinks
-                .findAll { it.type.name == "Succeeds" && it.outwardIssue?.key }
-                .collect { it.outwardIssue.key }
-
-            return [(issue.key as String): [
-                    section: "sec${number.replaceAll(/\./, "s")}".toString(),
-                    number: number,
-                    heading: issue.fields.summary,
-                    documents: documentTypes,
-                    content: content?.replaceAll("\u00a0", " ") ?: " ",
-                    status: issue.fields.status.name,
-                    key: issue.key as String,
-                    predecessors: predecessorLinks.isEmpty()? [] : predecessorLinks,
-                    versions: versionName? [versionName] : [],
-                ]
-            ]
-        }
-    }
-
-    String getVersionFromReleaseStatusIssue() {
-        if (!this.jira) return ""
-
-        def releaseStatusIssueKey = this.project.buildParams.releaseStatusJiraIssueKey as String
-        def releaseStatusIssueFields = this.project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS)
-
-        def productReleaseVersionField = releaseStatusIssueFields[CustomIssueFields.RELEASE_VERSION]
-        def versionField = this.jira.getTextFieldsOfIssue(releaseStatusIssueKey, [productReleaseVersionField.id])
-        if (!versionField || !versionField[productReleaseVersionField.id]?.name) {
-            throw new IllegalArgumentException('Unable to obtain version name from release status issue' +
-                " ${releaseStatusIssueKey}. Please check that field with name" +
-                " '${productReleaseVersionField.name}' and id '${productReleaseVersionField.id}' " +
-                'has a correct version value.')
-        }
-
-        return versionField[productReleaseVersionField.id].name
     }
 
     void matchTestIssuesAgainstTestResults(List testIssues, Map testResults,
@@ -259,7 +141,7 @@ class JiraUseCase {
         }
     }
 
-    void reportTestResultsForComponent(String componentName, List<String> testTypes, Map testResults) {
+    void reportTestResultsForComponent(ProjectData projectData, String componentName, List<String> testTypes, Map testResults) {
         if (!this.jira) return
 
         def testComponent = "${componentName ?: 'project'}"
@@ -270,7 +152,7 @@ class JiraUseCase {
         }
 
         log.startClocked("${testComponent}-jira-fetch-tests-${testTypes}")
-        def testIssues = this.project.getAutomatedTests(componentName, testTypes)
+        def testIssues = projectData.getAutomatedTests(componentName, testTypes)
         log.debugClocked("${testComponent}-jira-fetch-tests-${testTypes}",
             "Found automated tests$testMessage. Test type: ${testTypes}: " +
                 "${testIssues?.size()}")
@@ -285,61 +167,21 @@ class JiraUseCase {
         log.info("${testComponent}-jira-report-tests-${testTypes}")
         applyXunitTestResultsAsTestIssueLabels(testIssues, testResults)
         log.debug("${testComponent}-jira-report-tests-${testTypes}")
-        if (['Q', 'P'].contains(this.project.buildParams.targetEnvironmentToken)) {
+        if (['Q', 'P'].contains(projectData.buildParams.targetEnvironmentToken)) {
             log.info("${testComponent}-jira-report-bugs-${testTypes}")
             // Create bugs for erroneous test issues
             def errors = JUnitParser.Helper.getErrors(testResults)
-            this.createBugsForFailedTestIssues(testIssues, errors, this.steps.env.RUN_DISPLAY_URL)
+            this.createBugsForFailedTestIssues(projectData, testIssues, errors, this.steps.env.RUN_DISPLAY_URL)
 
             // Create bugs for failed test issues
             def failures = JUnitParser.Helper.getFailures(testResults)
-            this.createBugsForFailedTestIssues(testIssues, failures, this.steps.env.RUN_DISPLAY_URL)
+            this.createBugsForFailedTestIssues(projectData, testIssues, failures, this.steps.env.RUN_DISPLAY_URL)
             log.debug("${testComponent}-jira-report-bugs-${testTypes}")
         }
     }
 
-    void reportTestResultsForProject(List<String> testTypes, Map testResults) {
-        // No componentName passed to method to get all automated issues from project
-        this.reportTestResultsForComponent(
-            null, testTypes, testResults)
-    }
-
-    void updateJiraReleaseStatusBuildNumber() {
-        if (!this.jira) return
-
-        def releaseStatusIssueKey = this.project.buildParams.releaseStatusJiraIssueKey
-        def releaseStatusIssueFields = this.project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS)
-
-        def releaseStatusIssueBuildNumberField = releaseStatusIssueFields['Release Build']
-        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueBuildNumberField.id): "${this.project.buildParams.version}-${this.steps.env.BUILD_NUMBER}"])
-    }
-
-    void updateJiraReleaseStatusResult(String message, boolean isError) {
-        if (!this.jira) return
-
-        def status = isError ? 'Failed' : 'Successful'
-
-        def releaseStatusIssueKey = this.project.buildParams.releaseStatusJiraIssueKey
-        def releaseStatusIssueFields = this.project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS)
-
-        def releaseStatusIssueReleaseManagerStatusField = releaseStatusIssueFields['Release Manager Status']
-        this.jira.updateSelectListFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueReleaseManagerStatusField.id): status])
-
-        log.startClocked("jira-update-release-${releaseStatusIssueKey}")
-        addCommentInReleaseStatus(message)
-        log.debugClocked("jira-update-release-${releaseStatusIssueKey}")
-    }
-
-    void addCommentInReleaseStatus(String message) {
-        def releaseStatusIssueKey = this.project.buildParams.releaseStatusJiraIssueKey
-        if (message) {
-            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${this.steps.env.RUN_DISPLAY_URL}")
-        }
-
-    }
-
-    Long getLatestDocVersionId(List<Map> trackingIssues) {
-        def documentationTrackingIssueFields = this.project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)
+    Long getLatestDocVersionId(ProjectData projectData, List < Map > trackingIssues) {
+        def documentationTrackingIssueFields = projectData.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)
         def documentVersionField = documentationTrackingIssueFields[CustomIssueFields.DOCUMENT_VERSION].id as String
 
         // We will use the biggest ID available
@@ -376,15 +218,6 @@ class JiraUseCase {
                 def isMatch = testIssue != null
                 visitor(testIssue, testCase, isMatch)
             }
-        }
-    }
-
-    
-    private thumbnailImageReplacement(content) {
-        def matcher = content =~ /<a.*id="(.*)_thumb".*href="(.*?)"/
-        matcher.each {
-            def imageMatcher = content =~ /<a.*id="${it[1]}_thumb".*src="(.*?)"/
-            content = content.replace(imageMatcher[0][1], it[2])
         }
     }
 

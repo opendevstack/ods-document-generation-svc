@@ -1,15 +1,15 @@
 package org.ods.shared.lib.nexus
 
-import org.ods.shared.lib.jenkins.PipelineScript
+import org.ods.shared.lib.jenkins.PipelineSteps
 import org.ods.shared.lib.git.GitService
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
 class GitServiceSpec extends SpecHelper {
 
     def "get release branch"() {
         given:
         def version = "0.0.1"
-        def script = new PipelineScript()
+        def script = new PipelineSteps()
         def service = new GitService(script)
 
         when:
@@ -21,7 +21,7 @@ class GitServiceSpec extends SpecHelper {
 
     def "git skipping commit message"() {
         given:
-        def script = new PipelineScript()
+        def script = new PipelineSteps()
         def service = new GitService(script)
 
         when:
@@ -41,7 +41,7 @@ class GitServiceSpec extends SpecHelper {
 
     def "merged branch"() {
         given:
-        def script = new PipelineScript()
+        def script = new PipelineSteps()
         def service = new GitService(script)
 
         when:

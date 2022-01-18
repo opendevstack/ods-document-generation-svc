@@ -1,166 +1,195 @@
 package org.ods.shared.lib.jenkins
 
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
+import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Service
+import org.yaml.snakeyaml.Yaml
 
-@SuppressWarnings('MethodCount')
-class PipelineSteps implements IPipelineSteps, Serializable {
+@Slf4j
+@Service
+class PipelineSteps {
 
-    private final def context
+    private Map currentBuild = [:]
+    private Map env = [:]
 
-    PipelineSteps(def context) {
-        this.context = context
-    }
+/*    PipelineSteps() {
+        env.WORKSPACE = System.getProperty("java.io.tmpdir")
+    }*/
 
     void archiveArtifacts(String artifacts) {
-        this.context.archiveArtifacts(artifacts)
     }
 
     void archiveArtifacts(Map args) {
-        this.context.archiveArtifacts(args)
     }
 
     def checkout(Map config) {
-        return this.context.checkout(config)
+        return [:]
     }
 
     void dir(String path, Closure block) {
-        this.context.dir(path, block)
+        block()
     }
 
     void error(String message) {
-        this.context.error(message)
     }
 
     void echo(String message) {
-        def dateTimeString = OffsetDateTime
-            .now(ZoneOffset.UTC)
-            .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss'Z'"))
-        this.context.echo("${dateTimeString} ${message}")
-    }
-
-    def findFiles(Map config) {
-        return this.context.findFiles(config)
+        log.info(message)
     }
 
     def getCurrentBuild() {
-        return this.context.currentBuild
+        return currentBuild
     }
 
     Map getEnv() {
-        return this.context.env
+        return env
     }
 
     void junit(String path) {
-        this.context.junit(path)
     }
 
     void junit(Map config) {
-        this.context.junit(config)
     }
 
     def load(String path) {
-        return this.context.load(path)
-    }
-
-    def node(String name, Closure block) {
-        this.context.node (name, block)
+        return [:]
     }
 
     def sh(def args) {
-        this.context.sh(args)
+        return ""
     }
 
     void stage(String name, Closure block) {
-        this.context.stage(name, block)
+        block()
     }
 
     void stash(String name) {
-        this.context.stash(name)
     }
 
     void stash(Map config) {
-        this.context.stash(config)
     }
 
     void unstash(String name) {
-        this.context.unstash(name: name)
     }
 
+    
     def fileExists(String file) {
-        this.context.fileExists(file)
+        return null
     }
 
-    def readFile(String file, String encoding = '') {
-        this.context.readFile(file: file, encoding: encoding)
+    
+    def readFile(String file, String encoding) {
+        return null
     }
 
+    
     def readFile(Map args) {
-        this.context.readFile(args)
+        log.debug("readFile file: ${env.WORKSPACE}/${args.file}")
+        try {
+            return new File("${env.WORKSPACE}/${args.file}")?.text
+        } catch(Exception exception){
+            return ""
+        }
     }
 
-    def writeFile(String file, String text, String encoding = '') {
-        this.context.writeFile(file: file, text: text, encoding: encoding)
+    
+    def writeFile(String file, String text, String encoding) {
+        return null
     }
 
+    
     def writeFile(Map args) {
-        this.context.writeFile(args)
+        return null
     }
 
+    
     def readJSON(Map args) {
-        this.context.readJSON(args)
+        log.debug("readJSON file: ${args.text}")
+        new JsonSlurper().parseText(args.text)
     }
 
-    def writeJSON(Map args) {
-        this.context.writeJSON(args)
-    }
-
+    
     def readYaml(Map args) {
-        this.context.readYaml(args)
+        new Yaml().load(args.text)
     }
 
+    def readYaml(Map args, Closure body) {
+        def metadata = [:]
+        if(args.file) {
+            def fromFile = body(args.file)
+            if (fromFile == null) {
+                throw new FileNotFoundException(args.file, 'The requested file could not be found')
+            }
+            metadata.putAll(fromFile)
+        }
+        if(args.text) {
+            def fromText = new Yaml().load(args.text)
+            metadata.putAll(fromText)
+        }
+        return metadata
+    }
+
+    
     def writeYaml(Map args) {
-        this.context.writeYaml(args)
+        return null
     }
 
+    
+    def writeJSON(Map args) {
+        return null
+    }
+
+    
     def timeout(Map args, Closure block) {
-        this.context.timeout(args, block)
+        return null
     }
 
+    
     def deleteDir() {
-        this.context.deleteDir()
+        return null
     }
 
     def sleep(int seconds) {
-        this.context.sleep(seconds)
+        return null
     }
 
-    def withEnv(List<String> env, Closure block) {
-        this.context.withEnv (env, block)
+    
+    def withEnv(java.util.List env, groovy.lang.Closure block) {
+      block()
     }
 
+    
     def unstable(String message) {
-        this.context.unstable(message)
     }
 
     def usernamePassword(Map credentialsData) {
-        this.context.usernamePassword(credentialsData)
     }
 
     def sshUserPrivateKey(Map credentialsData) {
-        this.context.sshUserPrivateKey(credentialsData)
     }
 
     def withCredentials(List credentialsList, Closure block) {
-        this.context.withCredentials(credentialsList, block)
+      block()
+    }
+
+    def get(def key) {
+      return currentBuild.get(key)
+    }
+
+    def put(def key, def value) {
+      currentBuild.put(key, value)
     }
 
     def unwrap() {
-        return this.context
+      return [:]
+    }
+
+    def node (String name, Closure block) {
+      block ()
     }
 
     def emailext(Map args) {
-        this.context.emailext(args)
+
     }
+
 }

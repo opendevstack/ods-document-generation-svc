@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.client.*
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
 class JiraServiceSpec extends SpecHelper {
 

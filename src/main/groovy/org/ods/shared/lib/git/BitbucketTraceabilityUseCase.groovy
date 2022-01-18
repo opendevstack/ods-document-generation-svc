@@ -4,8 +4,8 @@ import com.xlson.groovycsv.CsvParser
 import com.xlson.groovycsv.PropertyMapper
 import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.project.data.Project
-import  org.ods.shared.lib.leva.doc.StringCleanup
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import  org.ods.doc.gen.leva.doc.services.StringCleanup
+import org.ods.shared.lib.jenkins.PipelineSteps
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -24,11 +24,11 @@ class BitbucketTraceabilityUseCase {
     ]
 
     private final BitbucketService bitbucketService
-    private final IPipelineSteps steps
+    private final PipelineSteps steps
     private final Project project
 
     @Inject
-    BitbucketTraceabilityUseCase(BitbucketService bitbucketService, IPipelineSteps steps, Project project) {
+    BitbucketTraceabilityUseCase(BitbucketService bitbucketService, PipelineSteps steps, Project project) {
         this.steps = steps
         this.project = project
         this.bitbucketService = bitbucketService
@@ -49,7 +49,6 @@ class BitbucketTraceabilityUseCase {
      * for every merge event into the integration branch of every ODS component:
      * @return absolutePath of the created file
      */
-
     String generateSourceCodeReviewFile() {
         String token = bitbucketService.getToken()
         File file = createReportFile()
@@ -64,7 +63,6 @@ class BitbucketTraceabilityUseCase {
      * @return List of commits
      */
     @SuppressWarnings(['JavaIoPackageAccess'])
-    
     List<Map> readSourceCodeReviewFile(String filePath) {
         def file = new File(filePath)
         def result = []

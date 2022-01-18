@@ -3,7 +3,7 @@ package org.ods.shared.lib.nexus
 import com.github.tomakehurst.wiremock.client.*
 
 import org.apache.http.client.utils.URIBuilder
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
 class NexusServiceSpec extends SpecHelper {
 

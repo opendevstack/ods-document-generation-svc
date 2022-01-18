@@ -1,18 +1,18 @@
 package org.ods.shared.lib.jira
 
-import org.ods.shared.lib.core.test.PipelineSteps
-import org.ods.shared.lib.jenkins.IPipelineSteps
-import  org.ods.shared.lib.leva.doc.MROPipelineUtil
+import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
+import  org.ods.doc.gen.leva.doc.services.MROPipelineUtil
 import  org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.doc.gen.core.test.SpecHelper
 
-import static org.ods.shared.lib.core.test.fixture.FixtureHelper.*
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
 
 class JiraUseCaseSpec extends SpecHelper {
 
     JiraService jira
     Project project
-    IPipelineSteps steps
+    PipelineSteps steps
     JiraUseCase usecase
     MROPipelineUtil util
 
@@ -43,27 +43,27 @@ class JiraUseCaseSpec extends SpecHelper {
         usecase.applyXunitTestResultsAsTestIssueLabels(testIssues, testResults)
 
         then:
-        1 * jira.removeLabelsFromIssue("JIRA-1", { return it == JiraUseCase.TestIssueLabels.values()*.toString() })
+        1 * jira.removeLabelsFromIssue("JIRA-1", { return it == TestIssueLabels.values()*.toString() })
         1 * jira.addLabelsToIssue("JIRA-1", ["Succeeded"])
         0 * jira.addLabelsToIssue("JIRA-1", _)
 
         then:
-        1 * jira.removeLabelsFromIssue("JIRA-2", { it == JiraUseCase.TestIssueLabels.values()*.toString() })
+        1 * jira.removeLabelsFromIssue("JIRA-2", { it == TestIssueLabels.values()*.toString() })
         1 * jira.addLabelsToIssue("JIRA-2", ["Error"])
         0 * jira.addLabelsToIssue("JIRA-2", _)
 
         then:
-        1 * jira.removeLabelsFromIssue("JIRA-3", { it == JiraUseCase.TestIssueLabels.values()*.toString() })
+        1 * jira.removeLabelsFromIssue("JIRA-3", { it == TestIssueLabels.values()*.toString() })
         1 * jira.addLabelsToIssue("JIRA-3", ["Failed"])
         0 * jira.addLabelsToIssue("JIRA-3", _)
 
         then:
-        1 * jira.removeLabelsFromIssue("JIRA-4", { it == JiraUseCase.TestIssueLabels.values()*.toString() })
+        1 * jira.removeLabelsFromIssue("JIRA-4", { it == TestIssueLabels.values()*.toString() })
         1 * jira.addLabelsToIssue("JIRA-4", ["Skipped"])
         0 * jira.addLabelsToIssue("JIRA-4", _)
 
         then:
-        1 * jira.removeLabelsFromIssue("JIRA-5", { it == JiraUseCase.TestIssueLabels.values()*.toString() })
+        1 * jira.removeLabelsFromIssue("JIRA-5", { it == TestIssueLabels.values()*.toString() })
         1 * jira.addLabelsToIssue("JIRA-5", ["Missing"])
         0 * jira.addLabelsToIssue("JIRA-5", _)
     }
@@ -157,37 +157,37 @@ class JiraUseCaseSpec extends SpecHelper {
         // Test Parameters
 
         def docChapterFields = [
-            (JiraUseCase.CustomIssueFields.HEADING_NUMBER): [id:"0"],
-            (JiraUseCase.CustomIssueFields.CONTENT): [id: "1"],
+            (CustomIssueFields.HEADING_NUMBER): [id:"0"],
+            (CustomIssueFields.CONTENT)       : [id: "1"],
         ]
 
         // Argument Constraints
         def jqlQuery = [
             fields: ['key', 'status', 'summary', 'labels', 'issuelinks',
-                     docChapterFields[JiraUseCase.CustomIssueFields.CONTENT].id,
-                     docChapterFields[JiraUseCase.CustomIssueFields.HEADING_NUMBER].id],
-            jql: "project = ${project.jiraProjectKey} AND issuetype = '${JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER}'",
+                     docChapterFields[CustomIssueFields.CONTENT].id,
+                     docChapterFields[CustomIssueFields.HEADING_NUMBER].id],
+            jql: "project = ${project.jiraProjectKey} AND issuetype = '${IssueTypes.DOCUMENTATION_CHAPTER}'",
             expand: ['renderedFields'],
         ]
 
         // Stubbed Method Responses
         def jiraIssue1 = createJiraIssue("1", null, null, null, "DONE")
         jiraIssue1.fields["0"] = "1.0"
-        jiraIssue1.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "CSD"]
+        jiraIssue1.fields.labels = [LabelPrefix.DOCUMENT+ "CSD"]
         jiraIssue1.renderedFields = [:]
         jiraIssue1.renderedFields["1"] = "<html>myContent1</html>"
         jiraIssue1.renderedFields.description = "<html>1-description</html>"
 
         def jiraIssue2 = createJiraIssue("2", null, null, null, "DONE")
         jiraIssue2.fields["0"] = "2.0"
-        jiraIssue2.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "SSDS"]
+        jiraIssue2.fields.labels = [LabelPrefix.DOCUMENT+ "SSDS"]
         jiraIssue2.renderedFields = [:]
         jiraIssue2.renderedFields["1"] = "<html>myContent2</html>"
         jiraIssue2.renderedFields.description = "<html>2-description</html>"
 
         def jiraIssue3 = createJiraIssue("3", null, null, null, "DONE")
         jiraIssue3.fields["0"] = "3.0"
-        jiraIssue3.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "DTP"]
+        jiraIssue3.fields.labels = [LabelPrefix.DOCUMENT+ "DTP"]
         jiraIssue3.renderedFields = [:]
         jiraIssue3.renderedFields["1"] = "<html>myContent3</html>"
         jiraIssue3.renderedFields.description = "<html>3-description</html>"
@@ -200,7 +200,7 @@ class JiraUseCaseSpec extends SpecHelper {
         def result = usecase.getDocumentChapterData(project.jiraProjectKey)
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
+        1 * project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
         1 * jira.searchByJQLQuery(jqlQuery) >> jiraResult
 
         then:
@@ -252,16 +252,16 @@ class JiraUseCaseSpec extends SpecHelper {
         def predecessorKey = "PRED-1"
 
         def docChapterFields = [
-            (JiraUseCase.CustomIssueFields.HEADING_NUMBER): [id:"0"],
-            (JiraUseCase.CustomIssueFields.CONTENT): [id: "1"],
+            (CustomIssueFields.HEADING_NUMBER): [id:"0"],
+            (CustomIssueFields.CONTENT)       : [id: "1"],
         ]
 
         // Argument Constraints
         def jqlQuery = [
             fields: ['key', 'status', 'summary', 'labels', 'issuelinks',
-                     docChapterFields[JiraUseCase.CustomIssueFields.CONTENT].id,
-                     docChapterFields[JiraUseCase.CustomIssueFields.HEADING_NUMBER].id],
-            jql: "project = ${project.jiraProjectKey} AND issuetype = '${JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER}'" +
+                     docChapterFields[CustomIssueFields.CONTENT].id,
+                     docChapterFields[CustomIssueFields.HEADING_NUMBER].id],
+            jql: "project = ${project.jiraProjectKey} AND issuetype = '${IssueTypes.DOCUMENTATION_CHAPTER}'" +
                 " AND fixVersion = '${version}'",
             expand: ['renderedFields'],
         ]
@@ -269,14 +269,14 @@ class JiraUseCaseSpec extends SpecHelper {
         // Stubbed Method Responses
         def jiraIssue1 = createJiraIssue("1", null, null, null, "DONE")
         jiraIssue1.fields["0"] = "1.0"
-        jiraIssue1.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "CSD"]
+        jiraIssue1.fields.labels = [LabelPrefix.DOCUMENT+ "CSD"]
         jiraIssue1.renderedFields = [:]
         jiraIssue1.renderedFields["1"] = "<html>myContent1</html>"
         jiraIssue1.renderedFields.description = "<html>1-description</html>"
 
         def jiraIssue2 = createJiraIssue("2", null, null, null, "DONE")
         jiraIssue2.fields["0"] = "2.0"
-        jiraIssue2.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "SSDS"]
+        jiraIssue2.fields.labels = [LabelPrefix.DOCUMENT+ "SSDS"]
         jiraIssue2.fields.issuelinks = [
             [type:[name: "Succeeds"], outwardIssue: [key: predecessorKey]],
             [type:[name: "Succeeds"], inwardIssue: [key: "Should not appwar the successor"]],
@@ -287,7 +287,7 @@ class JiraUseCaseSpec extends SpecHelper {
 
         def jiraIssue3 = createJiraIssue("3", null, null, null, "DONE")
         jiraIssue3.fields["0"] = "3.0"
-        jiraIssue3.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "DTP"]
+        jiraIssue3.fields.labels = [LabelPrefix.DOCUMENT+ "DTP"]
         jiraIssue3.fields.issuelinks = [
             [type:[name: "AnotherLink"], outwardIssue: [key: "Should not appear other links outward"]],
             [type:[name: "AnotherLink2"], inwardIssue: [key: "Should not appear other links inward"]],
@@ -304,7 +304,7 @@ class JiraUseCaseSpec extends SpecHelper {
         def result = usecase.getDocumentChapterData(project.jiraProjectKey, version)
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
+        1 * project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
         1 * jira.searchByJQLQuery(jqlQuery) >> jiraResult
 
         then:
@@ -356,16 +356,16 @@ class JiraUseCaseSpec extends SpecHelper {
         def predecessorKey = "PRED-1"
 
         def docChapterFields = [
-            (JiraUseCase.CustomIssueFields.HEADING_NUMBER): [id:"0"],
-            (JiraUseCase.CustomIssueFields.CONTENT): [id: "1"],
+            (CustomIssueFields.HEADING_NUMBER): [id:"0"],
+            (CustomIssueFields.CONTENT)       : [id: "1"],
         ]
 
         // Argument Constraints
         def jqlQuery = [
             fields: ['key', 'status', 'summary', 'labels', 'issuelinks',
-                     docChapterFields[JiraUseCase.CustomIssueFields.CONTENT].id,
-                     docChapterFields[JiraUseCase.CustomIssueFields.HEADING_NUMBER].id],
-            jql: "project = ${project.jiraProjectKey} AND issuetype = '${JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER}'" +
+                     docChapterFields[CustomIssueFields.CONTENT].id,
+                     docChapterFields[CustomIssueFields.HEADING_NUMBER].id],
+            jql: "project = ${project.jiraProjectKey} AND issuetype = '${IssueTypes.DOCUMENTATION_CHAPTER}'" +
                 " AND fixVersion = '${version}'",
             expand: ['renderedFields'],
         ]
@@ -373,14 +373,14 @@ class JiraUseCaseSpec extends SpecHelper {
         // Stubbed Method Responses
         def jiraIssue1 = createJiraIssue("1", null, null, null, "DONE")
         jiraIssue1.fields["0"] = "1.0"
-        jiraIssue1.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "CSD"]
+        jiraIssue1.fields.labels = [LabelPrefix.DOCUMENT+ "CSD"]
         jiraIssue1.renderedFields = [:]
         jiraIssue1.renderedFields["1"] = "<html>myContent1</html>"
         jiraIssue1.renderedFields.description = "<html>1-description</html>"
 
         def jiraIssue2 = createJiraIssue("2", null, null, null, "DONE")
         jiraIssue2.fields["0"] = "2.0"
-        jiraIssue2.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "SSDS"]
+        jiraIssue2.fields.labels = [LabelPrefix.DOCUMENT+ "SSDS"]
         jiraIssue2.fields.issuelinks = [
             [type:[name: "Succeeds"], outwardIssue: [key: predecessorKey]],
             [type:[name: "Succeeds"], inwardIssue: [key: "Should not appwar the successor"]],
@@ -391,7 +391,7 @@ class JiraUseCaseSpec extends SpecHelper {
 
         def jiraIssue3 = createJiraIssue("3", null, null, null, "DONE")
         jiraIssue3.fields["0"] = "3.0"
-        jiraIssue3.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "DTP"]
+        jiraIssue3.fields.labels = [LabelPrefix.DOCUMENT+ "DTP"]
         jiraIssue3.fields.issuelinks = [
             [type:[name: "AnotherLink"], outwardIssue: [key: "Should not appear other links outward"]],
             [type:[name: "AnotherLink2"], inwardIssue: [key: "Should not appear other links inward"]],
@@ -408,7 +408,7 @@ class JiraUseCaseSpec extends SpecHelper {
         def result = usecase.getDocumentChapterData(project.jiraProjectKey, version)
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
+        1 * project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
         1 * jira.searchByJQLQuery(jqlQuery) >> jiraResult
 
         then:
@@ -460,16 +460,16 @@ class JiraUseCaseSpec extends SpecHelper {
         def predecessorKey = "PRED-1"
 
         def docChapterFields = [
-            (JiraUseCase.CustomIssueFields.HEADING_NUMBER): [id:"0"],
-            (JiraUseCase.CustomIssueFields.CONTENT): [id: "1"],
+            (CustomIssueFields.HEADING_NUMBER): [id:"0"],
+            (CustomIssueFields.CONTENT)       : [id: "1"],
         ]
 
         // Argument Constraints
         def jqlQuery = [
             fields: ['key', 'status', 'summary', 'labels', 'issuelinks',
-                     docChapterFields[JiraUseCase.CustomIssueFields.CONTENT].id,
-                     docChapterFields[JiraUseCase.CustomIssueFields.HEADING_NUMBER].id],
-            jql: "project = ${project.jiraProjectKey} AND issuetype = '${JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER}'" +
+                     docChapterFields[CustomIssueFields.CONTENT].id,
+                     docChapterFields[CustomIssueFields.HEADING_NUMBER].id],
+            jql: "project = ${project.jiraProjectKey} AND issuetype = '${IssueTypes.DOCUMENTATION_CHAPTER}'" +
                 " AND fixVersion = '${version}'",
             expand: ['renderedFields'],
         ]
@@ -477,7 +477,7 @@ class JiraUseCaseSpec extends SpecHelper {
         // Stubbed Method Responses
         def jiraIssue1 = createJiraIssue("1", null, null, null, "DONE")
         jiraIssue1.fields["0"] = "1.0"
-        jiraIssue1.fields.labels = [JiraUseCase.LabelPrefix.DOCUMENT+ "CSD", JiraUseCase.LabelPrefix.DOCUMENT+ "SSDS"]
+        jiraIssue1.fields.labels = [LabelPrefix.DOCUMENT+ "CSD", LabelPrefix.DOCUMENT+ "SSDS"]
         jiraIssue1.renderedFields = [:]
         jiraIssue1.renderedFields["1"] = "<html>myContent1</html>"
         jiraIssue1.renderedFields.description = "<html>1-description</html>"
@@ -490,7 +490,7 @@ class JiraUseCaseSpec extends SpecHelper {
         def result = usecase.getDocumentChapterData(project.jiraProjectKey, version)
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
+        1 * project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_CHAPTER) >> docChapterFields
         1 * jira.searchByJQLQuery(jqlQuery) >> jiraResult
 
         then:
@@ -734,7 +734,7 @@ class JiraUseCaseSpec extends SpecHelper {
         usecase.updateJiraReleaseStatusBuildNumber()
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS) >> [
+        1 * project.getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS) >> [
             "Release Build": [
                 id: "customfield_2"
             ]
@@ -759,7 +759,7 @@ class JiraUseCaseSpec extends SpecHelper {
         usecase.updateJiraReleaseStatusResult(error.message, true)
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS) >> [
+        1 * project.getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS) >> [
             "Release Manager Status": [
                 id: "customfield_1"
             ]
@@ -784,7 +784,7 @@ class JiraUseCaseSpec extends SpecHelper {
         usecase.updateJiraReleaseStatusResult("", false)
 
         then:
-        1 * project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS) >> {
+        1 * project.getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS) >> {
             return [
                 "Release Manager Status": [
                     id: "customfield_1"
@@ -839,7 +839,7 @@ class JiraUseCaseSpec extends SpecHelper {
 
         then:
         project.buildParams.releaseStatusJiraIssueKey >> "KEY-1"
-        project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS) >> [(JiraUseCase.CustomIssueFields.RELEASE_VERSION): [id: "field_0"]]
+        project.getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS) >> [(CustomIssueFields.RELEASE_VERSION): [id: "field_0"]]
         def e = thrown(IllegalArgumentException)
         e.message.contains('Unable to obtain version name from release status issue')
 
@@ -849,7 +849,7 @@ class JiraUseCaseSpec extends SpecHelper {
 
         then:
         project.buildParams.releaseStatusJiraIssueKey >> "KEY-1"
-        project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS) >> [(JiraUseCase.CustomIssueFields.RELEASE_VERSION): [id: "field_0"]]
+        project.getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS) >> [(CustomIssueFields.RELEASE_VERSION): [id: "field_0"]]
         e = thrown(IllegalArgumentException)
         e.message.contains('Unable to obtain version name from release status issue')
 
@@ -859,7 +859,7 @@ class JiraUseCaseSpec extends SpecHelper {
 
         then:
         project.buildParams.releaseStatusJiraIssueKey >> "KEY-1"
-        project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.RELEASE_STATUS) >> [(JiraUseCase.CustomIssueFields.RELEASE_VERSION): [id: "field_0"]]
+        project.getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS) >> [(CustomIssueFields.RELEASE_VERSION): [id: "field_0"]]
         result == "versionX"
     }
 

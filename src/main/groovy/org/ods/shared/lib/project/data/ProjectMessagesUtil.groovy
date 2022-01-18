@@ -1,14 +1,13 @@
 package org.ods.shared.lib.project.data
 
-
-import  org.ods.shared.lib.leva.doc.LeVADocumentUseCase
+import org.ods.doc.gen.leva.doc.services.Constants
 
 class ProjectMessagesUtil {
 
     @SuppressWarnings('Instanceof')
-    static String generateWIPIssuesMessage(Project project) {
+    static String generateWIPIssuesMessage(ProjectData project) {
         def message = project.isWorkInProgress ? 'Pipeline-generated documents are watermarked ' +
-            "'${LeVADocumentUseCase.WORK_IN_PROGRESS_WATERMARK}' " +
+            "'${Constants.WORK_IN_PROGRESS_WATERMARK}' " +
             'since the following issues are work in progress: ' :
             "The pipeline failed since the following issues are work in progress (no documents were generated): "
 

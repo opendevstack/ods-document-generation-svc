@@ -1,7 +1,7 @@
 package org.ods.shared.lib.xunit
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 import  org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.xunit.parser.JUnitParser
 import org.springframework.stereotype.Service
@@ -14,10 +14,10 @@ import javax.inject.Inject
 class JUnitTestReportsUseCase {
 
     private final Project project
-    private final IPipelineSteps steps
+    private final PipelineSteps steps
 
     @Inject
-    JUnitTestReportsUseCase(Project project, IPipelineSteps steps) {
+    JUnitTestReportsUseCase(Project project, PipelineSteps steps) {
         this.project = project
         this.steps = steps
     }

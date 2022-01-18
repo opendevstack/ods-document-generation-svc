@@ -11,10 +11,10 @@ class JenkinsService {
 
     private static final String XUNIT_SYSTEM_RESULT_DIR = 'build/test-results/test'
 
-    private final IPipelineSteps script
+    private final PipelineSteps script
 
     @Inject
-    JenkinsService(IPipelineSteps script) {
+    JenkinsService(PipelineSteps script) {
         this.script = script
     }
 
@@ -83,23 +83,13 @@ class JenkinsService {
     }
 
     String getCurrentBuildLogAsText () {
-        StringWriter writer = new StringWriter()
-        this.script.currentBuild.getRawBuild().getLogText().writeLogTo(0, writer)
-        return writer.getBuffer().toString()
+        // TODO use Nexus
+        return "logs from CI"
     }
 
     boolean unstashFilesIntoPath(String name, String path, String type) {
-        def result = true
-
-        this.script.dir(path) {
-            try {
-                this.script.unstash(name)
-            } catch (e) {
-                log.info ("Could not find any files of type '${type}' to unstash for name '${name}'")
-                result = false
-            }
-        }
-        return result
+        // TODO use Nexus
+        return true
     }
 
     def maybeWithPrivateKeyCredentials(String credentialsId, Closure block) {

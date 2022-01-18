@@ -1,7 +1,7 @@
 package org.ods.shared.lib.project.data
 
 
-import org.ods.shared.lib.leva.doc.Constants
+import org.ods.doc.gen.leva.doc.services.Constants
 
 enum Environment {
 

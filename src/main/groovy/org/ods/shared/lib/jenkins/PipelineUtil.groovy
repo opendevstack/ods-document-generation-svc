@@ -20,11 +20,11 @@ class PipelineUtil {
     static final String XUNIT_DOCUMENTS_BASE_DIR = 'xunit'
 
     protected Project project
-    protected IPipelineSteps steps
+    protected PipelineSteps steps
     protected GitService git
 
     @Inject
-    PipelineUtil(Project project, IPipelineSteps steps, GitService git) {
+    PipelineUtil(Project project, PipelineSteps steps, GitService git) {
         this.project = project
         this.steps = steps
         this.git = git

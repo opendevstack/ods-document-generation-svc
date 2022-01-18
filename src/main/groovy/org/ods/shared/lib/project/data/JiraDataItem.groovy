@@ -50,11 +50,11 @@ class JiraDataItem implements Map, Serializable {
 
     static final String ISSUE_TEST_EXECUTION_TYPE_AUTOMATED = 'automated'
 
-    private final Project project;
+    private final ProjectData project;
     private final String type
     private HashMap delegate
 
-    JiraDataItem(Project project, Map map, String type) {
+    JiraDataItem(ProjectData project, Map map, String type) {
         this.project = project;
         this.delegate = new HashMap(map)
         this.type = type

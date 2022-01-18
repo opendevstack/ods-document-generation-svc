@@ -13,13 +13,13 @@ import javax.inject.Inject
 class NexusService {
 
     static final String NEXUS_REPO_EXISTS_KEY = 'nexusRepoExists'
-    final URI baseURL
+    URI baseURL
 
     final String username
     final String password
 
     @Inject
-    NexusService(@Value('${nexus.baseURL}') String baseURL,
+    NexusService(@Value('${nexus.url}') String baseURL,
                  @Value('${nexus.username}') String username,
                  @Value('${nexus.password}') String password) {
         if (!baseURL?.trim()) {
@@ -46,35 +46,6 @@ class NexusService {
         this.password = password
     }
 
-    static NexusService newFromEnv(def env) {
-        def c = readConfigFromEnv(env)
-        new NexusService(c.nexusUrl, c.nexusUsername, c.nexusPassword)
-    }
-
-    static Map readConfigFromEnv(def env) {
-        def config = [:]
-        if (env.NEXUS_URL?.trim()) {
-            config.nexusUrl = env.NEXUS_URL.trim()
-        } else if (env.NEXUS_HOST?.trim()) {
-            // Historically, the NEXUS_HOST variable contains the scheme.
-            config.nexusUrl = env.NEXUS_HOST.trim()
-        } else {
-            throw new IllegalArgumentException("Environment variable 'NEXUS_URL' is required")
-        }
-        if (env.NEXUS_USERNAME?.trim()) {
-            config.nexusUsername = env.NEXUS_USERNAME.trim()
-        } else {
-            throw new IllegalArgumentException('NEXUS_USERNAME is required, but not set')
-        }
-        if (env.NEXUS_PASSWORD?.trim()) {
-            config.nexusPassword = env.NEXUS_PASSWORD.trim()
-        } else {
-            throw new IllegalArgumentException('NEXUS_PASSWORD is required, but not set')
-        }
-        config
-    }
-
-    
     URI storeArtifact(String repository, String directory, String name, byte[] artifact, String contentType) {
         Map nexusParams = [
             'raw.directory': directory,
@@ -94,7 +65,6 @@ class NexusService {
     }
 
     @SuppressWarnings('LineLength')
-    
     URI storeComplextArtifact(String repository, byte[] artifact, String contentType, String repositoryType, Map nexusParams = [ : ]) {
         def restCall = Unirest.post("${this.baseURL}/service/rest/v1/components?repository={repository}")
             .routeParam('repository', repository)

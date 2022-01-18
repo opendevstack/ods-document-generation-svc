@@ -1,6 +1,6 @@
 package org.ods.shared.lib.nexus
 
-import org.ods.shared.lib.core.test.PipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 import org.ods.shared.lib.git.BitbucketService
 import spock.lang.Specification
 

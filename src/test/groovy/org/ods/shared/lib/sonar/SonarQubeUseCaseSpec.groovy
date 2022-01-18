@@ -1,21 +1,21 @@
 package org.ods.shared.lib.sonar
 
-import org.ods.shared.lib.core.test.PipelineSteps
-import org.ods.shared.lib.core.test.SpecHelper
+import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.shared.lib.project.data.Project
 
 import java.nio.file.Files
 
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 
-import static org.ods.shared.lib.core.test.fixture.FixtureHelper.*
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
 
 class SonarQubeUseCaseSpec extends SpecHelper {
 
     NexusService nexus
     Project project
-    IPipelineSteps steps
+    PipelineSteps steps
     SonarQubeUseCase usecase
 
     def setup() {

@@ -1,7 +1,7 @@
 package org.ods.shared.lib.git
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.IPipelineSteps
+import org.ods.shared.lib.jenkins.PipelineSteps
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -15,10 +15,10 @@ class GitService {
     public static String ODS_GIT_TAG_PREFIX = 'ods-generated-'
     public final static String ODS_GIT_BRANCH_PREFIX = 'release/'
 
-    private final IPipelineSteps script
+    private final PipelineSteps script
 
     @Inject
-    GitService(IPipelineSteps script) {
+    GitService(PipelineSteps script) {
         this.script = script
     }
 
