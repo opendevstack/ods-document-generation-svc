@@ -1,13 +1,11 @@
 package org.ods.doc.gen.leva.doc.services
 
-
-
+import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.parser.ParserEmulationProfile
-import com.vladsch.flexmark.util.data.MutableDataSet
 import com.vladsch.flexmark.pdf.converter.PdfConverterExtension
-import com.vladsch.flexmark.ext.tables.TablesExtension
+import com.vladsch.flexmark.util.data.MutableDataSet
 
 class MarkdownUtil {
 

@@ -1,7 +1,7 @@
 package org.ods.shared.lib.xunit
 
 import groovy.util.logging.Slf4j
-import  org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.xunit.parser.JUnitParser
 import org.springframework.stereotype.Service
 

@@ -3,8 +3,6 @@ package org.ods.shared.lib.jenkins
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Service
 
-import javax.inject.Inject
-
 @Slf4j
 @Service
 class JenkinsService {

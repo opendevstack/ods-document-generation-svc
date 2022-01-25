@@ -62,7 +62,7 @@ class LeVADocumentService extends DocGenUseCase {
     Clock clock
 
     @Inject
-    LeVADocumentService(Project project, MROPipelineUtil util, DocGenService docGen,
+    LeVADocumentService(Project project, PipelineUtil util, DocGenService docGen,
                         JenkinsService jenkins, JiraUseCase jiraUseCase, JUnitTestReportsUseCase junit,
                         LeVADocumentChaptersFileService levaFiles, NexusService nexus,
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {

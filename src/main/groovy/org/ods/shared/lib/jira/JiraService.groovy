@@ -3,10 +3,9 @@ package org.ods.shared.lib.jira
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
-import  org.ods.doc.gen.leva.doc.services.StringCleanup
 import kong.unirest.Unirest
-
 import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.leva.doc.services.StringCleanup
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -50,44 +49,7 @@ class JiraService {
         this.password = password
     }
 
-    
-    void addLabelsToIssue(String issueIdOrKey, List names) {
-        if (!issueIdOrKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to add labels to Jira issue. \'issueIdOrKey\' is undefined.')
-        }
 
-        if (!names) {
-            throw new IllegalArgumentException('Error: unable to add labels to Jira issue. \'names\' is undefined.')
-        }
-
-        def response = Unirest.put("${this.baseURL}/rest/api/2/issue/{issueIdOrKey}")
-            .routeParam("issueIdOrKey", issueIdOrKey)
-            .basicAuth(this.username, this.password)
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
-            .body(JsonOutput.toJson(
-                [
-                    update: [
-                        labels: names.collect { name ->
-                            [add: name]
-                        }
-                    ]
-                ]
-            ))
-            .asString()
-
-        response.ifFailure {
-            def message = "Error: unable to add labels to Jira issue. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to add labels to Jira issue. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-    }
-
-    
     void appendCommentToIssue(String issueIdOrKey, String comment) {
         if (!issueIdOrKey?.trim()) {
             throw new IllegalArgumentException('Error: unable to append comment to Jira issue. \'issueIdOrKey\' is undefined.')
@@ -118,7 +80,6 @@ class JiraService {
         }
     }
 
-    
     void createIssueLinkType(String linkType, Map inwardIssue, Map outwardIssue) {
         if (!linkType?.trim()) {
             throw new IllegalArgumentException('Error: unable to create Jira issue link. \'linkType\' is undefined.')
@@ -168,12 +129,10 @@ class JiraService {
         }
     }
 
-    
     void createIssueLinkTypeBlocks(Map inwardIssue, Map outwardIssue) {
         createIssueLinkType("Blocks", inwardIssue, outwardIssue)
     }
 
-    
     Map createIssueType(String type, String projectKey, String summary, String description, String fixVersion = null) {
         if (!type?.trim()) {
             throw new IllegalArgumentException('Error: unable to create Jira issue. \'type\' is undefined.')
@@ -237,35 +196,6 @@ class JiraService {
         return createIssueType("Bug", projectKey, summary, description, fixVersion)
     }
 
-    
-    Map getDocGenData(String projectKey) {
-        if (!projectKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to get documentation generation data from Jira. ' +
-                '\'projectKey\' is undefined.')
-        }
-
-        def response = Unirest.get("${this.baseURL}/rest/platform/1.0/docgenreports/{projectKey}")
-            .routeParam("projectKey", projectKey.toUpperCase())
-            .basicAuth(this.username, this.password)
-            .header("Accept", "application/json")
-            .asString()
-
-        response.ifFailure {
-            def message = 'Error: unable to get documentation generation data. Jira responded with code: ' +
-                "'${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = 'Error: unable to get documentation generation data. ' +
-                    "Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-
-        return new JsonSlurperClassic().parseText(StringCleanup.removeCharacters(response.getBody(), CHARACTER_REMOVEABLE))
-    }
-
-    
     Map getDeltaDocGenData(String projectKey, String version) {
         if (!projectKey?.trim()) {
             throw new IllegalArgumentException('Error: unable to get documentation generation data from Jira. ' +
@@ -428,93 +358,6 @@ class JiraService {
         return new JsonSlurperClassic().parseText(response.getBody())
     }
 
-    
-    List getProjectVersions(String projectKey) {
-        if (!projectKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to get project versions from Jira. \'projectKey\' is undefined.')
-        }
-
-        def response = Unirest.get("${this.baseURL}/rest/api/2/project/{projectKey}/versions")
-            .routeParam('projectKey', projectKey.toUpperCase())
-            .basicAuth(this.username, this.password)
-            .header('Accept', 'application/json')
-            .asString()
-
-        response.ifFailure {
-            def message = "Error: unable to get project versions. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to get project versions. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-
-        return new JsonSlurperClassic().parseText(response.getBody()) ?: []
-    }
-
-    
-    List<String> getLabelsFromIssue(String issueIdOrKey) {
-        if (!issueIdOrKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to remove labels from Jira issue. \'issueIdOrKey\' is undefined.')
-        }
-
-        def response = Unirest.get("${this.baseURL}/rest/api/2/issue/{issueIdOrKey}")
-            .routeParam("issueIdOrKey", issueIdOrKey)
-            .queryString('fields', 'labels')
-            .basicAuth(this.username, this.password)
-            .header('Accept', 'application/json')
-            .asString()
-
-        response.ifFailure {
-            def message = "Error: unable to get labels from Jira issue. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-            if (response.getStatus() == 404) {
-                message = "Error: unable to get labels from Jira issue. Jira could not be found at: '${this.baseURL}'."
-            }
-            throw new RuntimeException(message)
-        }
-
-        new JsonSlurperClassic().parseText(response.getBody()).getOrDefault("fields", [:]).getOrDefault("labels", [])
-    }
-
-    
-    void removeLabelsFromIssue(String issueIdOrKey, List names) {
-        if (!issueIdOrKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to remove labels from Jira issue. \'issueIdOrKey\' is undefined.')
-        }
-
-        if (!names) {
-            throw new IllegalArgumentException('Error: unable to remove labels from Jira issue. \'names\' is undefined.')
-        }
-
-        def response = Unirest.put("${this.baseURL}/rest/api/2/issue/{issueIdOrKey}")
-            .routeParam('issueIdOrKey', issueIdOrKey)
-            .basicAuth(this.username, this.password)
-            .header('Accept', 'application/json')
-            .header('Content-Type', 'application/json')
-            .body(JsonOutput.toJson(
-                [
-                    update: [
-                        labels: names.collect { name ->
-                            [remove: name]
-                        }
-                    ]
-                ]
-            ))
-            .asString()
-
-        response.ifFailure {
-            def message = "Error: unable to remove labels from Jira issue. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to remove labels from Jira issue. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-    }
-
-    
     Map searchByJQLQuery(Map query) {
         if (!query) {
             throw new IllegalArgumentException('Error: unable to get Jira issues for JQL query. \'query\' is undefined.')
@@ -551,56 +394,6 @@ class JiraService {
         }
 
         return new JsonSlurperClassic().parseText(StringCleanup.removeCharacters(response.getBody(), CHARACTER_REMOVEABLE))
-    }
-
-    
-    void updateSelectListFieldsOnIssue(String issueIdOrKey, Map fields) {
-        if (!issueIdOrKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to update select list fields on Jira issue. \'issueIdOrKey\' is undefined.')
-        }
-
-        if (!fields) {
-            throw new IllegalArgumentException('Error: unable to update select list fields on Jira issue. \'fields\' is undefined.')
-        }
-
-        def response = Unirest.put("${this.baseURL}/rest/api/2/issue/{issueIdOrKey}")
-            .routeParam('issueIdOrKey', issueIdOrKey)
-            .basicAuth(this.username, this.password)
-            .header('Accept', 'application/json')
-            .header('Content-Type', 'application/json')
-            .body(JsonOutput.toJson(
-                [
-                    update: fields.collectEntries { id, value_ ->
-                        [
-                            id,
-                            [
-                                [
-                                    set: [
-                                        value: value_ as String
-                                    ]
-                                ]
-                            ]
-                        ]
-                    }
-                ]
-            ))
-            .asString()
-
-        response.ifSuccess {
-            if (response.getStatus() != 204) {
-                throw new RuntimeException("Error: unable to update select list fields on Jira issue ${issueIdOrKey}. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'.")
-            }
-        }
-
-        response.ifFailure {
-            def message = "Error: unable to update select list fields on Jira issue ${issueIdOrKey}. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to update select list fields on Jira issue ${issueIdOrKey}. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
     }
 
     
@@ -680,45 +473,6 @@ class JiraService {
         }
 
         new JsonSlurperClassic().parseText(response.getBody()).getOrDefault("fields", [:])
-    }
-
-    
-    Boolean isVersionEnabledForDelta(String projectKey, String versionName) {
-        if (!projectKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to check project versions from Jira. ' +
-                '\'projectKey\' is undefined.')
-        }
-
-        if (!versionName?.trim()) {
-            throw new IllegalArgumentException('Error: unable to check project versions from Jira. ' +
-                '\'versionName\' is undefined.')
-        }
-
-        def response = Unirest.get("${this.baseURL}/rest/platform/1.1/productreleases/{projectKey}/versions/{version}")
-            .routeParam('projectKey', projectKey.toUpperCase())
-            .routeParam('version', versionName)
-            .basicAuth(this.username, this.password)
-            .header('Accept', 'application/json')
-            .asString()
-
-        response.ifFailure {
-            if (response.getStatus() == 400) {
-                if(response.getBody().contains("Invalid project versionName.")) {
-                    return false
-                }
-            }
-            def message = 'Error: unable to get project versions in url ' +
-                "${this.baseURL}/rest/platform/1.1/productreleases/${projectKey.toUpperCase()}/versions/${versionName}" +
-                ' Jira responded with code: ' +
-                "'${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to get project versions. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-        return true
     }
 
 }

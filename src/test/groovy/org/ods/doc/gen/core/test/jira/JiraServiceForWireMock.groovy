@@ -19,11 +19,6 @@ class JiraServiceForWireMock extends JiraService {
     }
 
     @Override
-    void addLabelsToIssue(String issueIdOrKey, List names) {
-        log.warn("addLabelsToIssue - issueIdOrKey:$issueIdOrKey")
-    }
-
-    @Override
     void appendCommentToIssue(String issueIdOrKey, String comment) {
         log.warn("appendCommentToIssue - issueIdOrKey:$issueIdOrKey")
     }
@@ -36,16 +31,6 @@ class JiraServiceForWireMock extends JiraService {
     @Override
     Map createIssueType(String type, String projectKey, String summary, String description, String fixVersion = null) {
         log.warn("createIssueType - type:${type}")
-    }
-
-    @Override
-    void removeLabelsFromIssue(String issueIdOrKey, List names) {
-        log.warn("removeLabelsFromIssue - issueIdOrKey:$issueIdOrKey")
-    }
-
-    @Override
-    void updateSelectListFieldsOnIssue(String issueIdOrKey, Map fields) {
-        log.warn("updateSelectListFieldsOnIssue - issueIdOrKey:$issueIdOrKey")
     }
 
     @Override

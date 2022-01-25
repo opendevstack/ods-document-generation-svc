@@ -7,6 +7,7 @@ import org.junit.contrib.java.lang.system.EnvironmentVariables
 
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
+import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.jira.JiraService
 import org.ods.shared.lib.jira.JiraUseCase
 import org.ods.shared.lib.project.data.Project
@@ -31,7 +32,7 @@ class LeVADocumentServiceSpec extends Specification {
     EnvironmentVariables env = new EnvironmentVariables()
 
     Project project
-    MROPipelineUtil util
+    PipelineUtil util
     DocGenService docGen
     JenkinsService jenkins
     JiraUseCase jiraUseCase
@@ -999,7 +1000,7 @@ class LeVADocumentServiceSpec extends Specification {
         def uri = new URI("http://nexus")
         def pdfUtil = new PDFUtil()
         jiraUseCase = Spy(new JiraUseCase(project, steps, util, Mock(JiraService), logger))
-        util = Spy(new MROPipelineUtil(project, steps, null, logger))
+        util = Spy(new PipelineUtil(project, steps, null, logger))
         usecase = Spy(
             new LeVADocumentService(project, steps, util, docGen, jenkins, jiraUseCase, junit, levaFiles, nexus, os, pdfUtil, sq, bbt, logger)
         )

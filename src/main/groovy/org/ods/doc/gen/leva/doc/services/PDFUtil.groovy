@@ -1,14 +1,8 @@
 package org.ods.doc.gen.leva.doc.services
 
-
-
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions
 import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Service
-
-import java.nio.file.Files
-
 import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -20,7 +14,9 @@ import org.apache.pdfbox.pdmodel.graphics.blend.BlendMode
 import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState
 import org.apache.pdfbox.util.Matrix
 import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.springframework.stereotype.Service
 
+import java.nio.file.Files
 import java.nio.file.Paths
 
 @SuppressWarnings(['JavaIoPackageAccess', 'LineLength', 'UnnecessaryObjectReferences'])

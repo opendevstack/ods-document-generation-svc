@@ -5,7 +5,7 @@ import groovy.util.logging.Slf4j
 import org.ods.shared.lib.jenkins.JenkinsService
 import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.nexus.NexusService
-import  org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.project.data.ProjectData
 
 @Slf4j

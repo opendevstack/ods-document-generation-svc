@@ -5,8 +5,8 @@ import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
-import org.ods.doc.gen.leva.doc.services.MROPipelineUtil
 import org.ods.shared.lib.git.GitService
+import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.jira.CustomIssueFields
 import org.ods.shared.lib.jira.IssueTypes
 import org.ods.shared.lib.jira.JiraService
@@ -295,7 +295,7 @@ class ProjectData {
     }
 
     static String envStateFileName(String targetEnvironment) {
-        "${MROPipelineUtil.ODS_STATE_DIR}/${targetEnvironment}.json"
+        "${PipelineUtil.ODS_STATE_DIR}/${targetEnvironment}.json"
     }
 
     String getEnvStateFileName() {

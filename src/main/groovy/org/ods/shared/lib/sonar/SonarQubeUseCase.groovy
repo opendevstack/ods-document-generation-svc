@@ -1,8 +1,8 @@
 package org.ods.shared.lib.sonar
 
 import groovy.util.logging.Slf4j
-import  org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.nexus.NexusService
+import org.ods.shared.lib.project.data.Project
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject

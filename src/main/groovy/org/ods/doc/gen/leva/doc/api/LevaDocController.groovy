@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController
 
 import javax.inject.Inject
 import java.nio.file.Files
-import java.nio.file.Path
 
 import static groovy.json.JsonOutput.prettyPrint
 import static groovy.json.JsonOutput.toJson

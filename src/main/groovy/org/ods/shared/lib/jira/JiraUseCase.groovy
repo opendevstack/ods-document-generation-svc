@@ -1,11 +1,10 @@
 package org.ods.shared.lib.jira
 
 import groovy.util.logging.Slf4j
-import  org.ods.doc.gen.leva.doc.services.MROPipelineUtil
-import  org.ods.shared.lib.project.data.Project
-import  org.ods.shared.lib.project.data.JiraDataItem
+import org.ods.shared.lib.jenkins.PipelineUtil
+import org.ods.shared.lib.project.data.JiraDataItem
+import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.project.data.ProjectData
-import org.ods.shared.lib.xunit.parser.JUnitParser
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -17,10 +16,10 @@ class JiraUseCase {
 
     private final Project project
     private final JiraService jira
-    private final MROPipelineUtil util
+    private final PipelineUtil util
 
     @Inject
-    JiraUseCase(Project project, MROPipelineUtil util, JiraService jira) {
+    JiraUseCase(Project project, PipelineUtil util, JiraService jira) {
         this.project = project
         this.util = util
         this.jira = jira
@@ -138,44 +137,6 @@ class JiraUseCase {
         }
     }
 
-    void reportTestResultsForComponent(ProjectData projectData, String componentName, List<String> testTypes, Map testResults) {
-        if (!this.jira) return
-
-        def testComponent = "${componentName ?: 'project'}"
-        def testMessage = componentName ? " for component '${componentName}'" : ''
-        if (log.debugMode) {
-            log.debug('Reporting unit test results to corresponding test cases in Jira' +
-                "${testMessage}. Test type: '${testTypes}'.\nTest results: ${testResults}")
-        }
-
-        log.startClocked("${testComponent}-jira-fetch-tests-${testTypes}")
-        def testIssues = projectData.getAutomatedTests(componentName, testTypes)
-        log.debugClocked("${testComponent}-jira-fetch-tests-${testTypes}",
-            "Found automated tests$testMessage. Test type: ${testTypes}: " +
-                "${testIssues?.size()}")
-
-        this.util.warnBuildIfTestResultsContainFailure(testResults)
-        this.matchTestIssuesAgainstTestResults(testIssues, testResults, null) { unexecutedJiraTests ->
-            if (!unexecutedJiraTests.isEmpty()) {
-                this.util.warnBuildAboutUnexecutedJiraTests(unexecutedJiraTests)
-            }
-        }
-
-        log.info("${testComponent}-jira-report-tests-${testTypes}")
-        applyXunitTestResultsAsTestIssueLabels(testIssues, testResults)
-        log.debug("${testComponent}-jira-report-tests-${testTypes}")
-        if (['Q', 'P'].contains(projectData.buildParams.targetEnvironmentToken)) {
-            log.info("${testComponent}-jira-report-bugs-${testTypes}")
-            // Create bugs for erroneous test issues
-            def errors = JUnitParser.Helper.getErrors(testResults)
-            this.createBugsForFailedTestIssues(projectData, testIssues, errors, projectData.data.env.RUN_DISPLAY_URL)
-
-            // Create bugs for failed test issues
-            def failures = JUnitParser.Helper.getFailures(testResults)
-            this.createBugsForFailedTestIssues(projectData, testIssues, failures, projectData.data.env.RUN_DISPLAY_URL)
-            log.debug("${testComponent}-jira-report-bugs-${testTypes}")
-        }
-    }
 
     Long getLatestDocVersionId(ProjectData projectData, List < Map > trackingIssues) {
         def documentationTrackingIssueFields = projectData.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)

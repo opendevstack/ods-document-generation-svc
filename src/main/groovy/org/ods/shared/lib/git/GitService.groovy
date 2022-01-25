@@ -3,8 +3,6 @@ package org.ods.shared.lib.git
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Service
 
-import javax.inject.Inject
-
 @SuppressWarnings('MethodCount')
 @Slf4j
 @Service

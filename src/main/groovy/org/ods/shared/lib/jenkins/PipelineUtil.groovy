@@ -3,8 +3,8 @@ package org.ods.shared.lib.jenkins
 import groovy.util.logging.Slf4j
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
-import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.git.GitService
+import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.project.data.ProjectData
 import org.springframework.stereotype.Service
 
@@ -14,6 +14,11 @@ import javax.inject.Inject
 @Slf4j
 @Service
 class PipelineUtil {
+
+    static final String COMPONENT_METADATA_FILE_NAME = 'metadata.yml'
+    static final String REPOS_BASE_DIR = 'repositories'
+    static final List EXCLUDE_NAMESPACES_FROM_IMPORT = ['openshift']
+    static final String ODS_STATE_DIR = 'ods-state'
 
     static final String ARTIFACTS_BASE_DIR = 'artifacts'
     static final String LOGS_BASE_DIR = 'logs'

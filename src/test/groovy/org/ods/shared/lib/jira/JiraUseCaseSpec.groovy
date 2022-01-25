@@ -2,7 +2,7 @@ package org.ods.shared.lib.jira
 
 
 
-import  org.ods.doc.gen.leva.doc.services.MROPipelineUtil
+import org.ods.shared.lib.jenkins.PipelineUtil
 import  org.ods.shared.lib.project.data.Project
 import org.ods.doc.gen.core.test.SpecHelper
 
@@ -14,11 +14,11 @@ class JiraUseCaseSpec extends SpecHelper {
     Project project
     def steps = [:]
     JiraUseCase usecase
-    MROPipelineUtil util
+    PipelineUtil util
 
     def setup() {
         project = Spy(createProject())
-        util = Mock(MROPipelineUtil)
+        util = Mock(PipelineUtil)
         jira = Mock(JiraService) {
             createIssueTypeBug(_, _, _) >> {
                 [
