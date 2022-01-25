@@ -1,20 +1,17 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
+import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
-import org.ods.shared.lib.project.data.JiraDataItem
-import  org.ods.shared.lib.git.ProjectDataBitbucketRepository
-import org.ods.shared.lib.jenkins.PipelineSteps
 
+import org.ods.shared.lib.project.data.JiraDataItem
 import spock.lang.Unroll
-import org.ods.doc.gen.core.test.SpecHelper
 
 import java.nio.file.NoSuchFileException
 
 class DocumentHistorySpec extends SpecHelper {
 
-    PipelineSteps steps
     Map jiraData10
     Map jiraData11_first
     Map jiraDataFix
@@ -28,11 +25,10 @@ class DocumentHistorySpec extends SpecHelper {
     List<DocumentHistoryEntry> entries11_second
     List<DocumentHistoryEntry> entries20
     List<DocumentHistoryEntry> entries20Alt
+    def steps = [:]
 
     def setup() {
-        steps = Mock(PipelineSteps) {
-            getEnv() >> { return [WORKSPACE: '/work/spa/ce'] }
-        }
+        steps =  [WORKSPACE: '/work/spa/ce']
         logger = Mock(Logger)
 
         def cmp = {  name, String version = null ->  [key: "Technology-${name}" as String, name: name, versions: [version]]}
@@ -234,7 +230,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def versionEntries = entries10
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -258,7 +254,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def versionEntries = entries11_first
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -280,7 +276,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def versionEntries = entries20Alt
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -302,7 +298,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def versionEntries = entriesFix
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -325,7 +321,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def versionEntries = entries11_second
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -347,7 +343,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def versionEntries = entries20
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -383,7 +379,7 @@ class DocumentHistorySpec extends SpecHelper {
 
         def docContent = ["ISSUE-A"]
 
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
         history.loadSavedDocHistoryData() >> {
             throw new NoSuchFileException('projectData/documentHistory-D-LevaDocType.json')
         }
@@ -485,7 +481,7 @@ class DocumentHistorySpec extends SpecHelper {
         ]
 
 
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'doc1'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'doc1'])
         history.loadSavedDocHistoryData() >> [new DocumentHistoryEntry([:], 1L, '1.0', '', 'Initial document version.')]
         history.load(base_saved_data, ['added1', 'added2', 'otherDocCh', 'changed1', 'discontinued'])
 
@@ -507,7 +503,7 @@ class DocumentHistorySpec extends SpecHelper {
         def versionEntries = entries11_first
         def docContent = computeIssuesDoc(versionEntries)
 
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -527,7 +523,7 @@ class DocumentHistorySpec extends SpecHelper {
         def savedData = entries10
         def versionEntries = entries11_first
         def docContent = computeIssuesDoc(versionEntries)
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)
@@ -540,80 +536,6 @@ class DocumentHistorySpec extends SpecHelper {
         result.collect { it.entryId } == [1, 2]
     }
 
-    def "loads saved data as DocumentEntry"() {
-        given:
-        def targetEnvironment = 'D'
-        def savedProjVersion = 'version'
-        def savedData = [[
-                bugs                    : [],
-                (JiraDataItem.TYPE_DOCS): [],
-                components              : [[key: "CMP", action: 'add']],
-                epics                   : [[key: "EPC", action: 'add']],
-                mitigations             : [[key: "MIT", action: 'add']],
-                requirements            : [[key: "req1.key", action: 'add']],
-                risks                   : [[key: "rsk1.key", action: 'add']],
-                tests                   : [[key: "tst1.key", action: 'add']],
-                techSpecs               : [[key: "ts1.key", action: 'add']],
-                entryId                 : 1,
-                projectVersion          : savedProjVersion,
-                previousProjectVersion  : '',
-                rational: "Modifications for project version '${savedProjVersion}'."
-            ]]
-
-        def expectedResult = savedData.collect{ Map entry -> new DocumentHistoryEntry(
-            entry,
-            entry.entryId,
-            entry.projectVersion,
-            entry.previousProjectVersion,
-            entry.rational
-        )}
-
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
-        ProjectDataBitbucketRepository repo = Spy(constructorArgs: [steps])
-
-        when:
-        def result = history.loadSavedDocHistoryData(repo)
-
-        then:
-        1 * repo.loadFile(_) >> savedData
-        result.size() == expectedResult.size()
-        result.getClass() == expectedResult.getClass()
-        result == expectedResult
-        result.first().getEntryId() == expectedResult.first().getEntryId()
-
-        when:
-        history.loadSavedDocHistoryData(repo)
-
-        then:
-        1 * repo.loadFile(_) >> [wrong: "saved data"]
-
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.message.contains("Unable to load saved document history for file")
-
-        when:
-        history.loadSavedDocHistoryData(repo)
-
-        then:
-        1 * repo.loadFile(_) >> [[bugs: ["BUG-1"], projectVersion: 'version']]
-
-        then:
-        e = thrown(IllegalArgumentException)
-        e.message.contains("Unable to load saved document history for file")
-        e.message.contains('EntryId cannot be empty')
-
-        when:
-        history.loadSavedDocHistoryData(repo)
-
-        then:
-        1 * repo.loadFile(_) >> [[bugs: ["BUG-1"], entryId: 12]]
-
-        then:
-        e = thrown(IllegalArgumentException)
-        e.message.contains("Unable to load saved document history for file")
-        e.message.contains('projectVersion cannot be empty')
-    }
-
     def "builds docHistory with only added/removed things when redeploying same version with no changes"() {
         given:
         def jiraData = jiraData10
@@ -623,7 +545,7 @@ class DocumentHistorySpec extends SpecHelper {
         def docContent = computeIssuesDoc(entries10)
         def versionEntries = [new DocumentHistoryEntry(entries10.first().getDelegate(), 2L, firstProjectVersion, '',
             "Modifications for project version '${firstProjectVersion}'. This document version invalidates the changes done in document version '1'.")] + entries10
-        DocumentHistory history = Spy(constructorArgs: [steps, logger, targetEnvironment, 'LevaDocType'])
+        DocumentHistory history = Spy(constructorArgs: [targetEnvironment, 'LevaDocType'])
 
         when:
         history.load(jiraData, docContent)

@@ -1,7 +1,7 @@
 package org.ods.shared.lib.xunit
 
-import org.ods.shared.lib.jenkins.PipelineSteps
-import org.ods.shared.lib.jenkins.PipelineSteps
+
+
 import org.ods.shared.lib.project.data.Project
 import org.ods.doc.gen.core.test.SpecHelper
 
@@ -13,13 +13,12 @@ import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 class JUnitTestReportsUseCaseSpec extends SpecHelper {
 
     Project project
-    PipelineSteps steps
+    def steps = [:]
     JUnitTestReportsUseCase usecase
 
     def setup() {
         project = createProject()
-        steps = Spy(PipelineSteps)
-        usecase = new JUnitTestReportsUseCase(project, steps)
+        usecase = new JUnitTestReportsUseCase(project)
     }
 
     def "combine test results"() {

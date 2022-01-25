@@ -4,7 +4,7 @@ import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.junit.contrib.java.lang.system.EnvironmentVariables
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
 import org.ods.shared.lib.jira.JiraService
@@ -18,7 +18,7 @@ import spock.lang.Unroll
 
 import org.ods.shared.lib.jenkins.JenkinsService
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 
@@ -31,7 +31,6 @@ class LeVADocumentServiceSpec extends Specification {
     EnvironmentVariables env = new EnvironmentVariables()
 
     Project project
-    PipelineSteps steps
     MROPipelineUtil util
     DocGenService docGen
     JenkinsService jenkins
@@ -44,6 +43,7 @@ class LeVADocumentServiceSpec extends Specification {
     LeVADocumentService usecase
     DocumentHistory docHistory
     BitbucketTraceabilityUseCase bbt
+    def steps = [:]
 
     def setup() {
         project = Spy(createProject())
@@ -51,7 +51,7 @@ class LeVADocumentServiceSpec extends Specification {
         project.buildParams.targetEnvironmentToken = "D"
         project.buildParams.version = "WIP"
 
-        steps = Spy(PipelineSteps)
+        steps = [:]
         util = Mock(MROPipelineUtil)
         docGen = Mock(DocGenService)
         jenkins = Mock(JenkinsService)

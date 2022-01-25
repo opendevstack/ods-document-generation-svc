@@ -1,25 +1,20 @@
 package org.ods.shared.lib.project.data
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
-import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.leva.doc.services.DocumentHistory
+import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
+import org.ods.doc.gen.leva.doc.services.MROPipelineUtil
 import org.ods.shared.lib.git.GitService
-import org.ods.shared.lib.git.GitTag
-import org.ods.shared.lib.git.ProjectDataBitbucketRepository
-import org.ods.shared.lib.jenkins.PipelineSteps
 import org.ods.shared.lib.jira.CustomIssueFields
 import org.ods.shared.lib.jira.IssueTypes
 import org.ods.shared.lib.jira.JiraService
 import org.ods.shared.lib.jira.LabelPrefix
 import org.ods.shared.lib.jira.OpenIssuesException
-import org.ods.doc.gen.leva.doc.services.DocumentHistory
-import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
-import org.ods.doc.gen.leva.doc.services.MROPipelineUtil
-import org.ods.shared.lib.nexus.NexusService
 import org.springframework.stereotype.Service
-import org.yaml.snakeyaml.Yaml
 
-import java.nio.file.Paths
+import java.nio.file.NoSuchFileException
 
 @SuppressWarnings(['LineLength',
         'AbcMetric',
@@ -37,20 +32,20 @@ class ProjectData {
 
     protected static final String BUILD_PARAM_VERSION_DEFAULT = 'WIP'
     protected static final String METADATA_FILE_NAME = 'metadata.yml'
+    protected static final String BASE_DIR = 'projectData'
 
-    protected PipelineSteps steps
-    protected GitService git
     protected Map config
     protected String targetProject
     protected Boolean isVersioningEnabled = false
-    JiraService jira
+
+    private final JiraService jira
+    private final GitService git
 
     Map data = [:]
 
-    ProjectData(JiraService jira, GitService git, PipelineSteps steps) {
+    ProjectData(JiraService jira, GitService git) {
         this.jira = jira
         this.git = git
-        this.steps = steps
         this.config =  [:]
         this.data.build = [
             hasFailingTests: false,
@@ -66,7 +61,7 @@ class ProjectData {
         this.data.openshift = data.openshift
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
-        this.steps.env = data.env // TODO //s2o => this should be removed! All Project Data should be in this class
+        this.data.env = data.env
         return this
     }
 
@@ -127,7 +122,7 @@ class ProjectData {
         def releaseStatusIssueFields = getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS)
 
         def releaseStatusIssueBuildNumberField = releaseStatusIssueFields['Release Build']
-        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueBuildNumberField.id): "${buildParams.version}-${steps.env.BUILD_NUMBER}"])
+        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueBuildNumberField.id): "${buildParams.version}-${data.env.BUILD_NUMBER}"])
     }
 
     Map<String, List> getWipJiraIssues() {
@@ -565,12 +560,6 @@ class ProjectData {
         return this.data.build.hasUnexecutedJiraTests
     }
 
-    static boolean isTriggeredByChangeManagementProcess(steps) {
-        def changeId = steps.env.changeId?.trim()
-        def configItem = steps.env.configItem?.trim()
-        return changeId && configItem
-    }
-
     String getGitReleaseBranch() {
         return GitService.getReleaseBranch(buildParams.version)
     }
@@ -608,38 +597,6 @@ class ProjectData {
     
     void setHistoryForDocument(DocumentHistory docHistory, String document) {
         this.documentHistories[document] = docHistory
-    }
-
-    static Map loadBuildParams(PipelineSteps steps) {
-        def releaseStatusJiraIssueKey = steps.env.releaseStatusJiraIssueKey?.trim()
-        if (isTriggeredByChangeManagementProcess(steps) && !releaseStatusJiraIssueKey) {
-            throw new IllegalArgumentException(
-                    "Error: unable to load build param 'releaseStatusJiraIssueKey': undefined")
-        }
-
-        def version = steps.env.version?.trim() ?: BUILD_PARAM_VERSION_DEFAULT
-        def targetEnvironment = (steps.env.environment?.trim() ?: 'dev').toLowerCase()
-        if (!['dev', 'qa', 'prod'].contains(targetEnvironment)) {
-            throw new IllegalArgumentException("Error: 'environment' build param must be one of 'DEV', 'QA' or 'PROD'.")
-        }
-        def targetEnvironmentToken = targetEnvironment[0].toUpperCase()
-
-        def changeId = steps.env.changeId?.trim() ?: 'UNDEFINED'
-        def configItem = steps.env.configItem?.trim() ?: 'UNDEFINED'
-        def changeDescription = steps.env.changeDescription?.trim() ?: 'UNDEFINED'
-        // Set rePromote=true if an existing tag should be deployed again
-        def rePromote = steps.env.rePromote?.trim() == 'true'
-
-        return [
-            changeDescription: changeDescription,
-            changeId: changeId,
-            configItem: configItem,
-            releaseStatusJiraIssueKey: releaseStatusJiraIssueKey,
-            targetEnvironment: targetEnvironment,
-            targetEnvironmentToken: targetEnvironmentToken,
-            version: version,
-            rePromote: rePromote,
-        ]
     }
 
     protected Map loadJiraData(String projectKey) {
@@ -901,7 +858,7 @@ class ProjectData {
     void addCommentInReleaseStatus(String message) {
         def releaseStatusIssueKey = buildParams.releaseStatusJiraIssueKey
         if (message) {
-            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${this.steps.env.RUN_DISPLAY_URL}")
+            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${data.env.RUN_DISPLAY_URL}")
         }
 
     }
@@ -949,26 +906,18 @@ class ProjectData {
         return JsonOutput.prettyPrint(JsonOutput.toJson(result))
     }
 
-    List<String> getMainReleaseManagerEnv() {
-        def mroSharedLibVersion = this.steps.sh(
-                script: "env | grep 'library.ods-mro-jenkins-shared-library.version' | cut -d= -f2",
-                returnStdout: true,
-                label: 'getting ODS shared lib version'
-        ).trim()
-
-        return [
-                "ods.build.rm.${getKey()}.repo.url=${gitData.url}",
-                "ods.build.rm.${getKey()}.repo.commit.sha=${gitData.commit}",
-                "ods.build.rm.${getKey()}.repo.commit.msg=${gitData.message}",
-                "ods.build.rm.${getKey()}.repo.commit.timestamp=${gitData.time}",
-                "ods.build.rm.${getKey()}.repo.commit.author=${gitData.author}",
-                "ods.build.rm.${getKey()}.repo.branch=${gitData.baseTag}",
-                "ods.build.orchestration.lib.version=${mroSharedLibVersion}",
-        ]
-    }
-
-    protected Map loadSavedJiraData(String savedVersion) {
-        new ProjectDataBitbucketRepository(steps).loadFile(savedVersion)
+    Object loadSavedJiraData(String savedVersion) {
+        String fileName = "${BASE_DIR}/${savedVersion}.json"
+        try {
+            String savedData =  new File("${data.env.WORKSPACE}/${fileName}")?.text
+            return new JsonSlurperClassic().parseText(savedData) ?: [:]
+        } catch (NoSuchFileException e) {
+            throw new NoSuchFileException("File '${fileName}' is expected to be inside the release " +
+                    'manager repository but was not found and thus, document history cannot be build. If you come from ' +
+                    'and old ODS version, create one for each document to use the automated document history feature.')
+        } catch (RuntimeException ex) {
+            throw new RuntimeException("Error parsing File '${fileName}'", ex)
+        }
     }
 
     Map mergeJiraData(Map oldData, Map newData) {

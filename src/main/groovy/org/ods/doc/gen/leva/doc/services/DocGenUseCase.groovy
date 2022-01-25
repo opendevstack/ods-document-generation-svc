@@ -1,13 +1,14 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
+import groovy.util.logging.Slf4j
 import org.ods.shared.lib.jenkins.JenkinsService
 import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.jenkins.PipelineSteps
 import  org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.project.data.ProjectData
 
+@Slf4j
 @SuppressWarnings([
     'AbstractClassWithPublicConstructor',
     'LineLength',
@@ -17,17 +18,16 @@ import org.ods.shared.lib.project.data.ProjectData
 abstract class DocGenUseCase {
 
     static final String RESURRECTED = "resurrected"
-    Project project
-    PipelineSteps steps
-    protected PipelineUtil util
-    protected DocGenService docGen
-    protected NexusService nexus
-    protected PDFUtil pdf
-    protected JenkinsService jenkins
 
-    DocGenUseCase(Project project, PipelineSteps steps, PipelineUtil util, DocGenService docGen, NexusService nexus, PDFUtil pdf, JenkinsService jenkins) {
+    protected final Project project
+    protected final PipelineUtil util
+    protected final DocGenService docGen
+    protected final NexusService nexus
+    protected final PDFUtil pdf
+    protected final JenkinsService jenkins
+
+    DocGenUseCase(Project project, PipelineUtil util, DocGenService docGen, NexusService nexus, PDFUtil pdf, JenkinsService jenkins) {
         this.project = project
-        this.steps = steps
         this.util = util
         this.docGen = docGen
         this.nexus = nexus
@@ -49,7 +49,7 @@ abstract class DocGenUseCase {
             document = this.pdf.addWatermarkText(document, watermarkText)
         }
 
-        def basename = this.getDocumentBasename(projectData, documentType, projectData.buildParams.version, this.steps.env.BUILD_ID, repo)
+        def basename = this.getDocumentBasename(projectData, documentType, projectData.buildParams.version, projectData.data.env.BUILD_ID, repo)
         def pdfName = "${basename}.pdf"
 
         // Create an archive with the document and raw data
@@ -63,6 +63,7 @@ abstract class DocGenUseCase {
 
         def doCreateArtifact = shouldCreateArtifact(documentType, repo)
         def artifact = this.util.createZipArtifact(
+                projectData,
             "${basename}.zip",
             artifacts,
             doCreateArtifact
@@ -70,7 +71,7 @@ abstract class DocGenUseCase {
 
         // Concerns DTR/TIR for a single repo
         if (!doCreateArtifact) {
-            this.util.createAndStashArtifact(pdfName, document)
+            this.util.createAndStashArtifact(projectData, pdfName, document)
             if (repo) {
                 repo.data.documents[documentType] = pdfName
             }
@@ -90,7 +91,7 @@ abstract class DocGenUseCase {
             message += " for ${repo.id}"
         }
         message += " uploaded @ ${uri}"
-        this.steps.echo message
+        log.info message
         return uri.toString()
     }
 
@@ -103,7 +104,7 @@ abstract class DocGenUseCase {
             def documentName = repo.data.documents[documentType]
 
             if (documentName) {
-                def path = "${this.steps.env.WORKSPACE}/reports/${repo.id}"
+                def path = "${projectData.data.env.WORKSPACE}/reports/${repo.id}"
                 jenkins.unstashFilesIntoPath(documentName, path, documentType)
 
                 documents << new File("${path}/${documentName}").readBytes()
@@ -129,7 +130,7 @@ abstract class DocGenUseCase {
         // Create a cover page and merge all documents into one
         def modifier = { document ->
             documents.add(0, document)
-            return this.pdf.merge(this.steps.env.WORKSPACE, documents)
+            return this.pdf.merge(projectData.data.env.WORKSPACE as String, documents)
         }
 
         def result = this.createDocument(projectData, documentType, null, data, [:], modifier, templateName, watermarkText)
@@ -143,7 +144,7 @@ abstract class DocGenUseCase {
     }
 
     String getDocumentBasename(ProjectData projectData, String documentType, String version, String build = null, Map repo = null) {
-        getDocumentBasenameWithDocVersion(projectData, documentType, getDocumentVersion(version, build), repo)
+        getDocumentBasenameWithDocVersion(projectData, documentType, getDocumentVersion(projectData, version, build), repo)
     }
 
     String getDocumentBasenameWithDocVersion(ProjectData projectData, String documentType, String docVersion, Map repo = null) {
@@ -155,23 +156,23 @@ abstract class DocGenUseCase {
         return "${documentType}-${result}-${docVersion}".toString()
     }
 
-    String getDocumentVersion(String projectVersion, String build = null) {
+    String getDocumentVersion(ProjectData projectData, String projectVersion, String build = null) {
         if (build) {
             "${projectVersion}-${build}"
         } else {
-            "${projectVersion}-${steps.env.BUILD_ID}"
+            "${projectVersion}-${projectData.data.env.BUILD_ID}"
         }
     }
 
     @SuppressWarnings(['AbcMetric'])
-    Map resurrectAndStashDocument(String documentType, Map repo, boolean stash = true) {
+    Map resurrectAndStashDocument(ProjectData projectData, String documentType, Map repo, boolean stash = true) {
         if (!repo.data.openshift.deployments) {
             return [found: false]
         }
         String resurrectedBuild
         if (repo.data.openshift.resurrectedBuild) {
             resurrectedBuild = repo.data.openshift.resurrectedBuild
-            this.steps.echo "Using ${documentType} from jenkins build: ${resurrectedBuild}" +
+            log.info "Using ${documentType} from jenkins build: ${resurrectedBuild}" +
                 " for repo: ${repo.id}"
         } else {
             return [found: false]
@@ -189,7 +190,7 @@ abstract class DocGenUseCase {
         def fileExtensions = getFiletypeForDocumentType(documentType)
         String storageType = fileExtensions.storage ?: 'zip'
         String contentType = fileExtensions.content ?: 'pdf'
-        this.steps.echo "Resolved documentType '${documentType}'" +
+        log.info "Resolved documentType '${documentType}'" +
             " - storage/content formats: ${fileExtensions}"
 
         String contentFileName = "${basename}.${contentType}"
@@ -200,7 +201,7 @@ abstract class DocGenUseCase {
                 "${projectData.key.toLowerCase()}-${oldBuildVersion}",
                 storedFileName, path)
 
-        this.steps.echo "Document found: ${storedFileName} \r${documentFromNexus}"
+        log.info "Document found: ${storedFileName} \r${documentFromNexus}"
         byte [] resurrectedDocAsBytes
         if (storageType == 'zip') {
             resurrectedDocAsBytes = this.util.extractFromZipFile(

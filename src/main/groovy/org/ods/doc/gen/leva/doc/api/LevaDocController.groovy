@@ -28,6 +28,15 @@ class LevaDocController {
         this.leVADocumentService = leVADocumentUseCase
     }
 
+    /**
+     * The url identifies a project with a build that wants to generate a docType
+     *
+     * @param projectId
+     * @param build
+     * @param levaDocType
+     * @param body
+     * @return
+     */
     @PostMapping("{projectId}/{build}/{levaDocType}")
     String buildDocument(
             @PathVariable("projectId") String projectId,

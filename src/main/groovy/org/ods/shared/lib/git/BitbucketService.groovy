@@ -1,10 +1,10 @@
 package org.ods.shared.lib.git
 
+import groovy.json.JsonSlurper
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.ods.shared.lib.jenkins.AuthUtil
-import org.ods.shared.lib.jenkins.PipelineSteps
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -47,8 +47,7 @@ class BitbucketService {
     private String tokenCredentialsId
 
     @Inject
-    BitbucketService(PipelineSteps script,
-                     @Value('${bitbucket.url}') String bitbucketUrl,
+    BitbucketService(@Value('${bitbucket.url}') String bitbucketUrl,
                      @Value('${bitbucket.password}') String passwordCredentialsId) {
         this.script = script
         this.bitbucketUrl = bitbucketUrl
@@ -189,7 +188,7 @@ class BitbucketService {
         def apiResponse = getPullRequests(repo, state)
         def prCandidates = []
         try {
-            def js = script.readJSON(text: apiResponse)
+            def js = new JsonSlurper().parseText(apiResponse)
             prCandidates = js['values']
             if (prCandidates == null) {
                 throw new RuntimeException('Field "values" of JSON response must not be empty!')
@@ -439,9 +438,7 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
                 """
             ).trim()
             try {
-                // call readJSON inside of withCredentials block,
-                // otherwise token will be displayed in output
-                def js = script.readJSON(text: res)
+                def js =  new JsonSlurper().parseText(res)
                 String token = js['token']
                 tokenMap['password'] = token
             } catch (Exception ex) {

@@ -7,14 +7,14 @@ import org.json.JSONArray
 import org.ods.doc.gen.core.test.wiremock.BitbucketServiceMock
 import org.ods.shared.lib.project.data.Project
 import org.ods.doc.gen.leva.doc.services.StringCleanup
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.TempDir
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 
 import static org.assertj.core.api.Assertions.assertThat
 
@@ -31,16 +31,14 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
 
     @TempDir
     public File tempFolder
-
+    def steps = [:]
     BitbucketServiceMock bitbucketServiceMock
-    PipelineSteps steps
     Project project
     BitbucketService bitbucketService
 
     def setup() {
         log.info "Using temporal folder:${tempFolder.absolutePath}"
 
-        steps = new PipelineSteps()
         steps.env.WORKSPACE = tempFolder.absolutePath
         project = buildProject(logger)
         bitbucketServiceMock = new BitbucketServiceMock().setUp("csv").startServer(RECORD_WIREMOCK, BB_URL_TO_RECORD)

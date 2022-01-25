@@ -1,7 +1,6 @@
 package org.ods.shared.lib.jira
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.PipelineSteps
 import  org.ods.doc.gen.leva.doc.services.MROPipelineUtil
 import  org.ods.shared.lib.project.data.Project
 import  org.ods.shared.lib.project.data.JiraDataItem
@@ -16,15 +15,13 @@ import javax.inject.Inject
 @Service
 class JiraUseCase {
 
-    Project project
-    JiraService jira
-    PipelineSteps steps
-    private MROPipelineUtil util
+    private final Project project
+    private final JiraService jira
+    private final MROPipelineUtil util
 
     @Inject
-    JiraUseCase(Project project, PipelineSteps steps, MROPipelineUtil util, JiraService jira) {
+    JiraUseCase(Project project, MROPipelineUtil util, JiraService jira) {
         this.project = project
-        this.steps = steps
         this.util = util
         this.jira = jira
     }
@@ -171,11 +168,11 @@ class JiraUseCase {
             log.info("${testComponent}-jira-report-bugs-${testTypes}")
             // Create bugs for erroneous test issues
             def errors = JUnitParser.Helper.getErrors(testResults)
-            this.createBugsForFailedTestIssues(projectData, testIssues, errors, this.steps.env.RUN_DISPLAY_URL)
+            this.createBugsForFailedTestIssues(projectData, testIssues, errors, projectData.data.env.RUN_DISPLAY_URL)
 
             // Create bugs for failed test issues
             def failures = JUnitParser.Helper.getFailures(testResults)
-            this.createBugsForFailedTestIssues(projectData, testIssues, failures, this.steps.env.RUN_DISPLAY_URL)
+            this.createBugsForFailedTestIssues(projectData, testIssues, failures, projectData.data.env.RUN_DISPLAY_URL)
             log.debug("${testComponent}-jira-report-bugs-${testTypes}")
         }
     }

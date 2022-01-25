@@ -6,11 +6,11 @@ import org.apache.http.client.utils.URIBuilder
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.git.GitService
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.shared.lib.project.data.ProjectData
 import org.ods.shared.lib.xunit.parser.JUnitParser
 import org.yaml.snakeyaml.Yaml
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 
 @InheritConstructors
 class FakeGitUtil extends GitService {
@@ -68,7 +68,7 @@ class FakeProject extends ProjectData {
         return this
     }
 
-    static List<String> getBuildEnvironment(PipelineSteps steps, boolean debug) {
+    static List<String> getBuildEnvironment(boolean debug) {
         def env = new EnvironmentVariables()
         return FixtureHelper.createProjectBuildEnvironment(env)
     }
@@ -78,7 +78,7 @@ class FakeProject extends ProjectData {
         return new URIBuilder(url).build()
     }
 
-    static Map loadBuildParams(PipelineSteps steps) {
+    static Map loadBuildParams() {
         return FixtureHelper.createProjectBuildParams()
     }
 
@@ -138,7 +138,7 @@ class FakeProject extends ProjectData {
 
 class FixtureHelper {
     static Project createProject() {
-        def steps = new PipelineSteps()
+        def steps = [:]
         steps.env.WORKSPACE = ""
 
         return new FakeProject(steps)

@@ -1,6 +1,6 @@
 package org.ods.shared.lib.nexus
 
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.shared.lib.jenkins.JenkinsService
 
@@ -8,8 +8,8 @@ class JenkinsServiceSpec extends SpecHelper {
 
     def "unstash files into path"() {
         given:
-        def steps = Spy(PipelineSteps)
-        def service = new JenkinsService(steps)
+        def steps = [:]
+        def service = new JenkinsService()
 
         def name = "myStash"
         def path = "myPath"
@@ -30,8 +30,7 @@ class JenkinsServiceSpec extends SpecHelper {
 
     def "unstash files into path with failure"() {
         given:
-        def steps = Spy(PipelineSteps)
-        def service = new JenkinsService(steps)
+        def service = new JenkinsService()
 
         def name = "myStash"
         def path = "myPath"

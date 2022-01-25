@@ -5,7 +5,7 @@ import com.xlson.groovycsv.PropertyMapper
 import groovy.util.logging.Slf4j
 import  org.ods.shared.lib.project.data.Project
 import  org.ods.doc.gen.leva.doc.services.StringCleanup
-import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.shared.lib.project.data.ProjectData
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -24,12 +24,10 @@ class BitbucketTraceabilityUseCase {
     ]
 
     private final BitbucketService bitbucketService
-    private final PipelineSteps steps
     private final Project project
 
     @Inject
-    BitbucketTraceabilityUseCase(BitbucketService bitbucketService, PipelineSteps steps, Project project) {
-        this.steps = steps
+    BitbucketTraceabilityUseCase(BitbucketService bitbucketService, Project project) {
         this.project = project
         this.bitbucketService = bitbucketService
     }
@@ -39,8 +37,8 @@ class BitbucketTraceabilityUseCase {
      * for every merge event into the integration branch of every ODS component:
      * @return absolutePath of the created file
      */
-    List<Map> getPRMergeInfo() {
-        String csvFIleWithInfo = generateSourceCodeReviewFile()
+    List<Map> getPRMergeInfo(ProjectData projectData) {
+        String csvFIleWithInfo = generateSourceCodeReviewFile(projectData)
         return readSourceCodeReviewFile(csvFIleWithInfo)
     }
 
@@ -49,9 +47,9 @@ class BitbucketTraceabilityUseCase {
      * for every merge event into the integration branch of every ODS component:
      * @return absolutePath of the created file
      */
-    String generateSourceCodeReviewFile() {
+    String generateSourceCodeReviewFile(ProjectData projectData) {
         String token = bitbucketService.getToken()
-        File file = createReportFile()
+        File file = createReportFile(projectData)
         processRepositories(file, token)
         return file.absolutePath
     }
@@ -123,8 +121,8 @@ class BitbucketTraceabilityUseCase {
     }
 
     @SuppressWarnings(['JavaIoPackageAccess'])
-    private File createReportFile() {
-        File file = new File("${steps.env.WORKSPACE}/${CSV_FOLDER}/${CSV_FILE}")
+    private File createReportFile(ProjectData projectData) {
+        File file = new File("${projectData.data.env.WORKSPACE}/${CSV_FOLDER}/${CSV_FILE}")
         if (file.exists()) {
             file.delete()
         }

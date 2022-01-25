@@ -1,12 +1,11 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
+import org.ods.shared.lib.project.data.ProjectData
 import org.springframework.stereotype.Service
 
-import javax.inject.Inject
 import java.nio.file.Paths
 
-import org.ods.shared.lib.jenkins.PipelineSteps
 import org.yaml.snakeyaml.Yaml
 
 @Slf4j
@@ -15,25 +14,21 @@ class LeVADocumentChaptersFileService {
 
     static final String DOCUMENT_CHAPTERS_BASE_DIR = 'docs'
 
-    private PipelineSteps steps
-
-    @Inject
-    LeVADocumentChaptersFileService(PipelineSteps steps) {
-        this.steps = steps
-    }
-
-    Map getDocumentChapterData(String documentType) {
+    Map getDocumentChapterData(ProjectData projectData, String documentType) {
         if (!documentType?.trim()) {
             throw new IllegalArgumentException(
                 "Error: unable to load document chapters. 'documentType' is undefined."
             )
         }
 
-        def String yamlText
-        def file = Paths.get(this.steps.env.WORKSPACE, DOCUMENT_CHAPTERS_BASE_DIR,
-            "${documentType}.yaml").toFile()
+        String yamlText
+        def file = Paths.get(projectData.data.env.WORKSPACE as String, DOCUMENT_CHAPTERS_BASE_DIR, "${documentType}.yaml").toFile()
         if (!file.exists()) {
-            yamlText = this.steps.readFile(file: "docs/${documentType}.yaml")
+            try {
+                yamlText = new File("${projectData.data.env.WORKSPACE}/docs/${documentType}.yaml")?.text
+            } catch(Exception exception){
+                yamlText = "" // TODO s2o throw exception??
+            }
         } else {
             yamlText = file.text
         }

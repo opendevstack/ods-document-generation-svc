@@ -2,14 +2,11 @@ package org.ods
 
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.core.test.jira.JiraServiceForWireMock
-import org.ods.doc.gen.leva.doc.services.MROPipelineUtil
 import org.ods.shared.lib.git.BitbucketService
 import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
-import org.ods.shared.lib.jenkins.PipelineSteps
 import org.ods.shared.lib.jira.JiraService
-import org.ods.shared.lib.jira.JiraUseCase
 import org.ods.shared.lib.project.data.Project
-import org.springframework.beans.factory.annotation.Value
+import org.ods.shared.lib.project.data.ProjectData
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -40,19 +37,19 @@ class TestConfig {
     @Primary
     @Bean
     BitbucketTraceabilityUseCase getBitbucketTraceabilityUseCase(){
-        new BitbucketTraceabilityUseCaseStub(null, null, null)
+        new BitbucketTraceabilityUseCaseStub(null, null)
     }
 
     class BitbucketTraceabilityUseCaseStub extends BitbucketTraceabilityUseCase {
 
         static final String EXPECTED_BITBUCKET_CSV = "expected/bitbucket.csv"
 
-        BitbucketTraceabilityUseCaseStub(BitbucketService bitbucketService, PipelineSteps steps, Project project) {
-            super(bitbucketService, steps, project)
+        BitbucketTraceabilityUseCaseStub(BitbucketService bitbucketService, Project project) {
+            super(bitbucketService, project)
         }
 
         @Override
-        String generateSourceCodeReviewFile() {
+        String generateSourceCodeReviewFile(ProjectData projectData) {
             return new FixtureHelper().getResource(EXPECTED_BITBUCKET_CSV).getAbsolutePath()
         }
 

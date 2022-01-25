@@ -3,8 +3,7 @@ package org.ods.doc.gen.leva.doc.services
 import groovy.util.logging.Slf4j
 import org.ods.shared.lib.project.data.Environment
 import org.ods.shared.lib.project.data.JiraDataItem
-import  org.ods.shared.lib.git.ProjectDataBitbucketRepository
-import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.shared.lib.project.data.ProjectData
 
 import java.nio.file.NoSuchFileException
 
@@ -21,7 +20,6 @@ class DocumentHistory {
     static final String CHANGE = 'change'
     static final String CHANGED = CHANGE + 'd'
 
-    protected PipelineSteps steps
     protected List<DocumentHistoryEntry> data = []
     private String sourceEnvironment
     protected String targetEnvironment
@@ -33,8 +31,7 @@ class DocumentHistory {
     protected Boolean allIssuesAreValid = true
     protected String allIssuesAreNotValidMessage = ''
 
-    DocumentHistory(PipelineSteps steps,String targetEnvironment, String documentName) {
-        this.steps = steps
+    DocumentHistory(String targetEnvironment, String documentName) {
         this.documentName = documentName
         if (!targetEnvironment) {
             throw new RuntimeException('Variable \'targetEnvironment\' cannot be empty for computing Document History')
@@ -46,10 +43,10 @@ class DocumentHistory {
         sourceEnvironment = getSourceEnvironment(documentName, targetEnvironment)
     }
 
-    DocumentHistory load(Map jiraData, List<String> filterKeys) {
+    DocumentHistory load(ProjectData projectData, Map jiraData, List<String> filterKeys) {
         this.latestVersionId = 0L
         try {
-            def docHistories = sortDocHistoriesReversed(this.loadSavedDocHistoryData())
+            def docHistories = sortDocHistoriesReversed(this.loadSavedDocHistoryData(projectData))
             if (docHistories) {
                 this.latestVersionId = docHistories.first().getEntryId()
                 log.debug("Retrieved latest ${documentName} version ${latestVersionId} from saved history")
@@ -86,28 +83,26 @@ class DocumentHistory {
         this.latestVersionId
     }
 
-    List<DocumentHistoryEntry> loadSavedDocHistoryData(ProjectDataBitbucketRepository repo = null) {
+    private List<DocumentHistoryEntry> loadSavedDocHistoryData(ProjectData projectData) {
         def fileName = this.getSavedDocumentName(sourceEnvironment)
         this.log.debug("Retrieving saved document history with name '${fileName}' " +
-            "in workspace '${this.steps.env.WORKSPACE}'.")
-        if (!repo) {
-            repo = new ProjectDataBitbucketRepository(steps)
-        }
-        def content = repo.loadFile(fileName)
+            "in workspace '${projectData.data.env.WORKSPACE}'.")
+
+        def content = projectData.loadSavedJiraData(fileName)
         try {
             return content.collect { Map entry ->
-                if (! entry.entryId) {
+                if (!entry.entryId) {
                     throw new IllegalArgumentException('EntryId cannot be empty')
                 }
-                if (! entry.projectVersion) {
+                if (!entry.projectVersion) {
                     throw new IllegalArgumentException('projectVersion cannot be empty')
                 }
                 return new DocumentHistoryEntry(
-                    entry,
-                    entry.entryId,
-                    entry.projectVersion,
-                    entry.previousProjectVersion,
-                    entry.rational
+                    entry as Map,
+                    entry.entryId as Long,
+                    entry.projectVersion as String,
+                    entry.previousProjectVersion as String,
+                    entry.rational as String
                 )
             }
         } catch (Exception e) {
@@ -115,16 +110,6 @@ class DocumentHistory {
                 "'${fileName}': ${e.message}", e)
         }
     }
-
-    String saveDocHistoryData(ProjectDataBitbucketRepository repository) {
-        repository.save(this.data, this.getSavedDocumentName())
-    }
-
-    
-    List<DocumentHistoryEntry> getDocHistoryEntries() {
-        this.data.clone()
-    }
-
     
     List<Map> getDocGenFormat() {
         def issueTypes = JiraDataItem.TYPES - JiraDataItem.TYPE_DOCS

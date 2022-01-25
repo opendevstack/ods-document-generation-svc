@@ -1,6 +1,6 @@
 package org.ods.shared.lib.nexus
 
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.shared.lib.git.BitbucketService
 import spock.lang.Specification
 
@@ -8,7 +8,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "find pull request"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -33,7 +33,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "find default reviewers"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         def service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -67,7 +67,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -119,7 +119,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report without Aqua Link"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -165,7 +165,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report without Nexus link"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -210,7 +210,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report without Nexus and Aqua link"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -247,7 +247,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report with links and messages"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -306,7 +306,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report with messages but without links"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',
@@ -350,7 +350,7 @@ class BitbucketServiceSpec extends Specification {
 
     def "create code insight report with error in call"() {
         given:
-        def steps = Spy(PipelineSteps)
+        def steps = [:]
         BitbucketService service = Spy(BitbucketService, constructorArgs: [
             steps,
             'https://bitbucket.example.com',

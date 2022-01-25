@@ -7,6 +7,7 @@ import org.ods.doc.gen.core.test.usecase.RepoDataBuilder
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.leva.doc.services.PipelineConfig
 import org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.project.data.ProjectData
 import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.Paths
@@ -50,7 +51,9 @@ class LevaDocServiceTestHelper {
         data.openshift = [targetApiUrl:"https://openshift-sample"]
         data.env = getEnvVariables(tempFolder, projectFixture.version)
 
-        project.getProjectData(data.projectBuild, data)
+        // We need to override the value because of the cache in ProjectData
+        project.getProjectData(data.projectBuild as String, data).data.env.WORKSPACE = tempFolder.absolutePath
+
         return data
     }
 
@@ -67,9 +70,10 @@ class LevaDocServiceTestHelper {
         }
     }
 
-    Map getModuleData(ProjectFixture projectFixture) {
+    Map getModuleData(ProjectFixture projectFixture, Map data) {
         Map input = RepoDataBuilder.getRepoForComponent(projectFixture.component)
-        input.data.tests << [unit: testsReports.getResults(projectFixture.component, "unit")]
+        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+        input.data.tests << [unit: testsReports.getResults(projectData, projectFixture.component, "unit")]
         return input
     }
 
@@ -138,7 +142,7 @@ class LevaDocServiceTestHelper {
     private Map<String, String> buildGitData() {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "https://bitbucket/scm/ofi2004/ofi2004-release.git",
+                url: "https://bitbucket/scm/ofi2004/ofi2004-release.git", //  new GitService().getOriginUrl()
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
                 author: "s2o",

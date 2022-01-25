@@ -1,7 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
 
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.doc.gen.core.test.SpecHelper
 
 import java.nio.file.Paths
@@ -10,11 +10,10 @@ class LeVADocumentChaptersFileServiceSpec extends SpecHelper {
 
     def "get document chapter data"() {
         given:
-        def steps = Spy(PipelineSteps)
-        def service = new LeVADocumentChaptersFileService(steps)
+        def service = new LeVADocumentChaptersFileService()
 
         def type = "myType"
-
+        def steps = [:]
         def levaPath = Paths.get(steps.env.WORKSPACE, LeVADocumentChaptersFileService.DOCUMENT_CHAPTERS_BASE_DIR)
         levaPath.toFile().mkdirs()
 
@@ -53,8 +52,8 @@ class LeVADocumentChaptersFileServiceSpec extends SpecHelper {
 
     def "get document chapter data with invalid documentType"() {
         given:
-        def steps = Spy(PipelineSteps)
-        def service = new LeVADocumentChaptersFileService(steps)
+        def steps = [:]
+        def service = new LeVADocumentChaptersFileService()
 
         when:
         service.getDocumentChapterData(null)

@@ -13,14 +13,16 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.shared.lib.jenkins.PipelineSteps
 import org.ods.shared.lib.jira.JiraService
 import org.ods.shared.lib.nexus.NexusService
 import org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.TempDir
+
+import javax.inject.Inject
 
 /**
  * IMPORTANT: this test use Wiremock files to mock all the external interactions.
@@ -79,9 +81,6 @@ class LevaDocServiceFunctTest extends Specification {
     TestsReports testsReports
 
     @Inject
-    PipelineSteps steps
-
-    @Inject
     Project project
 
     private WiremockManager jiraServer
@@ -95,8 +94,6 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     def setup() {
-        // We need to override the value because of the cache in ProjectData
-        steps.env.WORKSPACE = tempFolder.absolutePath
         testHelper = new LevaDocServiceTestHelper(
                 this.class.simpleName as String,
                 GENERATE_EXPECTED_PDF_FILES,
@@ -132,7 +129,8 @@ class LevaDocServiceFunctTest extends Specification {
         given: "There's a LeVADocument service"
         setUpWireMock(projectFixture)
         Map data = testHelper.buildFixtureData(projectFixture)
-        data << testsReports.getAllResults(project.getProjectData(data.projectBuild as String, data).repositories)
+        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+        data << testsReports.getAllResults(projectData, projectData.repositories)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -148,7 +146,7 @@ class LevaDocServiceFunctTest extends Specification {
         given: "There's a LeVADocument service"
         setUpWireMock(projectFixture)
         Map data = testHelper.buildFixtureData(projectFixture)
-        data.repo = testHelper.getModuleData(projectFixture)
+        data.repo = testHelper.getModuleData(projectFixture, data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -206,6 +204,4 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
 }
-
-import javax.inject.Inject
 

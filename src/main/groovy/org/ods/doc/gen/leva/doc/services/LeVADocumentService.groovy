@@ -3,22 +3,19 @@ package org.ods.doc.gen.leva.doc.services
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
 import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
+import org.ods.shared.lib.jenkins.JenkinsService
+import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.jira.CustomIssueFields
 import org.ods.shared.lib.jira.IssueTypes
 import org.ods.shared.lib.jira.JiraUseCase
 import org.ods.shared.lib.jira.LabelPrefix
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.project.data.ProjectData
-import org.ods.shared.lib.sonar.SonarQubeUseCase
 import org.ods.shared.lib.project.data.Environment
-import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.project.data.Project
+import org.ods.shared.lib.project.data.ProjectData
 import org.ods.shared.lib.project.data.TestType
-import org.ods.shared.lib.git.GitService
-import org.ods.shared.lib.jenkins.JenkinsService
-import org.ods.shared.lib.jenkins.PipelineSteps
+import org.ods.shared.lib.sonar.SonarQubeUseCase
 import org.ods.shared.lib.xunit.JUnitTestReportsUseCase
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -61,15 +58,15 @@ class LeVADocumentService extends DocGenUseCase {
     private final SonarQubeUseCase sq
     private final BitbucketTraceabilityUseCase bbt
 
-    @Autowired
+    @Inject
     Clock clock
 
     @Inject
-    LeVADocumentService(Project project, PipelineSteps steps, MROPipelineUtil util, DocGenService docGen,
+    LeVADocumentService(Project project, MROPipelineUtil util, DocGenService docGen,
                         JenkinsService jenkins, JiraUseCase jiraUseCase, JUnitTestReportsUseCase junit,
                         LeVADocumentChaptersFileService levaFiles, NexusService nexus,
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
-        super(project, steps, util, docGen, nexus, pdf, jenkins)
+        super(project, util, docGen, nexus, pdf, jenkins)
         this.jiraUseCase = jiraUseCase
         this.junit = junit
         this.levaFiles = levaFiles
@@ -430,7 +427,7 @@ class LeVADocumentService extends DocGenUseCase {
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         def documentType = Constants.DocumentType.SSDS as String
 
-        def bbInfo = this.bbt.getPRMergeInfo()
+        def bbInfo = this.bbt.getPRMergeInfo(projectData)
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
@@ -882,8 +879,8 @@ class LeVADocumentService extends DocGenUseCase {
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.DTR as String
-        Map resurrectedDocument = resurrectAndStashDocument(documentType, repo)
-        this.steps.echo "Resurrected ${documentType} for ${repo.id} -> (${resurrectedDocument.found})"
+        Map resurrectedDocument = resurrectAndStashDocument(projectData, documentType, repo)
+        log.info "Resurrected ${documentType} for ${repo.id} -> (${resurrectedDocument.found})"
         if (resurrectedDocument.found) {
             return resurrectedDocument.uri
         }
@@ -1013,7 +1010,7 @@ class LeVADocumentService extends DocGenUseCase {
         if (projectData.isAssembleMode && !this.jiraUseCase.jira &&
                 repo.type?.toLowerCase() == PipelineConfig.REPO_TYPE_ODS_CODE.toLowerCase()) {
             def currentRepoAsList = [ repo ]
-            codeReviewReport = obtainCodeReviewReport(currentRepoAsList)
+            codeReviewReport = obtainCodeReviewReport(projectData, currentRepoAsList)
         }
 
         def modifier = { document ->
@@ -1021,7 +1018,7 @@ class LeVADocumentService extends DocGenUseCase {
                 List documents = [document]
                 documents += codeReviewReport
                 // Merge the current document with the code review report
-                return this.pdf.merge(this.steps.env.WORKSPACE, documents)
+                return this.pdf.merge(projectData.data.env.WORKSPACE, documents)
             }
             return document
         }
@@ -1312,31 +1309,31 @@ class LeVADocumentService extends DocGenUseCase {
         }
     }
 
-    protected List obtainCodeReviewReport(List<Map> repos) {
+    protected List obtainCodeReviewReport(ProjectData projectData, List<Map> repos) {
         def reports =  repos.collect { r ->
             // resurrect?
-            Map resurrectedDocument = resurrectAndStashDocument('SCRR-MD', r, false)
-            this.steps.echo "Resurrected 'SCRR' for ${r.id} -> (${resurrectedDocument.found})"
+            Map resurrectedDocument = resurrectAndStashDocument(projectData,'SCRR-MD', r, false)
+            log.info "Resurrected 'SCRR' for ${r.id} -> (${resurrectedDocument.found})"
             if (resurrectedDocument.found) {
                 return resurrectedDocument.content
             }
 
             def sqReportsPath = "${PipelineUtil.SONARQUBE_BASE_DIR}/${r.id}"
-            def sqReportsStashName = "scrr-report-${r.id}-${this.steps.env.BUILD_ID}"
+            def sqReportsStashName = "scrr-report-${r.id}-${projectData.data.env.BUILD_ID}"
 
             // Unstash SonarQube reports into path
-            def hasStashedSonarQubeReports = this.jenkins.unstashFilesIntoPath(sqReportsStashName, "${this.steps.env.WORKSPACE}/${sqReportsPath}", "SonarQube Report")
+            def hasStashedSonarQubeReports = this.jenkins.unstashFilesIntoPath(sqReportsStashName, "${projectData.data.env.WORKSPACE}/${sqReportsPath}", "SonarQube Report")
             if (!hasStashedSonarQubeReports) {
                 throw new RuntimeException("Error: unable to unstash SonarQube reports for repo '${r.id}' from stash '${sqReportsStashName}'.")
             }
 
             // Load SonarQube report files from path
-            def sqReportFiles = this.sq.loadReportsFromPath("${this.steps.env.WORKSPACE}/${sqReportsPath}")
+            def sqReportFiles = this.sq.loadReportsFromPath("${projectData.data.env.WORKSPACE}/${sqReportsPath}")
             if (sqReportFiles.isEmpty()) {
-                throw new RuntimeException("Error: unable to load SonarQube reports for repo '${r.id}' from path '${this.steps.env.WORKSPACE}/${sqReportsPath}'.")
+                throw new RuntimeException("Error: unable to load SonarQube reports for repo '${r.id}' from path '${projectData.data.env.WORKSPACE}/${sqReportsPath}'.")
             }
 
-            def name = this.getDocumentBasename('SCRR-MD', projectData.buildParams.version, this.steps.env.BUILD_ID, r)
+            def name = this.getDocumentBasename('SCRR-MD', projectData.buildParams.version, projectData.data.env.BUILD_ID, r)
             def sqReportFile = sqReportFiles.first()
 
             def generatedSCRR = this.pdf.convertFromMarkdown(sqReportFile, true)
@@ -1344,7 +1341,7 @@ class LeVADocumentService extends DocGenUseCase {
             // store doc - we may need it later for partial deployments
             if (!resurrectedDocument.found) {
                 def result = this.storeDocument("${name}.pdf", generatedSCRR, 'application/pdf')
-                this.steps.echo "Stored 'SCRR' for later consumption -> ${result}"
+                log.info "Stored 'SCRR' for later consumption -> ${result}"
             }
             return generatedSCRR
         }
@@ -1361,10 +1358,7 @@ class LeVADocumentService extends DocGenUseCase {
         return projectData.components.collectEntries { component ->
             def normComponentName = component.name.replaceAll('Technology-', '')
 
-            def gitUrl = new GitService(this.steps).getOriginUrl()
-            def isReleaseManagerComponent =
-                gitUrl.endsWith("${projectData.key}-${normComponentName}.git".toLowerCase())
-            if (isReleaseManagerComponent) {
+            if (isReleaseManagerComponent(projectData, normComponentName)) {
                 return [ : ]
             }
 
@@ -1408,6 +1402,11 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
             ]
         }
+    }
+
+    private boolean isReleaseManagerComponent(ProjectData projectData, normComponentName) {
+        def gitUrl = projectData.data.git.url // TODO s2o review this code
+        return gitUrl.endsWith("${projectData.key}-${normComponentName}.git".toLowerCase())
     }
 
     protected Map computeComponentsUnitTests(List<Map> tests) {
@@ -1461,15 +1460,15 @@ class LeVADocumentService extends DocGenUseCase {
             name          : name,
             description   : projectData.description,
             type          : documentTypeName,
-            version       : this.steps.env.RELEASE_PARAM_VERSION,
+            version       : projectData.data.env.RELEASE_PARAM_VERSION,
             date_created  : LocalDateTime.now(clock).toString(),
             buildParameter: projectData.buildParams,
             git           : repo ? repo.data.git : projectData.gitData,
             openShift     : [apiUrl: projectData.getOpenShiftApiUrl()],
             jenkins       : [
-                buildNumber: this.steps.env.BUILD_NUMBER,
-                buildUrl   : this.steps.env.BUILD_URL,
-                jobName    : this.steps.env.JOB_NAME
+                buildNumber: projectData.data.env.BUILD_NUMBER,
+                buildUrl   : projectData.data.env.BUILD_URL,
+                jobName    : projectData.data.env.JOB_NAME
             ],
             referencedDocs : this.getReferencedDocumentsVersion(projectData)
         ]
@@ -1557,12 +1556,12 @@ class LeVADocumentService extends DocGenUseCase {
             def documentType = LeVADocumentUtil.getTypeFromName(documentName)
             def jiraData = projectData.data.jira as Map
             def environment = this.computeSavedDocumentEnvironment(documentType, projectData)
-            def docHistory = new DocumentHistory(this.steps, environment, documentName)
+            def docHistory = new DocumentHistory(environment, documentName)
             def docChapters = projectData.getDocumentChaptersForDocument(documentType)
             def docChapterKeys = docChapters.collect { chapter ->
                 chapter.key
             }
-            docHistory.load(jiraData, (keysInDoc + docChapterKeys).unique())
+            docHistory.load(projectData, jiraData, (keysInDoc + docChapterKeys).unique())
 
             // Save the doc history to project class, so it can be persisted when considered
             projectData.setHistoryForDocument(docHistory, documentName)
@@ -1633,7 +1632,7 @@ class LeVADocumentService extends DocGenUseCase {
             [(sec.section): sec + [content: this.convertImages(sec.content)]]
         }
         if (!sections || sections.isEmpty() ) {
-            sections = this.levaFiles.getDocumentChapterData(documentType)
+            sections = this.levaFiles.getDocumentChapterData(projectData, documentType)
             if (!projectData.data.jira.undoneDocChapters) {
                 projectData.data.jira.undoneDocChapters = [:]
             }
@@ -1701,7 +1700,7 @@ class LeVADocumentService extends DocGenUseCase {
             }
         } else {
             // TODO removeme in ODS 4.x
-            version = "${projectData.buildParams.version}-${this.steps.env.BUILD_NUMBER}"
+            version = "${projectData.buildParams.version}-${projectData.data.env.BUILD_NUMBER}"
         }
 
         if (projectData.isWorkInProgress) {

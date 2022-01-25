@@ -5,6 +5,7 @@ import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
 import org.ods.shared.lib.project.data.Project
 import org.ods.shared.lib.git.GitService
+import org.ods.shared.lib.project.data.ProjectData
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -20,47 +21,13 @@ class PipelineUtil {
     static final String XUNIT_DOCUMENTS_BASE_DIR = 'xunit'
 
     protected Project project
-    protected PipelineSteps steps
     protected GitService git
 
     @Inject
-    PipelineUtil(Project project, PipelineSteps steps, GitService git) {
+    PipelineUtil(Project project, GitService git) {
         this.project = project
-        this.steps = steps
         this.git = git
     }
-
-    void archiveArtifact(String path, byte[] data) {
-        if (!path?.trim()) {
-            throw new IllegalArgumentException(
-                "Error: unable to archive artifact. 'path' is undefined."
-            )
-        }
-
-        if (!path.startsWith(this.steps.env.WORKSPACE)) {
-            throw new IllegalArgumentException(
-                "Error: unable to archive artifact. 'path' must be inside the Jenkins workspace: ${path}"
-            )
-        }
-
-        def file = null
-
-        try {
-            // Write the artifact data to file
-            file = new File(path).setBytes(data)
-
-            // Compute the relative path inside the Jenkins workspace
-            def workspacePath = new File(this.steps.env.WORKSPACE).toURI().relativize(new File(path).toURI()).getPath()
-
-            // Archive the artifact (requires a relative path inside the Jenkins workspace)
-            this.steps.archiveArtifacts(workspacePath)
-        } finally {
-            if (file && file.exists()) {
-                file.delete()
-            }
-        }
-    }
-
     
     protected File createDirectory(String path) {
         if (!path?.trim()) {
@@ -72,7 +39,7 @@ class PipelineUtil {
         return dir
     }
 
-    byte[] createZipArtifact(String name, Map<String, byte[]> files, boolean doCreateArtifact = true) {
+    byte[] createZipArtifact(ProjectData projectData, String name, Map<String, byte[]> files, boolean doCreateArtifact = true) {
         if (!name?.trim()) {
             throw new IllegalArgumentException("Error: unable to create Zip artifact. 'name' is undefined.")
         }
@@ -81,16 +48,16 @@ class PipelineUtil {
             throw new IllegalArgumentException("Error: unable to create Zip artifact. 'files' is undefined.")
         }
 
-        def path = "${this.steps.env.WORKSPACE}/${ARTIFACTS_BASE_DIR}/${name}".toString()
+        def path = "${projectData.data.env.WORKSPACE}/${ARTIFACTS_BASE_DIR}/${name}".toString()
         def result = this.createZipFile(path, files)
         if (doCreateArtifact) {
-            this.archiveArtifact(path, result)
+          //  this.archiveArtifact(path, result) // TODO s2o
         }
 
         return result
     }
 
-    void createAndStashArtifact(String stashName, byte[] file) {
+    void createAndStashArtifact(ProjectData projectData, String stashName, byte[] file) {
         if (!stashName?.trim()) {
             throw new IllegalArgumentException("Error: unable to stash artifact. 'stashName' is undefined.")
         }
@@ -99,15 +66,16 @@ class PipelineUtil {
             throw new IllegalArgumentException("Error: unable to stash artifact. 'file' is undefined.")
         }
 
-        def path = "${this.steps.env.WORKSPACE}/${ARTIFACTS_BASE_DIR}/${stashName}".toString()
+        def path = "${projectData.data.env.WORKSPACE}/${ARTIFACTS_BASE_DIR}/${stashName}".toString()
 
         // Create parent directory if needed
         this.createDirectory(new File(path).getParent())
         new File(path) << (file)
 
-        this.steps.dir(new File(path).getParent()) {
+        // TODO s2o stash
+      /*  this.steps.dir(new File(path).getParent()) {
             this.steps.stash(['name': stashName, 'includes': stashName])
-        }
+        }*/
     }
 
     
@@ -146,37 +114,9 @@ class PipelineUtil {
         return new File(parentdir, fileToBeExtracted).getBytes()
     }
 
-    void executeBlockAndFailBuild(Closure block) {
-        try {
-            block()
-        } catch (e) {
-            this.failBuild(e.message)
-            hudson.Functions.printThrowable(e)
-            throw e
-        }
-    }
-
-    void failBuild(String message) {
-        this.steps.currentBuild.result = 'FAILURE'
-        this.log.warn(message)
-    }
-
     void warnBuild(String message) {
         this.steps.currentBuild.result = 'UNSTABLE'
         this.log.warn(message)
-    }
-
-    def loadGroovySourceFile(String path) {
-        if (!path?.trim()) {
-            throw new IllegalArgumentException("Error: unable to load Groovy source file. 'path' is undefined.")
-        }
-
-        def file = new File(path)
-        if (!file.exists()) {
-            throw new IllegalArgumentException("Error: unable to load Groovy source file. Path ${path} does not exist.")
-        }
-
-        return this.steps.load(path)
     }
 
 }

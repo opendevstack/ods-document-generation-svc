@@ -1,28 +1,27 @@
 package org.ods.doc.gen.leva.doc.services
 
 
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.shared.lib.project.data.Project
 
 import java.nio.file.Paths
 
-import org.ods.shared.lib.jenkins.PipelineSteps
+
 import org.ods.shared.lib.git.GitService
 
 class MROPipelineUtilSpec extends SpecHelper {
 
     Project project
-    PipelineSteps steps
     MROPipelineUtil util
     def logger
+    def steps = [:]
 
     def setup() {
         project = createProject()
-        steps = Spy(PipelineSteps)
         def git = Mock(GitService)
         logger = Mock(Logger)
-        util = new MROPipelineUtil(project, steps, git, logger)
+        util = new MROPipelineUtil(project, git, logger)
     }
 
     def "load a repo's pipeline config"() {
