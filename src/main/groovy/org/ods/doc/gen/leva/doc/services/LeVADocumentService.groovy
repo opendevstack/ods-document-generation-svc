@@ -1651,21 +1651,6 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     /**
-     * Gets the valid or to be valid document version either from the current project (for documents created
-     * together) or from Jira for documents generated in another environments.
-     * @param document to be gathered the id of
-     * @return string with the valid id
-     */
-    private Long getLatestDocVersionId(String document, List<String> environments = null) {
-        if (projectData.historyForDocumentExists(document)) {
-            projectData.getHistoryForDocument(document).getVersion()
-        } else {
-            def trackingIssues =  this.getDocumentTrackingIssuesForHistory(document, environments)
-            this.jiraUseCase.getLatestDocVersionId(trackingIssues)
-        }
-    }
-
-    /**
      * gets teh document version IDS at the start ... can't do that...
      * @return Map
      */
@@ -1692,7 +1677,7 @@ class LeVADocumentService extends DocGenUseCase {
                 def trackingIssues =  this.getDocumentTrackingIssuesForHistory(projectData, doc, envs)
                 version = this.jiraUseCase.getLatestDocVersionId(projectData, trackingIssues)
                 if (projectData.isWorkInProgress ||
-                    LeVADocumentScheduler.getFirstCreationEnvironment(doc) == //TODO s2o
+                    LeVADocumentScheduler.getFirstCreationEnvironment(doc) == //TODO s2o see what we do
                         projectData.buildParams.targetEnvironmentToken ) {
                     // Either this is a developer preview or the history is to be updated in this environment.
                     version += 1L

@@ -80,59 +80,6 @@ class JiraService {
         }
     }
 
-    void createIssueLinkType(String linkType, Map inwardIssue, Map outwardIssue) {
-        if (!linkType?.trim()) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue link. \'linkType\' is undefined.')
-        }
-
-        if (!inwardIssue) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue link. \'inwardIssue\' is undefined.')
-        }
-
-        if (!outwardIssue) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue link. \'outwardIssue\' is undefined.')
-        }
-
-        def response = Unirest.post("${this.baseURL}/rest/api/2/issueLink")
-            .basicAuth(this.username, this.password)
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
-            .body(JsonOutput.toJson(
-                [
-                    type: [
-                        name: linkType
-                    ],
-                    inwardIssue: [
-                        key: inwardIssue.key
-                    ],
-                    outwardIssue: [
-                        key: outwardIssue.key
-                    ]
-                ]
-            ))
-            .asString()
-
-        response.ifSuccess {
-            if (response.getStatus() != 201) {
-                throw new RuntimeException("Error: unable to create Jira issue link. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'.")
-            }
-        }
-
-        response.ifFailure {
-            def message = "Error: unable to create Jira issue link. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to create Jira issue link. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-    }
-
-    void createIssueLinkTypeBlocks(Map inwardIssue, Map outwardIssue) {
-        createIssueLinkType("Blocks", inwardIssue, outwardIssue)
-    }
-
     Map createIssueType(String type, String projectKey, String summary, String description, String fixVersion = null) {
         if (!type?.trim()) {
             throw new IllegalArgumentException('Error: unable to create Jira issue. \'type\' is undefined.')

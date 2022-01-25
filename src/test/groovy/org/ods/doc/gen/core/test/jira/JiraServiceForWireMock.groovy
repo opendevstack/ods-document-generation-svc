@@ -24,11 +24,6 @@ class JiraServiceForWireMock extends JiraService {
     }
 
     @Override
-    void createIssueLinkTypeBlocks(Map inwardIssue, Map outwardIssue) {
-        log.warn("createIssueLinkTypeBlocks - inwardIssue:$inwardIssue")
-    }
-
-    @Override
     Map createIssueType(String type, String projectKey, String summary, String description, String fixVersion = null) {
         log.warn("createIssueType - type:${type}")
     }

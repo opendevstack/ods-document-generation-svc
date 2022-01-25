@@ -45,56 +45,6 @@ class JiraUseCase {
         return result
     }
 
-    void createBugsForFailedTestIssues(ProjectData projectData, List testIssues, Set testFailures, String comment) {
-        if (!this.jira) return
-
-        testFailures.each { failure ->
-            // FIXME: this.project.versionFromReleaseStatusIssue loads data from Jira and should therefore be called not more
-            // than once. However, it's also called via this.getVersionFromReleaseStatusIssue in Project.groovy.
-            String version = projectData.versionFromReleaseStatusIssue
-            def bug = this.jira.createIssueTypeBug(
-                projectData.jiraProjectKey, failure.type, failure.text, version)
-
-            // Maintain a list of all Jira test issues affected by the current bug
-            def bugAffectedTestIssues = [:]
-            this.walkTestIssuesAndTestResults(testIssues, failure) { testIssue, testCase, isMatch ->
-                // Find the testcases within the current failure that corresponds to a Jira test issue
-                if (isMatch) {
-                    // Add a reference to the current bug to the Jira test issue
-                    if (null == testIssue.bugs) {
-                        testIssue.bugs = []
-                    }
-                    testIssue.bugs << bug.key
-
-                    // Add a link to the current bug on the Jira test issue (within Jira)
-                    this.jira.createIssueLinkTypeBlocks(bug, testIssue)
-
-                    bugAffectedTestIssues << [(testIssue.key): testIssue]
-                }
-            }
-
-            // Create a JiraDataItem from the newly created bug
-            def bugJiraDataItem = new JiraDataItem(project, [ // add project reference for access to Project.JiraDataItem
-              key: bug.key,
-              name: failure.type,
-              assignee: "Unassigned",
-              dueDate: "",
-              status: "TO DO",
-              tests: bugAffectedTestIssues.keySet() as List,
-              versions: [ "${version}" ]
-            ], Project.JiraDataItem.TYPE_BUGS)
-
-            // Add JiraDataItem into the Jira data structure
-            projectData.data.jira.bugs[bug.key] = bugJiraDataItem
-
-            // Add the resolved JiraDataItem into the Jira data structure
-            projectData.data.jiraResolved.bugs[bug.key] = bugJiraDataItem.cloneIt()
-            projectData.data.jiraResolved.bugs[bug.key].tests = bugAffectedTestIssues.values() as List
-
-            this.jira.appendCommentToIssue(bug.key, comment)
-        }
-    }
-
     void matchTestIssuesAgainstTestResults(List testIssues, Map testResults,
                                            Closure matchedHandler, Closure unmatchedHandler = null,
                                            boolean checkDuplicateTestResults = true) {
