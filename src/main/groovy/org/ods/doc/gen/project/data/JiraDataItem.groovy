@@ -1,4 +1,4 @@
-package org.ods.shared.lib.project.data
+package org.ods.doc.gen.project.data
 
 class JiraDataItem implements Map, Serializable {
     static final String TYPE_BUGS = 'bugs'

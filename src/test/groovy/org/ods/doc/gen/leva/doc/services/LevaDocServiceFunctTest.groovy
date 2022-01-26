@@ -17,8 +17,8 @@ import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.shared.lib.jira.JiraService
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification

@@ -1,14 +1,15 @@
 package org.ods.shared.lib.xunit
 
 import org.ods.doc.gen.core.test.SpecHelper
-import org.ods.shared.lib.project.data.Project
+import org.ods.doc.gen.project.data.Project
+import spock.lang.Specification
 
 import java.nio.file.Files
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
-class JUnitTestReportsUseCaseSpec extends SpecHelper {
+class JUnitTestReportsUseCaseSpec extends Specification {
 
     Project project
     def steps = [:]

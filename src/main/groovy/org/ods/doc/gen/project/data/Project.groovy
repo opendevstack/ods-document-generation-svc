@@ -1,7 +1,6 @@
-package org.ods.shared.lib.project.data
+package org.ods.doc.gen.project.data
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.git.GitService
 import org.ods.shared.lib.jira.JiraService
 import org.springframework.stereotype.Service
 
@@ -13,19 +12,17 @@ import javax.inject.Inject
 @Service
 class Project {
 
-    private final GitService gitService
     private final JiraService jira
 
     @Inject
-    Project(GitService gitService, JiraService jira){
-        this.gitService = gitService
+    Project(JiraService jira){
         this.jira = jira
     }
 
     @CacheResult(cacheName = "projectData")
     ProjectData getProjectData(@CacheKey String projectBuildId, Map data){
         log.info("build project data for projectBuildId:${projectBuildId}")
-        return new ProjectData(jira, gitService).init(data).load()
+        return new ProjectData(jira).init(data).load()
     }
 
 }

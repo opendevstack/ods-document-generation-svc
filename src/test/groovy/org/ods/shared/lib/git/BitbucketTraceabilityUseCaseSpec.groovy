@@ -7,7 +7,7 @@ import org.json.JSONArray
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.core.test.wiremock.BitbucketServiceMock
 import org.ods.doc.gen.leva.doc.services.StringCleanup
-import org.ods.shared.lib.project.data.Project
+import org.ods.doc.gen.project.data.Project
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 import spock.lang.Ignore

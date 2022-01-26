@@ -4,16 +4,16 @@ import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
 import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
 import org.ods.shared.lib.jenkins.JenkinsService
-import org.ods.shared.lib.jenkins.PipelineUtil
+import org.ods.doc.gen.core.ZipFacade
 import org.ods.shared.lib.jira.CustomIssueFields
 import org.ods.shared.lib.jira.IssueTypes
 import org.ods.shared.lib.jira.JiraUseCase
 import org.ods.shared.lib.jira.LabelPrefix
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.project.data.Environment
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
-import org.ods.shared.lib.project.data.TestType
+import org.ods.doc.gen.project.data.Environment
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
+import org.ods.doc.gen.project.data.TestType
 import org.ods.shared.lib.sonar.SonarQubeUseCase
 import org.ods.shared.lib.xunit.JUnitTestReportsUseCase
 import org.springframework.stereotype.Service
@@ -52,6 +52,8 @@ import static groovy.json.JsonOutput.toJson
 @Service
 class LeVADocumentService extends DocGenUseCase {
 
+    static final String SONARQUBE_BASE_DIR = 'sonarqube'
+
     private final JiraUseCase jiraUseCase
     private final JUnitTestReportsUseCase junit
     private final LeVADocumentChaptersFileService levaFiles
@@ -62,7 +64,7 @@ class LeVADocumentService extends DocGenUseCase {
     Clock clock
 
     @Inject
-    LeVADocumentService(Project project, PipelineUtil util, DocGenService docGen,
+    LeVADocumentService(Project project, ZipFacade util, DocGenService docGen,
                         JenkinsService jenkins, JiraUseCase jiraUseCase, JUnitTestReportsUseCase junit,
                         LeVADocumentChaptersFileService levaFiles, NexusService nexus,
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
@@ -1318,7 +1320,7 @@ class LeVADocumentService extends DocGenUseCase {
                 return resurrectedDocument.content
             }
 
-            def sqReportsPath = "${PipelineUtil.SONARQUBE_BASE_DIR}/${r.id}"
+            def sqReportsPath = "${SONARQUBE_BASE_DIR}/${r.id}"
             def sqReportsStashName = "scrr-report-${r.id}-${projectData.data.env.BUILD_ID}"
 
             // Unstash SonarQube reports into path
@@ -1667,18 +1669,27 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     private String getVersion(ProjectData projectData, String doc) {
-        def version
+        String version = getVersionFromDocuments(projectData, doc)
+        if (projectData.isWorkInProgress) {
+            // If this is a developer preview, the document version is always a WIP, because,
+            // if we have the document history, it has already been updated to a new version.
+            return  "${version}-WIP"
+        }
+        return version
+    }
 
+    private String getVersionFromDocuments(ProjectData projectData, String doc) {
+        String version
         if (projectData.isVersioningEnabled) {
             version = projectData.getDocumentVersionFromHistories(doc)
             if (!version) {
                 // The document has not (yet) been generated in this pipeline run.
                 def envs = Environment.values().collect { it.toString() }
-                def trackingIssues =  this.getDocumentTrackingIssuesForHistory(projectData, doc, envs)
+                def trackingIssues = this.getDocumentTrackingIssuesForHistory(projectData, doc, envs)
                 version = this.jiraUseCase.getLatestDocVersionId(projectData, trackingIssues)
                 if (projectData.isWorkInProgress ||
-                    LeVADocumentScheduler.getFirstCreationEnvironment(doc) == //TODO s2o see what we do
-                        projectData.buildParams.targetEnvironmentToken ) {
+                        LeVADocumentScheduler.getFirstCreationEnvironment(doc) == //TODO s2o see what we do
+                        projectData.buildParams.targetEnvironmentToken) {
                     // Either this is a developer preview or the history is to be updated in this environment.
                     version += 1L
                 }
@@ -1687,17 +1698,10 @@ class LeVADocumentService extends DocGenUseCase {
             // TODO removeme in ODS 4.x
             version = "${projectData.buildParams.version}-${projectData.data.env.BUILD_NUMBER}"
         }
-
-        if (projectData.isWorkInProgress) {
-            // If this is a developer preview, the document version is always a WIP, because,
-            // if we have the document history, it has already been updated to a new version.
-            version = "${version}-WIP"
-        }
-
-        return version as String
+        return version
     }
 
-    
+
     private def computeKeysInDocForTCR(def data) {
         return data.collect { it.subMap(['key', 'requirements', 'bugs']).values() }.flatten()
     }

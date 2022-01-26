@@ -3,7 +3,7 @@ package org.ods.doc.gen.core.test.usecase.levadoc.fixture
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.test.pdf.PdfCompare
-import org.ods.shared.lib.project.data.Project
+import org.ods.doc.gen.project.data.Project
 
 @Slf4j
 class LevaDocTestValidator {

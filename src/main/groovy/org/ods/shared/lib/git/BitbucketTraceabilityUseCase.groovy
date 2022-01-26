@@ -4,8 +4,8 @@ import com.xlson.groovycsv.CsvParser
 import com.xlson.groovycsv.PropertyMapper
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.leva.doc.services.StringCleanup
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject

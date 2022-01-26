@@ -2,7 +2,7 @@ package org.ods.shared.lib.sonar
 
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.project.data.Project
+import org.ods.doc.gen.project.data.Project
 
 import java.nio.file.Files
 

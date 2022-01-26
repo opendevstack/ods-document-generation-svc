@@ -1,4 +1,4 @@
-package org.ods.shared.lib.project.data
+package org.ods.doc.gen.project.data
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
@@ -6,8 +6,6 @@ import groovy.util.logging.Slf4j
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
 import org.ods.doc.gen.leva.doc.services.PipelineConfig
-import org.ods.shared.lib.git.GitService
-import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.jira.CustomIssueFields
 import org.ods.shared.lib.jira.IssueTypes
 import org.ods.shared.lib.jira.JiraService
@@ -42,13 +40,11 @@ class ProjectData {
     protected Boolean isVersioningEnabled = false
 
     private final JiraService jira
-    private final GitService git
 
     Map data = [:]
 
-    ProjectData(JiraService jira, GitService git) {
+    ProjectData(JiraService jira) {
         this.jira = jira
-        this.git = git
         this.config =  [:]
         this.data.build = [
             hasFailingTests: false,
@@ -240,17 +236,6 @@ class ProjectData {
         ['Q', 'P'].contains(targetEnvironmentToken)
     }
 
-    boolean isProjectReadyToFreeze(Map data) {
-        def result = true
-        JiraDataItem.TYPES_TO_BE_CLOSED.each { type ->
-            if (data.containsKey(type)) {
-                result = result & (data[type].find { k, v -> issueIsWIP(v) } == null)
-            }
-        }
-        return result
-    }
-
-    
     protected Map<String, List> computeWipJiraIssues(Map data) {
         def result = [:]
         JiraDataItem.TYPES_WITH_STATUS.each { type ->
@@ -386,42 +371,8 @@ class ProjectData {
         version == BUILD_PARAM_VERSION_DEFAULT
     }
 
-    static String envStateFileName(String targetEnvironment) {
-        "${PipelineUtil.ODS_STATE_DIR}/${targetEnvironment}.json"
-    }
-
-    String getEnvStateFileName() {
-        envStateFileName(buildParams.targetEnvironment)
-    }
-
     Map getBuildParams() {
         return this.data.buildParams
-    }
-
-    String getSourceEnv() {
-        ['dev': 'dev', 'qa': 'dev', 'prod': 'qa'].get(buildParams.targetEnvironment)
-    }
-
-    String getBaseTag() {
-        this.data.git.baseTag
-    }
-
-    String getTargetTag() {
-        this.data.git.targetTag
-    }
-
-    boolean getVersionedDevEnvsEnabled() {
-        this.config.get('versionedDevEnvs', false)
-    }
-
-    static String getConcreteEnvironment(String environment, String version, boolean versionedDevEnvsEnabled) {
-        if (versionedDevEnvsEnabled && environment == 'dev' && version != BUILD_PARAM_VERSION_DEFAULT) {
-            def cleanedVersion = version.replaceAll('[^A-Za-z0-9-]', '-').toLowerCase()
-            environment = "${environment}-${cleanedVersion}"
-        } else if (environment == 'qa') {
-            environment = 'test'
-        }
-        environment
     }
 
     List getCapabilities() {
@@ -499,21 +450,8 @@ class ProjectData {
         return this.data.git
     }
     
-    List<JiraDataItem> getEpics() {
-        return this.data.jira.epics.values() as List
-    }
-
-    
     Map<String, DocumentHistory> getDocumentHistories() {
         return this.data.documentHistories
-    }
-
-    String getId() {
-        return this.data.jira.project.id
-    }
-
-    Map getVersion() {
-        return this.data.jira.project.version
     }
 
     /**
@@ -521,7 +459,6 @@ class ProjectData {
      * @param issueTypeName Jira issue type
      * @return Map containing [id: "customfield_XYZ", name:"name shown in jira"]
      */
-    
     Map getJiraFieldsForIssueType(String issueTypeName) {
         return this.data.jira?.issueTypes[issueTypeName]?.fields ?: [:]
     }
@@ -552,25 +489,17 @@ class ProjectData {
         return this.data.metadata.repositories
     }
 
-    
     List<JiraDataItem> getRequirements() {
         return this.data.jira.requirements.values() as List
     }
-
-    Map getEnvironments() {
-        return this.data.metadata.environments
-    }
-
     
     List<JiraDataItem> getRisks() {
         return this.data.jira.risks.values() as List
     }
 
-    
     Map getServices() {
         return this.data.metadata.services
     }
-
     
     List<JiraDataItem> getSystemRequirements(String componentName = null, List<String> gampTopics = []) {
         return this.data.jira.requirements.findAll { key, req ->
@@ -602,79 +531,33 @@ class ProjectData {
         }.values() as List
     }
 
-    
-    List<JiraDataItem> getTests() {
-        return this.data.jira.tests.values() as List
-    }
-
-    
     List<JiraDataItem> getDocumentChaptersForDocument(String document) {
         def docs = this.data.jira[JiraDataItem.TYPE_DOCS] ?: [:]
         return docs.findAll { k, v -> v.documents && v.documents.contains(document) }.values() as List
     }
 
-    
     List<String> getWIPDocChaptersForDocument(String documentType) {
         def docs = this.getWIPDocChapters()
         return docs[documentType] ?: []
     }
 
-    
     Map getWIPDocChapters() {
         return this.data.jira.undoneDocChapters ?: [:]
-    }
-
-    Map getEnvironmentConfig() {
-        def environments = getEnvironments()
-        environments[buildParams.targetEnvironment]
     }
 
     // Deprecated in favour of getOpenShiftTargetApiUrl
     String getOpenShiftApiUrl() {
         this.data.openshift.targetApiUrl
     }
-    
-    boolean hasCapability(String name) {
-        def collector = {
-            return (it instanceof Map) ? it.keySet().first().toLowerCase() : it.toLowerCase()
-        }
 
-        return this.capabilities.collect(collector).contains(name.toLowerCase())
-    }
-
-    
-    boolean hasFailingTests() {
-        return this.data.build.hasFailingTests
-    }
-
-    
-    boolean hasUnexecutedJiraTests() {
-        return this.data.build.hasUnexecutedJiraTests
-    }
-
-    String getGitReleaseBranch() {
-        return GitService.getReleaseBranch(buildParams.version)
-    }
-
-    String getTargetProject() {
-        this.targetProject
-    }
-
-    String setTargetProject(def proj) {
-        this.targetProject = proj
-    }
-
-    
     boolean historyForDocumentExists(String document) {
         return this.getHistoryForDocument(document) ? true : false
     }
 
-    
     DocumentHistory getHistoryForDocument(String document) {
         return this.documentHistories[document]
     }
 
-    
     Long getDocumentVersionFromHistories(String documentType) {
         def history = getHistoryForDocument(documentType)
         if (!history) {
@@ -686,7 +569,6 @@ class ProjectData {
         return history?.version
     }
 
-    
     void setHistoryForDocument(DocumentHistory docHistory, String document) {
         this.documentHistories[document] = docHistory
     }

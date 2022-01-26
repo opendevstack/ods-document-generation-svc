@@ -1,10 +1,8 @@
 package org.ods.shared.lib.jira
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.PipelineUtil
-import org.ods.shared.lib.project.data.JiraDataItem
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -16,12 +14,10 @@ class JiraUseCase {
 
     private final Project project
     private final JiraService jira
-    private final PipelineUtil util
 
     @Inject
-    JiraUseCase(Project project, PipelineUtil util, JiraService jira) {
+    JiraUseCase(Project project, JiraService jira) {
         this.project = project
-        this.util = util
         this.jira = jira
     }
 

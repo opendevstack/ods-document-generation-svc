@@ -1,4 +1,4 @@
-package org.ods.shared.lib.project.data
+package org.ods.doc.gen.project.data
 
 
 import org.ods.doc.gen.leva.doc.services.Constants

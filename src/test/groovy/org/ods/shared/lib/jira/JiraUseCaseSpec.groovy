@@ -1,8 +1,7 @@
 package org.ods.shared.lib.jira
 
 import org.ods.doc.gen.core.test.SpecHelper
-import org.ods.shared.lib.jenkins.PipelineUtil
-import org.ods.shared.lib.project.data.Project
+import org.ods.doc.gen.project.data.Project
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
 
@@ -12,11 +11,9 @@ class JiraUseCaseSpec extends SpecHelper {
     Project project
     def steps = [:]
     JiraUseCase usecase
-    PipelineUtil util
 
     def setup() {
         project = Spy(createProject())
-        util = Mock(PipelineUtil)
         jira = Mock(JiraService) {
             createIssueTypeBug(_, _, _) >> {
                 [
@@ -27,7 +24,6 @@ class JiraUseCaseSpec extends SpecHelper {
                 ]
             }
         }
-        logger = Mock(Logger)
         usecase = Spy(new JiraUseCase(project, steps, util, jira, logger))
     }
 
