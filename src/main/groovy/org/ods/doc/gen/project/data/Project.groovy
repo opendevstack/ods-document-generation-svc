@@ -1,7 +1,7 @@
 package org.ods.doc.gen.project.data
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jira.JiraService
+import org.ods.doc.gen.external.modules.jira.JiraService
 import org.springframework.stereotype.Service
 
 import javax.cache.annotation.CacheKey

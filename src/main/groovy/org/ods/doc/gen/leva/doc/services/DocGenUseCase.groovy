@@ -2,9 +2,9 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.JenkinsService
 import org.ods.doc.gen.core.ZipFacade
-import org.ods.shared.lib.nexus.NexusService
+import org.ods.doc.gen.external.modules.jenkins.JenkinsService
+import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 

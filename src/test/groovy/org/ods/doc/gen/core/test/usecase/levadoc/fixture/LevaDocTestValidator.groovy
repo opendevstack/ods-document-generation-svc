@@ -28,10 +28,9 @@ class LevaDocTestValidator {
             copyDocWhenRecording(projectFixture)
             return true
         } else {
-            return new PdfCompare(SAVED_DOCUMENTS).compareAreEqual(
-                actualDoc(projectFixture).absolutePath,
-                expectedDoc(projectFixture).absolutePath
-            )
+            def actualFile = actualDoc(projectFixture)
+            def expectedFile = expectedDoc(projectFixture)
+            return new PdfCompare(SAVED_DOCUMENTS).compareAreEqual(actualFile.absolutePath, expectedFile.absolutePath)
         }
     }
 

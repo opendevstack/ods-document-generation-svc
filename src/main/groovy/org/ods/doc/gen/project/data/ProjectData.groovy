@@ -3,14 +3,14 @@ package org.ods.doc.gen.project.data
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.external.modules.jira.CustomIssueFields
+import org.ods.doc.gen.external.modules.jira.IssueTypes
+import org.ods.doc.gen.external.modules.jira.JiraService
+import org.ods.doc.gen.external.modules.jira.LabelPrefix
+import org.ods.doc.gen.external.modules.jira.OpenIssuesException
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
 import org.ods.doc.gen.leva.doc.services.PipelineConfig
-import org.ods.shared.lib.jira.CustomIssueFields
-import org.ods.shared.lib.jira.IssueTypes
-import org.ods.shared.lib.jira.JiraService
-import org.ods.shared.lib.jira.LabelPrefix
-import org.ods.shared.lib.jira.OpenIssuesException
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 

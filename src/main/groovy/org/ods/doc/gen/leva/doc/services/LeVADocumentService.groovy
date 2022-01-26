@@ -2,20 +2,20 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
-import org.ods.shared.lib.git.BitbucketTraceabilityUseCase
-import org.ods.shared.lib.jenkins.JenkinsService
 import org.ods.doc.gen.core.ZipFacade
-import org.ods.shared.lib.jira.CustomIssueFields
-import org.ods.shared.lib.jira.IssueTypes
-import org.ods.shared.lib.jira.JiraUseCase
-import org.ods.shared.lib.jira.LabelPrefix
-import org.ods.shared.lib.nexus.NexusService
+import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
+import org.ods.doc.gen.external.modules.jenkins.JenkinsService
+import org.ods.doc.gen.external.modules.jira.CustomIssueFields
+import org.ods.doc.gen.external.modules.jira.IssueTypes
+import org.ods.doc.gen.external.modules.jira.JiraUseCase
+import org.ods.doc.gen.external.modules.jira.LabelPrefix
+import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.external.modules.sonar.SonarQubeUseCase
+import org.ods.doc.gen.external.modules.xunit.JUnitTestReportsUseCase
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.ods.doc.gen.project.data.TestType
-import org.ods.shared.lib.sonar.SonarQubeUseCase
-import org.ods.shared.lib.xunit.JUnitTestReportsUseCase
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
