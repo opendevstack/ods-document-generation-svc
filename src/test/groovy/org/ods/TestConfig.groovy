@@ -54,22 +54,5 @@ class TestConfig {
         }
 
     }
-    //@Bean
-    //BitbucketTraceabilityUseCase getBitbucketTraceabilityUseCase(){
-      //  new BitbucketTraceabilityUseCase(null, null, null)
-   // }
 
-    /*
-        // Mocks generation (spock don't let you add this outside a Spec)
-        JenkinsService jenkins = Mock(JenkinsService)
-        jenkins.unstashFilesIntoPath(_, _, _) >> true
-
-        BitbucketTraceabilityUseCase bbT = Spy(new BitbucketTraceabilityUseCase(null, null, null))
-        bbT.generateSourceCodeReviewFile() >> getExpectedBitBucketCSV().getAbsolutePath()
-
-          private JiraServiceForWireMock buildJiraServiceForWireMock() {
-        new JiraServiceForWireMock(jiraServer.mock().baseUrl(), WiremockServers.JIRA.user, WiremockServers.JIRA.password)
-    }
-
-     */
 }

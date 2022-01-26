@@ -12,11 +12,12 @@ import spock.lang.Specification
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.equalTo
 
-@Slf4j
-@Testcontainers
+
 /**
  * Run it with DockerTest action, you should have a Docker client
  */
+@Slf4j
+@Testcontainers
 class DocGenDockerIT extends Specification {
 
     static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse("ods-document-generation-svc:local");

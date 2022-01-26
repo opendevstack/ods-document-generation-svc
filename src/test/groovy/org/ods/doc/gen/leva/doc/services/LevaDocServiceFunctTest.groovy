@@ -88,6 +88,7 @@ class LevaDocServiceFunctTest extends Specification {
     private WiremockManager docGenServer
     private WiremockManager nexusServer
     private WiremockManager sonarServer
+
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
 
