@@ -1,9 +1,7 @@
 package org.ods.shared.lib.xunit
 
-
-
-import org.ods.shared.lib.project.data.Project
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.shared.lib.project.data.Project
 
 import java.nio.file.Files
 

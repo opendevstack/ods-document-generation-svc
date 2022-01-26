@@ -1,11 +1,10 @@
 package org.ods.doc.gen.core.test.workspace
 
 import groovy.util.logging.Slf4j
+import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.project.data.ProjectData
-import  org.ods.shared.lib.xunit.JUnitTestReportsUseCase
-import  org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.project.data.TestType
-
+import org.ods.shared.lib.xunit.JUnitTestReportsUseCase
 import org.springframework.stereotype.Service
 
 /**

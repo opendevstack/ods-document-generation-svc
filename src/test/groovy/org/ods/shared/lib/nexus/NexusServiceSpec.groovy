@@ -1,7 +1,7 @@
 package org.ods.shared.lib.nexus
 
-import com.github.tomakehurst.wiremock.client.*
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.core.test.SpecHelper
 

@@ -79,9 +79,8 @@ class GithubDocumentTemplatesRepository implements DocumentTemplatesRepository {
 
     private OkHttpClient buildHttpClient(String[] httpProxyHost) {
         int httpProxyPort = httpProxyHost.size() == 2 ? Integer.parseInt(httpProxyHost[1]) : 80
-        Proxy proxy = new Proxy(Proxy.Type.HTTP,
-                new InetSocketAddress(httpProxyHost[0], httpProxyPort));
-        return new OkHttpClient().newBuilder().proxy(proxy).build();
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(httpProxyHost[0], httpProxyPort))
+        return new OkHttpClient().newBuilder().proxy(proxy).build()
     }
 
     private void moveContentToRootFolder(targetDir, startAtDir){

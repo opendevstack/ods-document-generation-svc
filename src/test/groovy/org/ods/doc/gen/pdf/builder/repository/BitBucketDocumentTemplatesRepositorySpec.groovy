@@ -3,7 +3,6 @@ package org.ods.doc.gen.pdf.builder.repository
 import feign.FeignException
 import feign.Request
 import feign.RequestTemplate
-import org.springframework.core.env.Environment
 import spock.lang.Specification
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
@@ -25,8 +24,7 @@ class BitBucketDocumentTemplatesRepositorySpec extends Specification {
     def "error msg in request by #exceptionTypeName"(){
         given:
         def version = "1.0"
-        def environment = Mock(Environment)
-        def repository = new BitBucketDocumentTemplatesRepository(null, environment)
+        def repository = new BitBucketDocumentTemplatesRepository(null, "basePath")
         def uri = repository.getURItoDownloadTemplates(version)
         def store = Mock(BitBucketDocumentTemplatesStoreHttpAPI)
         store.getTemplatesZipArchiveForVersion(_, _, _) >> { throw createException(exceptionTypeName)}

@@ -3,7 +3,7 @@ package org.ods.shared.lib.xunit.parser
 import groovy.json.JsonBuilder
 import org.ods.doc.gen.core.test.SpecHelper
 
-import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createTestResults
 
 class JUnitParserSpec extends SpecHelper {
 

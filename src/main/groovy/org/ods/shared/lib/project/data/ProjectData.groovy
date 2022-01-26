@@ -5,6 +5,7 @@ import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
+import org.ods.doc.gen.leva.doc.services.PipelineConfig
 import org.ods.shared.lib.git.GitService
 import org.ods.shared.lib.jenkins.PipelineUtil
 import org.ods.shared.lib.jira.CustomIssueFields
@@ -13,8 +14,10 @@ import org.ods.shared.lib.jira.JiraService
 import org.ods.shared.lib.jira.LabelPrefix
 import org.ods.shared.lib.jira.OpenIssuesException
 import org.springframework.stereotype.Service
+import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.NoSuchFileException
+import java.nio.file.Paths
 
 @SuppressWarnings(['LineLength',
         'AbcMetric',
@@ -56,18 +59,16 @@ class ProjectData {
 
     ProjectData init(Map data) {
         this.data.buildParams = data.jobParams
-        this.data.metadata = data.metadata
         this.data.git = data.git
         this.data.openshift = data.openshift
+        this.data.env = data.env
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
-        this.data.env = data.env
         return this
     }
 
     ProjectData load() {
-        // FIXME: the quality of this function degraded with ODS 3.1 and needs a cleanup
-        // with a clear concept for versioning (scattered across various places)
+        this.data.metadata = loadMetadata(data.env.WORKSPACE) // TODO s2o load from BB
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
 
@@ -115,6 +116,97 @@ class ProjectData {
         this.updateJiraReleaseStatusBuildNumber()
 
         return this
+    }
+
+
+    private Map loadMetadata(String workspace){
+        Map result = parseMetadataFile(workspace)
+        result.description = (result.description)?: ""
+        result.repositories = (result.repositories)?: ""
+        updateRepositories(result)
+        result.capabilities = (result.capabilities )?: []
+        updateLevaDocCapability(result)
+        result.environments = (result.environments)?: [:]
+        return result
+    }
+
+    private void updateLevaDocCapability(Map result) {
+        def levaDocsCapabilities = result.capabilities.findAll { it instanceof Map && it.containsKey('LeVADocs') }
+        if (levaDocsCapabilities) {
+            if (levaDocsCapabilities.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Error: unable to parse project metadata. More than one 'LeVADoc' capability has been defined.")
+            }
+
+            def levaDocsCapability = levaDocsCapabilities.first()
+
+            def gampCategory = levaDocsCapability.LeVADocs?.GAMPCategory
+            if (!gampCategory) {
+                throw new IllegalArgumentException(
+                        "Error: 'LeVADocs' capability has been defined but contains no 'GAMPCategory'.")
+            }
+
+            def templatesVersion = levaDocsCapability.LeVADocs?.templatesVersion
+            if (!templatesVersion) {
+                levaDocsCapability.LeVADocs.templatesVersion = DEFAULT_TEMPLATE_VERSION
+            }
+        }
+    }
+
+    private void updateRepositories(Map result) {
+        result.repositories.eachWithIndex { repo, index ->
+            // Check for existence of required attribute 'repositories[i].id'
+            if (!repo.id?.trim()) {
+                throw new IllegalArgumentException(
+                        "Error: unable to parse project meta data. Required attribute 'repositories[${index}].id' is undefined.")
+            }
+
+            repo.data = [
+                    openshift: [:],
+                    documents: [:],
+            ]
+
+            // Set repo type, if not provided
+            if (!repo.type?.trim()) {
+                repo.type = PipelineConfig.REPO_TYPE_ODS_CODE
+            }
+
+            repo.url = "gitURL getGitURLFromPath"
+            repo.branch = 'master'
+            repo.metadata = loadMetadataRepo(repo)
+        }
+    }
+
+    private Map<String, String> loadMetadataRepo(repo) {
+        return  [
+                id: repo.id,
+                name: repo.name,
+                description: "myDescription-A",
+                supplier: "mySupplier-A",
+                version: "myVersion-A",
+                references: "myReferences-A"
+        ]
+    }
+
+    private Map parseMetadataFile(String workspace) {
+        String filename = METADATA_FILE_NAME
+        def file = Paths.get(workspace, filename).toFile()
+        if (!file.exists()) {
+            throw new RuntimeException("Error: unable to load project meta data. File '${workspace}/${filename}' does not exist.")
+        }
+
+        Map result = new Yaml().load(file.text)
+
+        // Check for existence of required attribute 'id'
+        if (!result?.id?.trim()) {
+            throw new IllegalArgumentException("Error: unable to parse project meta data. Required attribute 'id' is undefined.")
+        }
+
+        // Check for existence of required attribute 'name'
+        if (!result?.name?.trim()) {
+            throw new IllegalArgumentException("Error: unable to parse project meta data. Required attribute 'name' is undefined.")
+        }
+        return result
     }
 
     void updateJiraReleaseStatusBuildNumber() {

@@ -1,7 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
-import org.ods.doc.gen.leva.doc.services.SortUtil
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.doc.gen.leva.doc.services.SortUtil
 
 class SortUtilSpec extends SpecHelper {
 

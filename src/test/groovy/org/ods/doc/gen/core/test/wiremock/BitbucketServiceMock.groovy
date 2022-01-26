@@ -7,8 +7,8 @@ import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 
-import static com.github.tomakehurst.wiremock.core.WireMockApp.MAPPINGS_ROOT
 import static com.github.tomakehurst.wiremock.core.WireMockApp.FILES_ROOT
+import static com.github.tomakehurst.wiremock.core.WireMockApp.MAPPINGS_ROOT
 
 @Slf4j
 class BitbucketServiceMock {

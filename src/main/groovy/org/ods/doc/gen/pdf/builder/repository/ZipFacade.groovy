@@ -29,8 +29,7 @@ class ZipFacade {
 
     private ZipFile createZipFile(Path tmpFile, byte[] zipArchiveContent) {
         Files.write(tmpFile, zipArchiveContent)
-        ZipFile zipFile = new ZipFile(tmpFile.toFile())
-        zipFile
+        return new ZipFile(tmpFile.toFile())
     }
 
 }

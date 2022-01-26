@@ -1,6 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
 import org.ods.AppConfiguration
 import org.ods.TestConfig
@@ -8,7 +9,8 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithComponent
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithTestData
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesOverall
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocServiceTestHelper
+import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
+import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
@@ -63,7 +65,6 @@ class LevaDocServiceFunctTest extends Specification {
 
     private static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
     private static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
-    private static final String SAVED_DOCUMENTS = "build/reports/LeVADocs"
 
     @TempDir
     public File tempFolder
@@ -87,20 +88,17 @@ class LevaDocServiceFunctTest extends Specification {
     private WiremockManager docGenServer
     private WiremockManager nexusServer
     private WiremockManager sonarServer
-    private LevaDocServiceTestHelper testHelper
+    private LevaDocTestValidator testValidator
+    private LevaDocDataFixture dataFixture
 
     def setupSpec(){
-        new File(SAVED_DOCUMENTS).mkdirs()
+        new File(LevaDocTestValidator.SAVED_DOCUMENTS).mkdirs()
     }
 
     def setup() {
-        testHelper = new LevaDocServiceTestHelper(
-                this.class.simpleName as String,
-                GENERATE_EXPECTED_PDF_FILES,
-                SAVED_DOCUMENTS,
-                tempFolder,
-                testsReports,
-                project)
+        String simpleName = this.class.simpleName
+        dataFixture = new LevaDocDataFixture(simpleName, tempFolder, project, testsReports)
+        testValidator = new LevaDocTestValidator(simpleName, tempFolder, project)
     }
 
     def cleanup() {
@@ -111,48 +109,53 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     def "create #projectFixture.docType for project: #projectFixture.project"() {
-        given: "There's a LeVADocument service"
+        given: "A project data"
+        copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
-        Map data = testHelper.buildFixtureData(projectFixture)
+        Map data = dataFixture.buildFixtureData(projectFixture)
+        setWorkSpaceOverridingCachedData(data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testHelper.validatePDF(projectFixture)
+        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
 
         where: "Doctypes without testResults"
         projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
     def "create #projectFixture.docType with tests results for project: #projectFixture.project"() {
-        given: "There's a LeVADocument service"
+        given: "A project data"
+        copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
-        Map data = testHelper.buildFixtureData(projectFixture)
-        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+        Map data = dataFixture.buildFixtureData(projectFixture)
+        ProjectData projectData = setWorkSpaceOverridingCachedData(data)
         data << testsReports.getAllResults(projectData, projectData.repositories)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testHelper.validatePDF(projectFixture)
+        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
 
         where: "Doctypes with tests results"
         projectFixture << new DocTypeProjectFixtureWithTestData().getProjects()
     }
 
     def "create #projectFixture.docType for component #projectFixture.component and project: #projectFixture.project"() {
-        given: "There's a LeVADocument service"
+        given: "A project data"
+        copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
-        Map data = testHelper.buildFixtureData(projectFixture)
-        data.repo = testHelper.getModuleData(projectFixture, data)
+        Map data = dataFixture.buildFixtureData(projectFixture)
+        setWorkSpaceOverridingCachedData(data)
+        data.repo = dataFixture.getModuleData(projectFixture, data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testHelper.validatePDF(projectFixture)
+        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
 
         where: "Doctypes with modules"
         projectFixture << new DocTypeProjectFixtureWithComponent().getProjects()
@@ -163,24 +166,37 @@ class LevaDocServiceFunctTest extends Specification {
      * @return
      */
     def "create Overall #projectFixture.docType for project: #projectFixture.project"() {
-        given: "There's a LeVADocument service"
+        given: "A project data"
+        copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
-        Map data = testHelper.buildFixtureData(projectFixture)
-        testHelper.useExpectedComponentDocs(data, projectFixture)
+        Map data = dataFixture.buildFixtureData(projectFixture)
+        setWorkSpaceOverridingCachedData(data)
+        dataFixture.updateExpectedComponentDocs(data, projectFixture)
 
         when: "the user creates a LeVA document"
         leVADocumentService."createOverall${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testHelper.validatePDF(projectFixture)
+        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
 
         where:
         projectFixture << new DocTypeProjectFixturesOverall().getProjects()
     }
 
+    private Object copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
+        FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
+    }
+
     private void setUpWireMock(ProjectFixture projectFixture) {
         startUpWiremockServers(projectFixture)
         updateServicesWithWiremockConfig()
+    }
+
+    private ProjectData setWorkSpaceOverridingCachedData(Map<Object, Object> data) {
+        // We need to override the value because of the cache in ProjectData
+        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+        projectData.data.env.WORKSPACE = tempFolder.absolutePath
+        return projectData
     }
 
     private void startUpWiremockServers(ProjectFixture projectFixture) {

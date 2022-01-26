@@ -4,17 +4,15 @@ import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.json.JSONArray
+import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.core.test.wiremock.BitbucketServiceMock
-import org.ods.shared.lib.project.data.Project
 import org.ods.doc.gen.leva.doc.services.StringCleanup
-
+import org.ods.shared.lib.project.data.Project
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.TempDir
-import org.ods.doc.gen.core.test.fixture.FixtureHelper
-
 
 import static org.assertj.core.api.Assertions.assertThat
 

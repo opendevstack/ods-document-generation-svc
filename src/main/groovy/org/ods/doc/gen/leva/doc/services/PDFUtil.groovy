@@ -24,7 +24,6 @@ import java.nio.file.Paths
 @Service
 class PDFUtil {
 
-    
     byte[] addWatermarkText(byte[] file, String text) {
         def result
 
@@ -63,7 +62,6 @@ class PDFUtil {
 
         return result
     }
-
     
     byte[] convertFromWordDoc(File wordDoc) {
         def result
@@ -88,7 +86,6 @@ class PDFUtil {
 
         return result
     }
-
     
     byte[] merge(String workspacePath, List<byte[]> files) {
         def result
@@ -113,7 +110,6 @@ class PDFUtil {
         return result
     }
 
-    
     // Courtesy of https://svn.apache.org/viewvc/pdfbox/trunk/examples/src/main/java/org/apache/pdfbox/examples/util/AddWatermarkText.java
     private addWatermarkTextToPage(PDDocument doc, PDPage page, PDFont font, String text) {
         def cs

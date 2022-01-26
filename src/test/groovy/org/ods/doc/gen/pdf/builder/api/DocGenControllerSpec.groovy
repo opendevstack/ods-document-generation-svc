@@ -36,12 +36,12 @@ class DocGenControllerSpec extends Specification {
         GroovySpy(Files, global: true)
         Files.createTempDirectory(_) >> tempFolder
 
-        and: "PdfGenerationService is mock"
+        and: "PdfGenerationService is mocked"
         Path pdfFile =  Path.of("src/test/resources","dtr_proof.pdf")
         String pdfValue = Files.readAllBytes(pdfFile).encodeBase64().toString()
         when(service.generatePdfFile(metadataValue, dataValue, tempFolder)).thenReturn(pdfFile)
 
-        expect: "a client call to /document is OK and returned json has pdf data"
+        expect: "a client call to /document return the initial json as pdf data"
         def postContent = JsonOutput.toJson([metadata: metadataValue, data: dataValue])
         def returnValue = this.mockMvc
                 .perform(post("/document").contentType(MediaType.APPLICATION_JSON).content(postContent))
@@ -64,7 +64,7 @@ class DocGenControllerSpec extends Specification {
                 .andExpect(status().isPreconditionFailed())
                 .andReturn()
 
-        and: "And msg error"
+        and: "msg error"
         mvcResult.response.contentAsString.startsWith("missing argument")
 
         where: "not valid post content"

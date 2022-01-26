@@ -4,7 +4,6 @@ package org.ods.doc.gen.core.test.wiremock
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.http.JvmProxyConfigurer
 import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult
 import groovy.json.JsonBuilder
 import groovy.json.JsonOutput

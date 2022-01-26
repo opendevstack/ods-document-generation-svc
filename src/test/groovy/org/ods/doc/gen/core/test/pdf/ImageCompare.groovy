@@ -3,7 +3,7 @@ package org.ods.doc.gen.core.test.pdf
 import groovy.util.logging.Slf4j
 
 import javax.imageio.ImageIO
-import java.awt.Color
+import java.awt.*
 import java.awt.image.BufferedImage
 
 @Slf4j

@@ -1,15 +1,12 @@
 package org.ods.shared.lib.sonar
 
-
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.shared.lib.nexus.NexusService
 import org.ods.shared.lib.project.data.Project
 
 import java.nio.file.Files
 
-import org.ods.shared.lib.nexus.NexusService
-
-
-import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
+import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
 class SonarQubeUseCaseSpec extends SpecHelper {
 

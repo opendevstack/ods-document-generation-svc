@@ -43,8 +43,10 @@ class LevaDocController {
             @PathVariable("levaDocType") LevaDocType levaDocType,
             @RequestBody Map body){
         validateRequestParams(body)
-        logData(body)
-        return createDocument(levaDocType, body)
+        logData(projectId, build, levaDocType, body)
+        def url = createDocument(levaDocType, body)
+        log.info "buildDocument return:${url}"
+        return url
     }
 
     private String createDocument(LevaDocType levaDocType, Map data) {
@@ -54,8 +56,8 @@ class LevaDocController {
             data.env.WORKSPACE =  tmpDir.absolutePath
             return levaDocType.buildDocument.apply(leVADocumentService, data)
         } catch (Throwable e) {
-            String msg = "Error building document:${levaDocType} with data:${data}"
-            log.error(msg)
+            String msg = "Error building document: ${levaDocType} with data:${data}"
+            log.error(msg, e)
             throw new RuntimeException(msg, e)
         } finally {
             if (tmpDir) {
@@ -65,7 +67,7 @@ class LevaDocController {
     }
 
     private static void validateRequestParams(Map body) {
-        if (body.levaDocType == null) {
+      /*  if (body.levaDocType == null) {
             throw new IllegalArgumentException("missing argument 'metadata.type'")
         }
         if (body.buildParams.projectKey == null) {
@@ -73,17 +75,16 @@ class LevaDocController {
         }
         if (body?.data == null || 0 == body?.data.size()) {
             throw new IllegalArgumentException("missing argument 'data'")
-        }
+        }*/
     }
 
-    private static void logData(Map body) {
+    private static void logData(String projectId, String build, LevaDocType levaDocType, Map body) {
         log.info("buildDocument for: \n" +
-                "- projectId:${body.buildParams.projectKey} \n" +
-                "- build:${body.buildParams.buildNumber} \n" +
-                "- levaDocType:${body.levaDocType}")
+                "- projectId:${projectId} \n" +
+                "- build:${build} \n" +
+                "- levaDocType:${levaDocType}")
         if (log.isDebugEnabled()) {
-            log.debug("Input request body data before send it to convert it to a pdf: ")
-            log.debug(prettyPrint(toJson(body.data)))
+            log.debug(prettyPrint(toJson(body)))
         }
     }
 

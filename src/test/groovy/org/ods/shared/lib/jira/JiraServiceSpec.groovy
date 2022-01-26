@@ -1,7 +1,7 @@
 package org.ods.shared.lib.jira
 
-import com.github.tomakehurst.wiremock.client.*
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
 import org.ods.doc.gen.core.test.SpecHelper

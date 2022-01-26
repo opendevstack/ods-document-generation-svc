@@ -1,10 +1,8 @@
 package org.ods.shared.lib.jira
 
-
-
-import org.ods.shared.lib.jenkins.PipelineUtil
-import  org.ods.shared.lib.project.data.Project
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.shared.lib.jenkins.PipelineUtil
+import org.ods.shared.lib.project.data.Project
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
 

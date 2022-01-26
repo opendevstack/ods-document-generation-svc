@@ -1,8 +1,7 @@
 package org.ods.shared.lib.nexus
 
-
-import org.ods.shared.lib.git.GitService
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.shared.lib.git.GitService
 
 class GitServiceSpec extends SpecHelper {
 

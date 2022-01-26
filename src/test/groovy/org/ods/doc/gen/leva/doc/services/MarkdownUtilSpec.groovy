@@ -1,10 +1,9 @@
 
 package org.ods.doc.gen.leva.doc.services
 
-
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.ods.doc.gen.leva.doc.services.MarkdownUtil
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.doc.gen.leva.doc.services.MarkdownUtil
 
 class MarkdownUtilSpec extends SpecHelper {
 
@@ -93,4 +92,5 @@ class MarkdownUtilSpec extends SpecHelper {
         isLandscape == true
         doc.close()
     }
+
 }

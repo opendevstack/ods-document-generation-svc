@@ -45,7 +45,8 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
 
         BitBucketDocumentTemplatesStoreHttpAPI store = createStorageClient(bitbucketUserName, bitbucketPassword, uri)
         byte[] zipArchiveContent = getZipArchive(store, version, uri, bitbucketUserName)
-        return zipFacade.extractZipArchive(zipArchiveContent, targetDir)
+        zipFacade.extractZipArchive(zipArchiveContent, targetDir)
+        return targetDir
     }
 
     boolean isApplicableToSystemConfig () {

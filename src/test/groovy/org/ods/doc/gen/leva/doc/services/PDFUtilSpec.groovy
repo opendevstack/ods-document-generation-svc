@@ -1,21 +1,19 @@
 package org.ods.doc.gen.leva.doc.services
 
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.ods.doc.gen.leva.doc.services.PDFUtil
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
+import org.ods.doc.gen.leva.doc.services.PDFUtil
+import spock.lang.TempDir
 
 class PDFUtilSpec extends SpecHelper {
 
-    @Rule
-    public TemporaryFolder tempFolder
+    @TempDir
+    public File tempFolder
 
     def "add watermark text"() {
         given:
         def util = new PDFUtil()
-
         def pdfFile = new FixtureHelper().getResource("Test-1.pdf")
         def text = "myWatermark"
 
@@ -77,7 +75,7 @@ class PDFUtilSpec extends SpecHelper {
         def docFile2 = new FixtureHelper().getResource("Test-2.pdf")
 
         when:
-        def result = util.merge(tempFolder.getRoot().absolutePath, [docFile1.bytes, docFile2.bytes])
+        def result = util.merge(tempFolder.absolutePath, [docFile1.bytes, docFile2.bytes])
 
         then:
         new String(result).startsWith("%PDF-1.4\n")
