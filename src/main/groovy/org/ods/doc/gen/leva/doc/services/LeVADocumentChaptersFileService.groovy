@@ -1,7 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 

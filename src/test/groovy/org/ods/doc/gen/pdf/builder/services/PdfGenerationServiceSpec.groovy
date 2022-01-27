@@ -9,8 +9,8 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
-import org.ods.TestConfig
-import org.ods.doc.gen.WireMockFacade
+import org.ods.doc.gen.TestConfig
+import org.ods.doc.gen.core.test.wiremock.WireMockFacade
 import org.ods.doc.gen.pdf.builder.repository.BitBucketDocumentTemplatesRepository
 import org.ods.doc.gen.pdf.builder.repository.GithubDocumentTemplatesRepository
 import org.springframework.test.context.ActiveProfiles

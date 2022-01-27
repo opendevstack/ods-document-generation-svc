@@ -4,8 +4,8 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.test.usecase.RepoDataBuilder
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 
 @Slf4j
 class LevaDocDataFixture {

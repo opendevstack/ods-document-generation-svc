@@ -1,10 +1,9 @@
 package org.ods.doc.gen.core.test.workspace
 
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.PipelineUtil
-import org.ods.shared.lib.project.data.ProjectData
-import org.ods.shared.lib.project.data.TestType
-import org.ods.shared.lib.xunit.JUnitTestReportsUseCase
+import org.ods.doc.gen.external.modules.xunit.JUnitTestReportsUseCase
+import org.ods.doc.gen.project.data.ProjectData
+import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
 
 /**
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service
 class TestsReports {
     private final static List TYPES = [TestType.INSTALLATION, TestType.INTEGRATION, TestType.ACCEPTANCE, TestType.UNIT]
     private final JUnitTestReportsUseCase jUnitTestReport
+    static final String XUNIT_DOCUMENTS_BASE_DIR = 'xunit'
 
     TestsReports(JUnitTestReportsUseCase jUnitTestReportsUseCase){
         this.jUnitTestReport = jUnitTestReportsUseCase
@@ -32,12 +32,12 @@ class TestsReports {
     }
 
     /**
-     * see @org.ods.shared.lib.orchestration.Stage#getTestResults
+     * see @org.ods.external.modules.orchestration.Stage#getTestResults
      */
     Map getResults(ProjectData projectData, String repoId, String type) {
         log.debug("Collecting JUnit XML Reports ('${type}') for ${repoId}")
 
-        def testReportsPath = "${PipelineUtil.XUNIT_DOCUMENTS_BASE_DIR}/${repoId}/${type}"
+        def testReportsPath = "${XUNIT_DOCUMENTS_BASE_DIR}/${repoId}/${type}"
         def testReportFiles = jUnitTestReport
                 .loadTestReportsFromPath( "${projectData.data.env.WORKSPACE}/${testReportsPath}")
 

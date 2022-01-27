@@ -8,6 +8,7 @@ import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
 import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.core.ZipFacade
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Repository

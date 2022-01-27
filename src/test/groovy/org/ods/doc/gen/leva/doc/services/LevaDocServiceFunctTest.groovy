@@ -3,8 +3,8 @@ package org.ods.doc.gen.leva.doc.services
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
-import org.ods.AppConfiguration
-import org.ods.TestConfig
+import org.ods.doc.gen.AppConfiguration
+import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithComponent
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithTestData
@@ -15,10 +15,10 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.shared.lib.jira.JiraService
-import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.external.modules.jira.JiraService
+import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification

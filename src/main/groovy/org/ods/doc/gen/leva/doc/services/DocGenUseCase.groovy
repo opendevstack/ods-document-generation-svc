@@ -2,11 +2,11 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.ods.shared.lib.jenkins.JenkinsService
-import org.ods.shared.lib.jenkins.PipelineUtil
-import org.ods.shared.lib.nexus.NexusService
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
+import org.ods.doc.gen.core.ZipFacade
+import org.ods.doc.gen.external.modules.jenkins.JenkinsService
+import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 
 @Slf4j
 @SuppressWarnings([
@@ -20,15 +20,15 @@ abstract class DocGenUseCase {
     static final String RESURRECTED = "resurrected"
 
     protected final Project project
-    protected final PipelineUtil util
+    private final ZipFacade zip
     protected final DocGenService docGen
     protected final NexusService nexus
     protected final PDFUtil pdf
     protected final JenkinsService jenkins
 
-    DocGenUseCase(Project project, PipelineUtil util, DocGenService docGen, NexusService nexus, PDFUtil pdf, JenkinsService jenkins) {
+    DocGenUseCase(Project project, ZipFacade zip, DocGenService docGen, NexusService nexus, PDFUtil pdf, JenkinsService jenkins) {
         this.project = project
-        this.util = util
+        this.zip = zip
         this.docGen = docGen
         this.nexus = nexus
         this.pdf = pdf
@@ -62,16 +62,10 @@ abstract class DocGenUseCase {
         }
 
         def doCreateArtifact = shouldCreateArtifact(documentType, repo)
-        def artifact = this.util.createZipArtifact(
-                projectData,
-            "${basename}.zip",
-            artifacts,
-            doCreateArtifact
-        )
+        def artifact = this.zip.createZipFileFromFiles(projectData, "${basename}.zip", artifacts)
 
         // Concerns DTR/TIR for a single repo
         if (!doCreateArtifact) {
-            this.util.createAndStashArtifact(projectData, pdfName, document)
             if (repo) {
                 repo.data.documents[documentType] = pdfName
             }
@@ -204,15 +198,10 @@ abstract class DocGenUseCase {
         log.info "Document found: ${storedFileName} \r${documentFromNexus}"
         byte [] resurrectedDocAsBytes
         if (storageType == 'zip') {
-            resurrectedDocAsBytes = this.util.extractFromZipFile(
+            resurrectedDocAsBytes = this.zip.extractFromZipFile(
                 "${path}/${storedFileName}", contentFileName)
         } else {
             resurrectedDocAsBytes = documentFromNexus.content.getBytes()
-        }
-
-        // stash doc with new name / + build id
-        if (stash) {
-            this.util.createAndStashArtifact(contentFileName, resurrectedDocAsBytes)
         }
 
         if (!shouldCreateArtifact(documentType, repo)) {

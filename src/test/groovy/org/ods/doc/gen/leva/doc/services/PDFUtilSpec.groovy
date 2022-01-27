@@ -3,7 +3,6 @@ package org.ods.doc.gen.leva.doc.services
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
-import org.ods.doc.gen.leva.doc.services.PDFUtil
 import spock.lang.TempDir
 
 class PDFUtilSpec extends SpecHelper {

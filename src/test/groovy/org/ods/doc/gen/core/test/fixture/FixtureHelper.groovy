@@ -4,22 +4,10 @@ import groovy.json.JsonSlurperClassic
 import groovy.transform.InheritConstructors
 import org.apache.http.client.utils.URIBuilder
 import org.junit.contrib.java.lang.system.EnvironmentVariables
-import org.ods.shared.lib.git.GitService
-import org.ods.shared.lib.project.data.Project
-import org.ods.shared.lib.project.data.ProjectData
-import org.ods.shared.lib.xunit.parser.JUnitParser
+import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
+import org.ods.doc.gen.project.data.Project
+import org.ods.doc.gen.project.data.ProjectData
 import org.yaml.snakeyaml.Yaml
-
-@InheritConstructors
-class FakeGitUtil extends GitService {
-    String getCommitSha() {
-        return "my-commit"
-    }
-
-    String getOriginUrl() {
-        return "https://github.com/my-org/my-repo-A.git"
-    }
-}
 
 @InheritConstructors
 class FakeProject extends ProjectData {
@@ -43,7 +31,7 @@ class FakeProject extends ProjectData {
         return this
     }
 
-    ProjectData load(GitService git) {
+    ProjectData load() {
         this.git = git
 
         this.data.git = [ commit: git.getCommitSha(), url: git.getOriginUrl() ]
@@ -141,7 +129,7 @@ class FixtureHelper {
 
         return new FakeProject(steps)
             .init()
-            .load(new FakeGitUtil(steps, null), null)
+            .load()
     }
 
     static Map createProjectBuildEnvironment(def env) {
