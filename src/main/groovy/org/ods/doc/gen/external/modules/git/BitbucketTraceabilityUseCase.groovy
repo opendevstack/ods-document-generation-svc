@@ -49,7 +49,14 @@ class BitbucketTraceabilityUseCase {
      */
     String generateSourceCodeReviewFile(ProjectData projectData) {
         File file = createReportFile(projectData)
-        processRepositories(file)
+
+        List<Map> repos = getRepositories(projectData)
+        int reposSize = repos.size()
+        for (def i = 0; i < reposSize; i++) {
+            def repo = repos[i]
+            processRepo(repo, file)
+        }
+
         return file.absolutePath
     }
 
@@ -131,23 +138,13 @@ class BitbucketTraceabilityUseCase {
     }
 
     
-    private void processRepositories(File file) {
-        List<Map> repos = getRepositories()
-        int reposSize = repos.size()
-        for (def i = 0; i < reposSize; i++) {
-            def repo = repos[i]
-            processRepo(repo, file)
-        }
-    }
-
-    
-    private List<Map> getRepositories() {
+    private List<Map> getRepositories(ProjectData projectData) {
         List<Map> result = []
-        List<Map> repos = this.project.getProjectData().getRepositories()
+        List<Map> repos = projectData.getRepositories()
         int reposSize = repos.size()
         for (def i = 0; i < reposSize; i++) {
             def repository = repos[i]
-            result << [repo: "${project.getProjectData().data.id.toLowerCase()}-${repository.id}", branch: repository.branch]
+            result << [repo: "${projectData.data.id.toLowerCase()}-${repository.id}", branch: repository.branch]
         }
         return result
     }
