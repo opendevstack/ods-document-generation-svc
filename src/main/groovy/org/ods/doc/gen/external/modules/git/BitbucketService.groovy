@@ -5,7 +5,6 @@ import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.apache.http.client.utils.URIBuilder
-import org.ods.shared.lib.jenkins.AuthUtil
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 

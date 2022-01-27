@@ -48,9 +48,8 @@ class BitbucketTraceabilityUseCase {
      * @return absolutePath of the created file
      */
     String generateSourceCodeReviewFile(ProjectData projectData) {
-        String token = bitbucketService.getToken()
         File file = createReportFile(projectData)
-        processRepositories(file, token)
+        processRepositories(file)
         return file.absolutePath
     }
 
@@ -132,29 +131,29 @@ class BitbucketTraceabilityUseCase {
     }
 
     
-    private void processRepositories(File file, String token) {
+    private void processRepositories(File file) {
         List<Map> repos = getRepositories()
         int reposSize = repos.size()
         for (def i = 0; i < reposSize; i++) {
             def repo = repos[i]
-            processRepo(token, repo, file)
+            processRepo(repo, file)
         }
     }
 
     
     private List<Map> getRepositories() {
         List<Map> result = []
-        List<Map> repos = this.project.getRepositories()
+        List<Map> repos = this.project.getProjectData().getRepositories()
         int reposSize = repos.size()
         for (def i = 0; i < reposSize; i++) {
             def repository = repos[i]
-            result << [repo: "${project.data.metadata.id.toLowerCase()}-${repository.id}", branch: repository.branch]
+            result << [repo: "${project.getProjectData().data.id.toLowerCase()}-${repository.id}", branch: repository.branch]
         }
         return result
     }
 
     
-    private void processRepo(String token, Map repo, File file) {
+    private void processRepo(Map repo, File file) {
         boolean nextPage = true
         int nextPageStart = 0
         while (nextPage) {
