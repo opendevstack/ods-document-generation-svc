@@ -139,12 +139,13 @@ class BitbucketTraceabilityUseCase {
 
     
     private List<Map> getRepositories(ProjectData projectData) {
+        String projectDataKey = "${projectData.getKey().toLowerCase()}"
         List<Map> result = []
         List<Map> repos = projectData.getRepositories()
         int reposSize = repos.size()
         for (def i = 0; i < reposSize; i++) {
             def repository = repos[i]
-            result << [repo: "${projectData.data.id.toLowerCase()}-${repository.id}", branch: repository.branch]
+            result << [repo: "${projectDataKey}-${repository.id}", branch: repository.branch]
         }
         return result
     }
