@@ -88,6 +88,7 @@ class LevaDocServiceFunctTest extends Specification {
     private WiremockManager docGenServer
     private WiremockManager nexusServer
     private WiremockManager sonarServer
+    private WiremockManager bitbucketServer
 
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
@@ -107,6 +108,7 @@ class LevaDocServiceFunctTest extends Specification {
         jiraServer?.tearDown()
         nexusServer?.tearDown()
         sonarServer?.tearDown()
+        bitbucketServer?.tearDown()
     }
 
     def "create #projectFixture.docType for project: #projectFixture.project"() {
@@ -213,6 +215,7 @@ class LevaDocServiceFunctTest extends Specification {
         jiraServer = WiremockServers.JIRA.build().withScenario(scenarioPath).startServer(RECORD)
         nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
         //sonarServer = WiremockServers.SONAR_QU.build().withScenario(scenarioPath).startServer(RECORD)
+        bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
     }
 
     private void updateServicesWithWiremockConfig() {

@@ -4,6 +4,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
+import org.apache.http.client.utils.URIBuilder
 import org.ods.shared.lib.jenkins.AuthUtil
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -30,10 +31,6 @@ class BitbucketService {
     // Name of the CD project in OpenShift, based on the "project" name.
     private final String openShiftCdProject
 
-    // Name of the credentials which store the username/password of a user with
-    // access to the BitBucket server identified by "bitbucketUrl".
-    private final String passwordCredentialsId
-
     // Name of the secret in "openShiftCdProject", which contains the username/token
     // of a user with access to the BitBucket server identified by "bitbucketUrl".
     // This secret does not need to exist ahead of time, it will be created
@@ -46,17 +43,47 @@ class BitbucketService {
     // automatically (by syncing the "tokenSecretName").
     private String tokenCredentialsId
 
-    @Inject
-    BitbucketService(@Value('${bitbucket.url}') String bitbucketUrl,
-                     @Value('${bitbucket.password}') String passwordCredentialsId) {
-        this.script = script
-        this.bitbucketUrl = bitbucketUrl
+    // Username and password we use to connect to bitbucket
+    String username
+    String password
+
+    // Bitbucket base url
+    URI baseURL
+
+    BitbucketService(@Value('${bitbucket.url}') String baseURL,
+                @Value('${bitbucket.username}')  String username,
+                @Value('${bitbucket.password}') String password) {
+        if (!baseURL?.trim()) {
+            throw new IllegalArgumentException('Error: unable to connect to Jira. \'baseURL\' is undefined.')
+        }
+
+        if (!username?.trim()) {
+            throw new IllegalArgumentException('Error: unable to connect to Jira. \'username\' is undefined.')
+        }
+
+        if (!password?.trim()) {
+            throw new IllegalArgumentException('Error: unable to connect to Jira. \'password\' is undefined.')
+        }
+
+        if (baseURL.endsWith('/')) {
+            baseURL = baseURL.substring(0, baseURL.size() - 1)
+        }
+
+        try {
+            this.baseURL = new URIBuilder(baseURL).build()
+        } catch (e) {
+            throw new IllegalArgumentException("Error: unable to connect to Jira. '${baseURL}' is not a valid URI.").initCause(e)
+        }
+
+        this.username = username
+        this.password = password
+
         this.project = "FRML24113" // TODO s2o
         this.openShiftCdProject = "${project}-cd"
-        this.passwordCredentialsId = passwordCredentialsId
         this.tokenSecretName = 'cd-user-bitbucket-token'
+
     }
-    
+
     static String userTokenSecretYml(String tokenSecretName, String username, String password) {
         """\
           apiVersion: v1
@@ -76,25 +103,24 @@ class BitbucketService {
         bitbucketUrl
     }
 
-    String getPasswordCredentialsId() {
-        passwordCredentialsId
-    }
+    Map getDefaultReviewerConditions(String repo) {
+        def response = Unirest.get("${this.baseURL}/rest/default-reviewers/1.0/projects/${projectKey}/repos/${repo}/conditions")
+                .routeParam('projectKey', project.toUpperCase())
+                .basicAuth(this.username, this.password)
+                .header('Accept', 'application/json')
+                .asString()
 
-    String getDefaultReviewerConditions(String repo) {
-        String res
-        withTokenCredentials { username, token ->
-            res = script.sh(
-                label: 'Get default reviewer conditions via API',
-                script: """curl \\
-                  --fail \\
-                  -sS \\
-                  --request GET \\
-                  --header \"Authorization: Bearer ${token}\" \\
-                  ${bitbucketUrl}/rest/default-reviewers/1.0/projects/${project}/repos/${repo}/conditions""",
-                returnStdout: true
-            ).trim()
+        response.ifFailure {
+            def message = "Error: unable to get Bitbucket reviewer conditions. Bitbucket responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
+
+            if (response.getStatus() == 404) {
+                message = "Error: unable to get Bitbucket issue types. Bitbucket could not be found at: '${this.baseURL}'."
+            }
+
+            throw new RuntimeException(message)
         }
-        return res
+
+        return new JsonSlurperClassic().parseText(response.getBody())
     }
 
     // Returns a list of bitbucket user names (not display names)
@@ -352,21 +378,6 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
         }
     }
 
-    def withTokenCredentials(Closure block) {
-        if (!tokenCredentialsId) {
-            createUserTokenIfMissing()
-        }
-        script.withCredentials([
-            script.usernamePassword(
-                credentialsId: tokenCredentialsId,
-                usernameVariable: 'USERNAME',
-                passwordVariable: 'TOKEN'
-            )
-        ]) {
-            block(script.env.USERNAME, script.env.TOKEN)
-        }
-    }
-
     @SuppressWarnings('SynchronizedMethod')
     private synchronized void createUserTokenIfMissing() {
         def credentialsId = "${openShiftCdProject}-${tokenSecretName}"
@@ -413,16 +424,8 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
         Map<String, String> tokenMap = [username: '', password: '']
         def res = ''
         def payload = """{"name": "ods-jenkins-shared-library-${openShiftCdProject}", "permissions": ["PROJECT_WRITE", "REPO_WRITE"]}"""
-        script.withCredentials(
-            [script.usernamePassword(
-                credentialsId: passwordCredentialsId,
-                usernameVariable: 'USERNAME',
-                passwordVariable: 'PASSWORD'
-            )]
-        ) {
-            String username = script.env.USERNAME
+
             tokenMap['username'] = username
-            String password = script.env.PASSWORD
             String url = "${bitbucketUrl}/rest/access-tokens/1.0/users/${username.replace('@', '_')}"
             script.echo "Requesting token via PUT ${url} with payload=${payload}"
             res = script.sh(
@@ -444,15 +447,10 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
             } catch (Exception ex) {
                 log.warn "Could not understand API response. Error was: ${ex}"
             }
-        }
+
         return tokenMap
     }
 
-    String getToken() {
-        withTokenCredentials { username, token -> return token}
-    }
-
-    
     Map getCommitsForIntegrationBranch(String token, String repo, int limit, int nextPageStart){
         String request = "${bitbucketUrl}/rest/api/1.0/projects/${project}/repos/${repo}/commits"
         return queryRepo(token, request, limit, nextPageStart)
@@ -507,22 +505,6 @@ repos/${repo}/commits/${gitCommit}/reports/${data.key}"""
             """
         } catch (Exception ex) {
             log.warn "Could not create secret ${tokenSecretName}. Error was: ${ex}"
-        }
-    }
-
-    private boolean basicAuthCredentialsIdExists(String credentialsId) {
-        try {
-            script.withCredentials([
-                script.usernamePassword(
-                    credentialsId: credentialsId,
-                    usernameVariable: 'USERNAME',
-                    passwordVariable: 'TOKEN'
-                )
-            ]) {
-                true
-            }
-        } catch (_) {
-            false
         }
     }
 
