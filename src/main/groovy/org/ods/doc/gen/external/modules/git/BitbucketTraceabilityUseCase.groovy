@@ -158,20 +158,20 @@ class BitbucketTraceabilityUseCase {
         boolean nextPage = true
         int nextPageStart = 0
         while (nextPage) {
-            Map commits = bitbucketService.getCommitsForIntegrationBranch(token, repo.repo, PAGE_LIMIT, nextPageStart)
+            Map commits = bitbucketService.getCommitsForIntegrationBranch(repo.repo, PAGE_LIMIT, nextPageStart)
             if (commits.isLastPage) {
                 nextPage = false
             } else {
                 nextPageStart = commits.nextPageStart
             }
-            processCommits(token, repo, commits, file)
+            processCommits(repo, commits, file)
         }
     }
 
     
-    private void processCommits(String token, Map repo, Map commits, File file) {
+    private void processCommits(Map repo, Map commits, File file) {
         commits.values.each { commit ->
-            Map mergedPR = bitbucketService.getPRforMergedCommit(token, repo.repo, commit.id)
+            Map mergedPR = bitbucketService.getPRforMergedCommit(repo.repo, commit.id)
             // Only changes in PR and destiny integration branch
             if (mergedPR.values
                 && mergedPR.values[0].toRef.displayId == repo.branch) {
