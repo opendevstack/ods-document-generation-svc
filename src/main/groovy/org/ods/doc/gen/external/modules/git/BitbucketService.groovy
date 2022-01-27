@@ -15,9 +15,6 @@ import javax.inject.Inject
 @Service
 class BitbucketService {
 
-    // Bae URL of Bitbucket server, such as "https://bitbucket.example.com".
-    final String bitbucketUrl
-
     // Name of Bitbucket project, such as "foo".
     // This name is also the prefix for OpenShift projects ("foo-cd", "foo-dev", ...).
     final String project
@@ -60,19 +57,14 @@ class BitbucketService {
         this.project = "FRML24113" // TODO s2o
     }
 
-    String getUrl() {
-        bitbucketUrl
-    }
-
-
     Map getCommitsForIntegrationBranch(String repo, int limit, int nextPageStart){
-        String request = "${bitbucketUrl}/rest/api/1.0/projects/${project}/repos/${repo}/commits"
+        String request = "${this.baseURL}/rest/api/1.0/projects/${project}/repos/${repo}/commits"
         return queryRepo(request, limit, nextPageStart)
     }
 
     
     Map getPRforMergedCommit(String repo, String commit) {
-        String request = "${bitbucketUrl}/rest/api/1.0/projects/${project}" +
+        String request = "${this.baseURL}/rest/api/1.0/projects/${project}" +
             "/repos/${repo}/commits/${commit}/pull-requests"
         return queryRepo(request, 0, 0)
     }
