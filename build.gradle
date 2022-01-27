@@ -192,7 +192,7 @@ test {
     exceptionFormat = 'full'
   }
   filter {
-    includeTestsMatching "*Spec"
+    excludeTestsMatching "*IT"
   }
   systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
   systemProperty 'com.athaydes.spockframework.report.projectName', 'docGen'

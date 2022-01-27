@@ -15,7 +15,7 @@ enum WiremockServers {
             return System.properties["sonar.username"]
         };
         String getPassword(){
-            return System.properties["sonar.username"]
+            return System.properties["sonar.password"]
         }
     },
     JIRA {
@@ -26,7 +26,7 @@ enum WiremockServers {
             return System.properties["jira.username"]
         };
         String getPassword(){
-            return System.properties["jira.username"]
+            return System.properties["jira.password"]
         }
     },
     NEXUS {
@@ -37,7 +37,7 @@ enum WiremockServers {
             return System.properties["nexus.username"]
         };
         String getPassword(){
-            return System.properties["nexus.username"]
+            return System.properties["nexus.password"]
         }
     },
     DOC_GEN {
@@ -48,7 +48,18 @@ enum WiremockServers {
             return "docGen.username"
         };
         String getPassword(){
-            return "docGen.username"
+            return "docGen.password"
+        }
+    },
+    BITBUCKET {
+        WiremockManager build() {
+            new WiremockManager("bitbucket", System.properties["bitbucket.url"])
+        };
+        String getUser(){
+            return "bitbucket.username"
+        };
+        String getPassword(){
+            return "bitbucket.password"
         }
     }
 

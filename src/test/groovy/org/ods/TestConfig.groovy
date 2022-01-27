@@ -34,12 +34,15 @@ class TestConfig {
         return jiraServiceForWireMock
     }
 
+    /*
     @Primary
     @Bean
     BitbucketTraceabilityUseCase getBitbucketTraceabilityUseCase(){
         new BitbucketTraceabilityUseCaseStub(null, null)
-    }
+    }*/
 
+    // TODO: To be removed
+    /*
     class BitbucketTraceabilityUseCaseStub extends BitbucketTraceabilityUseCase {
 
         static final String EXPECTED_BITBUCKET_CSV = "expected/bitbucket.csv"
@@ -54,5 +57,5 @@ class TestConfig {
         }
 
     }
-
+    */
 }
