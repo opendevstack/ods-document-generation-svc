@@ -218,7 +218,7 @@ class LevaDocServiceFunctTest extends Specification {
         docGenServer = WiremockServers.DOC_GEN.build().withScenario(scenarioPath).startServer(RECORD)
         jiraServer = WiremockServers.JIRA.build().withScenario(scenarioPath).startServer(RECORD)
         nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
-        bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(true)
+        bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
     }
 
     private void updateServicesWithWiremockConfig() {
