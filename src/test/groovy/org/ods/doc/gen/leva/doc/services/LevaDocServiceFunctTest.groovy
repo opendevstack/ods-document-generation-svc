@@ -15,6 +15,7 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
+import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.Project
@@ -83,6 +84,9 @@ class LevaDocServiceFunctTest extends Specification {
 
     @Inject
     Project project
+
+    @Inject
+    BitbucketService bitbucketService
 
     private WiremockManager jiraServer
     private WiremockManager docGenServer
@@ -214,13 +218,13 @@ class LevaDocServiceFunctTest extends Specification {
         docGenServer = WiremockServers.DOC_GEN.build().withScenario(scenarioPath).startServer(RECORD)
         jiraServer = WiremockServers.JIRA.build().withScenario(scenarioPath).startServer(RECORD)
         nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
-        //sonarServer = WiremockServers.SONAR_QU.build().withScenario(scenarioPath).startServer(RECORD)
         bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
     }
 
     private void updateServicesWithWiremockConfig() {
         nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
         jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
+        bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
     }
 
 }

@@ -52,7 +52,7 @@ class LevaDocController {
     private String createDocument(LevaDocType levaDocType, Map data) {
         File tmpDir
         try {
-            tmpDir = Files.createTempDirectory("${data.projectBuild}-${levaDocType}").toFile()
+            tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
             data.env.WORKSPACE =  tmpDir.absolutePath
             return levaDocType.buildDocument.apply(leVADocumentService, data)
         } catch (Throwable e) {

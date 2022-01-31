@@ -953,11 +953,7 @@ class LeVADocumentService extends DocGenUseCase {
             ["raw/${file.getName()}", file.getBytes()]
         }
 
-        def modifier = { document ->
-            return document
-        }
-
-
+        def modifier = { document -> return document }
         def templateName = getDocumentTemplateName(projectData, documentType, repo)
         return this.createDocument(projectData, documentType, repo, data_, files, modifier, templateName, watermarkText)
     }
@@ -1007,24 +1003,7 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
         ]
 
-        // Code review report - in the special case of NO jira ..
-        def codeReviewReport
-        if (projectData.isAssembleMode && !this.jiraUseCase.jira &&
-                repo.type?.toLowerCase() == PipelineConfig.REPO_TYPE_ODS_CODE.toLowerCase()) {
-            def currentRepoAsList = [ repo ]
-            codeReviewReport = obtainCodeReviewReport(projectData, currentRepoAsList)
-        }
-
-        def modifier = { document ->
-            if (codeReviewReport) {
-                List documents = [document]
-                documents += codeReviewReport
-                // Merge the current document with the code review report
-                return this.pdf.merge(projectData.data.env.WORKSPACE, documents)
-            }
-            return document
-        }
-
+        def modifier = { document -> return document }
         return this.createDocument(projectData, documentType, repo, data_, [:], modifier, getDocumentTemplateName(projectData, documentType, repo), watermarkText)
     }
 
