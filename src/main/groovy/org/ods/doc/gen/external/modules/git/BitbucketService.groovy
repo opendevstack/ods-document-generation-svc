@@ -1,5 +1,6 @@
 package org.ods.doc.gen.external.modules.git
 
+import groovy.json.JsonException
 import groovy.json.JsonSlurper
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
@@ -91,7 +92,14 @@ class BitbucketService {
             throw new RuntimeException(message)
         }
 
-        return new JsonSlurperClassic().parseText(response.getBody())
+        try {
+            Map result = new JsonSlurperClassic().parseText(response.getBody())
+            return result
+        } catch(JsonException e) {
+            log.warn("Exception parsing response body. Body: ")
+            log.warn(response.getBody())
+            throw new Exception("Exception parsing response body.", e)
+        }
     }
 
 }

@@ -94,12 +94,15 @@ class WiremockManager {
         new File("${pathToFiles}/${MAPPINGS_ROOT}").eachFileRecurse() {
             replaceFileInText(it, replaceAllMap)
             updateDateCreated(it)
+            log.debug("File " + it.getAbsolutePath() + " contents: ")
+            log.debug(it.text)
         }
         new File("${pathToFiles}/${FILES_ROOT}").eachFileRecurse() {replaceFileInText(it, replaceAllMap)}
     }
 
     private Map prepareReplaceMap() {
-        Map replaceAllMap = ["${System.properties['domainUser']}"  : 'dummyUser']
+        String myDomainUser = getMyDomainUserValue()
+        Map replaceAllMap = [myDomainUser  : "dummyUser"]
         Map customReplaceAllMap = (System.properties['wiremock.textToReplace'] as String).tokenize(',')
             .collectEntries {
                 List value = it.tokenize(':')
@@ -107,6 +110,19 @@ class WiremockManager {
             }
         replaceAllMap += customReplaceAllMap
         return replaceAllMap
+    }
+
+    private String getMyDomainUserValue() {
+        String myDomainUser = "${System.properties['domainUser']}"
+        myDomainUser = myDomainUser.trim();
+        while (myDomainUser.startsWith("\"")) {
+            myDomainUser = myDomainUser.substring(1)
+        }
+        while (myDomainUser.endsWith("\"")) {
+            myDomainUser = myDomainUser.substring(0, myDomainUser.length() -1)
+        }
+        log.info("My domain user: ${myDomainUser}")
+        return myDomainUser
     }
 
     private void replaceFileInText(File file, Map replaceAllMap) {

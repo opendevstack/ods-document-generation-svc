@@ -222,10 +222,19 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     private void updateServicesWithWiremockConfig() {
-        nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
-        jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
-        bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
+        nexusService.baseURL = new URIBuilder(fixBaseUrl(nexusServer.server().baseUrl())).build()
+        jiraService.baseURL = new URIBuilder(fixBaseUrl(jiraServer.server().baseUrl())).build()
+        bitbucketService.baseURL = new URIBuilder(fixBaseUrl(bitbucketServer.server().baseUrl())).build()
     }
 
+    private String fixBaseUrl(String baseUrl) {
+        if (baseUrl == null)
+            return ""
+        baseUrl = baseUrl.trim()
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.size() - 1)
+        }
+        return baseUrl
+    }
 }
 
