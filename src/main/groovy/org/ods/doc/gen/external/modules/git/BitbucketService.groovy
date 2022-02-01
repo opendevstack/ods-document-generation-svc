@@ -6,6 +6,7 @@ import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -15,10 +16,6 @@ import javax.inject.Inject
 @Slf4j
 @Service
 class BitbucketService {
-
-    // Name of Bitbucket project, such as "foo".
-    // This name is also the prefix for OpenShift projects ("foo-cd", "foo-dev", ...).
-    final String project
 
     // Username and password we use to connect to bitbucket
     String username
@@ -54,18 +51,18 @@ class BitbucketService {
 
         this.username = username
         this.password = password
-
-        this.project = "FRML24113" // TODO s2o
     }
 
-    Map getCommitsForIntegrationBranch(String repo, int limit, int nextPageStart){
-        String request = "${this.baseURL}/rest/api/1.0/projects/${project}/repos/${repo}/commits"
+    Map getCommitsForIntegrationBranch(String repo, ProjectData projectData, int limit, int nextPageStart){
+        String projectKey = projectData.getKey()
+        String request = "${this.baseURL}/rest/api/1.0/projects/${projectKey}/repos/${repo}/commits"
         return queryRepo(request, limit, nextPageStart)
     }
 
     
-    Map getPRforMergedCommit(String repo, String commit) {
-        String request = "${this.baseURL}/rest/api/1.0/projects/${project}" +
+    Map getPRforMergedCommit(String repo, ProjectData projectData, String commit) {
+        String projectKey = projectData.getKey()
+        String request = "${this.baseURL}/rest/api/1.0/projects/${projectKey}" +
             "/repos/${repo}/commits/${commit}/pull-requests"
         return queryRepo(request, 0, 0)
     }
