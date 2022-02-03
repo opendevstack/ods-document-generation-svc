@@ -36,7 +36,6 @@ class ProjectData {
     protected static final String BASE_DIR = 'projectData'
 
     protected Map config
-    protected String targetProject
     protected Boolean isVersioningEnabled = false
 
     private final JiraService jira
@@ -58,6 +57,7 @@ class ProjectData {
     ProjectData init(Map data) {
         this.tmpFolder = data.tmpFolder
         this.build << data.build
+        this.build.buildId = data.buildId
         this.data.git = data.git
         this.data.openshift = data.openshift
         this.data.documents = [:]

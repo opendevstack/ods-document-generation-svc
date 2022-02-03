@@ -1300,7 +1300,7 @@ class LeVADocumentService extends DocGenUseCase {
             }
 
             def sqReportsPath = "${SONARQUBE_BASE_DIR}/${r.id}"
-            def sqReportsStashName = "scrr-report-${r.id}-${projectData.build.BUILD_ID}"
+            def sqReportsStashName = "scrr-report-${r.id}-${projectData.build.buildId}"
 
             // Unstash SonarQube reports into path
             def hasStashedSonarQubeReports = this.jenkins.unstashFilesIntoPath(sqReportsStashName, "${projectData.tmpFolder}/${sqReportsPath}", "SonarQube Report")
@@ -1314,7 +1314,7 @@ class LeVADocumentService extends DocGenUseCase {
                 throw new RuntimeException("Error: unable to load SonarQube reports for repo '${r.id}' from path '${projectData.tmpFolder}/${sqReportsPath}'.")
             }
 
-            def name = this.getDocumentBasename('SCRR-MD', projectData.build.version, projectData.build.BUILD_ID, r)
+            def name = this.getDocumentBasename('SCRR-MD', projectData.build.version, projectData.build.buildId, r)
             def sqReportFile = sqReportFiles.first()
 
             def generatedSCRR = this.pdf.convertFromMarkdown(sqReportFile, true)

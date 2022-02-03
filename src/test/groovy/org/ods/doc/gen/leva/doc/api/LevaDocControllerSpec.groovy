@@ -52,12 +52,12 @@ class LevaDocControllerSpec extends Specification {
         and: "leVADocumentService is mocked"
         def urlDocType = "URL nexus artifact"
         Map data = dataFixture.buildFixtureData(projectFixture)
-        Map serviceParam = buildServiceDataParam(projectFixture, data)
+        Map serviceParam = buildServiceDataParam(projectFixture, buildId, data)
         when(leVADocumentService.createCSD(argThat(map -> map == serviceParam))).thenReturn(urlDocType)
 
-        expect: "a client call to /levaDoc/TEST_PROJECT_ID/2/CSD return the url of the doc created"
+        expect: "a client call to /levaDoc/ProjectId/BuildID/docType return the url of the doc created"
         this.mockMvc
-                .perform(post("/levaDoc/TEST_PROJECT_ID/2/CSD")
+                .perform(post("/levaDoc/${projectFixture.project}/${buildId}/CSD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonOutput.toJson(data)))
                 .andExpect(status().isOk()).andExpect(content().string(urlDocType))
@@ -67,6 +67,7 @@ class LevaDocControllerSpec extends Specification {
 
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()
+        buildId = "2"
     }
 
 
@@ -82,7 +83,7 @@ class LevaDocControllerSpec extends Specification {
 
         expect: "am error in the query"
         MvcResult mvcResult = this.mockMvc
-                .perform(post("/levaDoc/TEST_PROJECT_ID/2/CSD")
+                .perform(post("/levaDoc/${projectFixture.project}/2/CSD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonOutput.toJson(data)))
                 .andExpect(status().isConflict()).andReturn();
@@ -106,11 +107,12 @@ class LevaDocControllerSpec extends Specification {
         ]
     }
 
-    private Map buildServiceDataParam(ProjectFixture projectFixture, Map data) {
+    private Map buildServiceDataParam(ProjectFixture projectFixture, String buildId, Map data) {
         Map serviceParam = [:]
         serviceParam << data
         serviceParam.documentType = projectFixture.docType
-        serviceParam.projectBuild = "${data.build.projectKey}-${data.build.BUILD_ID}"
+        serviceParam.projectBuild = "${projectFixture.project}-${buildId}"
+        serviceParam.buildId = buildId
         serviceParam.tmpFolder = tempFolder.toFile().absolutePath
         return serviceParam
     }

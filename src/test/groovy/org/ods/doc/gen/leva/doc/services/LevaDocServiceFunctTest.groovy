@@ -201,8 +201,9 @@ class LevaDocServiceFunctTest extends Specification {
 
     private ProjectData prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
         data.tmpFolder = tempFolder.absolutePath
-        data.projectBuild =  "${data.build.projectKey}-1"
         data.documentType = projectFixture.docType
+        data.projectBuild =  "${projectFixture.project}-1"
+        data.buildId = "1"
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         // We need to override the value because of the cache in ProjectData
         projectData.tmpFolder = tempFolder.absolutePath

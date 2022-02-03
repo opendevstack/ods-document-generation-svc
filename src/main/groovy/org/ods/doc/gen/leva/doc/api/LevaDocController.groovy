@@ -40,20 +40,20 @@ class LevaDocController {
     @PostMapping("{projectId}/{build}/{levaDocType}")
     String buildDocument(
             @PathVariable("projectId") String projectId,
-            @PathVariable("build") String build,
+            @PathVariable("build") String buildId,
             @PathVariable("levaDocType") LevaDocType levaDocType,
             @RequestBody Map body){
         validateRequestParams(body)
-        logData(projectId, build, levaDocType, body)
-        def url = createDocument(levaDocType, body)
+        logData(projectId, buildId, levaDocType, body)
+        def url = createDocument(projectId, buildId, levaDocType, body)
         log.info "buildDocument return:${url}"
         return url
     }
 
-    private String createDocument(LevaDocType levaDocType, Map data) {
+    private String createDocument(String projectId, String buildId, LevaDocType levaDocType, Map data) {
         File tmpDir
         try {
-            tmpDir = prepareServiceDataParam(levaDocType, data, tmpDir)
+            tmpDir = prepareServiceDataParam(projectId, buildId, levaDocType, data, tmpDir)
             return levaDocType.buildDocument.apply(leVADocumentService, data)
         } catch (Throwable e) {
             String msg = "Error building document: ${levaDocType} with data:${data}"
@@ -66,9 +66,10 @@ class LevaDocController {
         }
     }
 
-    private File prepareServiceDataParam(LevaDocType levaDocType, Map data, File tmpDir) {
+    private File prepareServiceDataParam(String projectId, String buildId, LevaDocType levaDocType, Map data, File tmpDir) {
         data.documentType = levaDocType.toString()
-        data.projectBuild = "${data.build.projectKey}-${data.build.BUILD_ID}"
+        data.projectBuild = "${projectId}-${buildId}"
+        data.buildId = buildId
         tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
         data.tmpFolder = tmpDir.absolutePath
         return tmpDir

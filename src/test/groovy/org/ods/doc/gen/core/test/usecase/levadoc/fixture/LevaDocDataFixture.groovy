@@ -61,7 +61,6 @@ class LevaDocDataFixture {
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         return  [
-                projectKey: projectFixture.project,
                 targetEnvironment: "dev",
                 targetEnvironmentToken: "D",
                 version: "${projectFixture.version}",
@@ -75,7 +74,6 @@ class LevaDocDataFixture {
                 BUILD_NUMBER : "666",
                 BUILD_URL : "https://jenkins-sample",
                 JOB_NAME : "ofi2004-cd/ofi2004-cd-release-master",
-                BUILD_ID : "1"
         ]
     }
 
@@ -92,7 +90,7 @@ class LevaDocDataFixture {
     }
 
     private String copyPdfToTemp(ProjectFixture projectFixture, Map data) {
-        def destPath = "${tmpFolder}/reports/${projectFixture.component}"
+        def destPath = "${tempFolder}/reports/${projectFixture.component}"
         new File(destPath).mkdirs()
         File expected = expectedDoc(projectFixture)
         FileUtils.copyFile(expectedDoc(projectFixture), new File("${destPath}/${expected.name}"))

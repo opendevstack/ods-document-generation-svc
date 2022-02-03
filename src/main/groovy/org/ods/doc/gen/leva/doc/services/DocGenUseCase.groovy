@@ -49,7 +49,7 @@ abstract class DocGenUseCase {
             document = this.pdf.addWatermarkText(document, watermarkText)
         }
 
-        def basename = this.getDocumentBasename(projectData, documentType, projectData.build.version, projectData.build.BUILD_ID, repo)
+        def basename = this.getDocumentBasename(projectData, documentType, projectData.build.version, projectData.build.buildId, repo)
         def pdfName = "${basename}.pdf"
 
         // Create an archive with the document and raw data
@@ -154,7 +154,7 @@ abstract class DocGenUseCase {
         if (build) {
             "${projectVersion}-${build}"
         } else {
-            "${projectVersion}-${projectData.build.BUILD_ID}"
+            "${projectVersion}-${projectData.build.buildId}"
         }
     }
 
