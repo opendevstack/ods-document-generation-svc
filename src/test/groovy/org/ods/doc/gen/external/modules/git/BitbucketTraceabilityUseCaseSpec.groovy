@@ -59,11 +59,11 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
         def project = new Project(steps, logger, [:])
         project.data.metadata = project.loadMetadata("metadata.yml")
         project.data.metadata.id = PROJECT_KEY
-        project.data.buildParams = [:]
-        project.data.buildParams.targetEnvironment = "dev"
-        project.data.buildParams.targetEnvironmentToken = "D"
-        project.data.buildParams.version = "WIP"
-        project.data.buildParams.releaseStatusJiraIssueKey = "${PROJECT_KEY}-123"
+        project.data.build = [:]
+        project.data.build.targetEnvironment = "dev"
+        project.data.build.targetEnvironmentToken = "D"
+        project.data.build.version = "WIP"
+        project.data.build.releaseStatusJiraIssueKey = "${PROJECT_KEY}-123"
         return project
     }
 

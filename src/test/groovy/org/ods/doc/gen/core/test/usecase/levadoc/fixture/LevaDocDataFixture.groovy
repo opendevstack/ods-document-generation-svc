@@ -27,13 +27,9 @@ class LevaDocDataFixture {
 
     Map buildFixtureData(ProjectFixture projectFixture){
         Map data = [:]
-        data.projectBuild =  "${projectFixture.project}-1"
-        data.documentType = projectFixture.docType
-        data.jobParams = buildJobParams(projectFixture)
+        data.build = buildJobParams(projectFixture)
         data.git =  buildGitData()
         data.openshift = [targetApiUrl:"https://openshift-sample"]
-        data.env = getEnvVariables(tempFolder, projectFixture.version)
-
         return data
     }
 
@@ -63,12 +59,18 @@ class LevaDocDataFixture {
         return new File("${filePath}/${projectFixture.docType}-${projectFixture.version}-1.pdf")
     }
 
-    private Map<String, String> getEnvVariables(File tmpWorkspace, String version) {
-        return [
-                WORKSPACE : tmpWorkspace.absolutePath,
+    private Map<String, String> buildJobParams(ProjectFixture projectFixture){
+        return  [
+                projectKey: projectFixture.project,
+                targetEnvironment: "dev",
+                targetEnvironmentToken: "D",
+                version: "${projectFixture.version}",
+                configItem: "BI-IT-DEVSTACK",
+                changeDescription: "changeDescription",
+                changeId: "changeId",
+                rePromote: "false",
+                releaseStatusJiraIssueKey: projectFixture.releaseKey,
                 RUN_DISPLAY_URL : "",
-                version : version,
-                configItem : "Functional-Test",
                 RELEASE_PARAM_VERSION : "3.0",
                 BUILD_NUMBER : "666",
                 BUILD_URL : "https://jenkins-sample",
@@ -89,22 +91,8 @@ class LevaDocDataFixture {
         ]
     }
 
-    private Map<String, String> buildJobParams(ProjectFixture projectFixture){
-        return  [
-                projectKey: projectFixture.project,
-                targetEnvironment: "dev",
-                targetEnvironmentToken: "D",
-                version: "${projectFixture.version}",
-                configItem: "BI-IT-DEVSTACK",
-                changeDescription: "changeDescription",
-                changeId: "changeId",
-                rePromote: "false",
-                releaseStatusJiraIssueKey: projectFixture.releaseKey
-        ]
-    }
-
     private String copyPdfToTemp(ProjectFixture projectFixture, Map data) {
-        def destPath = "${data.env.WORKSPACE}/reports/${projectFixture.component}"
+        def destPath = "${tmpFolder}/reports/${projectFixture.component}"
         new File(destPath).mkdirs()
         File expected = expectedDoc(projectFixture)
         FileUtils.copyFile(expectedDoc(projectFixture), new File("${destPath}/${expected.name}"))

@@ -1300,21 +1300,21 @@ class LeVADocumentService extends DocGenUseCase {
             }
 
             def sqReportsPath = "${SONARQUBE_BASE_DIR}/${r.id}"
-            def sqReportsStashName = "scrr-report-${r.id}-${projectData.data.env.BUILD_ID}"
+            def sqReportsStashName = "scrr-report-${r.id}-${projectData.build.BUILD_ID}"
 
             // Unstash SonarQube reports into path
-            def hasStashedSonarQubeReports = this.jenkins.unstashFilesIntoPath(sqReportsStashName, "${projectData.data.env.WORKSPACE}/${sqReportsPath}", "SonarQube Report")
+            def hasStashedSonarQubeReports = this.jenkins.unstashFilesIntoPath(sqReportsStashName, "${projectData.tmpFolder}/${sqReportsPath}", "SonarQube Report")
             if (!hasStashedSonarQubeReports) {
                 throw new RuntimeException("Error: unable to unstash SonarQube reports for repo '${r.id}' from stash '${sqReportsStashName}'.")
             }
 
             // Load SonarQube report files from path
-            def sqReportFiles = this.sq.loadReportsFromPath("${projectData.data.env.WORKSPACE}/${sqReportsPath}")
+            def sqReportFiles = this.sq.loadReportsFromPath("${projectData.tmpFolder}/${sqReportsPath}")
             if (sqReportFiles.isEmpty()) {
-                throw new RuntimeException("Error: unable to load SonarQube reports for repo '${r.id}' from path '${projectData.data.env.WORKSPACE}/${sqReportsPath}'.")
+                throw new RuntimeException("Error: unable to load SonarQube reports for repo '${r.id}' from path '${projectData.tmpFolder}/${sqReportsPath}'.")
             }
 
-            def name = this.getDocumentBasename('SCRR-MD', projectData.buildParams.version, projectData.data.env.BUILD_ID, r)
+            def name = this.getDocumentBasename('SCRR-MD', projectData.build.version, projectData.build.BUILD_ID, r)
             def sqReportFile = sqReportFiles.first()
 
             def generatedSCRR = this.pdf.convertFromMarkdown(sqReportFile, true)
@@ -1374,7 +1374,7 @@ class LeVADocumentService extends DocGenUseCase {
                     references        : metadata.references ?: 'N/A',
                     supplier          : metadata.supplier,
                     version           : (repo_.type?.toLowerCase() == PipelineConfig.REPO_TYPE_ODS_CODE) ?
-                        projectData.buildParams.version :
+                        projectData.build.version :
                         metadata.version,
                     requirements      : component.getResolvedSystemRequirements(),
                     requirementKeys   : component.requirements,
@@ -1441,15 +1441,15 @@ class LeVADocumentService extends DocGenUseCase {
             name          : name,
             description   : projectData.description,
             type          : documentTypeName,
-            version       : projectData.data.env.RELEASE_PARAM_VERSION,
+            version       : projectData.build.RELEASE_PARAM_VERSION,
             date_created  : LocalDateTime.now(clock).toString(),
-            buildParameter: projectData.buildParams,
+            buildParameter: projectData.build,
             git           : repo ? repo.data.git : projectData.gitData,
             openShift     : [apiUrl: projectData.getOpenShiftApiUrl()],
             jenkins       : [
-                buildNumber: projectData.data.env.BUILD_NUMBER,
-                buildUrl   : projectData.data.env.BUILD_URL,
-                jobName    : projectData.data.env.JOB_NAME
+                buildNumber: projectData.build.BUILD_NUMBER,
+                buildUrl   : projectData.build.BUILD_URL,
+                jobName    : projectData.build.JOB_NAME
             ],
             referencedDocs : this.getReferencedDocumentsVersion(projectData)
         ]
@@ -1462,7 +1462,7 @@ class LeVADocumentService extends DocGenUseCase {
     private List<String> getJiraTrackingIssueLabelsForDocTypeAndEnvs(ProjectData projectData, String documentType, List<String> envs = null) {
         def labels = []
 
-        def environments = envs ?: projectData.buildParams.targetEnvironmentToken
+        def environments = envs ?: projectData.build.targetEnvironmentToken
         environments.each { env ->
             Environment.ENVIRONMENT_TYPE[env].get(documentType).each { label ->
                 labels.add("${LabelPrefix.DOCUMENT}${label}")
@@ -1552,7 +1552,7 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     private String computeSavedDocumentEnvironment(String documentType, ProjectData projectData) {
-        def environment = projectData.buildParams.targetEnvironmentToken
+        def environment = projectData.build.targetEnvironmentToken
         if (projectData.isWorkInProgress) {
             environment = Environment.getEnvironment(documentType)
         }
@@ -1643,7 +1643,7 @@ class LeVADocumentService extends DocGenUseCase {
             def doc = dt as String
             def version = getVersion(projectData, doc)
 
-            return [(doc): "${projectData.buildParams.configItem} / ${version}"]
+            return [(doc): "${projectData.build.configItem} / ${version}"]
         }
     }
 
@@ -1668,14 +1668,14 @@ class LeVADocumentService extends DocGenUseCase {
                 version = this.jiraUseCase.getLatestDocVersionId(projectData, trackingIssues)
                 if (projectData.isWorkInProgress ||
                         LeVADocumentScheduler.getFirstCreationEnvironment(doc) == //TODO s2o see what we do
-                        projectData.buildParams.targetEnvironmentToken) {
+                        projectData.build.targetEnvironmentToken) {
                     // Either this is a developer preview or the history is to be updated in this environment.
                     version += 1L
                 }
             }
         } else {
             // TODO removeme in ODS 4.x
-            version = "${projectData.buildParams.version}-${projectData.data.env.BUILD_NUMBER}"
+            version = "${projectData.build.version}-${projectData.build.BUILD_NUMBER}"
         }
         return version
     }

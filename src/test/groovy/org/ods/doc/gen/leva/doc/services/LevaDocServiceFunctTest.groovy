@@ -120,7 +120,7 @@ class LevaDocServiceFunctTest extends Specification {
         copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
         Map data = dataFixture.buildFixtureData(projectFixture)
-        setWorkSpaceOverridingCachedData(data)
+        prepareServiceDataParam(projectFixture, data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -137,7 +137,7 @@ class LevaDocServiceFunctTest extends Specification {
         copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
         Map data = dataFixture.buildFixtureData(projectFixture)
-        ProjectData projectData = setWorkSpaceOverridingCachedData(data)
+        ProjectData projectData = prepareServiceDataParam(projectFixture, data)
         data << testsReports.getAllResults(projectData, projectData.repositories)
 
         when: "the user creates a LeVA document"
@@ -155,7 +155,7 @@ class LevaDocServiceFunctTest extends Specification {
         copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
         Map data = dataFixture.buildFixtureData(projectFixture)
-        setWorkSpaceOverridingCachedData(data)
+        prepareServiceDataParam(projectFixture, data)
         data.repo = dataFixture.getModuleData(projectFixture, data)
 
         when: "the user creates a LeVA document"
@@ -177,7 +177,7 @@ class LevaDocServiceFunctTest extends Specification {
         copyProjectDataToTemporalFolder(projectFixture)
         setUpWireMock(projectFixture)
         Map data = dataFixture.buildFixtureData(projectFixture)
-        setWorkSpaceOverridingCachedData(data)
+        prepareServiceDataParam(projectFixture, data)
         dataFixture.updateExpectedComponentDocs(data, projectFixture)
 
         when: "the user creates a LeVA document"
@@ -199,10 +199,13 @@ class LevaDocServiceFunctTest extends Specification {
         updateServicesWithWiremockConfig()
     }
 
-    private ProjectData setWorkSpaceOverridingCachedData(Map<Object, Object> data) {
-        // We need to override the value because of the cache in ProjectData
+    private ProjectData prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
+        data.tmpFolder = tempFolder.absolutePath
+        data.projectBuild =  "${data.build.projectKey}-1"
+        data.documentType = projectFixture.docType
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        projectData.data.env.WORKSPACE = tempFolder.absolutePath
+        // We need to override the value because of the cache in ProjectData
+        projectData.tmpFolder = tempFolder.absolutePath
         return projectData
     }
 

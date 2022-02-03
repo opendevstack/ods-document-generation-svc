@@ -86,7 +86,7 @@ class DocumentHistory {
     private List<DocumentHistoryEntry> loadSavedDocHistoryData(ProjectData projectData) {
         def fileName = this.getSavedDocumentName(sourceEnvironment)
         this.log.debug("Retrieving saved document history with name '${fileName}' " +
-            "in workspace '${projectData.data.env.WORKSPACE}'.")
+            "in workspace '${projectData.tmpFolder}'.")
 
         def content = projectData.loadSavedJiraData(fileName)
         try {

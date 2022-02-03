@@ -21,10 +21,10 @@ class LeVADocumentChaptersFileService {
         }
 
         String yamlText
-        def file = Paths.get(projectData.data.env.WORKSPACE as String, DOCUMENT_CHAPTERS_BASE_DIR, "${documentType}.yaml").toFile()
+        def file = Paths.get(projectData.tmpFolder as String, DOCUMENT_CHAPTERS_BASE_DIR, "${documentType}.yaml").toFile()
         if (!file.exists()) {
             try {
-                yamlText = new File("${projectData.data.env.WORKSPACE}/docs/${documentType}.yaml")?.text
+                yamlText = new File("${projectData.tmpFolder}/docs/${documentType}.yaml")?.text
             } catch(Exception exception){
                 yamlText = "" // TODO s2o throw exception??
             }

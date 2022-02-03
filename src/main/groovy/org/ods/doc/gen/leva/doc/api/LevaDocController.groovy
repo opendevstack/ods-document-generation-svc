@@ -1,5 +1,6 @@
 package org.ods.doc.gen.leva.doc.api
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
@@ -52,8 +53,7 @@ class LevaDocController {
     private String createDocument(LevaDocType levaDocType, Map data) {
         File tmpDir
         try {
-            tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
-            data.env.WORKSPACE =  tmpDir.absolutePath
+            tmpDir = prepareServiceDataParam(levaDocType, data, tmpDir)
             return levaDocType.buildDocument.apply(leVADocumentService, data)
         } catch (Throwable e) {
             String msg = "Error building document: ${levaDocType} with data:${data}"
@@ -64,6 +64,14 @@ class LevaDocController {
                 FileUtils.deleteDirectory(tmpDir)
             }
         }
+    }
+
+    private File prepareServiceDataParam(LevaDocType levaDocType, Map data, File tmpDir) {
+        data.documentType = levaDocType.toString()
+        data.projectBuild = "${data.build.projectKey}-${data.build.BUILD_ID}"
+        tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
+        data.tmpFolder = tmpDir.absolutePath
+        return tmpDir
     }
 
     private static void validateRequestParams(Map body) {

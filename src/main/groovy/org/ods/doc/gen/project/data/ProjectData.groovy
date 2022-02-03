@@ -41,12 +41,14 @@ class ProjectData {
 
     private final JiraService jira
 
+    String tmpFolder
     Map data = [:]
+    Map build = [:]
 
     ProjectData(JiraService jira) {
         this.jira = jira
         this.config =  [:]
-        this.data.build = [
+        this.build = [
             hasFailingTests: false,
             hasUnexecutedJiraTests: false,
         ]
@@ -54,17 +56,17 @@ class ProjectData {
     }
 
     ProjectData init(Map data) {
-        this.data.buildParams = data.jobParams
+        this.tmpFolder = data.tmpFolder
+        this.build << data.build
         this.data.git = data.git
         this.data.openshift = data.openshift
-        this.data.env = data.env
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
         return this
     }
 
     ProjectData load() {
-        this.data.metadata = loadMetadata(data.env.WORKSPACE) // TODO s2o load from BB
+        this.data.metadata = loadMetadata(tmpFolder) // TODO s2o load from BB
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
 
@@ -210,7 +212,7 @@ class ProjectData {
         def releaseStatusIssueFields = getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS)
 
         def releaseStatusIssueBuildNumberField = releaseStatusIssueFields['Release Build']
-        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueBuildNumberField.id): "${buildParams.version}-${data.env.BUILD_NUMBER}"])
+        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueBuildNumberField.id): "${buildParams.version}-${build.BUILD_NUMBER}"])
     }
 
     Map<String, List> getWipJiraIssues() {
@@ -363,8 +365,8 @@ class ProjectData {
     }
 
     boolean isDeveloperPreviewMode() {
-        return BUILD_PARAM_VERSION_DEFAULT.equalsIgnoreCase(this.data.buildParams.version) &&
-                this.data.buildParams.targetEnvironmentToken == "D"
+        return BUILD_PARAM_VERSION_DEFAULT.equalsIgnoreCase(this.build.version) &&
+                this.build.targetEnvironmentToken == "D"
     }
 
     static boolean isWorkInProgress(String version) {
@@ -372,7 +374,7 @@ class ProjectData {
     }
 
     Map getBuildParams() {
-        return this.data.buildParams
+        return this.build
     }
 
     List getCapabilities() {
@@ -832,7 +834,7 @@ class ProjectData {
     void addCommentInReleaseStatus(String message) {
         def releaseStatusIssueKey = buildParams.releaseStatusJiraIssueKey
         if (message) {
-            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${data.env.RUN_DISPLAY_URL}")
+            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${build.RUN_DISPLAY_URL}")
         }
 
     }
@@ -883,7 +885,7 @@ class ProjectData {
     Object loadSavedJiraData(String savedVersion) {
         String fileName = "${BASE_DIR}/${savedVersion}.json"
         try {
-            String savedData =  new File("${data.env.WORKSPACE}/${fileName}")?.text
+            String savedData =  new File("${tmpFolder}/${fileName}")?.text
             return new JsonSlurperClassic().parseText(savedData) ?: [:]
         } catch (NoSuchFileException e) {
             throw new NoSuchFileException("File '${fileName}' is expected to be inside the release " +

@@ -49,7 +49,7 @@ abstract class DocGenUseCase {
             document = this.pdf.addWatermarkText(document, watermarkText)
         }
 
-        def basename = this.getDocumentBasename(projectData, documentType, projectData.buildParams.version, projectData.data.env.BUILD_ID, repo)
+        def basename = this.getDocumentBasename(projectData, documentType, projectData.build.version, projectData.build.BUILD_ID, repo)
         def pdfName = "${basename}.pdf"
 
         // Create an archive with the document and raw data
@@ -74,7 +74,7 @@ abstract class DocGenUseCase {
         // Store the archive as an artifact in Nexus
         def uri = this.nexus.storeArtifact(
             projectData.services.nexus.repository.name,
-            "${projectData.key.toLowerCase()}-${projectData.buildParams.version}",
+            "${projectData.key.toLowerCase()}-${projectData.build.version}",
             "${basename}.zip",
             artifact,
             "application/zip"
@@ -98,7 +98,7 @@ abstract class DocGenUseCase {
             def documentName = repo.data.documents[documentType]
 
             if (documentName) {
-                def path = "${projectData.data.env.WORKSPACE}/reports/${repo.id}"
+                def path = "${projectData.tmpFolder}/reports/${repo.id}"
                 jenkins.unstashFilesIntoPath(documentName, path, documentType)
 
                 documents << new File("${path}/${documentName}").readBytes()
@@ -124,7 +124,7 @@ abstract class DocGenUseCase {
         // Create a cover page and merge all documents into one
         def modifier = { document ->
             documents.add(0, document)
-            return this.pdf.merge(projectData.data.env.WORKSPACE as String, documents)
+            return this.pdf.merge(projectData.tmpFolder as String, documents)
         }
 
         def result = this.createDocument(projectData, documentType, null, data, [:], modifier, templateName, watermarkText)
@@ -154,7 +154,7 @@ abstract class DocGenUseCase {
         if (build) {
             "${projectVersion}-${build}"
         } else {
-            "${projectVersion}-${projectData.data.env.BUILD_ID}"
+            "${projectVersion}-${projectData.build.BUILD_ID}"
         }
     }
 
@@ -219,7 +219,7 @@ abstract class DocGenUseCase {
     URI storeDocument (String documentName, byte [] documentAsBytes, String contentType) {
         return this.nexus.storeArtifact(
             projectData.services.nexus.repository.name,
-            "${projectData.key.toLowerCase()}-${projectData.buildParams.version}",
+            "${projectData.key.toLowerCase()}-${projectData.build.version}",
             "${documentName}",
             documentAsBytes,
             contentType

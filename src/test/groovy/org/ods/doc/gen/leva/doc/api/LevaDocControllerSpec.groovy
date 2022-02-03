@@ -52,7 +52,6 @@ class LevaDocControllerSpec extends Specification {
         and: "leVADocumentService is mocked"
         def urlDocType = "URL nexus artifact"
         Map data = dataFixture.buildFixtureData(projectFixture)
-        data.env.WORKSPACE =  tempFolder.toFile().absolutePath
         when(leVADocumentService.createCSD(argThat(map -> map == data))).thenReturn(urlDocType)
 
         expect: "a client call to /levaDoc/TEST_PROJECT_ID/2/CSD return the url of the doc created"
@@ -76,9 +75,7 @@ class LevaDocControllerSpec extends Specification {
         Files.createTempDirectory(_) >> tempFolder
 
         and: "leVADocumentService is mocked and Throw an exception"
-        def urlDocType = "URL nexus artifact"
         Map data = dataFixture.buildFixtureData(projectFixture)
-        data.env.WORKSPACE =  tempFolder.toFile().absolutePath
         def initialMsgError = "Error building document: CSD with data:"
         when(leVADocumentService.createCSD(anyMap())).thenThrow(new RuntimeException(initialMsgError))
 

@@ -16,7 +16,7 @@ class FakeProject extends ProjectData {
 
     @Override
     ProjectData init(Map params) {
-        this.data.buildParams = this.loadBuildParams(steps)
+        this.data.build = this.loadBuildParams(steps)
         this.data.metadata = this.loadMetadata(METADATA_FILE_NAME)
 
         this.data.metadata.repositories.each { repo ->

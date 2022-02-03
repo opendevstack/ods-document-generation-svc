@@ -39,7 +39,7 @@ class TestsReports {
 
         def testReportsPath = "${XUNIT_DOCUMENTS_BASE_DIR}/${repoId}/${type}"
         def testReportFiles = jUnitTestReport
-                .loadTestReportsFromPath( "${projectData.data.env.WORKSPACE}/${testReportsPath}")
+                .loadTestReportsFromPath( "${projectData.tmpFolder}/${testReportsPath}")
 
         return [
             testReportFiles: testReportFiles,

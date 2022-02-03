@@ -25,7 +25,7 @@ class ZipFacade {
     }
 
     byte[] createZipFileFromFiles(ProjectData projectData, String name, Map<String, byte[]> files) {
-        def path = "${projectData.data.env.WORKSPACE}/${ARTIFACTS_BASE_DIR}/${name}".toString()
+        def path = "${projectData.tmpFolder}/${ARTIFACTS_BASE_DIR}/${name}".toString()
         Files.createDirectories(Paths.get(path).parent)
 
         def zipFile = new ZipFile(path)

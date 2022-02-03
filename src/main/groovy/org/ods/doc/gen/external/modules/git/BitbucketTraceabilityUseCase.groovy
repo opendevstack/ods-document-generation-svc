@@ -128,7 +128,7 @@ class BitbucketTraceabilityUseCase {
 
     @SuppressWarnings(['JavaIoPackageAccess'])
     private File createReportFile(ProjectData projectData) {
-        File file = new File("${projectData.data.env.WORKSPACE}/${CSV_FOLDER}/${CSV_FILE}")
+        File file = new File("${projectData.tmpFolder}/${CSV_FOLDER}/${CSV_FILE}")
         if (file.exists()) {
             file.delete()
         }
