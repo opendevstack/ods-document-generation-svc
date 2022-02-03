@@ -94,12 +94,14 @@ class WiremockManager {
         new File("${pathToFiles}/${MAPPINGS_ROOT}").eachFileRecurse() {
             replaceFileInText(it, replaceAllMap)
             updateDateCreated(it)
+            log.debug("File " + it.getAbsolutePath() + " contents: ")
+            log.debug(it.text)
         }
         new File("${pathToFiles}/${FILES_ROOT}").eachFileRecurse() {replaceFileInText(it, replaceAllMap)}
     }
 
     private Map prepareReplaceMap() {
-        Map replaceAllMap = ["${System.properties['domainUser']}"  : 'dummyUser']
+        Map replaceAllMap = ["${System.properties['domainUser']}"  : "\\\"dummyUser\\\""]
         Map customReplaceAllMap = (System.properties['wiremock.textToReplace'] as String).tokenize(',')
             .collectEntries {
                 List value = it.tokenize(':')

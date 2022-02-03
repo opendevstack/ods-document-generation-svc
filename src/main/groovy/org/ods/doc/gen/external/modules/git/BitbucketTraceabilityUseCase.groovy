@@ -49,12 +49,12 @@ class BitbucketTraceabilityUseCase {
      */
     String generateSourceCodeReviewFile(ProjectData projectData) {
         File file = createReportFile(projectData)
-
         List<Map> repos = getRepositories(projectData)
+
         int reposSize = repos.size()
         for (def i = 0; i < reposSize; i++) {
             def repo = repos[i]
-            processRepo(repo, file)
+            processRepo(repo, projectData, file)
         }
 
         return file.absolutePath
@@ -151,24 +151,24 @@ class BitbucketTraceabilityUseCase {
     }
 
     
-    private void processRepo(Map repo, File file) {
+    private void processRepo(Map repo, ProjectData projectData, File file) {
         boolean nextPage = true
         int nextPageStart = 0
         while (nextPage) {
-            Map commits = bitbucketService.getCommitsForIntegrationBranch(repo.repo, PAGE_LIMIT, nextPageStart)
+            Map commits = bitbucketService.getCommitsForIntegrationBranch(repo.repo, projectData, PAGE_LIMIT, nextPageStart)
             if (commits.isLastPage) {
                 nextPage = false
             } else {
                 nextPageStart = commits.nextPageStart
             }
-            processCommits(repo, commits, file)
+            processCommits(repo, projectData, commits, file)
         }
     }
 
     
-    private void processCommits(Map repo, Map commits, File file) {
+    private void processCommits(Map repo, ProjectData projectData, Map commits, File file) {
         commits.values.each { commit ->
-            Map mergedPR = bitbucketService.getPRforMergedCommit(repo.repo, commit.id)
+            Map mergedPR = bitbucketService.getPRforMergedCommit(repo.repo, projectData, commit.id)
             // Only changes in PR and destiny integration branch
             if (mergedPR.values
                 && mergedPR.values[0].toRef.displayId == repo.branch) {
