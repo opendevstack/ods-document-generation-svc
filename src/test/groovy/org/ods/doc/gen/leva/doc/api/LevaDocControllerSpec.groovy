@@ -52,7 +52,8 @@ class LevaDocControllerSpec extends Specification {
         and: "leVADocumentService is mocked"
         def urlDocType = "URL nexus artifact"
         Map data = dataFixture.buildFixtureData(projectFixture)
-        when(leVADocumentService.createCSD(argThat(map -> map == data))).thenReturn(urlDocType)
+        Map serviceParam = buildServiceDataParam(projectFixture, data)
+        when(leVADocumentService.createCSD(argThat(map -> map == serviceParam))).thenReturn(urlDocType)
 
         expect: "a client call to /levaDoc/TEST_PROJECT_ID/2/CSD return the url of the doc created"
         this.mockMvc
@@ -105,5 +106,13 @@ class LevaDocControllerSpec extends Specification {
         ]
     }
 
+    private Map buildServiceDataParam(ProjectFixture projectFixture, Map data) {
+        Map serviceParam = [:]
+        serviceParam << data
+        serviceParam.documentType = projectFixture.docType
+        serviceParam.projectBuild = "${data.build.projectKey}-${data.build.BUILD_ID}"
+        serviceParam.tmpFolder = tempFolder.toFile().absolutePath
+        return serviceParam
+    }
 
 }

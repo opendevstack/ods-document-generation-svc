@@ -112,7 +112,6 @@ class ProjectData {
         }
 
         this.updateJiraReleaseStatusBuildNumber()
-
         return this
     }
 
