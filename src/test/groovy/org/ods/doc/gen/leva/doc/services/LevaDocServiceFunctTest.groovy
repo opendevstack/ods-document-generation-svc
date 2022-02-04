@@ -89,7 +89,6 @@ class LevaDocServiceFunctTest extends Specification {
     BitbucketService bitbucketService
 
     private WiremockManager jiraServer
-    private WiremockManager docGenServer
     private WiremockManager nexusServer
     private WiremockManager sonarServer
     private WiremockManager bitbucketServer
@@ -108,7 +107,6 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     def cleanup() {
-        docGenServer?.tearDown()
         jiraServer?.tearDown()
         nexusServer?.tearDown()
         sonarServer?.tearDown()
@@ -211,7 +209,8 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     private void startUpWiremockServers(ProjectFixture projectFixture) {
-        String projectKey = projectFixture.project, doctype = projectFixture.docType
+        String projectKey = projectFixture.project
+        String doctype = projectFixture.docType
         log.info "Using PROJECT_KEY:${projectKey}"
         log.info "Using RECORD Wiremock:${RECORD}"
         log.info "Using GENERATE_EXPECTED_PDF_FILES:${GENERATE_EXPECTED_PDF_FILES}"
@@ -219,7 +218,6 @@ class LevaDocServiceFunctTest extends Specification {
 
         String component = (projectFixture.component) ? "/${projectFixture.component}" : ""
         String scenarioPath = "${this.class.simpleName}/${projectKey}${component}/${doctype}/${projectFixture.version}"
-        docGenServer = WiremockServers.DOC_GEN.build().withScenario(scenarioPath).startServer(RECORD)
         jiraServer = WiremockServers.JIRA.build().withScenario(scenarioPath).startServer(RECORD)
         nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
         bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
