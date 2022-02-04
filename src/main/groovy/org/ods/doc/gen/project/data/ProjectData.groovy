@@ -66,6 +66,7 @@ class ProjectData {
     }
 
     ProjectData load() {
+        ReleaseManagerRepo releaseManagerRepo = new ReleaseManagerRepo(this)
         this.data.metadata = loadMetadata(tmpFolder) // TODO s2o load from BB
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
