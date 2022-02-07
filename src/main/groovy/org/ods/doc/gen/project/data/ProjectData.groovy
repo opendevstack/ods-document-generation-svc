@@ -3,6 +3,7 @@ package org.ods.doc.gen.project.data
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraService
@@ -39,13 +40,16 @@ class ProjectData {
     protected Boolean isVersioningEnabled = false
 
     private final JiraService jira
+    private final GitRepoDownloadService gitRepoDownloadService
 
     String tmpFolder
     Map data = [:]
     Map build = [:]
 
-    ProjectData(JiraService jira) {
+    ProjectData(JiraService jira, GitRepoDownloadService gitRepoDownloadService) {
         this.jira = jira
+        this.gitRepoDownloadService = gitRepoDownloadService
+
         this.config =  [:]
         this.build = [
             hasFailingTests: false,
@@ -66,7 +70,13 @@ class ProjectData {
     }
 
     ProjectData load() {
-        ReleaseManagerRepo releaseManagerRepo = new ReleaseManagerRepo(this)
+
+        // TODO: Still some info that needs to be retrieved from Jira...
+        String project = "FRML24113"
+        String releaseRepo = "frml24113-release"
+        String releaseRepoVersion = "master"
+
+        gitRepoDownloadService.getRepoContentsToFolder(project, releaseRepo, releaseRepoVersion, tmpFolder)
         this.data.metadata = loadMetadata(tmpFolder) // TODO s2o load from BB
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
