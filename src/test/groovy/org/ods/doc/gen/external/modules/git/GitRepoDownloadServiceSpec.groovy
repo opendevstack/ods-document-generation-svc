@@ -7,6 +7,7 @@ import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
+import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
 import org.ods.doc.gen.leva.doc.services.StringCleanup
@@ -42,14 +43,55 @@ class GitRepoDownloadServiceSpec extends Specification {
         String releaseRepo = "frml24113-release"
         String releaseRepoVersion = "master"
 
-        when: "some functionality needs a copy of a git repos (project + repos + branch)"
-
-        then: "get a copy of the repository"
+        Map data = buildFixtureData()
+        when: "get a copy of the repository is called"
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.getRepoContentsToFolder(project, releaseRepo, releaseRepoVersion, tmpFolderAbsolutePath, GitRepoVersionType.BRANCH)
+        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+
 
         // where: "Doctypes without testResults"
-        // projectFixture << new DocTypeProjectFixture().getProjects()
+        projectFixture << new DocTypeProjectFixture().getProjects()
+    }
+
+    Map buildFixtureData(ProjectFixture projectFixture){
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitData()
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+        return data
+    }
+
+    private Map<String, String> buildJobParams(ProjectFixture projectFixture){
+        return  [
+                targetEnvironment: "dev",
+                targetEnvironmentToken: "D",
+                version: "${projectFixture.version}",
+                configItem: "BI-IT-DEVSTACK",
+                changeDescription: "changeDescription",
+                changeId: "changeId",
+                rePromote: "false",
+                releaseStatusJiraIssueKey: projectFixture.releaseKey,
+                RUN_DISPLAY_URL : "",
+                RELEASE_PARAM_VERSION : "3.0",
+                BUILD_NUMBER : "666",
+                BUILD_URL : "https://jenkins-sample",
+                JOB_NAME : "ofi2004-cd/ofi2004-cd-release-master",
+        ]
+    }
+
+    private Map<String, String> buildGitData() {
+        return  [
+                commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                url: "https://bitbucket/scm/ofi2004/ofi2004-release.git", //  new GitService().getOriginUrl()
+                baseTag: "ods-generated-v3.0-3.0-0b11-D",
+                targetTag: "ods-generated-v3.0-3.0-0b11-D",
+                author: "s2o",
+                message: "Swingin' The Bottle",
+                time: "2021-04-20T14:58:31.042152",
+                releaseManagerBranch: "refs/tags/CHG0066328",
+        ]
     }
 
 }

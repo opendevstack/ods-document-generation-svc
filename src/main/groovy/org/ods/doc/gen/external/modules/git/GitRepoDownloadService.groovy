@@ -82,14 +82,20 @@ class GitRepoDownloadService {
         this.zipFacade = zipFacade
     }
 
-    void getRepoContentsToFolder(String project, String repo, String version, String targetFolderRelativePath, GitRepoVersionType versionType) {
+    void getRepoContentsToFolder(Map data, String targetFolderRelativePath) {
         def targetDir = Paths.get(targetFolderRelativePath)
+        GitRepoVersionType versionType = GitRepoVersionType.COMMIT
         GitRepoHttpAPI store = createStorageClient(versionType)
-        byte[] zipArchiveContent = getZipArchiveFromStore(store, project, repo, version)
+        byte[] zipArchiveContent = getZipArchiveFromStore(store, data, versionType)
         zipFacade.extractZipArchive(zipArchiveContent, targetDir)
     }
 
-    private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, String project, String repo, String version) {
+    private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data, GitRepoVersionType versionType) {
+
+        String project = data.git.
+        String repo
+        String version
+
         try {
             return store.getRepoZipArchive(project, repo, version)
         } catch (FeignException callException) {
