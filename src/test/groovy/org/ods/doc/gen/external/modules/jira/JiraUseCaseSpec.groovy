@@ -2,9 +2,11 @@ package org.ods.doc.gen.external.modules.jira
 
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.project.data.Project
+import spock.lang.Ignore
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.*
 
+@Ignore
 class JiraUseCaseSpec extends SpecHelper {
 
     JiraService jira

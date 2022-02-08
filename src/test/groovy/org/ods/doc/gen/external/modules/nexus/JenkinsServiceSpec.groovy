@@ -3,7 +3,9 @@ package org.ods.doc.gen.external.modules.nexus
 
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.external.modules.jenkins.JenkinsService
+import spock.lang.Ignore
 
+@Ignore
 class JenkinsServiceSpec extends SpecHelper {
 
     def "unstash files into path"() {

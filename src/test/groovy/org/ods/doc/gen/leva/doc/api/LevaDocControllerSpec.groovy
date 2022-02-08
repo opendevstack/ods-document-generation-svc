@@ -40,8 +40,7 @@ class LevaDocControllerSpec extends Specification {
     LevaDocDataFixture dataFixture
 
     def setup() {
-        String simpleName = this.class.simpleName
-        dataFixture = new LevaDocDataFixture(simpleName, tempFolder.toFile())
+        dataFixture = new LevaDocDataFixture(tempFolder.toFile())
     }
 
     def "BuildDocument ok"() {
