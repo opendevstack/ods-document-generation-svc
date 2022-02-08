@@ -2,6 +2,7 @@ package org.ods.doc.gen.external.modules.xunit
 
 
 import org.ods.doc.gen.project.data.Project
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.nio.file.Files
@@ -9,6 +10,7 @@ import java.nio.file.Files
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
+@Ignore
 class JUnitTestReportsUseCaseSpec extends Specification {
 
     Project project

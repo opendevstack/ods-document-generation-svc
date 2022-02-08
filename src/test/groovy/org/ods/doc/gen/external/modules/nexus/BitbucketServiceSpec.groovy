@@ -2,8 +2,10 @@ package org.ods.doc.gen.external.modules.nexus
 
 
 import org.ods.doc.gen.external.modules.git.BitbucketService
+import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore
 class BitbucketServiceSpec extends Specification {
 
     def "find pull request"() {

@@ -13,6 +13,9 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.PropertySource
 
+import javax.cache.annotation.CacheKey
+import javax.cache.annotation.CacheResult
+import java.nio.file.Path
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -34,4 +37,23 @@ class TestConfig {
         return jiraServiceForWireMock
     }
 
+   /* @Primary
+    @Bean
+    JiraService getDocumentTemplatesRepository(){
+        return jiraServiceForWireMock
+    }
+
+    class DocumentTemplatesRepository {
+
+        Path getTemplatesForVersion()
+
+        boolean isApplicableToSystemConfig(){
+            return true
+        }
+
+        URI getURItoDownloadTemplates(String version){
+            return null
+        }
+    }
+*/
 }

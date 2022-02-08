@@ -2,7 +2,10 @@ package org.ods.doc.gen.core.test.usecase.levadoc.fixture
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
+import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.core.test.usecase.RepoDataBuilder
+import org.ods.doc.gen.core.test.wiremock.WiremockManager
+import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
@@ -12,17 +15,18 @@ class LevaDocDataFixture {
 
     private final File tempFolder
     private final Project project
-    private final String simpleClassName
     private final TestsReports testsReports
 
-    LevaDocDataFixture(String simpleClassName,
-                       File tempFolder,
+    LevaDocDataFixture(File tempFolder,
                        Project project = null,
                        TestsReports testsReports = null){
-        this.simpleClassName = simpleClassName
         this.tempFolder = tempFolder
         this.testsReports = testsReports
         this.project = project
+    }
+
+    Object copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
+        FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
     }
 
     Map buildFixtureData(ProjectFixture projectFixture){
@@ -52,12 +56,6 @@ class LevaDocDataFixture {
         projectFixture.component = null
     }
 
-    File expectedDoc(ProjectFixture projectFixture) {
-        def comp =  (projectFixture.component) ? "${projectFixture.component}/" : ''
-        def filePath = "src/test/resources/expected/${simpleClassName}/${projectFixture.project}/${comp}"
-        new File(filePath).mkdirs()
-        return new File("${filePath}/${projectFixture.docType}-${projectFixture.version}-1.pdf")
-    }
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         return  [
@@ -69,11 +67,11 @@ class LevaDocDataFixture {
                 changeId: "changeId",
                 rePromote: "false",
                 releaseStatusJiraIssueKey: projectFixture.releaseKey,
-                RUN_DISPLAY_URL : "",
-                RELEASE_PARAM_VERSION : "3.0",
-                BUILD_NUMBER : "666",
-                BUILD_URL : "https://jenkins-sample",
-                JOB_NAME : "ofi2004-cd/ofi2004-cd-release-master",
+                runDisplayUrl : "",
+                releaseParamVersion : "3.0",
+                buildId : "2022-01-22_23-59-59",
+                buildURL : "https://jenkins-sample",
+                jobName : "ofi2004-cd/ofi2004-cd-release-master",
         ]
     }
 
@@ -92,8 +90,8 @@ class LevaDocDataFixture {
     private String copyPdfToTemp(ProjectFixture projectFixture, Map data) {
         def destPath = "${tempFolder}/reports/${projectFixture.component}"
         new File(destPath).mkdirs()
-        File expected = expectedDoc(projectFixture)
-        FileUtils.copyFile(expectedDoc(projectFixture), new File("${destPath}/${expected.name}"))
+        File expected = LevaDocTestValidator.expectedDoc(projectFixture, data.build.buildId as String)
+        FileUtils.copyFile(expected, new File("${destPath}/${expected.name}"))
         return expected.name
     }
 

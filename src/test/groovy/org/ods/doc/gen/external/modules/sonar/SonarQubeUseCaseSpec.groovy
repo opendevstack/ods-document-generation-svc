@@ -2,11 +2,13 @@ package org.ods.doc.gen.external.modules.sonar
 
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.project.data.Project
+import spock.lang.Ignore
 
 import java.nio.file.Files
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
+@Ignore
 class SonarQubeUseCaseSpec extends SpecHelper {
 
     org.ods.doc.gen.external.modules.nexus.NexusService nexus

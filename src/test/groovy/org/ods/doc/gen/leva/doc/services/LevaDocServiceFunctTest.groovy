@@ -1,8 +1,6 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
-import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
@@ -11,13 +9,9 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWi
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesOverall
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
+import org.ods.doc.gen.leva.doc.LevaDocWiremock
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
-import org.ods.doc.gen.core.test.wiremock.WiremockManager
-import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -26,7 +20,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import javax.inject.Inject
-
 /**
  * IMPORTANT: this test use Wiremock files to mock all the external interactions.
  *
@@ -46,16 +39,16 @@ import javax.inject.Inject
  *
  * ==>> HOW TO use record/play:
  *  We have 2 flags to play with the test:
- *  - RECORD: When TRUE wiremock will record the interaction with the servers and compare the pdf results with the expected
- *  - GENERATE_EXPECTED_PDF_FILES: When TRUE it will remove the expected pdfs and create a new ones
+ *  - LevaDocWiremock.RECORD: When TRUE wiremock will record the interaction with the servers and compare the pdf results with the expected
+ *  - LevaDocTestValidator.GENERATE_EXPECTED_PDF_FILES: When TRUE it will remove the expected pdfs and create a new ones
  *
  *  ie:
- *  - RECORD=false & GENERATE_EXPECTED_PDF_FILES=false are the default values. So then it can be executed everywhere.
- *  - RECORD=true & GENERATE_EXPECTED_PDF_FILES=false will record and compare the generate pdfs with the 'old' expected files
+ *  - LevaDocWiremock.RECORD=false & GENERATE_EXPECTED_PDF_FILES=false are the default values. So then it can be executed everywhere.
+ *  - LevaDocWiremock.RECORD=true & GENERATE_EXPECTED_PDF_FILES=false will record and compare the generate pdfs with the 'old' expected files
  *      ==> with this combination, if there's an error,
  *          we can compare new pdf with the old one, and see the implications of our changes in the pdfs
  *          see here _build/reports/LeVADocs_ the compared results images
- *  - RECORD=true & GENERATE_EXPECTED_PDF_FILES=true will record and generate new pdf expected files
+ *  - LevaDocWiremock.RECORD=true & GENERATE_EXPECTED_PDF_FILES=true will record and generate new pdf expected files
  *
  */
 
@@ -63,21 +56,12 @@ import javax.inject.Inject
 @ActiveProfiles("test")
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
 class LevaDocServiceFunctTest extends Specification {
-
-    private static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
-    private static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
-
+    
     @TempDir
     public File tempFolder
 
     @Inject
     LeVADocumentService leVADocumentService
-
-    @Inject
-    JiraService jiraService
-
-    @Inject
-    NexusService nexusService
 
     @Inject
     TestsReports testsReports
@@ -86,12 +70,7 @@ class LevaDocServiceFunctTest extends Specification {
     Project project
 
     @Inject
-    BitbucketService bitbucketService
-
-    private WiremockManager jiraServer
-    private WiremockManager nexusServer
-    private WiremockManager sonarServer
-    private WiremockManager bitbucketServer
+    LevaDocWiremock levaDocWiremock
 
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
@@ -101,22 +80,18 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     def setup() {
-        String simpleName = this.class.simpleName
-        dataFixture = new LevaDocDataFixture(simpleName, tempFolder, project, testsReports)
-        testValidator = new LevaDocTestValidator(simpleName, tempFolder, project)
+        dataFixture = new LevaDocDataFixture(tempFolder, project, testsReports)
+        testValidator = new LevaDocTestValidator(tempFolder, project)
     }
 
     def cleanup() {
-        jiraServer?.tearDown()
-        nexusServer?.tearDown()
-        sonarServer?.tearDown()
-        bitbucketServer?.tearDown()
+        levaDocWiremock.tearDownWiremock()
     }
 
     def "create #projectFixture.docType for project: #projectFixture.project"() {
         given: "A project data"
-        copyProjectDataToTemporalFolder(projectFixture)
-        setUpWireMock(projectFixture)
+        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
+        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         Map data = dataFixture.buildFixtureData(projectFixture)
         prepareServiceDataParam(projectFixture, data)
 
@@ -124,7 +99,7 @@ class LevaDocServiceFunctTest extends Specification {
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
+        testValidator.validatePDF(projectFixture, data.build.buildId as String)
 
         where: "Doctypes without testResults"
         projectFixture << new DocTypeProjectFixture().getProjects()
@@ -132,8 +107,8 @@ class LevaDocServiceFunctTest extends Specification {
 
     def "create #projectFixture.docType with tests results for project: #projectFixture.project"() {
         given: "A project data"
-        copyProjectDataToTemporalFolder(projectFixture)
-        setUpWireMock(projectFixture)
+        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
+        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         Map data = dataFixture.buildFixtureData(projectFixture)
         ProjectData projectData = prepareServiceDataParam(projectFixture, data)
         data << testsReports.getAllResults(projectData, projectData.repositories)
@@ -142,7 +117,7 @@ class LevaDocServiceFunctTest extends Specification {
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
+        testValidator.validatePDF(projectFixture, data.build.buildId as String)
 
         where: "Doctypes with tests results"
         projectFixture << new DocTypeProjectFixtureWithTestData().getProjects()
@@ -150,8 +125,8 @@ class LevaDocServiceFunctTest extends Specification {
 
     def "create #projectFixture.docType for component #projectFixture.component and project: #projectFixture.project"() {
         given: "A project data"
-        copyProjectDataToTemporalFolder(projectFixture)
-        setUpWireMock(projectFixture)
+        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
+        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         Map data = dataFixture.buildFixtureData(projectFixture)
         prepareServiceDataParam(projectFixture, data)
         data.repo = dataFixture.getModuleData(projectFixture, data)
@@ -160,7 +135,7 @@ class LevaDocServiceFunctTest extends Specification {
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
+        testValidator.validatePDF(projectFixture, data.build.buildId as String)
 
         where: "Doctypes with modules"
         projectFixture << new DocTypeProjectFixtureWithComponent().getProjects()
@@ -172,8 +147,8 @@ class LevaDocServiceFunctTest extends Specification {
      */
     def "create Overall #projectFixture.docType for project: #projectFixture.project"() {
         given: "A project data"
-        copyProjectDataToTemporalFolder(projectFixture)
-        setUpWireMock(projectFixture)
+        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
+        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         Map data = dataFixture.buildFixtureData(projectFixture)
         prepareServiceDataParam(projectFixture, data)
         dataFixture.updateExpectedComponentDocs(data, projectFixture)
@@ -182,52 +157,21 @@ class LevaDocServiceFunctTest extends Specification {
         leVADocumentService."createOverall${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(GENERATE_EXPECTED_PDF_FILES, projectFixture)
+        testValidator.validatePDF(projectFixture, data.build.buildId as String)
 
         where:
         projectFixture << new DocTypeProjectFixturesOverall().getProjects()
-    }
-
-    private Object copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
-        
-        // FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
-    }
-
-    private void setUpWireMock(ProjectFixture projectFixture) {
-        startUpWiremockServers(projectFixture)
-        updateServicesWithWiremockConfig()
     }
 
     private ProjectData prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
         data.tmpFolder = tempFolder.absolutePath
         data.documentType = projectFixture.docType
         data.projectBuild =  "${projectFixture.project}-1"
-        data.buildId = "1"
+        data.buildNumber = "666"
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         // We need to override the value because of the cache in ProjectData
         projectData.tmpFolder = tempFolder.absolutePath
         return projectData
-    }
-
-    private void startUpWiremockServers(ProjectFixture projectFixture) {
-        String projectKey = projectFixture.project
-        String doctype = projectFixture.docType
-        log.info "Using PROJECT_KEY:${projectKey}"
-        log.info "Using RECORD Wiremock:${RECORD}"
-        log.info "Using GENERATE_EXPECTED_PDF_FILES:${GENERATE_EXPECTED_PDF_FILES}"
-        log.info "Using temporal folder:${tempFolder.absolutePath}"
-
-        String component = (projectFixture.component) ? "/${projectFixture.component}" : ""
-        String scenarioPath = "${this.class.simpleName}/${projectKey}${component}/${doctype}/${projectFixture.version}"
-        jiraServer = WiremockServers.JIRA.build().withScenario(scenarioPath).startServer(RECORD)
-        nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
-        bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
-    }
-
-    private void updateServicesWithWiremockConfig() {
-        nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
-        jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
-        bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
     }
 
 }

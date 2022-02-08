@@ -40,6 +40,17 @@ enum WiremockServers {
             return System.properties["nexus.password"]
         }
     },
+    DOC_GEN {
+        WiremockManager build() {
+            new WiremockManager("docgen", System.properties["docGen.url"])
+        };
+        String getUser(){
+            return "docGen.username"
+        };
+        String getPassword(){
+            return "docGen.password"
+        }
+    },
     BITBUCKET {
         WiremockManager build() {
             new WiremockManager("bitbucket", System.properties["bitbucket.url"])

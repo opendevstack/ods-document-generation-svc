@@ -40,8 +40,7 @@ class LevaDocControllerSpec extends Specification {
     LevaDocDataFixture dataFixture
 
     def setup() {
-        String simpleName = this.class.simpleName
-        dataFixture = new LevaDocDataFixture(simpleName, tempFolder.toFile())
+        dataFixture = new LevaDocDataFixture(tempFolder.toFile())
     }
 
     def "BuildDocument ok"() {
@@ -52,12 +51,12 @@ class LevaDocControllerSpec extends Specification {
         and: "leVADocumentService is mocked"
         def urlDocType = "URL nexus artifact"
         Map data = dataFixture.buildFixtureData(projectFixture)
-        Map serviceParam = buildServiceDataParam(projectFixture, buildId, data)
+        Map serviceParam = buildServiceDataParam(projectFixture, buildNumber, data)
         when(leVADocumentService.createCSD(argThat(map -> map == serviceParam))).thenReturn(urlDocType)
 
         expect: "a client call to /levaDoc/ProjectId/BuildID/docType return the url of the doc created"
         this.mockMvc
-                .perform(post("/levaDoc/${projectFixture.project}/${buildId}/CSD")
+                .perform(post("/levaDoc/${projectFixture.project}/${buildNumber}/CSD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonOutput.toJson(data)))
                 .andExpect(status().isOk()).andExpect(content().string(urlDocType))
@@ -67,7 +66,7 @@ class LevaDocControllerSpec extends Specification {
 
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()
-        buildId = "2"
+        buildNumber = "2"
     }
 
 
@@ -107,12 +106,12 @@ class LevaDocControllerSpec extends Specification {
         ]
     }
 
-    private Map buildServiceDataParam(ProjectFixture projectFixture, String buildId, Map data) {
+    private Map buildServiceDataParam(ProjectFixture projectFixture, String buildNumber, Map data) {
         Map serviceParam = [:]
         serviceParam << data
         serviceParam.documentType = projectFixture.docType
-        serviceParam.projectBuild = "${projectFixture.project}-${buildId}"
-        serviceParam.buildId = buildId
+        serviceParam.projectBuild = "${projectFixture.project}-${buildNumber}"
+        serviceParam.buildNumber = buildNumber
         serviceParam.tmpFolder = tempFolder.toFile().absolutePath
         return serviceParam
     }

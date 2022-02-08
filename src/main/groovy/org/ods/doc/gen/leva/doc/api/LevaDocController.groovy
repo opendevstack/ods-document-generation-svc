@@ -38,22 +38,22 @@ class LevaDocController {
      * @return
      */
     @PostMapping("{projectId}/{build}/{levaDocType}")
-    String buildDocument(
+    Map<String, String> buildDocument(
             @PathVariable("projectId") String projectId,
-            @PathVariable("build") String buildId,
+            @PathVariable("build") String buildNumber,
             @PathVariable("levaDocType") LevaDocType levaDocType,
             @RequestBody Map body){
         validateRequestParams(body)
-        logData(projectId, buildId, levaDocType, body)
-        def url = createDocument(projectId, buildId, levaDocType, body)
+        logData(projectId, buildNumber, levaDocType, body)
+        def url = createDocument(projectId, buildNumber, levaDocType, body)
         log.info "buildDocument return:${url}"
-        return url
+        return [nexusURL: url]
     }
 
-    private String createDocument(String projectId, String buildId, LevaDocType levaDocType, Map data) {
+    private String createDocument(String projectId, String buildNumber, LevaDocType levaDocType, Map data) {
         File tmpDir
         try {
-            tmpDir = prepareServiceDataParam(projectId, buildId, levaDocType, data, tmpDir)
+            tmpDir = prepareServiceDataParam(projectId, buildNumber, levaDocType, data, tmpDir)
             return levaDocType.buildDocument.apply(leVADocumentService, data)
         } catch (Throwable e) {
             String msg = "Error building document: ${levaDocType} with data:${data}"
@@ -66,10 +66,10 @@ class LevaDocController {
         }
     }
 
-    private File prepareServiceDataParam(String projectId, String buildId, LevaDocType levaDocType, Map data, File tmpDir) {
+    private File prepareServiceDataParam(String projectId, String buildNumber, LevaDocType levaDocType, Map data, File tmpDir) {
         data.documentType = levaDocType.toString()
-        data.projectBuild = "${projectId}-${buildId}"
-        data.buildId = buildId
+        data.projectBuild = "${projectId}-${buildNumber}"
+        data.buildNumber = buildNumber
         tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
         data.tmpFolder = tmpDir.absolutePath
         return tmpDir

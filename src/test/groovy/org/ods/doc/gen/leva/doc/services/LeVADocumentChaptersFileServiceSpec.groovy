@@ -3,9 +3,11 @@ package org.ods.doc.gen.leva.doc.services
 
 
 import org.ods.doc.gen.core.test.SpecHelper
+import spock.lang.Ignore
 
 import java.nio.file.Paths
 
+@Ignore
 class LeVADocumentChaptersFileServiceSpec extends SpecHelper {
 
     def "get document chapter data"() {

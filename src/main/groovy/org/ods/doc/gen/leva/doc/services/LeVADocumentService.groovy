@@ -1441,15 +1441,15 @@ class LeVADocumentService extends DocGenUseCase {
             name          : name,
             description   : projectData.description,
             type          : documentTypeName,
-            version       : projectData.build.RELEASE_PARAM_VERSION,
+            version       : projectData.build.releaseParamVersion,
             date_created  : LocalDateTime.now(clock).toString(),
             buildParameter: projectData.build,
             git           : repo ? repo.data.git : projectData.gitData,
             openShift     : [apiUrl: projectData.getOpenShiftApiUrl()],
             jenkins       : [
-                buildNumber: projectData.build.BUILD_NUMBER,
-                buildUrl   : projectData.build.BUILD_URL,
-                jobName    : projectData.build.JOB_NAME
+                buildNumber: projectData.build.buildNumber,
+                buildUrl   : projectData.build.buildURL,
+                jobName    : projectData.build.jobName
             ],
             referencedDocs : this.getReferencedDocumentsVersion(projectData)
         ]
@@ -1675,7 +1675,7 @@ class LeVADocumentService extends DocGenUseCase {
             }
         } else {
             // TODO removeme in ODS 4.x
-            version = "${projectData.build.version}-${projectData.build.BUILD_NUMBER}"
+            version = "${projectData.build.version}-${projectData.build.buildNumber}"
         }
         return version
     }

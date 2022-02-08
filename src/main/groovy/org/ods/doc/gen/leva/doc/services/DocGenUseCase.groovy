@@ -80,11 +80,11 @@ abstract class DocGenUseCase {
             "application/zip"
         )
 
-        def message = "Document ${documentType}"
+        def message = "Document ${documentType} created and uploaded"
         if (repo) {
             message += " for ${repo.id}"
         }
-        message += " uploaded @ ${uri}"
+        message += " to [${uri}]"
         log.info message
         return uri.toString()
     }

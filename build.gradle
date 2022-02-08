@@ -2,6 +2,7 @@ buildscript {
   ext {
     groovyallVersion = '3.0.9'
     springbootVersion = "2.6.2"
+    springCloudVersion = '3.1.0'
     spockCoreVersion = "2.0-groovy-3.0"
     spockReportsVersion = '2.1-groovy-3.0'
 
@@ -132,6 +133,8 @@ dependencies {
   implementation "org.springframework.boot:spring-boot-starter:${springbootVersion}"
   implementation "org.springframework.boot:spring-boot-starter-web:${springbootVersion}"
   implementation "org.springframework.boot:spring-boot-starter-cache:${springbootVersion}"
+  implementation "org.springframework.cloud:spring-cloud-starter-loadbalancer:${springCloudVersion}"
+  implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudVersion}"
 
   implementation("javax.inject:javax.inject:1")
   implementation("javax.cache:cache-api:1.1.1")
@@ -184,6 +187,10 @@ dependencies {
   testImplementation "com.github.stefanbirkner:system-rules:1.19.0" // for managing environment variables
   testImplementation "org.hamcrest:hamcrest:2.1"
   testImplementation "org.skyscreamer:jsonassert:1.5.0"             // JSON Asserts
+
+  testImplementation("au.com.dius:pact-jvm-provider:4.0.10")
+  testImplementation("au.com.dius:pact-jvm-provider-junit:4.0.10")
+
 }
 
 test {

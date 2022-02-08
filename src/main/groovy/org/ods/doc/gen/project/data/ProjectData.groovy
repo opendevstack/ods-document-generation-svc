@@ -61,7 +61,7 @@ class ProjectData {
     ProjectData init(Map data) {
         this.tmpFolder = data.tmpFolder
         this.build << data.build
-        this.build.buildId = data.buildId
+        this.build.buildNumber = data.buildNumber
         this.data.git = data.git
         this.data.openshift = data.openshift
         this.data.documents = [:]
@@ -213,11 +213,11 @@ class ProjectData {
     }
 
     void updateJiraReleaseStatusBuildNumber() {
-        def releaseStatusIssueKey = buildParams.releaseStatusJiraIssueKey
-        def releaseStatusIssueFields = getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS)
-
-        def releaseStatusIssueBuildNumberField = releaseStatusIssueFields['Release Build']
-        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, [(releaseStatusIssueBuildNumberField.id): "${buildParams.version}-${build.BUILD_NUMBER}"])
+        String releaseStatusIssueKey = buildParams.releaseStatusJiraIssueKey
+        Map releaseStatusIssueFields = getJiraFieldsForIssueType(IssueTypes.RELEASE_STATUS)
+        Map releaseStatusIssueBuildNumberField = releaseStatusIssueFields['Release Build']
+        Map testFields = [(releaseStatusIssueBuildNumberField.id): "${buildParams.version}-${build.buildNumber}"]
+        this.jira.updateTextFieldsOnIssue(releaseStatusIssueKey, testFields)
     }
 
     Map<String, List> getWipJiraIssues() {
@@ -839,7 +839,7 @@ class ProjectData {
     void addCommentInReleaseStatus(String message) {
         def releaseStatusIssueKey = buildParams.releaseStatusJiraIssueKey
         if (message) {
-            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${build.RUN_DISPLAY_URL}")
+            this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${build.runDisplayUrl}")
         }
 
     }
