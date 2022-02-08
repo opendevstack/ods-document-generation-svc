@@ -3,8 +3,7 @@ package org.ods.doc.gen.core.test.usecase.levadoc.fixture
 class DocTypeProjectFixture extends DocTypeProjectFixtureBase {
 
     DocTypeProjectFixture() {
-     //   super(["CSD", "DIL", "DTP", "RA", "CFTP", "IVP", "SSDS", "TCP", "TIP", "TRC"])
-        super([ "TRC"])
+        super(["CSD", "DIL", "DTP", "RA", "CFTP", "IVP", "SSDS", "TCP", "TIP", "TRC"])
     }
 
     DocTypeProjectFixture(docTypes) {

@@ -9,6 +9,8 @@ import org.ods.doc.gen.project.data.ProjectData
 @Slf4j
 class LevaDocTestValidator {
 
+    private static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
+
     static final String SAVED_DOCUMENTS = "build/reports/LeVADocs"
 
     private final File tempFolder
@@ -20,13 +22,14 @@ class LevaDocTestValidator {
         this.project = project
     }
 
-    boolean validatePDF(Boolean generateExpectedFiles, ProjectFixture projectFixture, String buildId) {
+    boolean validatePDF(ProjectFixture projectFixture, String buildId) {
         unzipGeneratedArtifact(projectFixture, buildId)
-        if (generateExpectedFiles) {
+        if (GENERATE_EXPECTED_PDF_FILES) {
             copyDocWhenRecording(projectFixture)
             return true
         } else {
             def actualFile = actualDoc(projectFixture, buildId)
+            log.info("Validating pdf:${actualFile}")
             def expectedFile = expectedDoc(projectFixture, buildId)
             return new PdfCompare(SAVED_DOCUMENTS).compareAreEqual(actualFile.absolutePath, expectedFile.absolutePath)
         }

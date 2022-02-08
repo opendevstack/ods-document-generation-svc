@@ -61,6 +61,7 @@ class LevaDocControllerPactSpec extends Specification {
 
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
+    private ProjectFixture projectFixture
 
     def setupSpec() {
         verifier = new ProviderVerifier()
@@ -87,19 +88,20 @@ class LevaDocControllerPactSpec extends Specification {
         given: "A temporal folder "
         GroovySpy(Files, global: true)
         Files.createTempDirectory(_) >> tempFolder
+        consumer.stateChange = { ProviderState state -> setUpFixture(state)}
 
         when: "mock folder"
         Map failures = verifyConsumerPact(consumer)
 
         then:
         assert failures.size() == 0 : "Error in contract:${failures}"
+       // testValidator.validatePDF(projectFixture, "2022-01-22_23-59-59")
 
         where:
         consumer << levaDocControllerPact.consumers
     }
 
     private Map verifyConsumerPact(ConsumerInfo consumer) {
-        consumer.stateChange = { ProviderState state -> setUpFixture(state)}
         verifier.initialiseReporters(levaDocControllerPact)
         Map failures = [:]
         verifier.runVerificationForConsumer(failures, levaDocControllerPact, consumer)
@@ -109,7 +111,7 @@ class LevaDocControllerPactSpec extends Specification {
     private void setUpFixture(ProviderState state) {
         log.info("stateChangeHandler")
         log.info("stateChangeHandler state:${state}")
-        def projectFixture = buildProjectFixture(state.params)
+        projectFixture = buildProjectFixture(state.params)
         dataFixture.copyProjectDataToTemporalFolder(projectFixture)
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder.toFile())
     }
