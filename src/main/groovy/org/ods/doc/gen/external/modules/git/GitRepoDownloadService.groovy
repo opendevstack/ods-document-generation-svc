@@ -22,13 +22,20 @@ interface GitRepoHttpAPI {
     abstract byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
 }
 
-interface GitRepoVersionHttpAPI extends GitRepoHttpAPI {
+/** Examples for version parameter:
+ * version = refs/heads/release/v{hash}
+ * version = refs/tags/CHG0066328
+ */
+interface GitRepoVersionDownloadHttpAPI extends GitRepoHttpAPI {
     @Headers("Accept: application/octet-stream")
-    @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/release/v{version}&format=zip")
+    @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at={version}&format=zip")
     byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
 }
 
-interface GitRepoBranchHttpAPI extends GitRepoHttpAPI {
+/** Examples for branch parameter:
+ * branch = master
+ */
+interface GitRepoBranchDownloadHttpAPI extends GitRepoHttpAPI {
     @Headers("Accept: application/octet-stream")
     @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/{branch}&format=zip")
     byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("branch") String branch)
@@ -92,9 +99,11 @@ class GitRepoDownloadService {
 
     private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data, GitRepoVersionType versionType) {
 
-        String project = data.git.
-        String repo
-        String version
+        String url = data.git.url
+        String [] urlPieces = url.split('/')
+        String project = urlPieces[urlPieces.length -2]
+        String repo = urlPieces[urlPieces.length -1]
+        String version = data.git.releaseManagerBranch
 
         try {
             return store.getRepoZipArchive(project, repo, version)
@@ -123,8 +132,8 @@ class GitRepoDownloadService {
         }
 
         if (GitRepoVersionType.BRANCH == versionType) {
-            return builder.target(GitRepoBranchHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
+            return builder.target(GitRepoBranchDownloadHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
         }
-        return builder.target(GitRepoVersionHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
+        return builder.target(GitRepoVersionDownloadHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
     }
 }

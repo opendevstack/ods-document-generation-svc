@@ -1,5 +1,10 @@
 package org.ods.doc.gen.external.modules.git
 
+import feign.Feign
+import feign.Headers
+import feign.Param
+import feign.RequestLine
+import feign.auth.BasicAuthRequestInterceptor
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
@@ -10,7 +15,9 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
+import org.ods.doc.gen.external.modules.git.fixtureDatas.CheckRepoExists
 import org.ods.doc.gen.leva.doc.services.StringCleanup
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
@@ -29,6 +36,9 @@ class GitRepoDownloadServiceSpec extends Specification {
     @Inject
     GitRepoDownloadService gitRepoDownloadService
 
+    @Inject
+    CheckRepoExists checkRepoExists
+
     def setup() {
         String simpleName = this.class.simpleName
     }
@@ -36,34 +46,41 @@ class GitRepoDownloadServiceSpec extends Specification {
     def cleanup() {
     }
 
-    def "test getRepoContentsToFolder()"() {
+    def "test getRepoContentsToFolder() "() {
         given: "A project data"
-        // TODO: Setup fixture
-        String project = "FRML24113"
-        String releaseRepo = "frml24113-release"
-        String releaseRepoVersion = "master"
+        Map projectFixture = getProjectFixture()
+        Map data = buildFixtureData(projectFixture)
 
-        Map data = buildFixtureData()
         when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
         gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
-
-
-        // where: "Doctypes without testResults"
-        projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
-    Map buildFixtureData(ProjectFixture projectFixture){
+    Map getProjectFixture() {
+        Map projectFixture = [
+                id: "FRML24113",
+                releaseId: "1",
+                version: "WIP",
+                validation: "",
+                releaseKey: "",
+                releaseRepo: "frml24113-release",
+        ]
+        return projectFixture
+    }
+    Map buildFixtureData(Map projectFixture){
+
+
         Map data = [:]
         data.build = buildJobParams(projectFixture)
-        data.git =  buildGitData()
+        data.git =  buildGitData(projectFixture)
         data.openshift = [targetApiUrl:"https://openshift-sample"]
         return data
     }
 
-    private Map<String, String> buildJobParams(ProjectFixture projectFixture){
+    private Map<String, String> buildJobParams(Map projectFixture){
         return  [
                 targetEnvironment: "dev",
                 targetEnvironmentToken: "D",
@@ -77,14 +94,16 @@ class GitRepoDownloadServiceSpec extends Specification {
                 RELEASE_PARAM_VERSION : "3.0",
                 BUILD_NUMBER : "666",
                 BUILD_URL : "https://jenkins-sample",
-                JOB_NAME : "ofi2004-cd/ofi2004-cd-release-master",
+                JOB_NAME : "${projectFixture.id}/${projectFixture.repo}-master"
+                // "ofi2004-cd/ofi2004-cd-release-master",
         ]
     }
 
-    private Map<String, String> buildGitData() {
+    private Map<String, String> buildGitData(Map projectFixture) {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "https://bitbucket/scm/ofi2004/ofi2004-release.git", //  new GitService().getOriginUrl()
+                url: "http://localhost:7990/${projectFixture.id}/${projectFixture.releaseRepo}",
+                // "https://bitbucket/scm/ofi2004/ofi2004-release.git", //  new GitService().getOriginUrl()
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
                 author: "s2o",
@@ -93,5 +112,7 @@ class GitRepoDownloadServiceSpec extends Specification {
                 releaseManagerBranch: "refs/tags/CHG0066328",
         ]
     }
+
+
 
 }
