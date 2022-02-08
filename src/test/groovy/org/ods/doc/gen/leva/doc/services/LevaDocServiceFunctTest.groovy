@@ -189,7 +189,8 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     private Object copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
-        FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
+        
+        // FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
     }
 
     private void setUpWireMock(ProjectFixture projectFixture) {
