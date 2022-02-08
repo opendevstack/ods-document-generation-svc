@@ -71,12 +71,7 @@ class ProjectData {
 
     ProjectData load() {
 
-        // TODO: Still some info that needs to be retrieved from Jira...
-        String project = "FRML24113"
-        String releaseRepo = "frml24113-release"
-        String releaseRepoVersion = "master"
-
-        gitRepoDownloadService.getRepoContentsToFolder(project, releaseRepo, releaseRepoVersion, tmpFolder)
+        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolder)
         this.data.metadata = loadMetadata(tmpFolder) // TODO s2o load from BB
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)

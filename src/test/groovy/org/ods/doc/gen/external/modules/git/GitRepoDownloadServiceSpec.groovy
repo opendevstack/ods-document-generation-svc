@@ -5,6 +5,7 @@ import feign.Headers
 import feign.Param
 import feign.RequestLine
 import feign.auth.BasicAuthRequestInterceptor
+import groovy.io.FileType
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
@@ -57,6 +58,20 @@ class GitRepoDownloadServiceSpec extends Specification {
         gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
+        log.info("Files in folder: ${tmpFolderAbsolutePath}")
+        def dir = new File(tmpFolderAbsolutePath)
+        boolean found = false
+        dir.traverse() {
+            log.info(it.getAbsolutePath())
+            if ("Jenkinsfile" == it.getName()) {
+                found = true
+            }
+        }
+        log.info("End of Files in folder: ${tmpFolderAbsolutePath}")
+
+        if (!found) {
+            throw new Exception("Test was not able to find Jenkinsfile file.")
+        }
     }
 
     Map getProjectFixture() {
