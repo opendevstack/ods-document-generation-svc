@@ -8,14 +8,19 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
+import org.ods.doc.gen.pdf.builder.util.OSService
 import org.springframework.stereotype.Service
 
+import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
 
 @Slf4j
 @Service
 class HtmlToPDFService {
+
+    @Inject
+    private OSService OSService;
 
     String executeTemplate(Path path, Object data) {
         def loader = new FileTemplateLoader("", "")
@@ -31,7 +36,7 @@ class HtmlToPDFService {
     }
 
     private List<String> generateCmd(Map data, Path documentHtmlFile, Path documentPDFFile) {
-        def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+        def cmd = [getServiceName(), "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
         cmd << "--enable-local-file-access"
         cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
         addHeader(data, cmd)
@@ -40,6 +45,10 @@ class HtmlToPDFService {
         cmd << documentHtmlFile.toFile().absolutePath
         cmd << documentPDFFile.toFile().absolutePath
         return cmd
+    }
+
+    private String getServiceName() {
+        return "wkhtmltopdf" + OSService.getOSApplicationsExtension();
     }
 
     private void setOrientation(Map data, ArrayList<String> cmd) {
