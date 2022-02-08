@@ -679,8 +679,8 @@ class JiraUseCaseSpec extends SpecHelper {
         1 * util.warnBuildIfTestResultsContainFailure(testResults)
 
         then:
-        1 * usecase.createBugsForFailedTestIssues(testIssues, errors, steps.env.RUN_DISPLAY_URL) >> null
-        1 * usecase.createBugsForFailedTestIssues(testIssues, failures, steps.env.RUN_DISPLAY_URL) >> null
+        1 * usecase.createBugsForFailedTestIssues(testIssues, errors, steps.env.runDisplayUrl) >> null
+        1 * usecase.createBugsForFailedTestIssues(testIssues, failures, steps.env.runDisplayUrl) >> null
     }
 
     def "report test results for component in PROD"() {
@@ -713,15 +713,15 @@ class JiraUseCaseSpec extends SpecHelper {
         1 * util.warnBuildIfTestResultsContainFailure(testResults)
 
         then:
-        1 * usecase.createBugsForFailedTestIssues(testIssues, errors, steps.env.RUN_DISPLAY_URL) >> null
-        1 * usecase.createBugsForFailedTestIssues(testIssues, failures, steps.env.RUN_DISPLAY_URL) >> null
+        1 * usecase.createBugsForFailedTestIssues(testIssues, errors, steps.env.runDisplayUrl) >> null
+        1 * usecase.createBugsForFailedTestIssues(testIssues, failures, steps.env.runDisplayUrl) >> null
     }
 
     def "update Jira release status build number"() {
         given:
         project.buildParams.releaseStatusJiraIssueKey = "JIRA-4711"
         project.buildParams.version = "1.0"
-        steps.env.BUILD_NUMBER = "0815"
+        steps.env.buildNumber = "0815"
 
         when:
         usecase.updateJiraReleaseStatusBuildNumber()
@@ -743,8 +743,8 @@ class JiraUseCaseSpec extends SpecHelper {
         given:
         project.buildParams.releaseStatusJiraIssueKey = "JIRA-4711"
         project.buildParams.version = "1.0"
-        steps.env.BUILD_NUMBER = "0815"
-        steps.env.RUN_DISPLAY_URL = "http://jenkins"
+        steps.env.buildNumber = "0815"
+        steps.env.runDisplayUrl = "http://jenkins"
 
         def error = new RuntimeException("Oh no!")
 
@@ -764,14 +764,14 @@ class JiraUseCaseSpec extends SpecHelper {
         ])
 
         then:
-        1 * jira.appendCommentToIssue("JIRA-4711", "${error.message}\n\nSee: ${steps.env.RUN_DISPLAY_URL}")
+        1 * jira.appendCommentToIssue("JIRA-4711", "${error.message}\n\nSee: ${steps.env.runDisplayUrl}")
     }
 
     def "update Jira release status result without error"() {
         given:
         project.buildParams.releaseStatusJiraIssueKey = "JIRA-4711"
         project.buildParams.version = "1.0"
-        steps.env.BUILD_NUMBER = "0815"
+        steps.env.buildNumber = "0815"
 
         when:
         usecase.updateJiraReleaseStatusResult("", false)

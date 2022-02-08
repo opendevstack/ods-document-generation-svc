@@ -8,19 +8,29 @@ import feign.RequestLine
 import feign.auth.BasicAuthRequestInterceptor
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.BitBucketClientConfig
 import org.ods.doc.gen.core.ZipFacade
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Repository
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 
 import javax.inject.Inject
 import java.nio.file.Path
 import java.nio.file.Paths
 
+@Repository
+@FeignClient(name = "bitBucket-client", configuration = BitBucketClientConfig.class)
 interface BitBucketDocumentTemplatesStoreHttpAPI {
+
   @Headers("Accept: application/octet-stream")
-  @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/release/v{version}&format=zip")
-  byte[] getTemplatesZipArchiveForVersion(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
+  @GetMapping("/rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/release/v{version}&format=zip")
+  byte[] getTemplatesZipArchiveForVersion(@PathVariable("documentTemplatesProject") String documentTemplatesProject,
+                                          @PathVariable("documentTemplatesRepo") String documentTemplatesRepo,
+                                          @PathVariable ("version") String version)
+
 }
 
 @Slf4j
@@ -28,24 +38,22 @@ interface BitBucketDocumentTemplatesStoreHttpAPI {
 @Repository
 class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepository {
 
-    private ZipFacade zipFacade
-    private String basePath
+    private final ZipFacade zipFacade
+    private final String basePath
+    private final BitBucketDocumentTemplatesStoreHttpAPI store
 
     @Inject
-    BitBucketDocumentTemplatesRepository(ZipFacade zipFacade, @Value('${cache.documents.basePath}') String basePath){
+    BitBucketDocumentTemplatesRepository(BitBucketDocumentTemplatesStoreHttpAPI store, ZipFacade zipFacade, @Value('${cache.documents.basePath}') String basePath){
+        this.store = store
         this.basePath = basePath
         this.zipFacade = zipFacade
     }
 
     Path getTemplatesForVersion(String version) {
-        def targetDir = Paths.get(basePath, version)
-        URI uri = getURItoDownloadTemplates(version)
-        def bitbucketUserName = System.getenv("BITBUCKET_USERNAME")
-        def bitbucketPassword = System.getenv("BITBUCKET_PASSWORD")
-        log.info ("Using templates @${uri}")
+        log.info ("getTemplatesForVersion version:${version}")
 
-        BitBucketDocumentTemplatesStoreHttpAPI store = createStorageClient(bitbucketUserName, bitbucketPassword, uri)
-        byte[] zipArchiveContent = getZipArchive(store, version, uri, bitbucketUserName)
+        def targetDir = Paths.get(basePath, version)
+        byte[] zipArchiveContent = getZipArchive(version)
         zipFacade.extractZipArchive(zipArchiveContent, targetDir)
         return targetDir
     }
@@ -82,13 +90,15 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
                 .build()
     }
 
-    private byte[] getZipArchive(BitBucketDocumentTemplatesStoreHttpAPI store, String version, uri, String bitbucketUserName) {
+    private byte[] getZipArchive(String version) {
+        def bitbucketUserName = System.getenv("BITBUCKET_USERNAME")
+
         def bitbucketRepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
         def bitbucketProject = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")
         try {
             return store.getTemplatesZipArchiveForVersion(bitbucketProject, bitbucketRepo, version)
         } catch (FeignException callException) {
-            def baseErrMessage = "Could not get document zip from '${uri}'!"
+            def baseErrMessage = "Could not get document"
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${bitbucketRepo}' - "
             if (callException instanceof FeignException.BadRequest) {
                 throw new RuntimeException("${baseRepoErrMessage}" +
