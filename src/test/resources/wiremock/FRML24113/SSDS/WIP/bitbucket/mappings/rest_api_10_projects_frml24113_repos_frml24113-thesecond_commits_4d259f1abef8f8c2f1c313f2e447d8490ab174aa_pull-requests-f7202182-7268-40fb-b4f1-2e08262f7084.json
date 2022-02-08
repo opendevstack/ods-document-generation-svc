@@ -1,0 +1,32 @@
+{
+  "id" : "f7202182-7268-40fb-b4f1-2e08262f7084",
+  "name" : "rest_api_10_projects_frml24113_repos_frml24113-thesecond_commits_4d259f1abef8f8c2f1c313f2e447d8490ab174aa_pull-requests",
+  "request" : {
+    "url" : "/rest/api/1.0/projects/FRML24113/repos/frml24113-thesecond/commits/4d259f1abef8f8c2f1c313f2e447d8490ab174aa/pull-requests",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"size\":0,\"limit\":25,\"isLastPage\":true,\"values\":[],\"start\":0}",
+    "headers" : {
+      "Server" : "nginx/1.8.1",
+      "Date" : "Mon, 07 Feb 2022 14:16:01 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "@1N37ZSEx916x35766x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=C86566400DE6D29CD8FFB9B5F7DF0C51; Max-Age=1209600; Expires=Mon, 21-Feb-2022 14:16:01 GMT; Path=/; Secure; HttpOnly", "crowd.token_key=x0iBENcsbZhlYn5-Si3hXwAAAAABP4ABYW5nZWxfMi5tYXJ0aW5lekBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly", "visid_incap_2504425=YQ4xk7v0Tm+7guH5F8YDt6EpAWIAAAAAQUIPAAAAAABVvz4o+3XSEimrHqYPUHiK; expires=Tue, 07 Feb 2023 08:44:18 GMT; HttpOnly; path=/; Domain=.biscrum.com", "incap_ses_1484_2504425=Ug1GYB/hoib30fEqODqYFKEpAWIAAAAAeEap2F20vEN47FGtYXWFMw==; path=/; Domain=.biscrum.com" ],
+      "X-AUSERID" : "26567",
+      "X-AUSERNAME" : "angel_2.martinez%40domain.com",
+      "X-ASESSIONID" : "gezejg",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : "accept-encoding,x-auserid,cookie,x-ausername,accept-encoding",
+      "X-Content-Type-Options" : "nosniff",
+      "Strict-Transport-Security" : "max-age=15768000",
+      "X-CDN" : "Imperva",
+      "X-Iinfo" : "12-53623940-53620319 PNNN RT(1644243361105 24) q(0 0 0 -1) r(1 1) U5"
+    }
+  },
+  "uuid" : "f7202182-7268-40fb-b4f1-2e08262f7084",
+  "persistent" : true,
+  "insertionIndex" : 71
+}
