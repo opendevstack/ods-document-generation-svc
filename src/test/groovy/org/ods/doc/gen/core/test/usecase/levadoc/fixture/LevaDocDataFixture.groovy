@@ -25,8 +25,10 @@ class LevaDocDataFixture {
         this.project = project
     }
 
+    @Deprecated
     Object copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
-        FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
+        // Disabled
+        // FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
     }
 
     Map buildFixtureData(ProjectFixture projectFixture){
