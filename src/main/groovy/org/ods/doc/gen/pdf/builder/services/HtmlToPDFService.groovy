@@ -39,12 +39,19 @@ class HtmlToPDFService {
         def cmd = [getServiceName(), "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
         cmd << "--enable-local-file-access"
         cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
-        addHeader(data, cmd)
-        cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
+        cmd.addAll(controlSize())
+        cmd.addAll(addHeader(data))
+        cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10", "--footer-font-name", "Arial"])
         setOrientation(data, cmd)
         cmd << documentHtmlFile.toFile().absolutePath
         cmd << documentPDFFile.toFile().absolutePath
         return cmd
+    }
+
+    private List controlSize(){
+        return ["--dpi", "75",
+                "--image-dpi", "600",
+                "--minimum-font-size", "10"]
     }
 
     private String getServiceName() {
@@ -57,16 +64,17 @@ class HtmlToPDFService {
         }
     }
 
-    private void addHeader(Map data, ArrayList<String> cmd) {
+    private List<String> addHeader(Map data) {
+        List<String> cmd = []
         if (data?.metadata?.header) {
             if (data.metadata.header.size() > 1) {
-                cmd.addAll(["--header-center", """${data.metadata.header[0]}
-${data.metadata.header[1]}"""])
+                cmd.addAll(["--header-center", "${data.metadata.header[0]}\n${data.metadata.header[1]}"])
             } else {
-                cmd.addAll(["--header-center", data.metadata.header[0]])
+                cmd.addAll(["--header-center", data.metadata.header[0]] as String)
             }
-            cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
+            cmd.addAll(["--header-font-size", "10", "--header-spacing", "10", "--header-font-name", "Arial"])
         }
+        return cmd
     }
 
     private void executeCmd(documentHtmlFile, List<String> cmd) {

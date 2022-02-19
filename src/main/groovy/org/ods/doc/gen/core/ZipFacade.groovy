@@ -17,10 +17,8 @@ class ZipFacade {
 
     byte[] extractFromZipFile(String path, String fileToBeExtracted) {
         Path parentdir = Files.createDirectories(Paths.get(path).parent)
-
         def zipFile = new ZipFile(path)
         zipFile.extractFile(fileToBeExtracted, parentdir.toString())
-
         return new File(parentdir.toString(), fileToBeExtracted).getBytes()
     }
 
@@ -38,27 +36,14 @@ class ZipFacade {
         return new File(path).getBytes()
     }
 
-    void extractZipArchive(byte[] zipArchiveContent, Path targetDir) {
-        def tmpFile = Files.createTempFile("archive-", ".zip")
-        try {
-            cleanTargetFolder(targetDir)
-            createZipFile(tmpFile, zipArchiveContent).extractAll(targetDir.toString())
-        } catch (Throwable e) {
-            throw e
-        } finally {
-            Files.delete(tmpFile)
-        }
+    void extractZipArchive(Path zipArchive, Path targetDir) {
+        cleanTargetFolder(targetDir)
+        new ZipFile(zipArchive.toFile()).extractAll(targetDir.toString())
     }
 
     private void cleanTargetFolder(Path targetDir) {
         FileSystemUtils.deleteRecursively(targetDir.toFile())
         targetDir.toFile().mkdirs()
-    }
-
-    private ZipFile createZipFile(Path tmpFile, byte[] zipArchiveContent) {
-        Files.createDirectories(tmpFile.parent)
-        Files.write(tmpFile, zipArchiveContent)
-        return new ZipFile(tmpFile.toFile())
     }
 
 }

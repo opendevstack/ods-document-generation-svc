@@ -12,13 +12,14 @@ import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.doc.gen.leva.doc.LevaDocWiremock
+import org.ods.doc.gen.leva.doc.services.LevaDocWiremock
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.project.data.Project
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -59,6 +60,7 @@ class LevaDocControllerPactSpec extends Specification {
     @TempDir
     public Path tempFolder
 
+    @Shared
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
     private ProjectFixture projectFixture
@@ -76,26 +78,27 @@ class LevaDocControllerPactSpec extends Specification {
         levaDocControllerPact.host = 'localhost'
         levaDocControllerPact.port = port
         levaDocControllerPact.path = '/'
-        dataFixture = new LevaDocDataFixture(tempFolder.toFile(), project, testsReports)
-        testValidator = new LevaDocTestValidator(tempFolder.toFile(), project)
+        dataFixture = new LevaDocDataFixture(tempFolder.toFile(), testsReports)
+        testValidator = new LevaDocTestValidator(tempFolder.toFile())
     }
 
     def cleanup() {
         levaDocWiremock.tearDownWiremock()
     }
 
+    @Ignore
     def "Provider Pact - With Consumer #consumer"() {
-        given: "A temporal folder "
+        given: "Initial data for the project "
         GroovySpy(Files, global: true)
         Files.createTempDirectory(_) >> tempFolder
         consumer.stateChange = { ProviderState state -> setUpFixture(state)}
 
-        when: "mock folder"
+        when: "Verify the contract"
         Map failures = verifyConsumerPact(consumer)
 
         then:
         assert failures.size() == 0 : "Error in contract:${failures}"
-       // testValidator.validatePDF(projectFixture, "2022-01-22_23-59-59")
+        //testValidator.validatePDF(projectFixture, "2022-01-22_23-59-59")
 
         where:
         consumer << levaDocControllerPact.consumers

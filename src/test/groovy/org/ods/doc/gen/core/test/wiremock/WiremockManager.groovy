@@ -35,12 +35,11 @@ class WiremockManager {
         return this
     }
 
-    WiremockManager startServer(boolean recording = false, String targetURLParam = null) {
+    WiremockManager startServer(boolean recording) {
         if (recording){
             cleanExistingRecords()
         }
 
-        String targetURL = getTargetURL(targetURLParam)
         wireMockServer = new WireMockServer(
             WireMockConfiguration
                 .wireMockConfig()
@@ -50,10 +49,10 @@ class WiremockManager {
         )
         wireMockServer.start()
         log.info("WireMockServer: [{}:{}]", serverType, wireMockServer.baseUrl())
-        log.info("WireMockServer: [{}] targetURL:[{}]", serverType, targetURL)
+        log.info("WireMockServer: [{}] targetURL:[{}]", serverType, defaultURL)
         log.info("WireMockServer: [{}] pathToFiles:[{}]", serverType, pathToFiles)
 
-        setUpRecordMode(recording, wireMockServer, targetURL)
+        setUpRecordMode(recording, wireMockServer, defaultURL)
         return this
     }
 
@@ -101,13 +100,16 @@ class WiremockManager {
     }
 
     private Map prepareReplaceMap() {
-        Map replaceAllMap = ["${System.properties['domainUser']}"  : "\\\"dummyUser\\\""]
-        Map customReplaceAllMap = (System.properties['wiremock.textToReplace'] as String).tokenize(',')
-            .collectEntries {
-                List value = it.tokenize(':')
-                return [value[0], value[1]]
-            }
-        replaceAllMap += customReplaceAllMap
+        List domainUsers = ["bitbucket.username", "docGen.username", "jira.username"]
+        Map replaceAllMap = [:]
+        domainUsers.each {
+            replaceAllMap[(System.properties[it])] =  "dummyUser"
+        }
+
+        (System.properties['wiremock.textToReplace'] as String).tokenize(',').each {
+            List value = it.tokenize(':')
+            replaceAllMap[value[0]] =  value[1]
+        }
         return replaceAllMap
     }
 
@@ -152,14 +154,6 @@ class WiremockManager {
         def slurped = new JsonSlurper().parseText(text)
         def builder = new JsonBuilder(slurped)
         return builder
-    }
-
-    private String getTargetURL(String targetURLParam) {
-        String targetUrl = targetURLParam?:defaultURL
-        if (!targetUrl)
-            throw new RuntimeException("startServer needs the 'targetUrl' when recording")
-
-        return targetUrl
     }
 
     private void setUpRecordMode(boolean recording, WireMockServer wireMockServer, String targetURL) {

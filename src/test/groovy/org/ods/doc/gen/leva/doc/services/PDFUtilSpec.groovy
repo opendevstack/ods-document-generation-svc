@@ -3,6 +3,7 @@ package org.ods.doc.gen.leva.doc.services
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
+import spock.lang.Ignore
 import spock.lang.TempDir
 
 class PDFUtilSpec extends SpecHelper {
@@ -26,6 +27,7 @@ class PDFUtilSpec extends SpecHelper {
         doc.close()
     }
 
+    @Ignore
     def "convert from mardkdown document"() {
         given:
         def util = new PDFUtil()

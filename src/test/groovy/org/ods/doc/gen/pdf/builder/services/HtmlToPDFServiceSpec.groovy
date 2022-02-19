@@ -28,9 +28,6 @@ class HtmlToPDFServiceSpec extends Specification {
     }
 
     def "getServiceName for Windows"() {
-
-        given:
-
         when:
         OSService.getOSApplicationsExtension() >> ".exe"
 
@@ -39,9 +36,6 @@ class HtmlToPDFServiceSpec extends Specification {
     }
 
     def "getServiceName for not windows OS"() {
-
-        given:
-
         when:
         OSService.getOSApplicationsExtension() >> ""
 

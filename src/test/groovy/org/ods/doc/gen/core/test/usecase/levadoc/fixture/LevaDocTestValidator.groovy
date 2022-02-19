@@ -14,18 +14,15 @@ class LevaDocTestValidator {
     static final String SAVED_DOCUMENTS = "build/reports/LeVADocs"
 
     private final File tempFolder
-    private final Project project
 
-    LevaDocTestValidator(File tempFolder,
-                         Project project){
+    LevaDocTestValidator(File tempFolder){
         this.tempFolder = tempFolder
-        this.project = project
     }
 
     boolean validatePDF(ProjectFixture projectFixture, String buildId) {
         unzipGeneratedArtifact(projectFixture, buildId)
         if (GENERATE_EXPECTED_PDF_FILES) {
-            copyDocWhenRecording(projectFixture)
+            copyDocWhenRecording(projectFixture, buildId)
             return true
         } else {
             def actualFile = actualDoc(projectFixture, buildId)
@@ -56,8 +53,8 @@ class LevaDocTestValidator {
         return new File("${filePath}/${projectFixture.docType}-${projectFixture.version}-${buildId}.pdf")
     }
 
-    private void copyDocWhenRecording(ProjectFixture projectFixture) {
-        FileUtils.copyFile(actualDoc(projectFixture), expectedDoc(projectFixture))
+    private void copyDocWhenRecording(ProjectFixture projectFixture, String buildId) {
+        FileUtils.copyFile(actualDoc(projectFixture, buildId), expectedDoc(projectFixture, buildId))
     }
 
     private File actualDoc(ProjectFixture projectFixture, String buildId) {

@@ -6,6 +6,8 @@ import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
 
 import java.awt.image.BufferedImage
+import java.nio.file.Files
+import java.nio.file.Paths
 
 @Slf4j
 class PdfCompare {
@@ -69,6 +71,7 @@ class PdfCompare {
     }
 
     private String errorFileName(String file1, int iPage) {
+        Files.createDirectories(Paths.get(imageDestinationPath));
         return  this.imageDestinationPath +
             File.separator +
             new File(file1).getName().replace(PDF, "_") +

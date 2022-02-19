@@ -35,9 +35,15 @@ abstract class DocGenUseCase {
         this.jenkins = jenkins
     }
 
-    String createDocument(ProjectData projectData, String documentType, Map repo, Map data, Map<String, byte[]> files = [:], Closure modifier = null, String templateName = null, String watermarkText = null) {
-        // Create a PDF document via the DocGen service
-        def document = this.docGen.createDocument(templateName ?: documentType, this.getDocumentTemplatesVersion(projectData), data)
+    String createDocument(ProjectData projectData,
+                          String documentType,
+                          Map repo,
+                          Map data,
+                          Map<String, byte[]> files = [:],
+                          Closure modifier = null,
+                          String templateName = null,
+                          String watermarkText = null) {
+        def document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
 
         // Apply PDF document modifications, if provided
         if (modifier) {
@@ -49,19 +55,15 @@ abstract class DocGenUseCase {
             document = this.pdf.addWatermarkText(document, watermarkText)
         }
 
-        def basename = this.getDocumentBasename(projectData, documentType, projectData.build.version, projectData.build.buildId, repo)
+        def basename = this.getDocumentBasename(projectData,
+                documentType,
+                projectData.build.version,
+                projectData.build.buildId,
+                repo)
         def pdfName = "${basename}.pdf"
 
-        // Create an archive with the document and raw data
-        def artifacts = [
-            "${pdfName}": document,
-            "raw/${basename}.json": JsonOutput.toJson(data).getBytes(),
-        ]
-        artifacts << files.collectEntries { path, contents ->
-            [ path, contents ]
-        }
-
-        def doCreateArtifact = shouldCreateArtifact(documentType, repo)
+        Map<GString, Object> artifacts = buildArchiveWithPdfAndRawData(pdfName, document, basename, data, files)
+        boolean doCreateArtifact = shouldCreateArtifact(documentType, repo)
         def artifact = this.zip.createZipFileFromFiles(projectData, "${basename}.zip", artifacts)
 
         // Concerns DTR/TIR for a single repo
@@ -87,6 +89,17 @@ abstract class DocGenUseCase {
         message += " to [${uri}]"
         log.info message
         return uri.toString()
+    }
+
+    private Map<String, Object> buildArchiveWithPdfAndRawData(pdfName, document, basename, Map data, Map<String, byte[]> files) {
+        def artifacts = [
+                "${pdfName}"          : document,
+                "raw/${basename}.json": JsonOutput.toJson(data).getBytes(),
+        ]
+        artifacts << files.collectEntries { path, contents ->
+            [path, contents]
+        }
+        artifacts
     }
 
     @SuppressWarnings(['JavaIoPackageAccess'])
@@ -166,8 +179,7 @@ abstract class DocGenUseCase {
         String resurrectedBuild
         if (repo.data.openshift.resurrectedBuild) {
             resurrectedBuild = repo.data.openshift.resurrectedBuild
-            log.info "Using ${documentType} from jenkins build: ${resurrectedBuild}" +
-                " for repo: ${repo.id}"
+            log.info "Using ${documentType} from jenkins build: ${resurrectedBuild} for repo: ${repo.id}"
         } else {
             return [found: false]
         }
@@ -184,8 +196,7 @@ abstract class DocGenUseCase {
         def fileExtensions = getFiletypeForDocumentType(documentType)
         String storageType = fileExtensions.storage ?: 'zip'
         String contentType = fileExtensions.content ?: 'pdf'
-        log.info "Resolved documentType '${documentType}'" +
-            " - storage/content formats: ${fileExtensions}"
+        log.info "Resolved documentType '${documentType}' - storage/content formats: ${fileExtensions}"
 
         String contentFileName = "${basename}.${contentType}"
         String storedFileName = "${basename}.${storageType}"
@@ -198,8 +209,7 @@ abstract class DocGenUseCase {
         log.info "Document found: ${storedFileName} \r${documentFromNexus}"
         byte [] resurrectedDocAsBytes
         if (storageType == 'zip') {
-            resurrectedDocAsBytes = this.zip.extractFromZipFile(
-                "${path}/${storedFileName}", contentFileName)
+            resurrectedDocAsBytes = this.zip.extractFromZipFile("${path}/${storedFileName}", contentFileName)
         } else {
             resurrectedDocAsBytes = documentFromNexus.content.getBytes()
         }

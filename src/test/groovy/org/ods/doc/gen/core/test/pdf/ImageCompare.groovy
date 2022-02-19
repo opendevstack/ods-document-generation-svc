@@ -5,6 +5,8 @@ import groovy.util.logging.Slf4j
 import javax.imageio.ImageIO
 import java.awt.*
 import java.awt.image.BufferedImage
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Slf4j
 class ImageCompare {

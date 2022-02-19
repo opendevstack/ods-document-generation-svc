@@ -3,6 +3,8 @@ package org.ods.doc.gen.pdf.builder.repository
 import feign.FeignException
 import feign.Request
 import feign.RequestTemplate
+import org.ods.doc.gen.BitBucketClientConfig
+import org.ods.doc.gen.core.ZipFacade
 import spock.lang.Specification
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
@@ -24,13 +26,16 @@ class BitBucketDocumentTemplatesRepositorySpec extends Specification {
     def "error msg in request by #exceptionTypeName"(){
         given:
         def version = "1.0"
-        def repository = new BitBucketDocumentTemplatesRepository(null, "basePath")
-        def uri = repository.getURItoDownloadTemplates(version)
+        def repository = new BitBucketDocumentTemplatesRepository(
+                new BitBucketClientConfig(),
+                new ZipFacade(),
+                "basePath")
+        def uri = BitBucketDocumentTemplatesRepository.getURItoDownloadTemplates(version)
         def store = Mock(BitBucketDocumentTemplatesStoreHttpAPI)
         store.getTemplatesZipArchiveForVersion(_, _, _) >> { throw createException(exceptionTypeName)}
 
         when:
-        repository.getZipArchive(store, version, uri, "bitbucketUserName")
+        repository.getTemplatesForVersion(version)
 
         then:
         def e = thrown(RuntimeException)

@@ -1,6 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.JiraDataItem
 import org.ods.doc.gen.project.data.ProjectData
@@ -85,10 +86,9 @@ class DocumentHistory {
 
     private List<DocumentHistoryEntry> loadSavedDocHistoryData(ProjectData projectData) {
         def fileName = this.getSavedDocumentName(sourceEnvironment)
-        this.log.debug("Retrieving saved document history with name '${fileName}' " +
-            "in workspace '${projectData.tmpFolder}'.")
+        this.log.debug("Retrieving saved document history with name '${fileName}' from '${projectData.tmpFolder}'.")
 
-        def content = projectData.loadSavedJiraData(fileName)
+        def content = ProjectDataRepository.loadFile(projectData.tmpFolder, fileName)
         try {
             return content.collect { Map entry ->
                 if (!entry.entryId) {
