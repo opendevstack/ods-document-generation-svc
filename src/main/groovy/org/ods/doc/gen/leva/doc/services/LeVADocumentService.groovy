@@ -236,7 +236,7 @@ class LeVADocumentService extends DocGenUseCase {
         def watermarkText = this.getWatermarkText(projectData)
 
         def unitTests = projectData.getAutomatedTestsTypeUnit()
-        def tests = this.computeTestsWithRequirementsAndSpecs(unitTests)
+        def tests = this.computeTestsWithRequirementsAndSpecs(projectData, unitTests)
         def modules = this.getReposWithUnitTestsInfo(projectData, unitTests)
 
         def keysInDoc = this.computeKeysInDocForDTP(modules, tests)
@@ -1259,7 +1259,7 @@ class LeVADocumentService extends DocGenUseCase {
         return result
     }
 
-    protected List<Map> computeTestsWithRequirementsAndSpecs(List<Map> tests) {
+    protected List<Map> computeTestsWithRequirementsAndSpecs(ProjectData projectData, List<Map> tests) {
         def obtainEnum = { category, value ->
             return projectData.getEnumDictionary(category)[value as String]
         }
@@ -1347,7 +1347,7 @@ class LeVADocumentService extends DocGenUseCase {
                 [it.id, it.name, it.metadata.name].contains(normComponentName)
             }
             if (!repo_) {
-                def repoNamesAndIds = projectData.repositories. collect { [id: it.id, name: it.name] }
+                List<Map> repoNamesAndIds = projectData.repositories. collect { [id: it.id, name: it.name] }
                 throw new RuntimeException("Error: unable to create ${documentType}. Could not find a repository " +
                     "configuration with id or name equal to '${normComponentName}' for " +
                     "Jira component '${component.name}' in project '${projectData.key}'. Please check " +
@@ -1441,7 +1441,7 @@ class LeVADocumentService extends DocGenUseCase {
             name          : name,
             description   : projectData.description,
             type          : documentTypeName,
-            version       : projectData.build.releaseParamVersion,
+            version       : projectData.build.version,
             date_created  : LocalDateTime.now(clock).toString(),
             buildParameter: projectData.build,
             git           : repo ? repo.data.git : projectData.gitData,

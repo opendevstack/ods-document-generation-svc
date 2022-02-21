@@ -1,23 +1,33 @@
 package org.ods.doc.gen
 
+import feign.Feign
+import feign.Logger
+import feign.slf4j.Slf4jLogger
+import groovy.util.logging.Slf4j
+import okhttp3.OkHttpClient
+import org.ods.doc.gen.pdf.builder.repository.GithubDocumentTemplatesStoreHttpAPI
+import org.springframework.stereotype.Service
 
-import feign.auth.BasicAuthRequestInterceptor
-import org.springframework.context.annotation.Bean
-
+@Slf4j
+@Service
 class GithubClientConfig {
 
-  /*  @Bean
-    RequestInterceptor requestInterceptor() {
-        return requestTemplate -> {
-            requestTemplate.header("Accept", "aapplication/octet-stream");
-        };
-    }
-*/
+    GithubDocumentTemplatesStoreHttpAPI getClient(URI baseUrl) {
+        String[] httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.replace('http://','')?.split(':')
+        log.info ("Proxy setup: ${httpProxyHost ?: 'not found' }")
 
-    @Bean
-    BasicAuthRequestInterceptor basicAuthRequestInterceptor() {
-        def bitbucketUserName = System.getenv("BITBUCKET_USERNAME")
-        def bitbucketPassword = System.getenv("BITBUCKET_PASSWORD")
-        return new BasicAuthRequestInterceptor(bitbucketUserName, bitbucketPassword)
+        feign.okhttp.OkHttpClient client
+        if (httpProxyHost && !System.getenv("GITHUB_HOST")) {
+            int httpProxyPort = httpProxyHost.size() == 2 ? Integer.parseInt(httpProxyHost[1]) : 80
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(httpProxyHost[0], httpProxyPort))
+            client = new feign.okhttp.OkHttpClient(new OkHttpClient().newBuilder().proxy(proxy).build())
+        } else {
+            client = new feign.okhttp.OkHttpClient(new OkHttpClient().newBuilder().build())
+        }
+
+        return Feign.builder().client(client).logger(new Slf4jLogger(GithubDocumentTemplatesStoreHttpAPI.class))
+                .logLevel(Logger.Level.FULL)
+                .target(GithubDocumentTemplatesStoreHttpAPI.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
     }
+
 }

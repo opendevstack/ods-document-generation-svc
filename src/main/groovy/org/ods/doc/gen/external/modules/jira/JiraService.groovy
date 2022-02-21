@@ -17,6 +17,7 @@ class JiraService {
     protected static Map CHARACTER_REMOVEABLE = ['\u00A0': ' ',]
 
     URI baseURL
+    URI targetURL // this is because baseURL can be modificated by Wiremok
     String username
     String password
 
@@ -41,6 +42,7 @@ class JiraService {
 
         try {
             this.baseURL = new URIBuilder(baseURL).build()
+            this.targetURL = new URIBuilder(baseURL).build()
         } catch (e) {
             throw new IllegalArgumentException("Error: unable to connect to Jira. '${baseURL}' is not a valid URI.").initCause(e)
         }
@@ -173,7 +175,7 @@ class JiraService {
 
     
     Map getFileFromJira(String url) {
-        def response = Unirest.get(url)
+        def response = Unirest.get(changeRLWhenUsingWiremock(url))
             .basicAuth(this.username, this.password)
             .asBytes()
 
@@ -193,7 +195,11 @@ class JiraService {
         ]
     }
 
-    
+    private String changeRLWhenUsingWiremock(String url) {
+        return (baseURL == targetURL)? baseURL : url.replace(targetURL.toString(), baseURL.toString())
+    }
+
+
     List getIssuesForJQLQuery(Map query) {
         return searchByJQLQuery(query).issues
     }

@@ -15,5 +15,4 @@ interface DocumentTemplatesRepository {
     
     boolean isApplicableToSystemConfig()
 
-    URI getURItoDownloadTemplates(String version)
 }

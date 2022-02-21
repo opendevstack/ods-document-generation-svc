@@ -9,6 +9,7 @@ class ProjectFixture {
     String project
     String releaseKey
     String version
+    String templatesVersion
     String docType
     Boolean overall
     String component
@@ -19,6 +20,7 @@ class ProjectFixture {
             .project(project.id as String)
             .releaseKey(project.releaseId as String)
             .version(project.version as String)
+            .templatesVersion(project.templatesVersion as String)
             .validation(project.validation as String)
             .docType(docType)
     }

@@ -111,8 +111,7 @@ class NexusService {
     Map<URI, File> retrieveArtifact(String nexusRepository, String nexusDirectory, String name, String extractionPath) {
         // https://nexus3-ods....../repository/leva-documentation/odsst-WIP/DTP-odsst-WIP-108.zip
         String urlToDownload = "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
-        def restCall = Unirest.get("${urlToDownload}")
-            .basicAuth(this.username, this.password)
+        def restCall = Unirest.get("${urlToDownload}").basicAuth(this.username, this.password)
 
         // hurray - unirest, in case file exists - don't do anything.
         File artifactExists = new File("${extractionPath}/${name}")

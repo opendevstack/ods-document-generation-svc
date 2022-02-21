@@ -8,6 +8,7 @@ import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import spock.lang.Specification
@@ -59,7 +60,7 @@ class LevaDocControllerSpec extends Specification {
                 .perform(post("/levaDoc/${projectFixture.project}/${buildNumber}/CSD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonOutput.toJson(data)))
-                .andExpect(status().isOk()).andExpect(content().string(urlDocType))
+                .andExpect(status().isOk()).andExpect(content().json("{'nexusURL':'URL nexus artifact'}"))
 
         and: "the tmp folder is deleted"
         !Files.exists(tempFolder)

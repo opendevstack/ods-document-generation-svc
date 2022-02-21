@@ -1,7 +1,6 @@
 package org.ods.doc.gen.project.data
 
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
@@ -9,13 +8,13 @@ import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
 import org.ods.doc.gen.external.modules.jira.OpenIssuesException
+import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
 import org.ods.doc.gen.leva.doc.services.PipelineConfig
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
-import java.nio.file.NoSuchFileException
 import java.nio.file.Paths
 
 @SuppressWarnings(['LineLength',
@@ -32,9 +31,8 @@ import java.nio.file.Paths
 @Service
 class ProjectData {
 
-    protected static final String BUILD_PARAM_VERSION_DEFAULT = 'WIP'
-    protected static final String METADATA_FILE_NAME = 'metadata.yml'
-    protected static final String BASE_DIR = 'projectData'
+    static final String BUILD_PARAM_VERSION_DEFAULT = 'WIP'
+    static final String METADATA_FILE_NAME = 'metadata.yml'
 
     protected Map config
     protected Boolean isVersioningEnabled = false
@@ -204,11 +202,12 @@ class ProjectData {
         if (!result?.id?.trim()) {
             throw new IllegalArgumentException("Error: unable to parse project meta data. Required attribute 'id' is undefined.")
         }
-
         // Check for existence of required attribute 'name'
         if (!result?.name?.trim()) {
             throw new IllegalArgumentException("Error: unable to parse project meta data. Required attribute 'name' is undefined.")
         }
+
+        result.id = result.id.toUpperCase()
         return result
     }
 
@@ -626,8 +625,7 @@ class ProjectData {
         def contentField = docChapterIssueFields[CustomIssueFields.CONTENT].id
         def headingNumberField = docChapterIssueFields[CustomIssueFields.HEADING_NUMBER].id
 
-        def jql = "project = ${projectKey} " +
-                "AND issuetype = '${IssueTypes.DOCUMENTATION_CHAPTER}'"
+        def jql = "project = ${projectKey} AND issuetype = '${IssueTypes.DOCUMENTATION_CHAPTER}'"
 
         if (versionName) {
             jql = jql + " AND fixVersion = '${versionName}'"
@@ -695,14 +693,14 @@ class ProjectData {
 
         // Get more info of the versions from Jira
         def predecessors = newData.precedingVersions ?: []
-        def previousVersionId = null
+        String previousVersionId
         if (predecessors && ! predecessors.isEmpty()) {
             previousVersionId = predecessors.first()
         }
 
         if (previousVersionId) {
             log.info("Found a predecessor project version with ID '${previousVersionId}'. Loading its data.")
-            def savedDataFromOldVersion = this.loadSavedJiraData(previousVersionId)
+            def savedDataFromOldVersion =  ProjectDataRepository.loadFile(tmpFolder, previousVersionId)
             def mergedData = this.mergeJiraData(savedDataFromOldVersion, newData)
             result << this.addKeyAndVersionToComponentsWithout(mergedData)
             result.previousVersion = previousVersionId
@@ -885,20 +883,6 @@ class ProjectData {
         }
 
         return JsonOutput.prettyPrint(JsonOutput.toJson(result))
-    }
-
-    Object loadSavedJiraData(String savedVersion) {
-        String fileName = "${BASE_DIR}/${savedVersion}.json"
-        try {
-            String savedData =  new File("${tmpFolder}/${fileName}")?.text
-            return new JsonSlurperClassic().parseText(savedData) ?: [:]
-        } catch (NoSuchFileException e) {
-            throw new NoSuchFileException("File '${fileName}' is expected to be inside the release " +
-                    'manager repository but was not found and thus, document history cannot be build. If you come from ' +
-                    'and old ODS version, create one for each document to use the automated document history feature.')
-        } catch (RuntimeException ex) {
-            throw new RuntimeException("Error parsing File '${fileName}'", ex)
-        }
     }
 
     Map mergeJiraData(Map oldData, Map newData) {

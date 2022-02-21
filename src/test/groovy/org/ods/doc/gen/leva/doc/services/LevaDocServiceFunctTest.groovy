@@ -9,9 +9,9 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWi
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesOverall
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
-import org.ods.doc.gen.leva.doc.LevaDocWiremock
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
+import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -72,27 +72,29 @@ class LevaDocServiceFunctTest extends Specification {
     @Inject
     LevaDocWiremock levaDocWiremock
 
+    @Inject
+    WiremockDocumentRepository wiremockDocumentRepository
+
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
 
     def setupSpec(){
-        new File(LevaDocTestValidator.SAVED_DOCUMENTS).mkdirs()
+       new File(LevaDocTestValidator.SAVED_DOCUMENTS).mkdirs()
     }
 
     def setup() {
-        dataFixture = new LevaDocDataFixture(tempFolder, project, testsReports)
-        testValidator = new LevaDocTestValidator(tempFolder, project)
+        dataFixture = new LevaDocDataFixture(tempFolder, testsReports)
+        testValidator = new LevaDocTestValidator(tempFolder)
     }
 
     def cleanup() {
         levaDocWiremock.tearDownWiremock()
+        wiremockDocumentRepository.tearDownWiremock()
     }
 
     def "create #projectFixture.docType for project: #projectFixture.project"() {
         given: "A project data"
-        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
-        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
-        Map data = dataFixture.buildFixtureData(projectFixture)
+        Map data = setFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
 
         when: "the user creates a LeVA document"
@@ -107,9 +109,7 @@ class LevaDocServiceFunctTest extends Specification {
 
     def "create #projectFixture.docType with tests results for project: #projectFixture.project"() {
         given: "A project data"
-        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
-        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
-        Map data = dataFixture.buildFixtureData(projectFixture)
+        Map data = setFixture(projectFixture)
         ProjectData projectData = prepareServiceDataParam(projectFixture, data)
         data << testsReports.getAllResults(projectData, projectData.repositories)
 
@@ -125,11 +125,9 @@ class LevaDocServiceFunctTest extends Specification {
 
     def "create #projectFixture.docType for component #projectFixture.component and project: #projectFixture.project"() {
         given: "A project data"
-        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
-        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
-        Map data = dataFixture.buildFixtureData(projectFixture)
-        prepareServiceDataParam(projectFixture, data)
-        data.repo = dataFixture.getModuleData(projectFixture, data)
+        Map data = setFixture(projectFixture)
+        ProjectData projectData = prepareServiceDataParam(projectFixture, data)
+        data.repo = dataFixture.getModuleData(projectFixture, projectData)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -147,11 +145,9 @@ class LevaDocServiceFunctTest extends Specification {
      */
     def "create Overall #projectFixture.docType for project: #projectFixture.project"() {
         given: "A project data"
-        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
-        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
-        Map data = dataFixture.buildFixtureData(projectFixture)
-        prepareServiceDataParam(projectFixture, data)
-        dataFixture.updateExpectedComponentDocs(data, projectFixture)
+        Map data = setFixture(projectFixture)
+        ProjectData projectData = prepareServiceDataParam(projectFixture, data)
+        dataFixture.updateExpectedComponentDocs(projectData, data, projectFixture)
 
         when: "the user creates a LeVA document"
         leVADocumentService."createOverall${projectFixture.docType}"(data)
@@ -161,6 +157,13 @@ class LevaDocServiceFunctTest extends Specification {
 
         where:
         projectFixture << new DocTypeProjectFixturesOverall().getProjects()
+    }
+
+    private Map setFixture(ProjectFixture projectFixture) {
+        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
+        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
+        wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion as String)
+        return dataFixture.buildFixtureData(projectFixture)
     }
 
     private ProjectData prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {

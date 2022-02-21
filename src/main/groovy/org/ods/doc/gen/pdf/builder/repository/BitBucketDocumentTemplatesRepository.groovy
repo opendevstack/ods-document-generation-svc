@@ -1,35 +1,33 @@
 package org.ods.doc.gen.pdf.builder.repository
 
-import feign.Feign
+
 import feign.FeignException
 import feign.Headers
 import feign.Param
 import feign.RequestLine
-import feign.auth.BasicAuthRequestInterceptor
+import feign.Response
+import feign.codec.ErrorDecoder
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.BitBucketClientConfig
 import org.ods.doc.gen.core.ZipFacade
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Repository
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 
 import javax.inject.Inject
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
-@Repository
-@FeignClient(name = "bitBucket-client", configuration = BitBucketClientConfig.class)
 interface BitBucketDocumentTemplatesStoreHttpAPI {
 
   @Headers("Accept: application/octet-stream")
-  @GetMapping("/rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/release/v{version}&format=zip")
-  byte[] getTemplatesZipArchiveForVersion(@PathVariable("documentTemplatesProject") String documentTemplatesProject,
-                                          @PathVariable("documentTemplatesRepo") String documentTemplatesRepo,
-                                          @PathVariable ("version") String version)
+  @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/release/v{version}&format=zip")
+  Response getTemplatesZipArchiveForVersion(@Param("documentTemplatesProject") String documentTemplatesProject,
+                                            @Param("documentTemplatesRepo") String documentTemplatesRepo,
+                                            @Param("version") String version)
 
 }
 
@@ -40,11 +38,13 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
 
     private final ZipFacade zipFacade
     private final String basePath
-    private final BitBucketDocumentTemplatesStoreHttpAPI store
+    private final BitBucketClientConfig bitBucketClientConfig
 
     @Inject
-    BitBucketDocumentTemplatesRepository(BitBucketDocumentTemplatesStoreHttpAPI store, ZipFacade zipFacade, @Value('${cache.documents.basePath}') String basePath){
-        this.store = store
+    BitBucketDocumentTemplatesRepository(BitBucketClientConfig bitBucketClientConfig,
+                                         ZipFacade zipFacade,
+                                         @Value('${cache.documents.basePath}') String basePath){
+        this.bitBucketClientConfig = bitBucketClientConfig
         this.basePath = basePath
         this.zipFacade = zipFacade
     }
@@ -52,9 +52,17 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
     Path getTemplatesForVersion(String version) {
         log.info ("getTemplatesForVersion version:${version}")
 
-        def targetDir = Paths.get(basePath, version)
-        byte[] zipArchiveContent = getZipArchive(version)
-        zipFacade.extractZipArchive(zipArchiveContent, targetDir)
+        Path targetDir = Paths.get(basePath, version)
+        Path zipArchive = Files.createTempFile("archive-", ".zip")
+        try {
+            downloadZipArchive(version, zipArchive)
+            zipFacade.extractZipArchive(zipArchive, targetDir)
+        } catch (Throwable e) {
+            throw e
+        } finally {
+            Files.delete(zipArchive)
+        }
+
         return targetDir
     }
 
@@ -63,15 +71,12 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
         if (!System.getenv("BITBUCKET_URL")) {
             missingEnvs << "BITBUCKET_URL"
         }
-
         if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")) {
             missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_PROJECT"
         }
-
         if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")) {
             missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_REPO"
         }
-
         if (missingEnvs.size() > 0) {
             log.warn "Bitbucket adapter not applicable - missing config '${missingEnvs}'"
             return false
@@ -80,7 +85,7 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
         return true
     }
 
-    URI getURItoDownloadTemplates(String version) {
+    static URI getURItoDownloadTemplates(String version) {
         def project = System.getenv('BITBUCKET_DOCUMENT_TEMPLATES_PROJECT')
         def repo = System.getenv('BITBUCKET_DOCUMENT_TEMPLATES_REPO')
         return new URIBuilder(System.getenv("BITBUCKET_URL") as String)
@@ -90,38 +95,38 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
                 .build()
     }
 
-    private byte[] getZipArchive(String version) {
-        def bitbucketUserName = System.getenv("BITBUCKET_USERNAME")
-
+    private void downloadZipArchive(String version, Path zipArchive) {
         def bitbucketRepo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
         def bitbucketProject = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")
+        URI templates = getURItoDownloadTemplates(version)
         try {
-            return store.getTemplatesZipArchiveForVersion(bitbucketProject, bitbucketRepo, version)
+            bitBucketClientConfig
+                .getClient(templates)
+                .getTemplatesZipArchiveForVersion(bitbucketProject, bitbucketRepo, version)
+                .withCloseable { response ->
+                    if (response.status() >= 300) {
+                        def methodKey = 'BitBucketDocumentTempla..API#getTemplatesZipArchiveForVersion'
+                        throw new ErrorDecoder.Default().decode(methodKey, response)
+                    }
+                    response.body().withCloseable { body ->
+                            body.asInputStream().withStream { is ->
+                                Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
+                            }
+                    }
+                }
         } catch (FeignException callException) {
-            def baseErrMessage = "Could not get document"
-            def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${bitbucketRepo}' - "
+            def baseErrMessage = "Could not get document zip from '${templates}'!- For version:${version}"
             if (callException instanceof FeignException.BadRequest) {
-                throw new RuntimeException("${baseRepoErrMessage}" +
-                        "is there a correct release branch configured, called 'release/v${version}'?")
+                throw new RuntimeException ("${baseErrMessage} \rIs there a correct release branch configured?")
             } else if (callException instanceof FeignException.Unauthorized) {
-                def bbUserNameError = bitbucketUserName ?: 'Anyone'
-                throw new RuntimeException("${baseRepoErrMessage} \rDoes '${bbUserNameError}' have access?")
+                def bbUserNameError =  System.getenv("BITBUCKET_USERNAME") ?: 'Anyone'
+                throw new RuntimeException ("${baseErrMessage} \rDoes '${bbUserNameError}' have access?")
             } else if (callException instanceof FeignException.NotFound) {
-                throw new RuntimeException("${baseErrMessage}" +
-                        "\rDoes repository '${bitbucketRepo}' in project: '${bitbucketProject}' exist?")
+                throw new RuntimeException ("${baseErrMessage}")
             } else {
                 throw callException
             }
         }
-    }
-
-    private BitBucketDocumentTemplatesStoreHttpAPI createStorageClient(String bitbucketUserName, String bitbucketPassword, URI uri) {
-        Feign.Builder builder = Feign.builder()
-        if (bitbucketUserName && bitbucketPassword) {
-            builder.requestInterceptor(new BasicAuthRequestInterceptor(bitbucketUserName, bitbucketPassword))
-        }
-
-        return builder.target(BitBucketDocumentTemplatesStoreHttpAPI.class, uri.getScheme() + "://" + uri.getAuthority())
     }
 
 }

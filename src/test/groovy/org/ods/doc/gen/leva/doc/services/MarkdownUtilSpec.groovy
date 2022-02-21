@@ -4,6 +4,7 @@ package org.ods.doc.gen.leva.doc.services
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.leva.doc.services.MarkdownUtil
+import spock.lang.Ignore
 
 class MarkdownUtilSpec extends SpecHelper {
 
@@ -43,6 +44,7 @@ class MarkdownUtilSpec extends SpecHelper {
 
     }
 
+    @Ignore
     def "Converts to PDF"() {
         given:
         def util = new MarkdownUtil()
@@ -71,6 +73,7 @@ class MarkdownUtilSpec extends SpecHelper {
         doc.close()
     }
 
+    @Ignore
     def "Converts to PDF in landscape"() {
         given:
         def util = new MarkdownUtil()

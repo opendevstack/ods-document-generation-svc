@@ -1,16 +1,16 @@
 projects:
-  - id: FRML24113
-    releaseId: FRML24113-230
+  - id: ORDGP
+    description: One Release DocGen
+    releaseId: ORDGP-123
     version: WIP
+    templatesVersion: 1.2
     validation: >
       ### Project validates
-      * Large images
-      * Discontinue tests
-
-#  - id: OFI2004
-#    releaseId: OFI2004-207
-#    validation: In this project we are testing....
-
- # - id: EDPP
- #   releaseId: EDPP-1302
- #   validation: In this project we are testing EDPP
+      * Images in documents
+      *	Images in tables
+      * Long texts in issues
+      *	Long texts in tables
+      * Long lists on tables
+      *	All Test Levels documented
+      *	Test Steps documented
+      * Epics Documented
