@@ -14,16 +14,21 @@ import org.ods.doc.gen.project.data.ProjectData
 class LevaDocDataFixture {
 
     private final File tempFolder
+    private final Project project
     private final TestsReports testsReports
 
     LevaDocDataFixture(File tempFolder,
+                       Project project = null,
                        TestsReports testsReports = null){
         this.tempFolder = tempFolder
         this.testsReports = testsReports
+        this.project = project
     }
 
-    void copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
-        FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
+    @Deprecated
+    Object copyProjectDataToTemporalFolder(ProjectFixture projectFixture) {
+        // Disabled
+        // FileUtils.copyDirectory(new File("src/test/resources/workspace/${projectFixture.project}"), tempFolder)
     }
 
     Map buildFixtureData(ProjectFixture projectFixture){
@@ -34,14 +39,15 @@ class LevaDocDataFixture {
         return data
     }
 
-    Map getModuleData(ProjectFixture projectFixture, ProjectData projectData) {
+    Map getModuleData(ProjectFixture projectFixture, Map data) {
         Map input = RepoDataBuilder.getRepoForComponent(projectFixture.component)
+        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         input.data.tests << [unit: testsReports.getResults(projectData, projectFixture.component, "unit")]
         return input
     }
 
-    void updateExpectedComponentDocs(ProjectData projectData, Map data, ProjectFixture projectFixture) {
-        projectData.repositories.each {repo ->
+    void updateExpectedComponentDocs(Map data, ProjectFixture projectFixture) {
+        project.getProjectData(data.projectBuild as String, data).repositories.each {repo ->
             projectFixture.component = repo.id
             repo.data.documents = (repo.data.documents)?: [:]
             if (DocTypeProjectFixtureWithComponent.notIsReleaseModule(repo)){
@@ -51,6 +57,7 @@ class LevaDocDataFixture {
         }
         projectFixture.component = null
     }
+
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         return  [
@@ -63,6 +70,7 @@ class LevaDocDataFixture {
                 rePromote: "false",
                 releaseStatusJiraIssueKey: projectFixture.releaseKey,
                 runDisplayUrl : "",
+                releaseParamVersion : "3.0",
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
                 jobName : "ofi2004-cd/ofi2004-cd-release-master",

@@ -2,6 +2,7 @@ package org.ods.doc.gen.project.data
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraService
@@ -37,13 +38,16 @@ class ProjectData {
     protected Boolean isVersioningEnabled = false
 
     private final JiraService jira
+    private final GitRepoDownloadService gitRepoDownloadService
 
     String tmpFolder
     Map data = [:]
     Map build = [:]
 
-    ProjectData(JiraService jira) {
+    ProjectData(JiraService jira, GitRepoDownloadService gitRepoDownloadService) {
         this.jira = jira
+        this.gitRepoDownloadService = gitRepoDownloadService
+
         this.config =  [:]
         this.build = [
             hasFailingTests: false,
@@ -64,7 +68,9 @@ class ProjectData {
     }
 
     ProjectData load() {
-        this.data.metadata = loadMetadata(tmpFolder) // TODO s2o load from BB
+
+        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolder)
+        this.data.metadata = loadMetadata(tmpFolder) 
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
 

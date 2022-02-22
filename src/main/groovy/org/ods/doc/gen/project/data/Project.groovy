@@ -1,6 +1,7 @@
 package org.ods.doc.gen.project.data
 
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.springframework.stereotype.Service
 
@@ -13,16 +14,18 @@ import javax.inject.Inject
 class Project {
 
     private final JiraService jira
+    private final GitRepoDownloadService gitRepoDownloadService
 
     @Inject
-    Project(JiraService jira){
+    Project(JiraService jira, GitRepoDownloadService gitRepoDownloadService){
         this.jira = jira
+        this.gitRepoDownloadService = gitRepoDownloadService
     }
 
     @CacheResult(cacheName = "projectData")
     ProjectData getProjectData(@CacheKey String projectBuildId, Map data){
         log.info("build project data for projectBuildId:${projectBuildId}")
-        return new ProjectData(jira).init(data).load()
+        return new ProjectData(jira, gitRepoDownloadService).init(data).load()
     }
 
 }
