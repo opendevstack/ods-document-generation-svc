@@ -94,6 +94,7 @@ class LevaDocServiceFunctTest extends Specification {
     def cleanup() {
         levaDocWiremock.tearDownWiremock()
         wiremockDocumentRepository.tearDownWiremock()
+        wiremockReleaseRepository.tearDownWiremock()
     }
 
     def "create #projectFixture.docType for project: #projectFixture.project"() {
@@ -164,9 +165,9 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     private Map setFixture(ProjectFixture projectFixture) {
-        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion as String)
+        wiremockReleaseRepository.setUpBitbucketRepository(projectFixture.project, projectFixture.releaseKey, "refs/heads/master")
         return dataFixture.buildFixtureData(projectFixture)
     }
 

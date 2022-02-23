@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.ods.doc.gen.core.test.wiremock.WireMockFacade
 import org.springframework.stereotype.Repository
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo
@@ -13,49 +12,32 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 @Repository
 class WiremockReleaseRepository {
 
+    public static final String RELEASE_MANAGER_REPO_CONTENT_ZIP = "pdf.builder/release-manager-repo-content.zip"
+
     private WireMockFacade wireMockFacade
-    EnvironmentVariables env
 
     WiremockReleaseRepository(){
-        env = new EnvironmentVariables()
         wireMockFacade = new WireMockFacade()
     }
 
     def tearDownWiremock(){
-        env.teardown()
         wireMockFacade.stopWireMockServer()
     }
 
-    void setUpGithubRepository(String version) {
-        env.setup();
-        setupGitHubEnv()
-        mockTemplatesZipArchiveDownload(GithubDocumentTemplatesRepository.getURItoDownloadTemplates(version), GH_TEMPLATE)
+    void setUpBitbucketRepository(def documentTemplatesProject, def documentTemplatesRepo, def version) {
+        def uri = new URI("http://localhost:9003/rest/api/latest/projects/${documentTemplatesProject}/repos/${documentTemplatesRepo}/archive?at=${version}&format=zip")
+        mockZipArchiveDownload(uri, RELEASE_MANAGER_REPO_CONTENT_ZIP)
     }
 
-    void setUpBitbucketRepository(String version) {
-        env.setup();
-        setupBitBuckectEnv()
-        mockTemplatesZipArchiveDownload(BitBucketDocumentTemplatesRepository.getURItoDownloadTemplates(version), BB_TEMPLATE)
-    }
-
-    private setupBitBuckectEnv() {
-        env.set("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT", "myProject")
-        env.set("BITBUCKET_DOCUMENT_TEMPLATES_REPO", "myRepo")
-        env.set("BITBUCKET_URL", "http://localhost:9002")
-    }
-
-    private setupGitHubEnv() {
-        env.set("GITHUB_HOST", "http://localhost:9002")
-    }
-
-    private void mockTemplatesZipArchiveDownload(URI uri, String templatesName, int returnStatus = 200) {
-        def zipArchiveContent = getResource(templatesName).readBytes()
+    private void mockZipArchiveDownload(URI uri, String releaseManagerRepoName, int returnStatus = 200) {
+        def zipArchiveContent = getResource(releaseManagerRepoName).readBytes()
         startDocumentsWiremock(uri, zipArchiveContent, returnStatus)
     }
 
     private StubMapping startDocumentsWiremock(URI uri, byte[] zipArchiveContent, int returnStatus = 200) {
-        wireMockFacade.startWireMockServer(uri).stubFor(WireMock.get(urlPathMatching(uri.getPath()))
-                .withHeader("Accept", equalTo("application/octet-stream"))
+        def matchingUri = "https://bitbucket-dev.biscrum.com/rest/api/latest/projects/ordgp/repos/ordgp-releasemanager.git/archive?at=refs/heads/master&format=zip"
+        wireMockFacade.startWireMockServer(uri).stubFor(WireMock.get(urlPathMatching(matchingUri))
+//                .withHeader("Accept", equalTo("application/octet-stream"))
                 .willReturn(aResponse()
                         .withBody(zipArchiveContent)
                         .withStatus(returnStatus)

@@ -115,7 +115,6 @@ class LevaDocControllerPactSpec extends Specification {
         log.info("stateChangeHandler")
         log.info("stateChangeHandler state:${state}")
         projectFixture = buildProjectFixture(state.params)
-        dataFixture.copyProjectDataToTemporalFolder(projectFixture)
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder.toFile())
     }
 

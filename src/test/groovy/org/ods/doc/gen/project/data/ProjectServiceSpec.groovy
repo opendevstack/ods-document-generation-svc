@@ -4,13 +4,9 @@ import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
-import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
-import org.ods.doc.gen.external.modules.git.GitRepoVersionType
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.springframework.test.context.ActiveProfiles

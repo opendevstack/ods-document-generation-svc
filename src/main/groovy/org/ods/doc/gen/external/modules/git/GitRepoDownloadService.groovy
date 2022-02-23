@@ -13,34 +13,24 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
-
-
-public enum GitRepoVersionType { BRANCH, COMMIT }
 
 interface GitRepoHttpAPI {
     abstract byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
 }
 
 /** Examples for version parameter:
- * version = refs/heads/release/v{hash}
+ * version = refs/heads/release/{hash}
  * version = refs/tags/CHG0066328
+ * version = refs/heads/master
  */
 interface GitRepoVersionDownloadHttpAPI extends GitRepoHttpAPI {
     @Headers("Accept: application/octet-stream")
     @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at={version}&format=zip")
     byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
 }
-
-/** Examples for branch parameter:
- * branch = master
- */
-interface GitRepoBranchDownloadHttpAPI extends GitRepoHttpAPI {
-    @Headers("Accept: application/octet-stream")
-    @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at=refs/heads/{branch}&format=zip")
-    byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("branch") String branch)
-}
-
 
 @SuppressWarnings(['PublicMethodsBeforeNonPublicMethods'])
 @Slf4j
@@ -91,13 +81,14 @@ class GitRepoDownloadService {
 
     void getRepoContentsToFolder(Map data, String targetFolderRelativePath) {
         def targetDir = Paths.get(targetFolderRelativePath)
-        GitRepoVersionType versionType = GitRepoVersionType.COMMIT
-        GitRepoHttpAPI store = createStorageClient(versionType)
-        byte[] zipArchiveContent = getZipArchiveFromStore(store, data, versionType)
-        zipFacade.extractZipArchive(zipArchiveContent, targetDir)
+        GitRepoHttpAPI store = createStorageClient()
+        byte[] zipArchiveContentBytes = getZipArchiveFromStore(store, data)
+        Path zipArchive = Files.createTempFile("releaseManagerRepoContent", "tempZipArchive")
+        zipArchive.append(zipArchiveContentBytes)
+        zipFacade.extractZipArchive(zipArchive, targetDir)
     }
 
-    private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data, GitRepoVersionType versionType) {
+    private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data) {
 
         String url = data.git.url
         String [] urlPieces = url.split('/')
@@ -112,33 +103,30 @@ class GitRepoDownloadService {
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${repo}' - "
             if (callException instanceof FeignException.BadRequest) {
                 def errorMsg =
-                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called 'release/v${version}'?"
-                log.error(errorMsg)
-                throw new RuntimeException()
+                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called '${version}'?"
+                log.error(errorMsg, callException)
+                throw new RuntimeException(callException)
             } else if (callException instanceof FeignException.Unauthorized) {
                 def bbUserNameError = this.username ?: 'Anyone'
                 def errorMsg = "${baseRepoErrMessage} \rDoes '${bbUserNameError}' have access?"
-                log.error(errorMsg)
-                throw new RuntimeException(errorMsg)
+                log.error(errorMsg, callException)
+                throw new RuntimeException(callException)
             } else if (callException instanceof FeignException.NotFound) {
                 def errorMsg = "${baseErrMessage}" + "\rDoes repository '${repo}' in project: '${project}' exist?"
-                log.error(errorMsg)
-                throw new RuntimeException(errorMsg)
+                log.error(errorMsg, callException)
+                throw new RuntimeException(callException)
             } else {
                 throw callException
             }
         }
     }
 
-    private GitRepoHttpAPI createStorageClient(GitRepoVersionType versionType) {
+    private GitRepoHttpAPI createStorageClient() {
         Feign.Builder builder = Feign.builder()
         if (this.username && this.password) {
             builder.requestInterceptor(new BasicAuthRequestInterceptor(this.username, this.password))
         }
 
-        if (GitRepoVersionType.BRANCH == versionType) {
-            return builder.target(GitRepoBranchDownloadHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
-        }
         return builder.target(GitRepoVersionDownloadHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
     }
 }
