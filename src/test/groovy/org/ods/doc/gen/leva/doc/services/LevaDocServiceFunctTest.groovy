@@ -12,6 +12,7 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
+import org.ods.doc.gen.pdf.builder.repository.WiremockReleaseRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -75,6 +76,9 @@ class LevaDocServiceFunctTest extends Specification {
     @Inject
     WiremockDocumentRepository wiremockDocumentRepository
 
+    @Inject
+    WiremockReleaseRepository wiremockReleaseRepository
+
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
 
@@ -83,7 +87,7 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     def setup() {
-        dataFixture = new LevaDocDataFixture(tempFolder, testsReports)
+        dataFixture = new LevaDocDataFixture(tempFolder, project, testsReports)
         testValidator = new LevaDocTestValidator(tempFolder)
     }
 

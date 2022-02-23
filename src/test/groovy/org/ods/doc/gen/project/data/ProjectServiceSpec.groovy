@@ -140,6 +140,7 @@ class ProjectServiceSpec extends Specification {
         ]
     }
 
+    //TODO: add tag to project ORDGP
     private Map<String, String> buildGitData(Map projectFixture) {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",

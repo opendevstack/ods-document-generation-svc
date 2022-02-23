@@ -73,19 +73,20 @@ class LevaDocDataFixture {
                 releaseParamVersion : "3.0",
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
-                jobName : "ofi2004-cd/ofi2004-cd-release-master",
+                jobName : "ordgp-cd/ordgp-releasemanager",
         ]
     }
 
     private Map<String, String> buildGitData() {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "https://bitbucket/scm/ofi2004/ofi2004-release.git",
+                url: "https://bitbucket-dev.biscrum.com/scm/ordgp/ordgp-releasemanager.git",
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
+                releaseManagerBranch: "refs/master"
         ]
     }
 
