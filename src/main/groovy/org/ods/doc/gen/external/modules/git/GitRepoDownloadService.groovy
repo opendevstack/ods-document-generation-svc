@@ -111,14 +111,19 @@ class GitRepoDownloadService {
             def baseErrMessage = "Could not get document zip from '${this.baseURL}'!"
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${repo}' - "
             if (callException instanceof FeignException.BadRequest) {
-                throw new RuntimeException("${baseRepoErrMessage}" +
-                        "is there a correct release branch configured, called 'release/v${version}'?")
+                def errorMsg =
+                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called 'release/v${version}'?"
+                log.error(errorMsg)
+                throw new RuntimeException()
             } else if (callException instanceof FeignException.Unauthorized) {
                 def bbUserNameError = this.username ?: 'Anyone'
-                throw new RuntimeException("${baseRepoErrMessage} \rDoes '${bbUserNameError}' have access?")
+                def errorMsg = "${baseRepoErrMessage} \rDoes '${bbUserNameError}' have access?"
+                log.error(errorMsg)
+                throw new RuntimeException(errorMsg)
             } else if (callException instanceof FeignException.NotFound) {
-                throw new RuntimeException("${baseErrMessage}" +
-                        "\rDoes repository '${repo}' in project: '${project}' exist?")
+                def errorMsg = "${baseErrMessage}" + "\rDoes repository '${repo}' in project: '${project}' exist?"
+                log.error(errorMsg)
+                throw new RuntimeException(errorMsg)
             } else {
                 throw callException
             }
