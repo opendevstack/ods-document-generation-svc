@@ -22,8 +22,23 @@ import java.nio.file.Path
 @ContextConfiguration(classes= [TestConfig.class])
 class PdfGenerationServiceSpec extends Specification {
 
-    private static final String EXPECTED_PDF = "pdf.builder/CSD-ordgp-WIP-5.pdf"
-    private static final String PDF_RAW_DATA = "pdf.builder/CSD-ordgp-WIP-7.json"
+    class FixtureElement {
+        public final String expected
+        public final String raw_data
+        public final Map metadata
+
+        FixtureElement(expected, raw_data, Map metadata) {
+            this.expected = expected
+            this.raw_data = raw_data
+            this.metadata = metadata
+        }
+    }
+
+
+    private static final Map [] FIXTURES = [
+            [expected:"pdf.builder/CSD-ordgp-WIP-5.pdf", raw_data:"pdf.builder/CSD-ordgp-WIP-7.json", metadata: [ type: "CSD-5", version: "1.2" ]],
+            [expected:"pdf.builder/CFTP-ordgp-WIP-8.pdf", raw_data:"pdf.builder/CFTP-ordgp-WIP-8.json", metadata: [ type: "CFTP-5", version: "1.2" ]]
+    ]
 
     @Inject
     PdfGenerationService pdfGenerationService
@@ -44,34 +59,59 @@ class PdfGenerationServiceSpec extends Specification {
         wiremockDocumentRepository.tearDownWiremock()
     }
 
-    def "generate pdf from repo: #repository"() {
+    def "generate pdf from GH template #fixtureElement.metadata.version, doc type #fixtureElement.metadata.type and repo: #repository"() {
         given: "a document repository"
-        def jsonRawData = getJsonRawData()
-        Map metadata = getMetadata()
+        def jsonRawData = getJsonRawData(fixtureElement.raw_data as String)
+        String metadataVersion = fixtureElement.metadata.version as String
+
         if (repository == "Github"){
-            wiremockDocumentRepository.setUpGithubRepository(metadata.version as String)
+            wiremockDocumentRepository.setUpGithubRepository(metadataVersion)
         } else {
-            wiremockDocumentRepository.setUpBitbucketRepository(metadata.version as String)
+            wiremockDocumentRepository.setUpBitbucketRepository(metadataVersion)
         }
 
         when: "generate pdf file"
-        def resultFile = pdfGenerationService.generatePdfFile(metadata, jsonRawData, tempFolder)
+        Path resultFile = pdfGenerationService.generatePdfFile(fixtureElement.metadata as Map, jsonRawData as Map, tempFolder)
 
         then: "the result is the expected pdf"
-        new PdfCompare( "build/reports/pdf")
-                .compareAreEqual(resultFile.toString(), new FixtureHelper().getResource(EXPECTED_PDF).absolutePath)
+        comparePdfs(fixtureElement.expected as String, resultFile)
 
         where: "BB and GH repos"
-        repository << ["Github", "BuiBucket"]
+        fixtureElement << FIXTURES
+
+        repository = "Github"
     }
 
-    private Map getMetadata(){
-       return [ type: "CSD-5", version: "1.2" ]
+    def "generate pdf from BB template #fixtureElement.metadata.version, doc type #fixtureElement.metadata.type"() {
+        given: "a document repository"
+        def jsonRawData = getJsonRawData(fixtureElement.raw_data as String)
+        String metadataVersion = fixtureElement.metadata.version as String
+
+        if (repository == "Github"){
+            wiremockDocumentRepository.setUpGithubRepository(metadataVersion)
+        } else {
+            wiremockDocumentRepository.setUpBitbucketRepository(metadataVersion)
+        }
+
+        when: "generate pdf file"
+        Path resultFile = pdfGenerationService.generatePdfFile(fixtureElement.metadata as Map, jsonRawData as Map, tempFolder)
+
+        then: "the result is the expected pdf"
+        comparePdfs(fixtureElement.expected as String, resultFile)
+
+        where: "BB and GH repos"
+        fixtureElement << FIXTURES
+
+        repository = "BitBucket"
     }
 
-    private Object getJsonRawData(){
-        def pdfRawData = new FixtureHelper().getResource(PDF_RAW_DATA)
+    private Object getJsonRawData(String raw_data){
+        def pdfRawData = new FixtureHelper().getResource(raw_data)
         return new JsonSlurper().parse(pdfRawData)
     }
 
+    private comparePdfs(String expected, Path resultFile) {
+        new PdfCompare( "build/reports/pdf")
+                .compareAreEqual(resultFile.toString(), new FixtureHelper().getResource(expected).absolutePath)
+    }
 }
