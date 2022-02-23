@@ -34,10 +34,10 @@ class PdfGenerationServiceSpec extends Specification {
         }
     }
 
-    private static final Map METADATA = [ type: "CSD-5", version: "1.2" ]
 
     private static final Map [] FIXTURES = [
-            [expected:"pdf.builder/CSD-ordgp-WIP-5.pdf", raw_data:"pdf.builder/CSD-ordgp-WIP-7.json", metadata: METADATA]
+            [expected:"pdf.builder/CSD-ordgp-WIP-5.pdf", raw_data:"pdf.builder/CSD-ordgp-WIP-7.json", metadata: [ type: "CSD-5", version: "1.2" ]],
+            [expected:"pdf.builder/CFTP-ordgp-WIP-8.pdf", raw_data:"pdf.builder/CFTP-ordgp-WIP-8.json", metadata: [ type: "CFTP-5", version: "1.2" ]]
     ]
 
     @Inject
@@ -59,7 +59,7 @@ class PdfGenerationServiceSpec extends Specification {
         wiremockDocumentRepository.tearDownWiremock()
     }
 
-    def "generate pdf from repo: #repository"() {
+    def "generate pdf from GH template #fixtureElement.metadata.version, doc type #fixtureElement.metadata.type and repo: #repository"() {
         given: "a document repository"
         def jsonRawData = getJsonRawData(fixtureElement.raw_data as String)
         String metadataVersion = fixtureElement.metadata.version as String
@@ -77,8 +77,32 @@ class PdfGenerationServiceSpec extends Specification {
         comparePdfs(fixtureElement.expected as String, resultFile)
 
         where: "BB and GH repos"
-        repository << ["Github", "BuiBucket"]
         fixtureElement << FIXTURES
+
+        repository = "Github"
+    }
+
+    def "generate pdf from BB template #fixtureElement.metadata.version, doc type #fixtureElement.metadata.type"() {
+        given: "a document repository"
+        def jsonRawData = getJsonRawData(fixtureElement.raw_data as String)
+        String metadataVersion = fixtureElement.metadata.version as String
+
+        if (repository == "Github"){
+            wiremockDocumentRepository.setUpGithubRepository(metadataVersion)
+        } else {
+            wiremockDocumentRepository.setUpBitbucketRepository(metadataVersion)
+        }
+
+        when: "generate pdf file"
+        Path resultFile = pdfGenerationService.generatePdfFile(fixtureElement.metadata as Map, jsonRawData as Map, tempFolder)
+
+        then: "the result is the expected pdf"
+        comparePdfs(fixtureElement.expected as String, resultFile)
+
+        where: "BB and GH repos"
+        fixtureElement << FIXTURES
+
+        repository = "BitBucket"
     }
 
     private Object getJsonRawData(String raw_data){
