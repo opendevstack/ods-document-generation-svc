@@ -74,7 +74,7 @@ class LevaDocDataFixture {
     private Map<String, String> buildGitData() {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "https://bitbucket-dev.biscrum.com/scm/ordgp/ordgp-releasemanager.git",
+                url: "https://bitbucket-dev.biscrum.com/scm/ordgp/ordgp-releasemanager",
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
                 author: "ODS Jenkins Shared Library System User (undefined)",

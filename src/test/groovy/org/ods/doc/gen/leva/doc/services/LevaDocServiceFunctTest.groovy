@@ -167,7 +167,7 @@ class LevaDocServiceFunctTest extends Specification {
     private Map setFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion as String)
-        wiremockReleaseRepository.setUpBitbucketRepository(projectFixture.project, projectFixture.releaseKey, "refs/heads/master")
+        wiremockReleaseRepository.setUpBitbucketRepository(projectFixture.project, projectFixture.component, "refs/heads/master")
         return dataFixture.buildFixtureData(projectFixture)
     }
 
