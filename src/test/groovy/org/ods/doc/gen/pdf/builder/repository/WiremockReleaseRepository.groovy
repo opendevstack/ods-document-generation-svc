@@ -26,20 +26,26 @@ class WiremockReleaseRepository {
 
     void setUpBitbucketRepository(def project, def releaseManagerRepository, def branchRef) {
         project = project.toLowerCase()
-        def uri = new URI("http://localhost:9003/rest/api/latest/projects/${project}/repos/${releaseManagerRepository}/archive?at=${branchRef}&format=zip")
-        mockZipArchiveDownload(uri, RELEASE_MANAGER_REPO_CONTENT_ZIP)
+        releaseManagerRepository = project + "-" + releaseManagerRepository
+
+        def WIREMOCK_SERVER_HOST = "http://localhost:9003"
+        def BITBUCKET_HOST = "https://bitbucket-dev.biscrum.com"
+        def REPO_ZIP_ARCHIVE_URL = "/rest/api/latest/projects/${project}/repos/${releaseManagerRepository}/archive?at=${branchRef}&format=zip"
+
+        String uri = WIREMOCK_SERVER_HOST + REPO_ZIP_ARCHIVE_URL
+        String matchingUri = BITBUCKET_HOST + REPO_ZIP_ARCHIVE_URL
+
+        mockZipArchiveDownload(uri, matchingUri, RELEASE_MANAGER_REPO_CONTENT_ZIP)
     }
 
-    private void mockZipArchiveDownload(URI uri, String releaseManagerRepoName, int returnStatus = 200) {
+    private void mockZipArchiveDownload(String uri, String matchingUri, String releaseManagerRepoName, int returnStatus = 200) {
         def zipArchiveContent = getResource(releaseManagerRepoName).readBytes()
-        startDocumentsWiremock(uri, zipArchiveContent, returnStatus)
+        startDocumentsWiremock(uri, matchingUri, zipArchiveContent, returnStatus)
     }
 
-    private StubMapping startDocumentsWiremock(URI uri, byte[] zipArchiveContent, int returnStatus = 200) {
-        def matchingUri = "https://bitbucket-dev.biscrum.com/rest/api/latest/projects/ordgp/repos/ordgp-releasemanager/archive?at=refs/heads/master&format=zip"
-        def matchingUra = "http://localhost:9003/rest/api/latest/projects/ORDGP/repos/ORDGP-123/archive?at=refs/heads/master&format=zip"
-        wireMockFacade.startWireMockServer(uri).stubFor(WireMock.get(urlPathMatching(matchingUri))
-//                .withHeader("Accept", equalTo("application/octet-stream"))
+    private StubMapping startDocumentsWiremock(String uri, String matchingUri, byte[] zipArchiveContent, int returnStatus = 200) {
+        wireMockFacade.startWireMockServer(new URI(uri)).stubFor(WireMock.get(urlPathMatching(matchingUri))
+                .withHeader("Accept", equalTo("application/octet-stream"))
                 .willReturn(aResponse()
                         .withBody(zipArchiveContent)
                         .withStatus(returnStatus)

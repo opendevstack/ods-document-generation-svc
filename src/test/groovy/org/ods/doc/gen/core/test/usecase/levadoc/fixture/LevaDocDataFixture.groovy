@@ -40,8 +40,8 @@ class LevaDocDataFixture {
         return input
     }
 
-    void updateExpectedComponentDocs(Map data, ProjectFixture projectFixture) {
-        project.getProjectData(data.projectBuild as String, data).repositories.each {repo ->
+    void updateExpectedComponentDocs(ProjectData projectData, Map data, ProjectFixture projectFixture) {
+        projectData.repositories.each {repo ->
             projectFixture.component = repo.id
             repo.data.documents = (repo.data.documents)?: [:]
             if (DocTypeProjectFixtureWithComponent.notIsReleaseModule(repo)){

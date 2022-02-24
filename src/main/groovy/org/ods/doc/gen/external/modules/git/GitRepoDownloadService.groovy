@@ -83,7 +83,7 @@ class GitRepoDownloadService {
         def targetDir = Paths.get(targetFolderRelativePath)
         GitRepoHttpAPI store = createStorageClient()
         byte[] zipArchiveContentBytes = getZipArchiveFromStore(store, data)
-        Path zipArchive = Files.createTempFile("releaseManagerRepoContent", "tempZipArchive")
+        Path zipArchive = Files.createTempFile("release-manager-repo-content", ".zip")
         zipArchive.append(zipArchiveContentBytes)
         zipFacade.extractZipArchive(zipArchive, targetDir)
     }

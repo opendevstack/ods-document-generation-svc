@@ -132,7 +132,7 @@ class LevaDocServiceFunctTest extends Specification {
         given: "A project data"
         Map data = setFixture(projectFixture)
         ProjectData projectData = prepareServiceDataParam(projectFixture, data)
-        data.repo = dataFixture.getModuleData(projectFixture, projectData)
+        data.repo = dataFixture.getModuleData(projectFixture, data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -167,7 +167,6 @@ class LevaDocServiceFunctTest extends Specification {
     private Map setFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion as String)
-        wiremockReleaseRepository.setUpBitbucketRepository(projectFixture.project, projectFixture.component, "refs/heads/master")
         return dataFixture.buildFixtureData(projectFixture)
     }
 
@@ -177,9 +176,23 @@ class LevaDocServiceFunctTest extends Specification {
         data.projectBuild =  "${projectFixture.project}-1"
         data.buildNumber = "666"
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        // We need to override the value because of the cache in ProjectData
+        wiremockReleaseRepository.setUpBitbucketRepository(projectFixture.project, getReleaseManagerComponent(projectData), "refs/heads/master")        // We need to override the value because of the cache in ProjectData
         projectData.tmpFolder = tempFolder.absolutePath
         return projectData
+    }
+
+    private String getReleaseManagerComponent(projectData) {
+        for (component in projectData.components) {
+            def normComponentName = component.name.replaceAll('Technology-', '')
+            if (isReleaseManagerComponent(projectData, normComponentName)) {
+                return normComponentName
+            }
+        }
+    }
+
+    private boolean isReleaseManagerComponent(ProjectData projectData, normComponentName) {
+        def gitUrl = projectData.data.git.url
+        return gitUrl.endsWith("${projectData.key}-${normComponentName}".toLowerCase())
     }
 
 }
