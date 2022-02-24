@@ -45,11 +45,11 @@ class WiremockDocumentRepository {
     private setupBitBuckectEnv() {
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT", "myProject")
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_REPO", "myRepo")
-        env.set("BITBUCKET_URL", "http://localhost:9001")
+        env.set("BITBUCKET_URL", "http://localhost:9002")
     }
 
     private setupGitHubEnv() {
-        env.set("GITHUB_HOST", "http://localhost:9001")
+        env.set("GITHUB_HOST", "http://localhost:9002")
     }
 
     private void mockTemplatesZipArchiveDownload(URI uri, String templatesName, int returnStatus = 200) {

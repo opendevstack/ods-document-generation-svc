@@ -76,12 +76,12 @@ class GitRepoDownloadServiceSpec extends Specification {
 
     Map getProjectFixture() {
         Map projectFixture = [
-                id: "FRML24113",
+                id: "ORDGP",
                 releaseId: "1",
                 version: "WIP",
                 validation: "",
                 releaseKey: "",
-                releaseRepo: "frml24113-release",
+                releaseRepo: "ordgp-releasemanager",
         ]
         return projectFixture
     }
@@ -124,7 +124,8 @@ class GitRepoDownloadServiceSpec extends Specification {
                 author: "s2o",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
-                releaseManagerBranch: "refs/tags/CHG0066328",
+                releaseManagerBranch: "refs/heads/master",
+                //releaseManagerBranch: "refs/tags/CHG0066328",
         ]
     }
 
