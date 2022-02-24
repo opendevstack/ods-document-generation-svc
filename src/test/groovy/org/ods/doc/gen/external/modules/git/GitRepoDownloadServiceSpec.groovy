@@ -50,7 +50,10 @@ class GitRepoDownloadServiceSpec extends Specification {
     def "test getRepoContentsToFolder() "() {
         given: "A project data"
         Map projectFixture = getProjectFixture()
-        Map data = buildFixtureData(projectFixture)
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitData(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
 
         when: "get a copy of the repository is called"
         checkRepoExists.checkRepoExists(projectFixture)
@@ -74,6 +77,46 @@ class GitRepoDownloadServiceSpec extends Specification {
         }
     }
 
+    def "test no repo url for getRepoContentsToFolder() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitDataWithoutRepoUrl(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
+        String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
+        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Value for Git repoURL is empty or null."
+
+    }
+
+    def "test no repo release manager branch for getRepoContentsToFolder() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitDataWithoutReleaseManagerBranch(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
+        String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
+        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Value for Git releaseManagerBranch is empty or null."
+
+    }
+
+
+
     Map getProjectFixture() {
         Map projectFixture = [
                 id: "ORDGP",
@@ -84,15 +127,6 @@ class GitRepoDownloadServiceSpec extends Specification {
                 releaseRepo: "ordgp-releasemanager",
         ]
         return projectFixture
-    }
-    Map buildFixtureData(Map projectFixture){
-
-
-        Map data = [:]
-        data.build = buildJobParams(projectFixture)
-        data.git =  buildGitData(projectFixture)
-        data.openshift = [targetApiUrl:"https://openshift-sample"]
-        return data
     }
 
     private Map<String, String> buildJobParams(Map projectFixture){
@@ -117,7 +151,7 @@ class GitRepoDownloadServiceSpec extends Specification {
     private Map<String, String> buildGitData(Map projectFixture) {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "http://localhost:7990/${projectFixture.id}/${projectFixture.releaseRepo}",
+                repoURL: "http://localhost:7990/${projectFixture.id}/${projectFixture.releaseRepo}",
                 // "https://bitbucket/scm/ofi2004/ofi2004-release.git", //  new GitService().getOriginUrl()
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
@@ -129,6 +163,27 @@ class GitRepoDownloadServiceSpec extends Specification {
         ]
     }
 
+    private Map<String, String> buildGitDataWithoutRepoUrl(Map projectFixture) {
+        return  [
+                commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                baseTag: "ods-generated-v3.0-3.0-0b11-D",
+                targetTag: "ods-generated-v3.0-3.0-0b11-D",
+                author: "s2o",
+                message: "Swingin' The Bottle",
+                time: "2021-04-20T14:58:31.042152",
+        ]
+    }
 
+    private Map<String, String> buildGitDataWithoutReleaseManagerBranch(Map projectFixture) {
+        return  [
+                commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                repoURL: "http://localhost:7990/${projectFixture.id}/${projectFixture.releaseRepo}",
+                baseTag: "ods-generated-v3.0-3.0-0b11-D",
+                targetTag: "ods-generated-v3.0-3.0-0b11-D",
+                author: "s2o",
+                message: "Swingin' The Bottle",
+                time: "2021-04-20T14:58:31.042152",
+        ]
+    }
 
 }

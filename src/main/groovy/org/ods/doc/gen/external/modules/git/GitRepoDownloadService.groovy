@@ -7,8 +7,10 @@ import feign.Param
 import feign.RequestLine
 import feign.auth.BasicAuthRequestInterceptor
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.core.ZipFacade
+import org.ods.doc.gen.leva.doc.api.LevaDocType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -16,6 +18,9 @@ import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+
+import static groovy.json.JsonOutput.prettyPrint
+import static groovy.json.JsonOutput.toJson
 
 interface GitRepoHttpAPI {
     abstract byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
@@ -90,20 +95,29 @@ class GitRepoDownloadService {
 
     private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data) {
 
-        String url = data.git.url
-        String [] urlPieces = url.split('/')
+        String repoURL = data.git.repoURL
+        String [] urlPieces = repoURL.split('/')
         String project = urlPieces[urlPieces.length -2]
         String repo = urlPieces[urlPieces.length -1]
-        String version = data.git.releaseManagerBranch
+        String releaseManagerBranch = data.git.releaseManagerBranch
+
+        if (StringUtils.isEmpty(repoURL)) {
+            logData(data);
+            throw new RuntimeException("Value for Git repoURL is empty or null.")
+        }
+        if (StringUtils.isEmpty(releaseManagerBranch)) {
+            logData(data);
+            throw new RuntimeException("Value for Git releaseManagerBranch is empty or null.")
+        }
 
         try {
-            return store.getRepoZipArchive(project, repo, version)
+            return store.getRepoZipArchive(project, repo, releaseManagerBranch)
         } catch (FeignException callException) {
             def baseErrMessage = "Could not get document zip from '${this.baseURL}'!"
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${repo}' - "
             if (callException instanceof FeignException.BadRequest) {
                 def errorMsg =
-                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called '${version}'?"
+                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called '${releaseManagerBranch}'?"
                 log.error(errorMsg, callException)
                 throw new RuntimeException(callException)
             } else if (callException instanceof FeignException.Unauthorized) {
@@ -128,5 +142,9 @@ class GitRepoDownloadService {
         }
 
         return builder.target(GitRepoVersionDownloadHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())
+    }
+
+    private static void logData(Map body) {
+        log.debug(prettyPrint(toJson(body)))
     }
 }
