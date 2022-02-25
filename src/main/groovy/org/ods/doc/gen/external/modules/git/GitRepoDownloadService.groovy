@@ -156,7 +156,7 @@ class GitRepoDownloadService {
         log.debug(prettyPrint(toJson(body)))
     }
 
-    void gitCloneRepo(Map data, String targetFolderRelativePath) {
+    void gitCloneReleaseManagerRepo(Map data, String targetFolderRelativePath) {
         File targetDir = new File(targetFolderRelativePath)
         String repoURI = data.git.repoURL
         String branchName = data.git.releaseManagerBranch
