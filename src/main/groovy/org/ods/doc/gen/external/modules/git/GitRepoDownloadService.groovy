@@ -90,14 +90,15 @@ class GitRepoDownloadService {
 
     private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data) {
 
-        String url = data.git.url
+        String url = data.git.repoURL
+        url = url.replaceFirst("\\.git", "")
         String [] urlPieces = url.split('/')
         String project = urlPieces[urlPieces.length -2]
         String repo = urlPieces[urlPieces.length -1]
         String version = data.git.releaseManagerBranch
 
         try {
-            return store.getRepoZipArchive(project, repo, version)
+            return store.getRepoZipArchive(project.toUpperCase(), repo, version)
         } catch (FeignException callException) {
             def baseErrMessage = "Could not get document zip from '${this.baseURL}'!"
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${repo}' - "
