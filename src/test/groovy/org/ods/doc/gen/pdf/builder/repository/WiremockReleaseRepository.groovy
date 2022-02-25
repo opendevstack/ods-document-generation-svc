@@ -12,7 +12,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 @Repository
 class WiremockReleaseRepository {
 
-    public static final String RELEASE_MANAGER_REPO_CONTENT_ZIP = "pdf.builder/release-manager-repo-content.zip"
+    public static final String RELEASE_MANAGER_REPO_ZIP_PATH = "workspace/"
 
     private WireMockFacade wireMockFacade
 
@@ -34,8 +34,9 @@ class WiremockReleaseRepository {
 
         String uri = WIREMOCK_SERVER_HOST + REPO_ZIP_ARCHIVE_URL
         String matchingUri = BITBUCKET_HOST + REPO_ZIP_ARCHIVE_URL
+        String zipFilePath = RELEASE_MANAGER_REPO_ZIP_PATH + "/" + ${project} + "/" + ${releaseManagerRepository} + ".zip"
 
-        mockZipArchiveDownload(uri, matchingUri, RELEASE_MANAGER_REPO_CONTENT_ZIP)
+        mockZipArchiveDownload(uri, matchingUri, zipFilePath)
     }
 
     private void mockZipArchiveDownload(String uri, String matchingUri, String releaseManagerRepoName, int returnStatus = 200) {

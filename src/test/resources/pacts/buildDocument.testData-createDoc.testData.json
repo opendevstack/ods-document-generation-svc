@@ -1,0 +1,1863 @@
+{
+    "provider": {
+        "name": "createDoc.testData"
+    },
+    "consumer": {
+        "name": "buildDocument.testData"
+    },
+    "interactions": [
+        {
+            "description": "a request for /buildDocument CFTR",
+            "request": {
+                "method": "POST",
+                "path": "/levaDoc/ORDGP/666/CFTR",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "build": {
+                        "buildId": "2022-01-22_23-59-59",
+                        "buildURL": "https//jenkins-sample/",
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
+                    },
+                    "git": {
+                        "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
+                        "message": "Swingin' The Bottle",
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
+                    },
+                    "openshift": {
+                        "targetApiUrl": "https://openshift-sample/"
+                    },
+                    "tests": {
+                        "unit": {
+                            "testReportFiles": [
+                                {
+                                    "absolute": true,
+                                    "absolutePath": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "canonicalPath": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "directory": false,
+                                    "file": true,
+                                    "freeSpace": 12417183744,
+                                    "hidden": false,
+                                    "invalid": false,
+                                    "name": "TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "parent": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test",
+                                    "path": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "prefixLength": 1,
+                                    "totalSpace": 53660876800,
+                                    "usableSpace": 12417183744
+                                }
+                            ],
+                            "testResults": {
+                                "testsuites": [
+                                    {
+                                        "errors": "0",
+                                        "failures": "0",
+                                        "hostname": "pod-78fd40da-2e86-47bd-b56f-0dabb3231971-mw77k-tv93m",
+                                        "name": "com.boehringer.frml24113.thefirst.ThefirstApplicationTests",
+                                        "properties": [
+                                            [
+                                                
+                                            ]
+                                        ],
+                                        "skipped": "0",
+                                        "systemErr": "",
+                                        "systemOut": "12:07:42.161 [Test worker] DEBUG org.springframework.test.context.BootstrapUtils",
+                                        "testcases": [
+                                            {
+                                                "classname": "com.boehringer.frml24113.thefirst.ThefirstApplicationTests",
+                                                "name": "ORDGP163_workingunittest()",
+                                                "skipped": false,
+                                                "systemErr": "",
+                                                "systemOut": "",
+                                                "time": "0.612",
+                                                "timestamp": "2021-12-07T12:07:56"
+                                            }
+                                        ],
+                                        "tests": "2",
+                                        "time": "0.677",
+                                        "timestamp": "2021-12-07T12:07:56"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].errors": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].failures": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].hostname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].properties": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].skipped": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].systemErr": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].systemOut": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].classname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].skipped": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].systemErr": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].systemOut": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].time": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].timestamp": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].tests": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].time": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].timestamp": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].absolute": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].absolutePath": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].canonicalPath": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].directory": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].file": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].freeSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].hidden": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].invalid": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].parent": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].path": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].prefixLength": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].totalSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].usableSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.author": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.baseTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.repoURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironmentToken": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.version": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/CFTR-ORDGP-WIP-2022-01-22_23-59-59.zip"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.nexusURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/CFTR-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "project with data:",
+                    "params": {
+                        "buildNumber": "666",
+                        "docType": "CFTR",
+                        "project": "ORDGP",
+                        "version": "WIP"
+                    }
+                }
+            ]
+        },
+        {
+            "description": "a request for /buildDocument IVR",
+            "request": {
+                "method": "POST",
+                "path": "/levaDoc/ORDGP/666/IVR",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "build": {
+                        "buildId": "2022-01-22_23-59-59",
+                        "buildURL": "https//jenkins-sample/",
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
+                    },
+                    "git": {
+                        "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
+                        "message": "Swingin' The Bottle",
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
+                    },
+                    "openshift": {
+                        "targetApiUrl": "https://openshift-sample/"
+                    },
+                    "tests": {
+                        "unit": {
+                            "testReportFiles": [
+                                {
+                                    "absolute": true,
+                                    "absolutePath": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "canonicalPath": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "directory": false,
+                                    "file": true,
+                                    "freeSpace": 12417183744,
+                                    "hidden": false,
+                                    "invalid": false,
+                                    "name": "TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "parent": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test",
+                                    "path": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "prefixLength": 1,
+                                    "totalSpace": 53660876800,
+                                    "usableSpace": 12417183744
+                                }
+                            ],
+                            "testResults": {
+                                "testsuites": [
+                                    {
+                                        "errors": "0",
+                                        "failures": "0",
+                                        "hostname": "pod-78fd40da-2e86-47bd-b56f-0dabb3231971-mw77k-tv93m",
+                                        "name": "com.boehringer.frml24113.thefirst.ThefirstApplicationTests",
+                                        "properties": [
+                                            [
+                                                
+                                            ]
+                                        ],
+                                        "skipped": "0",
+                                        "systemErr": "",
+                                        "systemOut": "12:07:42.161 [Test worker] DEBUG org.springframework.test.context.BootstrapUtils",
+                                        "testcases": [
+                                            {
+                                                "classname": "com.boehringer.frml24113.thefirst.ThefirstApplicationTests",
+                                                "name": "ORDGP163_workingunittest()",
+                                                "skipped": false,
+                                                "systemErr": "",
+                                                "systemOut": "",
+                                                "time": "0.612",
+                                                "timestamp": "2021-12-07T12:07:56"
+                                            }
+                                        ],
+                                        "tests": "2",
+                                        "time": "0.677",
+                                        "timestamp": "2021-12-07T12:07:56"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironmentToken": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.version": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.repoURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.baseTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.author": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].parent": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].path": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].absolutePath": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].totalSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].hidden": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].usableSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].canonicalPath": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].invalid": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].freeSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].file": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].absolute": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].prefixLength": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].directory": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].hostname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].timestamp": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].systemErr": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].timestamp": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].systemErr": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].systemOut": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].skipped": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].time": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].classname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].tests": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].systemOut": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].skipped": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].errors": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].properties": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].failures": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].time": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/IVR-ORDGP-WIP-2022-01-22_23-59-59.zip"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.nexusURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/IVR-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "project with data:",
+                    "params": {
+                        "project": "ORDGP",
+                        "buildNumber": "666",
+                        "version": "WIP",
+                        "docType": "IVR"
+                    }
+                }
+            ]
+        },
+        {
+            "description": "a request for /buildDocument TCR",
+            "request": {
+                "method": "POST",
+                "path": "/levaDoc/ORDGP/666/TCR",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "build": {
+                        "buildId": "2022-01-22_23-59-59",
+                        "buildURL": "https//jenkins-sample/",
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
+                    },
+                    "git": {
+                        "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
+                        "message": "Swingin' The Bottle",
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
+                    },
+                    "openshift": {
+                        "targetApiUrl": "https://openshift-sample/"
+                    },
+                    "tests": {
+                        "unit": {
+                            "testReportFiles": [
+                                {
+                                    "absolute": true,
+                                    "absolutePath": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "canonicalPath": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "directory": false,
+                                    "file": true,
+                                    "freeSpace": 12417183744,
+                                    "hidden": false,
+                                    "invalid": false,
+                                    "name": "TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "parent": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test",
+                                    "path": "/tmp/junit12071942610173190818/workspace/xunit/thefirst/unit/build/test-results/test/TEST-com.boehringer.frml24113.thefirst.ThefirstApplicationTests.xml",
+                                    "prefixLength": 1,
+                                    "totalSpace": 53660876800,
+                                    "usableSpace": 12417183744
+                                }
+                            ],
+                            "testResults": {
+                                "testsuites": [
+                                    {
+                                        "errors": "0",
+                                        "failures": "0",
+                                        "hostname": "pod-78fd40da-2e86-47bd-b56f-0dabb3231971-mw77k-tv93m",
+                                        "name": "com.boehringer.frml24113.thefirst.ThefirstApplicationTests",
+                                        "properties": [
+                                            [
+                                                
+                                            ]
+                                        ],
+                                        "skipped": "0",
+                                        "systemErr": "",
+                                        "systemOut": "12:07:42.161 [Test worker] DEBUG org.springframework.test.context.BootstrapUtils",
+                                        "testcases": [
+                                            {
+                                                "classname": "com.boehringer.frml24113.thefirst.ThefirstApplicationTests",
+                                                "name": "ORDGP163_workingunittest()",
+                                                "skipped": false,
+                                                "systemErr": "",
+                                                "systemOut": "",
+                                                "time": "0.612",
+                                                "timestamp": "2021-12-07T12:07:56"
+                                            }
+                                        ],
+                                        "tests": "2",
+                                        "time": "0.677",
+                                        "timestamp": "2021-12-07T12:07:56"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].errors": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].failures": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].hostname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].properties": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].skipped": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].systemErr": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].systemOut": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].classname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].skipped": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].systemErr": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].systemOut": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].time": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].testcases[*].timestamp": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].tests": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].time": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.*.testsuites[*].timestamp": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].absolute": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].absolutePath": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].canonicalPath": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].directory": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].file": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].freeSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].hidden": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].invalid": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].name": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].parent": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].path": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].prefixLength": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].totalSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.*.testReportFiles[*].usableSpace": {
+                            "matchers": [
+                                {
+                                    "match": "number"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.author": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.baseTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.repoURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironmentToken": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.version": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/TCR-ORDGP-WIP-2022-01-22_23-59-59.zip"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.nexusURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/TCR-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "project with data:",
+                    "params": {
+                        "buildNumber": "666",
+                        "docType": "TCR",
+                        "project": "ORDGP",
+                        "version": "WIP"
+                    }
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "pactSpecification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.5.24"
+        }
+    }
+}

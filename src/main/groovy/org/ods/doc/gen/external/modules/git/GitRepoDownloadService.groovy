@@ -95,8 +95,9 @@ class GitRepoDownloadService {
 
     private byte[] getZipArchiveFromStore(GitRepoHttpAPI store, Map data) {
 
-        String repoURL = data.git.repoURL
-        String [] urlPieces = repoURL.split('/')
+        String url = data.git.repoURL
+        url = url.replaceFirst("\\.git", "")
+        String [] urlPieces = url.split('/')
         String project = urlPieces[urlPieces.length -2]
         String repo = urlPieces[urlPieces.length -1]
         String releaseManagerBranch = data.git.releaseManagerBranch
