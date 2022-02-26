@@ -69,7 +69,7 @@ class ProjectData {
 
     ProjectData load() {
 
-        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolder)
+        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolder)
         this.data.metadata = loadMetadata(tmpFolder) 
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)

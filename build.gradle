@@ -151,6 +151,7 @@ dependencies {
   implementation "org.apache.pdfbox:pdfbox:2.0.24"
 
   implementation("ch.qos.logback:logback-classic:1.2.10")
+  implementation 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
 
   testImplementation "org.junit.jupiter:junit-jupiter-api"
   testImplementation "org.junit.jupiter:junit-jupiter-engine"

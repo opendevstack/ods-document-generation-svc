@@ -3,6 +3,7 @@ package org.ods.doc.gen.leva.doc.api
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
+import org.apache.commons.lang3.StringUtils
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -58,7 +59,11 @@ class LevaDocController {
         } catch (Throwable e) {
             String msg = "Error building document: ${levaDocType} with data:${data}"
             log.error(msg, e)
-            throw new RuntimeException(msg, e)
+            String msgWithDetails = msg;
+            if (! StringUtils.isEmpty(e.getMessage())) {
+                msgWithDetails = msg + ". " + e.getMessage();
+            }
+            throw new RuntimeException(msgWithDetails, e)
         } finally {
             if (tmpDir) {
                 FileUtils.deleteDirectory(tmpDir)

@@ -1,30 +1,18 @@
 package org.ods.doc.gen.external.modules.git
 
-import feign.Feign
-import feign.Headers
-import feign.Param
-import feign.RequestLine
-import feign.auth.BasicAuthRequestInterceptor
-import groovy.io.FileType
+
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
-import org.ods.doc.gen.core.ZipFacade
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
-import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
 import org.ods.doc.gen.external.modules.git.fixtureDatas.CheckRepoExists
-import org.ods.doc.gen.leva.doc.services.StringCleanup
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.TempDir
 
 import javax.inject.Inject
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Slf4j
 @ActiveProfiles("test")
@@ -50,12 +38,15 @@ class GitRepoDownloadServiceSpec extends Specification {
     def "test getRepoContentsToFolder() "() {
         given: "A project data"
         Map projectFixture = getProjectFixture()
-        Map data = buildFixtureData(projectFixture)
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitData(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
 
         when: "get a copy of the repository is called"
         checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.getRepoContentsToFolder(data, tmpFolderAbsolutePath)
+        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
         log.info("Files in folder: ${tmpFolderAbsolutePath}")
@@ -74,6 +65,84 @@ class GitRepoDownloadServiceSpec extends Specification {
         }
     }
 
+    def "test no repo url for getRepoContentsToFolder() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitDataWithoutRepoUrl(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
+        String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
+        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Value for Git repoURL is empty or null."
+
+    }
+
+    def "test no repo release manager branch for getRepoContentsToFolder() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitDataWithoutReleaseManagerBranch(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
+        String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
+        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Value for Git releaseManagerBranch is empty or null."
+
+    }
+
+    def "test checkRepositoryBranchExists() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitData(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "we try to see if repo branch exists"
+        boolean result = gitRepoDownloadService.checkRepositoryBranchExists(data)
+
+        then: "check files are downloaded and no zip file remains there"
+        result == true
+    }
+
+
+    def "test gitCloneRepo() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitData(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        Path tmpFolder = Files.createTempDirectory("repoContents")
+        File tmpFolderFile = tmpFolder.toFile()
+
+        when: "we try to checkoout repo"
+        gitRepoDownloadService.gitCloneRepo(data, tmpFolderFile.getAbsolutePath())
+
+        then: "check files are downloaded and no zip file remains there"
+        boolean found = false
+        tmpFolderFile.traverse() {
+            log.info(it.getAbsolutePath())
+            found = true
+        }
+        found == true
+    }
+
+
     Map getProjectFixture() {
         Map projectFixture = [
                 id: "ORDGP",
@@ -84,15 +153,6 @@ class GitRepoDownloadServiceSpec extends Specification {
                 releaseRepo: "ordgp-releasemanager",
         ]
         return projectFixture
-    }
-    Map buildFixtureData(Map projectFixture){
-
-
-        Map data = [:]
-        data.build = buildJobParams(projectFixture)
-        data.git =  buildGitData(projectFixture)
-        data.openshift = [targetApiUrl:"https://openshift-sample"]
-        return data
     }
 
     private Map<String, String> buildJobParams(Map projectFixture){
@@ -115,9 +175,10 @@ class GitRepoDownloadServiceSpec extends Specification {
     }
 
     private Map<String, String> buildGitData(Map projectFixture) {
+        String bb_host = getBitBucketHost()
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "http://localhost:7990/${projectFixture.id}/${projectFixture.releaseRepo}",
+                repoURL: "${bb_host}/${projectFixture.id}/${projectFixture.releaseRepo}.git",
                 // "https://bitbucket/scm/ofi2004/ofi2004-release.git", //  new GitService().getOriginUrl()
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
@@ -129,6 +190,35 @@ class GitRepoDownloadServiceSpec extends Specification {
         ]
     }
 
+    private Map<String, String> buildGitDataWithoutRepoUrl(Map projectFixture) {
+        return  [
+                commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                baseTag: "ods-generated-v3.0-3.0-0b11-D",
+                targetTag: "ods-generated-v3.0-3.0-0b11-D",
+                author: "s2o",
+                message: "Swingin' The Bottle",
+                time: "2021-04-20T14:58:31.042152",
+        ]
+    }
 
+    private Map<String, String> buildGitDataWithoutReleaseManagerBranch(Map projectFixture) {
+        String bb_host = getBitBucketHost()
+        return  [
+                commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                repoURL: "${bb_host}/${projectFixture.id}/${projectFixture.releaseRepo}.git",
+                baseTag: "ods-generated-v3.0-3.0-0b11-D",
+                targetTag: "ods-generated-v3.0-3.0-0b11-D",
+                author: "s2o",
+                message: "Swingin' The Bottle",
+                time: "2021-04-20T14:58:31.042152",
+        ]
+    }
 
+    private String getBitBucketHost() {
+        String value = System.getenv("BITBUCKET_URL")
+        if (null == value) {
+           value = System.properties["bitbucket.url"]
+        }
+        return value
+    }
 }
