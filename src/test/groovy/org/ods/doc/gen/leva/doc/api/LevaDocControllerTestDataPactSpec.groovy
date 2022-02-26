@@ -11,9 +11,9 @@ import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
+import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.leva.doc.services.LevaDocWiremock
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.project.data.Project
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
@@ -34,9 +34,9 @@ import java.nio.file.Path
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
 @ActiveProfiles('test')
-class LevaDocControllerPactSpec extends Specification {
+class LevaDocControllerTestDataPactSpec extends Specification {
 
-    private static String PACT_FILE = 'pacts/buildDocument.defaultParams-createDoc.defaultParams.json'
+    private static String PACT_FILE = 'pacts/buildDocument.testData-createDoc.testData.json'
 
     @Shared
     private static ProviderInfo levaDocControllerPact
