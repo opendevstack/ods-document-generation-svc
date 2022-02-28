@@ -10,35 +10,35 @@
             "description": "a request for /buildDocument CFTP",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/CFTP",
+                "path": "/levaDoc/ORDGP/666/CFTP",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -54,7 +54,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -62,72 +62,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -152,7 +87,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -161,6 +104,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -177,7 +184,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -185,7 +210,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -201,35 +226,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -243,7 +243,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/CFTP-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/CFTP-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -251,7 +251,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/CFTP-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/CFTP-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -263,10 +263,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "CFTP"
+                        "docType": "CFTP",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -275,35 +275,35 @@
             "description": "a request for /buildDocument CSD",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/CSD",
+                "path": "/levaDoc/ORDGP/666/CSD",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -319,7 +319,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -327,72 +327,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -417,7 +352,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -426,6 +369,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -442,7 +449,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -450,7 +475,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -466,35 +491,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -508,7 +508,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/CSD-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/CSD-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -516,7 +516,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/CSD-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/CSD-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -528,10 +528,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "CSD"
+                        "docType": "CSD",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -540,35 +540,35 @@
             "description": "a request for /buildDocument DIL",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/DIL",
+                "path": "/levaDoc/ORDGP/666/DIL",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -584,7 +584,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -592,72 +592,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -682,7 +617,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -691,6 +634,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -707,7 +714,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -715,7 +740,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -731,35 +756,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -773,7 +773,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/DIL-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/DIL-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -781,7 +781,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/DIL-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/DIL-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -793,10 +793,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "DIL"
+                        "docType": "DIL",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -805,35 +805,35 @@
             "description": "a request for /buildDocument DTP",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/DTP",
+                "path": "/levaDoc/ORDGP/666/DTP",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -849,7 +849,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -857,72 +857,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -947,7 +882,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -956,6 +899,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -972,7 +979,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -980,7 +1005,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -996,35 +1021,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -1038,7 +1038,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/DTP-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/DTP-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -1046,7 +1046,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/DTP-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/DTP-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -1058,10 +1058,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "DTP"
+                        "docType": "DTP",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -1070,35 +1070,35 @@
             "description": "a request for /buildDocument IVP",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/IVP",
+                "path": "/levaDoc/ORDGP/666/IVP",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -1114,7 +1114,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1122,72 +1122,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1212,7 +1147,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1221,6 +1164,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1237,7 +1244,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1245,7 +1270,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1261,35 +1286,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -1303,7 +1303,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/IVP-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/IVP-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -1311,7 +1311,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/IVP-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/IVP-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -1323,10 +1323,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "IVP"
+                        "docType": "IVP",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -1335,35 +1335,35 @@
             "description": "a request for /buildDocument RA",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/RA",
+                "path": "/levaDoc/ORDGP/666/RA",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -1379,7 +1379,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1387,72 +1387,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1477,7 +1412,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1486,6 +1429,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1502,7 +1509,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1510,7 +1535,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1526,35 +1551,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -1568,7 +1568,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/RA-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/RA-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -1576,7 +1576,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/RA-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/RA-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -1588,48 +1588,47 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "RA"
+                        "docType": "RA",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
         },
-      
         {
-            "description": "a request for /buildDocument TCP",
+            "description": "a request for /buildDocument SSDS",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/TCP",
+                "path": "/levaDoc/ORDGP/666/SSDS",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -1645,7 +1644,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1653,72 +1652,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1743,7 +1677,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1752,6 +1694,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1768,7 +1774,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1776,7 +1800,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1792,6 +1816,99 @@
                             ],
                             "combine": "AND"
                         },
+                        "$.*.version": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/SSDS-ORDGP-WIP-2022-01-22_23-59-59.zip"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.nexusURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/SSDS-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "project with data:",
+                    "params": {
+                        "buildNumber": "666",
+                        "docType": "SSDS",
+                        "project": "ORDGP",
+                        "version": "WIP"
+                    }
+                }
+            ]
+        },
+        {
+            "description": "a request for /buildDocument TCP",
+            "request": {
+                "method": "POST",
+                "path": "/levaDoc/ORDGP/666/TCP",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "build": {
+                        "buildId": "2022-01-22_23-59-59",
+                        "buildURL": "https//jenkins-sample/",
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
+                    },
+                    "git": {
+                        "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
+                        "message": "Swingin' The Bottle",
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
+                    },
+                    "openshift": {
+                        "targetApiUrl": "https://openshift-sample/"
+                    }
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
                         "$.*.author": {
                             "matchers": [
                                 {
@@ -1800,7 +1917,48 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.message": {
+                        "$.*.baseTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.buildURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commit": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1816,11 +1974,117 @@
                             ],
                             "combine": "AND"
                         },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.repoURL": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
                         "$.*.targetApiUrl": {
                             "matchers": [
                                 {
                                     "match": "regex",
                                     "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironmentToken": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetTag": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.version": {
+                            "matchers": [
+                                {
+                                    "match": "type"
                                 }
                             ],
                             "combine": "AND"
@@ -1834,7 +2098,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/TCP-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/TCP-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -1842,7 +2106,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/TCP-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/TCP-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -1854,10 +2118,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "TCP"
+                        "docType": "TCP",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -1866,35 +2130,35 @@
             "description": "a request for /buildDocument TIP",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/TIP",
+                "path": "/levaDoc/ORDGP/666/TIP",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -1910,7 +2174,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironment": {
+                        "$.*.author": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -1918,72 +2182,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.targetEnvironmentToken": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.version": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.configItem": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeDescription": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.changeId": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.rePromote": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseStatusJiraIssueKey": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.runDisplayUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.releaseParamVersion": {
+                        "$.*.baseTag": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -2008,7 +2207,15 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.jobName": {
+                        "$.*.changeDescription": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.changeId": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -2017,6 +2224,70 @@
                             "combine": "AND"
                         },
                         "$.*.commit": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.commitTime": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.configItem": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.jobName": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.message": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.rePromote": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseManagerBranch": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseParamVersion": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.releaseStatusJiraIssueKey": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -2033,7 +2304,25 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.releaseManagerBranch": {
+                        "$.*.runDisplayUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetApiUrl": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": ".*$"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.*.targetEnvironment": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -2041,7 +2330,7 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.baseTag": {
+                        "$.*.targetEnvironmentToken": {
                             "matchers": [
                                 {
                                     "match": "type"
@@ -2057,35 +2346,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.*.author": {
+                        "$.*.version": {
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.message": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.commitTime": {
-                            "matchers": [
-                                {
-                                    "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.targetApiUrl": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -2099,7 +2363,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/TIP-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/TIP-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -2107,7 +2371,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/TIP-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/TIP-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -2119,10 +2383,10 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
                         "buildNumber": "666",
-                        "version": "WIP",
-                        "docType": "TIP"
+                        "docType": "TIP",
+                        "project": "ORDGP",
+                        "version": "WIP"
                     }
                 }
             ]
@@ -2131,35 +2395,35 @@
             "description": "a request for /buildDocument TRC",
             "request": {
                 "method": "POST",
-                "path": "/levaDoc/FRML24113/666/TRC",
+                "path": "/levaDoc/ORDGP/666/TRC",
                 "headers": {
                     "Content-Type": "application/json"
                 },
                 "body": {
                     "build": {
-                        "targetEnvironment": "dev",
-                        "targetEnvironmentToken": "D",
-                        "version": "WIP",
-                        "configItem": "BI-IT-DEVSTACK",
-                        "changeDescription": "changeDescription",
-                        "changeId": "changeId",
-                        "rePromote": false,
-                        "releaseStatusJiraIssueKey": "FRML24113-230",
-                        "runDisplayUrl": "https://jenkins-sample/blabla/",
-                        "releaseParamVersion": "3.0",
                         "buildId": "2022-01-22_23-59-59",
                         "buildURL": "https//jenkins-sample/",
-                        "jobName": "ofi2004-cd/ofi2004-cd-release-master"
+                        "changeDescription": "changeDescription",
+                        "changeId": "changeId",
+                        "configItem": "BI-IT-DEVSTACK",
+                        "jobName": "ordgp-cd/ordgp-cd-release-master",
+                        "rePromote": false,
+                        "releaseParamVersion": "1.0",
+                        "releaseStatusJiraIssueKey": "ORDGP-123",
+                        "runDisplayUrl": "https://jenkins-sample/blabla/",
+                        "targetEnvironment": "dev",
+                        "targetEnvironmentToken": "D",
+                        "version": "WIP"
                     },
                     "git": {
-                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                        "repoURL": "https://bitbucket/scm/ofi2004/ofi2004-release.git/",
-                        "releaseManagerBranch": "refs/tags/CHG0066328",
-                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
-                        "targetTag": "ods-generated-v3.0-3.0-0b11-D",
                         "author": "s2o",
+                        "baseTag": "ods-generated-v3.0-3.0-0b11-D",
+                        "commit": "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
+                        "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
-                        "commitTime": "2021-04-20T14:58:31.042152"
+                        "releaseManagerBranch": "refs/heads/master",
+                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
                         "targetApiUrl": "https://openshift-sample/"
@@ -2364,7 +2628,7 @@
                     "Content-Type": "application/json"
                 },
                 "body": {
-                    "nexusURL": "http://lalala/repository/leva-documentation/frml24113-WIP/TRC-FRML24113-WIP-2022-01-22_23-59-59.zip"
+                    "nexusURL": "http://lalala/repository/leva-documentation/ordgp-WIP/TRC-ORDGP-WIP-2022-01-22_23-59-59.zip"
                 },
                 "matchingRules": {
                     "body": {
@@ -2372,7 +2636,7 @@
                             "matchers": [
                                 {
                                     "match": "regex",
-                                    "regex": ".*\\Qrepository/leva-documentation/frml24113-WIP/TRC-FRML24113-WIP-2022-01-22_23-59-59.zip\\E$"
+                                    "regex": ".*\\Qrepository/leva-documentation/ordgp-WIP/TRC-ORDGP-WIP-2022-01-22_23-59-59.zip\\E$"
                                 }
                             ],
                             "combine": "AND"
@@ -2384,7 +2648,7 @@
                 {
                     "name": "project with data:",
                     "params": {
-                        "project": "FRML24113",
+                        "project": "ORDGP",
                         "buildNumber": "666",
                         "version": "WIP",
                         "docType": "TRC"
