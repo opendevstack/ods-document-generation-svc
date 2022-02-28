@@ -131,7 +131,7 @@ class GitRepoDownloadServiceSpec extends Specification {
         File tmpFolderFile = tmpFolder.toFile()
 
         when: "we try to checkoout repo"
-        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderFile.getAbsolutePath())
+        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolderFile.getAbsolutePath())
 
         then: "check files are downloaded and no zip file remains there"
         boolean found = false
@@ -142,6 +142,43 @@ class GitRepoDownloadServiceSpec extends Specification {
         found == true
     }
 
+    def "test no repo url for gitCloneRepo() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitDataWithoutRepoUrl(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
+        String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
+        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Value for Git repoURL is empty or null."
+
+    }
+
+    def "test no repo release manager branch for gitCloneRepo() "() {
+        given: "A project data"
+        Map projectFixture = getProjectFixture()
+        Map data = [:]
+        data.build = buildJobParams(projectFixture)
+        data.git =  buildGitDataWithoutReleaseManagerBranch(projectFixture)
+        data.openshift = [targetApiUrl:"https://openshift-sample"]
+
+        when: "get a copy of the repository is called"
+        checkRepoExists.checkRepoExists(projectFixture)
+        String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
+        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolderAbsolutePath)
+
+        then: "check files are downloaded and no zip file remains there"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Value for Git releaseManagerBranch is empty or null."
+
+    }
 
     Map getProjectFixture() {
         Map projectFixture = [

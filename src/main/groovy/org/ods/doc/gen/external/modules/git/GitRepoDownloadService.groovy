@@ -191,12 +191,22 @@ class GitRepoDownloadService {
     }
 
     boolean checkRepositoryBranchExists(Map data) {
-        String url = data.git.repoURL
-        url = url.replaceFirst("\\.git", "")
-        String [] urlPieces = url.split('/')
+        String repoURL = data.git.repoURL
+        String releaseManagerBranch = data.git.releaseManagerBranch
+
+        if (StringUtils.isEmpty(repoURL)) {
+            logData(data);
+            throw new IllegalArgumentException("Value for Git repoURL is empty or null.")
+        }
+        if (StringUtils.isEmpty(releaseManagerBranch)) {
+            logData(data);
+            throw new IllegalArgumentException("Value for Git releaseManagerBranch is empty or null.")
+        }
+
+        repoURL = repoURL.replaceFirst("\\.git", "")
+        String [] urlPieces = repoURL.split('/')
         String project = urlPieces[urlPieces.length -2]
         String repo = urlPieces[urlPieces.length -1]
-        String releaseManagerBranch = data.git.releaseManagerBranch
 
         // Remove problematic character from branch name.
         if ((!StringUtils.isEmpty(releaseManagerBranch)) && releaseManagerBranch.contains("/")) {
