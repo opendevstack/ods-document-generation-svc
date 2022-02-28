@@ -102,8 +102,7 @@ class GitRepoDownloadService {
 
     private byte[] getZipArchiveFromStore(GitRepoDownloadHttpAPI store, Map data) {
 
-        String url = data.git.repoURL
-        url = url.replaceFirst("\\.git", "")
+        String repoURL = data.git.repoURL
         String [] urlPieces = url.split('/')
         String project = urlPieces[urlPieces.length -2]
         String repo = urlPieces[urlPieces.length -1]
@@ -117,6 +116,8 @@ class GitRepoDownloadService {
             logData(data);
             throw new RuntimeException("Value for Git releaseManagerBranch is empty or null.")
         }
+
+        repoURL = repoURL.replaceFirst("\\.git", "")
 
         try {
             return store.getRepoZipArchive(project, repo, releaseManagerBranch)
@@ -195,7 +196,7 @@ class GitRepoDownloadService {
         String releaseManagerBranch = data.git.releaseManagerBranch
 
         // Remove problematic character from branch name.
-        if (releaseManagerBranch.contains("/")) {
+        if ((!StringUtils.isEmpty(releaseManagerBranch)) && releaseManagerBranch.contains("/")) {
             releaseManagerBranch = releaseManagerBranch.substring(releaseManagerBranch.lastIndexOf("/") +1)
         }
 
