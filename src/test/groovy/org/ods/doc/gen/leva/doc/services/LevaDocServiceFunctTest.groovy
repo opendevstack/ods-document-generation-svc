@@ -97,7 +97,7 @@ class LevaDocServiceFunctTest extends Specification {
         wiremockReleaseRepository.tearDownWiremock()
     }
 
-    def "create #projectFixture.docType for project: #projectFixture.project"() {
+    def "create #projectFixture.docType for project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
@@ -112,7 +112,7 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
-    def "create #projectFixture.docType with tests results for project: #projectFixture.project"() {
+    def "create #projectFixture.docType with tests results for project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
         ProjectData projectData = prepareServiceDataParam(projectFixture, data)
@@ -128,7 +128,7 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixtureWithTestData().getProjects()
     }
 
-    def "create #projectFixture.docType for component #projectFixture.component and project: #projectFixture.project"() {
+    def "create #projectFixture.docType for component #projectFixture.component and project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
         ProjectData projectData = prepareServiceDataParam(projectFixture, data)
@@ -148,7 +148,7 @@ class LevaDocServiceFunctTest extends Specification {
      * When creating a new test for a project, this test depends on
      * @return
      */
-    def "create Overall #projectFixture.docType for project: #projectFixture.project"() {
+    def "create Overall #projectFixture.docType for project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
         ProjectData projectData = prepareServiceDataParam(projectFixture, data)
