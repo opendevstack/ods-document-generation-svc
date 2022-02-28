@@ -33,8 +33,8 @@ import static groovy.json.JsonOutput.toJson
  */
 interface GitRepoDownloadHttpAPI {
     @Headers("Accept: application/octet-stream")
-    @RequestLine("GET /rest/api/latest/projects/{documentTemplatesProject}/repos/{documentTemplatesRepo}/archive?at={version}&format=zip")
-    byte[] getRepoZipArchive(@Param("documentTemplatesProject") String documentTemplatesProject, @Param("documentTemplatesRepo") String documentTemplatesRepo, @Param("version") String version)
+    @RequestLine("GET /rest/api/latest/projects/{project}/repos/{repo}/archive?format=zip&at={version}")
+    byte[] getRepoZipArchive(@Param("project") String documentTemplatesProject, @Param("repo") String documentTemplatesRepo, @Param("version") String version)
 }
 
 interface GitRepoGetBranchCommits {
@@ -103,21 +103,22 @@ class GitRepoDownloadService {
     private byte[] getZipArchiveFromStore(GitRepoDownloadHttpAPI store, Map data) {
 
         String repoURL = data.git.repoURL
-        String [] urlPieces = url.split('/')
-        String project = urlPieces[urlPieces.length -2]
-        String repo = urlPieces[urlPieces.length -1]
         String releaseManagerBranch = data.git.releaseManagerBranch
 
         if (StringUtils.isEmpty(repoURL)) {
             logData(data);
-            throw new RuntimeException("Value for Git repoURL is empty or null.")
+            throw new IllegalArgumentException("Value for Git repoURL is empty or null.")
         }
         if (StringUtils.isEmpty(releaseManagerBranch)) {
             logData(data);
-            throw new RuntimeException("Value for Git releaseManagerBranch is empty or null.")
+            throw new IllegalArgumentException("Value for Git releaseManagerBranch is empty or null.")
         }
 
-        repoURL = repoURL.replaceFirst("\\.git", "")
+        String [] urlPieces = repoURL.split('/')
+        String project = urlPieces[urlPieces.length -2]
+        String repo = urlPieces[urlPieces.length -1]
+
+        repo = repo.replaceFirst("\\.git", "")
 
         try {
             return store.getRepoZipArchive(project, repo, releaseManagerBranch)
@@ -126,16 +127,16 @@ class GitRepoDownloadService {
             def baseRepoErrMessage = "${baseErrMessage}\rIn repository '${repo}' - "
             if (callException instanceof FeignException.BadRequest) {
                 def errorMsg =
-                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called '${releaseManagerBranch}'?"
+                        "${baseRepoErrMessage}" + "is there a correct release branch configured, called '${releaseManagerBranch}'? \n"
                 log.error(errorMsg, callException)
                 throw new RuntimeException(callException)
             } else if (callException instanceof FeignException.Unauthorized) {
                 def bbUserNameError = this.username ?: 'Anyone'
-                def errorMsg = "${baseRepoErrMessage} \rDoes '${bbUserNameError}' have access?"
+                def errorMsg = "${baseRepoErrMessage} \rDoes '${bbUserNameError}' have access? \n"
                 log.error(errorMsg, callException)
                 throw new RuntimeException(callException)
             } else if (callException instanceof FeignException.NotFound) {
-                def errorMsg = "${baseErrMessage}" + "\rDoes repository '${repo}' in project: '${project}' exist?"
+                def errorMsg = "${baseErrMessage}" + "\rDoes repository '${repo}' in project: '${project}' exist? \n"
                 log.error(errorMsg, callException)
                 throw new RuntimeException(callException)
             } else {
@@ -148,6 +149,8 @@ class GitRepoDownloadService {
         Feign.Builder builder = Feign.builder()
         if (this.username && this.password) {
             builder.requestInterceptor(new BasicAuthRequestInterceptor(this.username, this.password))
+        } else {
+            log.warn("No username/password provided for connecting to BitBucket.")
         }
 
         return builder.target(GitRepoDownloadHttpAPI.class, this.baseURL.getScheme() + "://" + this.baseURL.getAuthority())

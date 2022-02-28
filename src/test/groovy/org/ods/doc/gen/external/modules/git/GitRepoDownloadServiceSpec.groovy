@@ -131,7 +131,7 @@ class GitRepoDownloadServiceSpec extends Specification {
         File tmpFolderFile = tmpFolder.toFile()
 
         when: "we try to checkoout repo"
-        gitRepoDownloadService.gitCloneRepo(data, tmpFolderFile.getAbsolutePath())
+        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderFile.getAbsolutePath())
 
         then: "check files are downloaded and no zip file remains there"
         boolean found = false
