@@ -1,0 +1,2 @@
+Network failure trying to make a proxied request from WireMock to https://bitbucket-dev.biscrum.com/rest/api/latest/projects/ORDGP/repos/ordgp-releasemanager/archive?at=refs/heads/master&format=zip
+bitbucket-dev.biscrum.com

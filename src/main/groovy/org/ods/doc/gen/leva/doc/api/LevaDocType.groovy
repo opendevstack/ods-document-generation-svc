@@ -1,5 +1,6 @@
 package org.ods.doc.gen.leva.doc.api
 
+import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 
 import java.util.function.BiFunction
@@ -20,13 +21,11 @@ enum LevaDocType {
     TCR(LeVADocumentService::createTCR),
     TIP(LeVADocumentService::createTIP),
     TIR(LeVADocumentService::createTIR),
-    TRC(LeVADocumentService::createTRC),
-    OVERALL_DTR(LeVADocumentService::createOverallDTR),
-    OVERALL_TIR(LeVADocumentService::createOverallTIR)
+    TRC(LeVADocumentService::createTRC)
 
-    public final BiFunction<LeVADocumentService, Map, String> buildDocument;
+    public final BiFunction<LeVADocumentService, Map, List<DocumentHistoryEntry> > buildDocument;
 
-    private LevaDocType(BiFunction<LeVADocumentService, Map, String> buildDocument) {
+    private LevaDocType(BiFunction<LeVADocumentService, Map, List<DocumentHistoryEntry>> buildDocument) {
         this.buildDocument = buildDocument;
     }
 }

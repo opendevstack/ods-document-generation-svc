@@ -17,7 +17,6 @@ class BitbucketTraceabilityUseCase {
 
     private static final String CSV_FILE = "source-code-review.csv"
     static final String CSV_FOLDER = "review"
-    private static final int PAGE_LIMIT = 10
     protected static Map CHARACTER_REMOVEABLE = [
         '/': '/\u200B',
         '@': '@\u200B',
@@ -84,7 +83,6 @@ class BitbucketTraceabilityUseCase {
         return result
     }
 
-    
     private Map<String, Object> getCommitInfo(info) {
         def authorInfo = processCsvDeveloper(info.author)
         def commitInfo = [
@@ -99,7 +97,6 @@ class BitbucketTraceabilityUseCase {
         return commitInfo
     }
 
-    
     private List getReviewers(PropertyMapper info) {
         def reviewers = []
         List infoReviewers = info.reviewers.split(Record.REVIEWERS_DELIMITER).findAll { it != null }
@@ -114,7 +111,6 @@ class BitbucketTraceabilityUseCase {
         }
         return reviewers
     }
-
     
     private String removeCharacters(PropertyMapper propertyMapper, String columnName) {
         String answer
@@ -137,7 +133,6 @@ class BitbucketTraceabilityUseCase {
         return file
     }
 
-    
     private List<Map> getRepositories(ProjectData projectData) {
         String projectDataKey = "${projectData.getKey().toLowerCase()}"
         List<Map> result = []
@@ -149,13 +144,12 @@ class BitbucketTraceabilityUseCase {
         }
         return result
     }
-
     
     private void processRepo(Map repo, ProjectData projectData, File file) {
         boolean nextPage = true
         int nextPageStart = 0
         while (nextPage) {
-            Map commits = bitbucketService.getCommitsForIntegrationBranch(repo.repo, projectData, PAGE_LIMIT, nextPageStart)
+            Map commits = bitbucketService.getCommitsForIntegrationBranch(repo.repo as String, projectData, nextPageStart)
             if (commits.isLastPage) {
                 nextPage = false
             } else {
@@ -164,7 +158,6 @@ class BitbucketTraceabilityUseCase {
             processCommits(repo, projectData, commits, file)
         }
     }
-
     
     private void processCommits(Map repo, ProjectData projectData, Map commits, File file) {
         commits.values.each { commit ->
@@ -182,7 +175,6 @@ class BitbucketTraceabilityUseCase {
             }
         }
     }
-
     
     private void writeCSVRecord(File file, Record record) {
         // Jenkins has his own idea how to concatenate Strings
@@ -210,7 +202,6 @@ class BitbucketTraceabilityUseCase {
         file << record.componentName
         file << record.END_LINE
     }
-
     
     private Developer getAuthor(Map author) {
         return new Developer(
@@ -218,7 +209,6 @@ class BitbucketTraceabilityUseCase {
             author.emailAddress)
     }
 
-    
     private List getReviewers(List reviewers) {
         List<Developer> approvals = []
         reviewers.each {
@@ -228,23 +218,19 @@ class BitbucketTraceabilityUseCase {
                     it.user.emailAddress)
             }
         }
-
         return approvals
     }
 
-    
     private String getDateWithFormat(Long timestamp) {
         Date dateObj =  new Date(timestamp)
         return new SimpleDateFormat('yyyy-MM-dd', Locale.getDefault()).format(dateObj)
     }
 
-    
     private Iterator processCsv(String data, String separator, List<String> columnNames) {
         Map parseParams = [separator: separator, readFirstLine: true, columnNames: columnNames, ]
         return CsvParser.parseCsv(parseParams, data)
     }
 
-    
     private Object processCsvDeveloper(String data) {
         return processCsv(data, Developer.FIELD_SEPARATOR, ['name', 'email']).next()
     }

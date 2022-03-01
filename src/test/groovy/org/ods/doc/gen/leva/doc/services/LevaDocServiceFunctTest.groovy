@@ -12,7 +12,6 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
-import org.ods.doc.gen.pdf.builder.repository.WiremockReleaseRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -76,9 +75,6 @@ class LevaDocServiceFunctTest extends Specification {
     @Inject
     WiremockDocumentRepository wiremockDocumentRepository
 
-    @Inject
-    WiremockReleaseRepository wiremockReleaseRepository
-
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
 
@@ -94,7 +90,7 @@ class LevaDocServiceFunctTest extends Specification {
     def cleanup() {
         levaDocWiremock.tearDownWiremock()
         wiremockDocumentRepository.tearDownWiremock()
-        wiremockReleaseRepository.tearDownWiremock()
+      //  wiremockReleaseRepository.tearDownWiremock()
     }
 
     def "create #projectFixture.docType for project #projectFixture.project"() {
@@ -103,7 +99,7 @@ class LevaDocServiceFunctTest extends Specification {
         prepareServiceDataParam(projectFixture, data)
 
         when: "the user creates a LeVA document"
-        leVADocumentService."create${projectFixture.docType}"(data)
+        List<DocumentHistoryEntry> history = leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
         testValidator.validatePDF(projectFixture, data.build.buildId as String)
@@ -131,7 +127,7 @@ class LevaDocServiceFunctTest extends Specification {
     def "create #projectFixture.docType for component #projectFixture.component and project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
-        ProjectData projectData = prepareServiceDataParam(projectFixture, data)
+        prepareServiceDataParam(projectFixture, data)
         data.repo = dataFixture.getModuleData(projectFixture, data)
 
         when: "the user creates a LeVA document"
@@ -167,6 +163,7 @@ class LevaDocServiceFunctTest extends Specification {
     private Map setFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion as String)
+//        wiremockReleaseRepository.setUpDocumentRepository(projectFixture.project, getReleaseManagerComponent(projectData), "refs/heads/master")        // We need to override the value because of the cache in ProjectData
         return dataFixture.buildFixtureData(projectFixture)
     }
 
@@ -174,9 +171,9 @@ class LevaDocServiceFunctTest extends Specification {
         data.tmpFolder = tempFolder.absolutePath
         data.documentType = projectFixture.docType
         data.projectBuild =  "${projectFixture.project}-1"
+        data.projectId = projectFixture.project
         data.buildNumber = "666"
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        wiremockReleaseRepository.setUpBitbucketRepository(projectFixture.project, getReleaseManagerComponent(projectData), "refs/heads/master")        // We need to override the value because of the cache in ProjectData
         projectData.tmpFolder = tempFolder.absolutePath
         return projectData
     }

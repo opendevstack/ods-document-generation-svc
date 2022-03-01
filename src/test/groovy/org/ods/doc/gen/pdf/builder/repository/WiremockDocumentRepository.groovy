@@ -31,24 +31,24 @@ class WiremockDocumentRepository {
     }
 
     void setUpGithubRepository(String version) {
-        env.setup();
         setupGitHubEnv()
         mockTemplatesZipArchiveDownload(GithubDocumentTemplatesRepository.getURItoDownloadTemplates(version), GH_TEMPLATE)
     }
 
     void setUpBitbucketRepository(String version) {
-        env.setup();
         setupBitBuckectEnv()
         mockTemplatesZipArchiveDownload(BitBucketDocumentTemplatesRepository.getURItoDownloadTemplates(version), BB_TEMPLATE)
     }
 
     private setupBitBuckectEnv() {
+        env.setup()
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT", "myProject")
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_REPO", "myRepo")
         env.set("BITBUCKET_URL", "http://localhost:9002")
     }
 
     private setupGitHubEnv() {
+        env.setup()
         env.set("GITHUB_HOST", "http://localhost:9002")
     }
 

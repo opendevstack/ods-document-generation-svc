@@ -1,5 +1,6 @@
 package org.ods.doc.gen.leva.doc.services
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
 import org.ods.doc.gen.core.ZipFacade
@@ -77,7 +78,7 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     @SuppressWarnings('CyclomaticComplexity')
-    String createCSD(Map data) {
+    List<DocumentHistoryEntry> createCSD(Map data) {
         log.info("createCSD for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -137,10 +138,11 @@ class LeVADocumentService extends DocGenUseCase {
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, 
                 getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        log.info("createDTR - data:${prettyPrint(toJson(docHistory.data))}")
+        return docHistory.data
     }
 
-    String createDIL(Map data) {
+    List<DocumentHistoryEntry> createDIL(Map data) {
         log.info("createDIL for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -223,10 +225,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri)
-        return uri
+        return []
     }
 
-    String createDTP(Map data) {
+    List<DocumentHistoryEntry> createDTP(Map data) {
         log.info("createDTP for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -254,10 +256,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createRA(Map data) {
+    List<DocumentHistoryEntry> createRA(Map data) {
         log.info("createRA for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -340,10 +342,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createCFTP(Map data) {
+    List<DocumentHistoryEntry> createCFTP(Map data) {
         log.info("createCFTP for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -365,10 +367,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createIVP(Map data) {
+    List<DocumentHistoryEntry> createIVP(Map data) {
         log.info("createIVP for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -420,10 +422,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createSSDS(Map data) {
+    List<DocumentHistoryEntry> createSSDS(Map data) {
         log.info("createSSDS for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -493,10 +495,10 @@ class LeVADocumentService extends DocGenUseCase {
         ]
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createTCP(Map data) {
+    List<DocumentHistoryEntry> createTCP(Map data) {
         log.info("createTCP for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -539,10 +541,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createTIP(Map data) {
+    List<DocumentHistoryEntry> createTIP(Map data) {
         log.info("createTIP for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -572,10 +574,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createTRC(Map data) {
+    List<DocumentHistoryEntry> createTRC(Map data) {
         log.info("createTRC for ${data.projectBuild}")
         log.trace("createTRC - data:${data}")
 
@@ -627,12 +629,12 @@ class LeVADocumentService extends DocGenUseCase {
         def watermarkText = this.getWatermarkText(projectData)
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
     // DocTypeProjectFixtureWithTestData
     @SuppressWarnings('CyclomaticComplexity')
-    String createTCR(Map data) {
+    List<DocumentHistoryEntry> createTCR(Map data) {
         log.info("createTCR for ${data.projectBuild}")
         log.trace("createTCR - data:${data}")
 
@@ -718,11 +720,11 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
     @SuppressWarnings('CyclomaticComplexity')
-    String createCFTR(Map data) {
+    List<DocumentHistoryEntry> createCFTR(Map data) {
         log.info("createCFTR for ${data.projectBuild}")
         log.trace("createCFTR - data:${data}")
 
@@ -794,10 +796,10 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, files, null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
-    String createIVR(Map data) {
+    List<DocumentHistoryEntry> createIVR(Map data) {
         log.info("createIVR for ${data.projectBuild}")
         log.trace("createIVR - data:${data}")
 
@@ -868,11 +870,11 @@ class LeVADocumentService extends DocGenUseCase {
 
         def uri = this.createDocument(projectData, documentType, null, data_, files, null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        return uri
+        return docHistory.data
     }
 
     // DocTypeProjectFixtureWithComponent
-    String createDTR(Map data) {
+    List<DocumentHistoryEntry> createDTR(Map data) {
         log.info("createDTR for ${data.projectBuild}")
         log.trace("createDTR - data:${prettyPrint(toJson(data))}")
 
@@ -955,11 +957,12 @@ class LeVADocumentService extends DocGenUseCase {
 
         def modifier = { document -> return document }
         def templateName = getDocumentTemplateName(projectData, documentType, repo)
-        return this.createDocument(projectData, documentType, repo, data_, files, modifier, templateName, watermarkText)
+        this.createDocument(projectData, documentType, repo, data_, files, modifier, templateName, watermarkText)
+        return docHistory.data
     }
 
     @SuppressWarnings('CyclomaticComplexity')
-    String createTIR(Map data) {
+    List<DocumentHistoryEntry> createTIR(Map data) {
         log.info("createTIR for ${data.projectBuild}")
         log.trace("createTIR - data:${prettyPrint(toJson(data))}")
 
@@ -1004,7 +1007,8 @@ class LeVADocumentService extends DocGenUseCase {
         ]
 
         def modifier = { document -> return document }
-        return this.createDocument(projectData, documentType, repo, data_, [:], modifier, getDocumentTemplateName(projectData, documentType, repo), watermarkText)
+        this.createDocument(projectData, documentType, repo, data_, [:], modifier, getDocumentTemplateName(projectData, documentType, repo), watermarkText)
+        return docHistory.data
     }
 
     String createOverallDTR(Map data) {
@@ -1679,7 +1683,6 @@ class LeVADocumentService extends DocGenUseCase {
         }
         return version
     }
-
 
     private def computeKeysInDocForTCR(def data) {
         return data.collect { it.subMap(['key', 'requirements', 'bugs']).values() }.flatten()

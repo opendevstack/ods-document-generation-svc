@@ -4,7 +4,6 @@ package org.ods.doc.gen.external.modules.git
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
-import org.ods.doc.gen.external.modules.git.fixtureDatas.CheckRepoExists
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
@@ -23,17 +22,7 @@ class GitRepoDownloadServiceSpec extends Specification {
     public File tmpFolder
 
     @Inject
-    GitRepoDownloadService gitRepoDownloadService
-
-    @Inject
-    CheckRepoExists checkRepoExists
-
-    def setup() {
-        String simpleName = this.class.simpleName
-    }
-
-    def cleanup() {
-    }
+    BitbucketService bitbucketService
 
     def "test getRepoContentsToFolder() "() {
         given: "A project data"
@@ -44,9 +33,8 @@ class GitRepoDownloadServiceSpec extends Specification {
         data.openshift = [targetApiUrl:"https://openshift-sample"]
 
         when: "get a copy of the repository is called"
-        checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderAbsolutePath)
+        bitbucketService.downloadRepo(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
         log.info("Files in folder: ${tmpFolderAbsolutePath}")
@@ -74,9 +62,8 @@ class GitRepoDownloadServiceSpec extends Specification {
         data.openshift = [targetApiUrl:"https://openshift-sample"]
 
         when: "get a copy of the repository is called"
-        checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderAbsolutePath)
+        bitbucketService.downloadRepo(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
         def e = thrown(IllegalArgumentException)
@@ -93,9 +80,8 @@ class GitRepoDownloadServiceSpec extends Specification {
         data.openshift = [targetApiUrl:"https://openshift-sample"]
 
         when: "get a copy of the repository is called"
-        checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.getRepoContentsAsZipAndExtractToFolder(data, tmpFolderAbsolutePath)
+        bitbucketService.downloadRepo(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
         def e = thrown(IllegalArgumentException)
@@ -131,7 +117,7 @@ class GitRepoDownloadServiceSpec extends Specification {
         File tmpFolderFile = tmpFolder.toFile()
 
         when: "we try to checkoout repo"
-        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolderFile.getAbsolutePath())
+        gitRepoDownloadService.cloneReleaseManagerRepo(data, tmpFolderFile.getAbsolutePath())
 
         then: "check files are downloaded and no zip file remains there"
         boolean found = false
@@ -153,7 +139,7 @@ class GitRepoDownloadServiceSpec extends Specification {
         when: "get a copy of the repository is called"
         checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolderAbsolutePath)
+        gitRepoDownloadService.cloneReleaseManagerRepo(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
         def e = thrown(IllegalArgumentException)
@@ -172,7 +158,7 @@ class GitRepoDownloadServiceSpec extends Specification {
         when: "get a copy of the repository is called"
         checkRepoExists.checkRepoExists(projectFixture)
         String tmpFolderAbsolutePath = tmpFolder.getAbsolutePath()
-        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolderAbsolutePath)
+        gitRepoDownloadService.cloneReleaseManagerRepo(data, tmpFolderAbsolutePath)
 
         then: "check files are downloaded and no zip file remains there"
         def e = thrown(IllegalArgumentException)

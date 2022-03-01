@@ -2,7 +2,7 @@ package org.ods.doc.gen.project.data
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
+import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraService
@@ -38,16 +38,15 @@ class ProjectData {
     protected Boolean isVersioningEnabled = false
 
     private final JiraService jira
-    private final GitRepoDownloadService gitRepoDownloadService
+    private final BitbucketService bitbucketService
 
     String tmpFolder
     Map data = [:]
     Map build = [:]
 
-    ProjectData(JiraService jira, GitRepoDownloadService gitRepoDownloadService) {
+    ProjectData(JiraService jira, BitbucketService bitbucketService) {
         this.jira = jira
-        this.gitRepoDownloadService = gitRepoDownloadService
-
+        this.bitbucketService = bitbucketService
         this.config =  [:]
         this.build = [
             hasFailingTests: false,
@@ -59,6 +58,7 @@ class ProjectData {
     ProjectData init(Map data) {
         this.tmpFolder = data.tmpFolder
         this.build << data.build
+        this.data.projectId = data.projectId
         this.build.buildNumber = data.buildNumber
         this.data.git = data.git
         this.data.openshift = data.openshift
@@ -68,8 +68,11 @@ class ProjectData {
     }
 
     ProjectData load() {
-
-        gitRepoDownloadService.gitCloneReleaseManagerRepo(data, tmpFolder)
+        bitbucketService.downloadRepo(
+                data.projectId as String,
+                data.git.releaseManagerRepo as String,
+                data.git.releaseManagerBranch as String,
+                tmpFolder)
         this.data.metadata = loadMetadata(tmpFolder) 
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)

@@ -9,6 +9,7 @@ import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.springframework.stereotype.Component
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
 import javax.inject.Inject
 
@@ -60,11 +61,14 @@ class LevaDocWiremock {
         nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
         bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
     }
+    EnvironmentVariables env = new EnvironmentVariables()
 
     private void updateServicesWithWiremockConfig() {
+        env.setup()
         nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
         jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
-        bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
+        //bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
+        env.set("BITBUCKET_URL",bitbucketServer.server().baseUrl())
     }
 
 }

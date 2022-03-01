@@ -11,54 +11,18 @@
 projects:
   - id: ORDGP
     releaseId: ORDGP-123
-    version: DEV
+    version: WIP
+    templatesVersion: 1.2
     validation: >
       ### Project validates
       * Images in documents
-  *	Images in tables
-  * Long texts in issues
-  *	Long texts in tables
-  * Long lists on tables
-  *	All Test Levels documented
-  *	Test Steps documented
-  * Epics Documented
-  - id: TRFDGP
-    releaseId: TRFDGP-179
-    version: Q
-    validation: >
-      ### Project validates
-      * Issues Succeeded
-  *	Issues Discontinued
-  *	All Test Levels documented
-  *	Test Steps documented
-  * Manual Tests not documented
-  *	Failing Tests
-  *	Releases frozen
-  * Images in documents
-  - id: TRDGP
-    releaseId: TRFDGP-123
-    version: DEV
-    validation: >
-      ### Project validates
-      * Two alive releases
-  * Complete structure of issues (Epic, Story, TST, Test, RA and Mitigation)
-  * All Tests Documented
-  *	Saas component provisioned
-  *	Epics Documented
-  - id: G3DGP
-    releaseId: G3DGP-123
-    version: DEV
-    validation: >
-      ### Project validates
-      * GAMP 3 Documentation
-  * Saas component provisioned
-  - id: G4DGP
-    releaseId: G4DGP-123
-    version: DEV
-    validation: >
-      ### Project validates
-      * GAMP 4 Documentation
-  * Saas component provisioned
+      *	Images in tables
+      * Long texts in issues
+      *	Long texts in tables
+      * Long lists on tables
+      *	All Test Levels documented
+      *	Test Steps documented
+      * Epics Documented
 
   #  - id: OFI2004
   #    releaseId: OFI2004-207

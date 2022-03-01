@@ -24,14 +24,8 @@ class WiremockReleaseRepository {
         wireMockFacade.stopWireMockServer()
     }
 
-    void setUpBitbucketRepository(def project, def releaseManagerRepository, def branchRef) {
-        project = project.toLowerCase()
-        releaseManagerRepository = project + "-" + releaseManagerRepository
-
-        def WIREMOCK_SERVER_HOST = "http://localhost:9003"
-        def BITBUCKET_HOST = "https://bitbucket-dev.biscrum.com"
-        def REPO_ZIP_ARCHIVE_URL = "/rest/api/latest/projects/${project}/repos/${releaseManagerRepository}/archive?at=${branchRef}&format=zip"
-
+    void setUpDocumentRepository(def project, def releaseManagerRepository, def branchRef) {
+        URI templatesURI = GithubDocumentTemplatesRepository.getURItoDownloadTemplates("1.2")
         String uri = WIREMOCK_SERVER_HOST + REPO_ZIP_ARCHIVE_URL
         String matchingUri = BITBUCKET_HOST + REPO_ZIP_ARCHIVE_URL
         String zipFilePath = RELEASE_MANAGER_REPO_ZIP_PATH + "/" + ${project} + "/" + ${releaseManagerRepository} + ".zip"

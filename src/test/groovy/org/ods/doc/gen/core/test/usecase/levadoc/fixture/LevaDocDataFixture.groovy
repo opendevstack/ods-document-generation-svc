@@ -67,7 +67,8 @@ class LevaDocDataFixture {
                 releaseParamVersion : "3.0",
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
-                jobName : "ordgp-cd/ordgp-releasemanager",
+                jobName : "ordgp-cd/${projectFixture.project}-releasemanager",
+                xmlTestResultsAceptancete: ""
         ]
     }
 
@@ -80,6 +81,7 @@ class LevaDocDataFixture {
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
+                releaseManagerRepo: "ordgp-releasemanager",
                 releaseManagerBranch: "refs/heads/master"
         ]
     }

@@ -1,101 +1,87 @@
 package org.ods.doc.gen.external.modules.git
 
-import groovy.json.JsonException
-import groovy.json.JsonSlurper
+import feign.FeignException
+import feign.Response
+import feign.codec.ErrorDecoder
 import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
-import kong.unirest.Unirest
-import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.BitBucketClientConfig
+import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.project.data.ProjectData
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
-@SuppressWarnings(['PublicMethodsBeforeNonPublicMethods', 'ParameterCount'])
 @Slf4j
 @Service
 class BitbucketService {
 
-    // Username and password we use to connect to bitbucket
-    String username
-    String password
+    private ZipFacade zipFacade
+    private final BitBucketClientConfig bitBucketClientConfig
 
-    // Bitbucket base url
-    URI baseURL
-
-    BitbucketService(@Value('${bitbucket.url}') String baseURL,
-                @Value('${bitbucket.username}')  String username,
-                @Value('${bitbucket.password}') String password) {
-        if (!baseURL?.trim()) {
-            throw new IllegalArgumentException('Error: unable to connect to Jira. \'baseURL\' is undefined.')
-        }
-
-        if (!username?.trim()) {
-            throw new IllegalArgumentException('Error: unable to connect to Jira. \'username\' is undefined.')
-        }
-
-        if (!password?.trim()) {
-            throw new IllegalArgumentException('Error: unable to connect to Jira. \'password\' is undefined.')
-        }
-
-        if (baseURL.endsWith('/')) {
-            baseURL = baseURL.substring(0, baseURL.size() - 1)
-        }
-
-        try {
-            this.baseURL = new URIBuilder(baseURL).build()
-        } catch (e) {
-            throw new IllegalArgumentException("Error: unable to connect to Jira. '${baseURL}' is not a valid URI.").initCause(e)
-        }
-
-        this.username = username
-        this.password = password
+    @Inject
+    BitbucketService(BitBucketClientConfig bitBucketClientConfig,
+                     ZipFacade zipFacade) {
+        this.bitBucketClientConfig = bitBucketClientConfig
+        this.zipFacade = zipFacade
     }
 
-    Map getCommitsForIntegrationBranch(String repo, ProjectData projectData, int limit, int nextPageStart){
+    Map getCommitsForIntegrationBranch(String repo, ProjectData projectData, int nextPageStart){
         String projectKey = projectData.getKey()
-        String request = "${this.baseURL}/rest/api/1.0/projects/${projectKey}/repos/${repo}/commits"
-        return queryRepo(request, limit, nextPageStart)
+        String response = bitBucketClientConfig.getClient().getCommitsForDefaultBranch(projectKey, repo, nextPageStart)
+        return new JsonSlurperClassic().parseText(response)
     }
 
-    
     Map getPRforMergedCommit(String repo, ProjectData projectData, String commit) {
         String projectKey = projectData.getKey()
-        String request = "${this.baseURL}/rest/api/1.0/projects/${projectKey}" +
-            "/repos/${repo}/commits/${commit}/pull-requests"
-        return queryRepo(request, 0, 0)
+        String response = bitBucketClientConfig.getClient().getPRforMergedCommit(projectKey, repo, commit)
+        return new JsonSlurperClassic().parseText(response)
     }
 
-    
-    private Map queryRepo(String request, int limit, int nextPageStart) {
-
-        def httpRequest = Unirest.get(request)
-                .basicAuth(this.username, this.password)
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/json")
-
-        if (limit>0) {
-            httpRequest.queryString("limit", limit)
-        }
-        if (nextPageStart>0) {
-            httpRequest.queryString("start", nextPageStart)
-        }
-        def response = httpRequest.asString()
-
-        response.ifFailure {
-            def message = 'Error: unable to get data from Bitbucket responded with code: ' +
-                "'${response.getStatus()}' and message: '${response.getBody()}'."
-            throw new RuntimeException(message)
-        }
-
+    void downloadRepo(String project, String repo, String branch, String tmpFolder) {
+        Path zipArchive = Files.createTempFile("archive-", ".zip")
         try {
-            Map result = new JsonSlurperClassic().parseText(response.getBody())
-            return result
-        } catch(JsonException e) {
-            log.warn("Exception parsing response body. Body: ")
-            log.warn(response.getBody())
-            throw new Exception("Exception parsing response body.", e)
+            bitBucketClientConfig
+                    .getClient()
+                    .getRepoZipArchive(project, repo, branch)
+                    .withCloseable { Response response ->
+                        streamResult(response, zipArchive)
+                    }
+            zipFacade.extractZipArchive(zipArchive, Paths.get(tmpFolder))
+        } catch (FeignException callException) {
+            checkError(repo, branch, callException)
+        } finally {
+            Files.delete(zipArchive)
+        }
+    }
+
+    private void streamResult(Response response, Path zipArchive){
+        if (response.status() >= 300) {
+            def methodKey = 'downloadRepo'
+            throw new ErrorDecoder.Default().decode(methodKey, response)
+        }
+        response.body().withCloseable { body ->
+            body.asInputStream().withStream { is ->
+                Files.copy(is, zipArchive, StandardCopyOption.REPLACE_EXISTING)
+            }
+        }
+    }
+
+    private void checkError(repo, String branch, FeignException callException) {
+        def baseErrMessage = "Could not get document zip from '${repo}'!- For version:${branch}"
+        if (callException instanceof FeignException.BadRequest) {
+            throw new RuntimeException("${baseErrMessage} \rIs there a correct release branch configured?")
+        } else if (callException instanceof FeignException.Unauthorized) {
+            def bbUserNameError = System.getenv("BITBUCKET_USERNAME") ?: 'Anyone'
+            throw new RuntimeException("${baseErrMessage} \rDoes '${bbUserNameError}' have access?")
+        } else if (callException instanceof FeignException.NotFound) {
+            throw new RuntimeException("${baseErrMessage}")
+        } else {
+            throw callException
         }
     }
 

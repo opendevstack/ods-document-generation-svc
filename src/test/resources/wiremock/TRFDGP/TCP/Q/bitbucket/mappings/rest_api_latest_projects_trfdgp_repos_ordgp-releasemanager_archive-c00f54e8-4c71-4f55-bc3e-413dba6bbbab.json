@@ -1,0 +1,29 @@
+{
+  "id" : "c00f54e8-4c71-4f55-bc3e-413dba6bbbab",
+  "name" : "rest_api_latest_projects_trfdgp_repos_ordgp-releasemanager_archive",
+  "request" : {
+    "url" : "/rest/api/latest/projects/TRFDGP/repos/ordgp-releasemanager/archive?at=refs/heads/master&format=zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 404,
+    "body" : "{\"errors\":[{\"context\":null,\"message\":\"Repository TRFDGP/ordgp-releasemanager does not exist.\",\"exceptionName\":\"com.atlassian.bitbucket.repository.NoSuchRepositoryException\"}]}",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Tue, 01 Mar 2022 09:20:09 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "@1POZ2QTx620x154256x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=5BA03B0E5D6E5B35E0AE587082EBCCBF; Max-Age=1209600; Expires=Tue, 15-Mar-2022 09:20:09 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=KtSy3bIf5v_IFx1KKMaBSAAAAAAAnoABc2VyZ2lvLnNhY3Jpc3RhbkBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "13482",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "X-ASESSIONID" : "azaspw",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : "accept-encoding,x-auserid,cookie,x-ausername,accept-encoding",
+      "X-Content-Type-Options" : "nosniff"
+    }
+  },
+  "uuid" : "c00f54e8-4c71-4f55-bc3e-413dba6bbbab",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

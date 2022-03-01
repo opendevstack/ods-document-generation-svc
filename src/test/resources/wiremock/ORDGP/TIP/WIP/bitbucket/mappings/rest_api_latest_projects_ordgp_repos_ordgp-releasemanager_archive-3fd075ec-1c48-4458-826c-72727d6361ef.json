@@ -1,0 +1,15 @@
+{
+  "id" : "3fd075ec-1c48-4458-826c-72727d6361ef",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ORDGP/repos/ordgp-releasemanager/archive?at=refs/heads/master&format=zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 500,
+    "bodyFileName" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive-3fd075ec-1c48-4458-826c-72727d6361ef.txt"
+  },
+  "uuid" : "3fd075ec-1c48-4458-826c-72727d6361ef",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

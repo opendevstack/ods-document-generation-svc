@@ -1,9 +1,9 @@
 package org.ods.doc.gen.leva.doc.api
 
-import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
+import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -39,7 +39,19 @@ class LevaDocController {
      * @return
      */
     @PostMapping("{projectId}/{build}/{levaDocType}")
-    Map<String, String> buildDocument(
+    List<DocumentHistoryEntry> buildDocument(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("build") String buildNumber,
+            @PathVariable("levaDocType") LevaDocType levaDocType,
+            @RequestBody Map body){
+        validateRequestParams(body)
+        logData(projectId, buildNumber, levaDocType, body)
+        List<DocumentHistoryEntry> document = createDocument(projectId, buildNumber, levaDocType, body)
+        return document
+    }
+
+    @PostMapping("{projectId}/{build}/overall/{levaDocType}")
+    Map<String, String> buildOverAllDocument(
             @PathVariable("projectId") String projectId,
             @PathVariable("build") String buildNumber,
             @PathVariable("levaDocType") LevaDocType levaDocType,
@@ -51,7 +63,7 @@ class LevaDocController {
         return [nexusURL: url]
     }
 
-    private String createDocument(String projectId, String buildNumber, LevaDocType levaDocType, Map data) {
+    private List<DocumentHistoryEntry> createDocument(String projectId, String buildNumber, LevaDocType levaDocType, Map data) {
         File tmpDir
         try {
             tmpDir = prepareServiceDataParam(projectId, buildNumber, levaDocType, data, tmpDir)
@@ -74,6 +86,7 @@ class LevaDocController {
     private File prepareServiceDataParam(String projectId, String buildNumber, LevaDocType levaDocType, Map data, File tmpDir) {
         data.documentType = levaDocType.toString()
         data.projectBuild = "${projectId}-${buildNumber}"
+        data.projectId = projectId
         data.buildNumber = buildNumber
         tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
         data.tmpFolder = tmpDir.absolutePath

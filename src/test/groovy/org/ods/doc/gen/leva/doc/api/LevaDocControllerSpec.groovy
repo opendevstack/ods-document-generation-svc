@@ -4,13 +4,16 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
+import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -50,17 +53,20 @@ class LevaDocControllerSpec extends Specification {
         Files.createTempDirectory(_) >> tempFolder
 
         and: "leVADocumentService is mocked"
-        def urlDocType = "URL nexus artifact"
+        List<DocumentHistoryEntry> response = buildExpectedResponse()
         Map data = dataFixture.buildFixtureData(projectFixture)
         Map serviceParam = buildServiceDataParam(projectFixture, buildNumber, data)
-        when(leVADocumentService.createCSD(argThat(map -> map == serviceParam))).thenReturn(urlDocType)
+        when(leVADocumentService.createCSD(argThat(map -> map == serviceParam))).thenReturn(response)
 
         expect: "a client call to /levaDoc/ProjectId/BuildID/docType return the url of the doc created"
-        this.mockMvc
-                .perform(post("/levaDoc/${projectFixture.project}/${buildNumber}/CSD")
+        MvcResult mvcResult = this.mockMvc
+                .perform(MockMvcRequestBuilders.post("/levaDoc/${projectFixture.project}/${buildNumber}/CSD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonOutput.toJson(data)))
-                .andExpect(status().isOk()).andExpect(content().json("{'nexusURL':'URL nexus artifact'}"))
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn()
+
+        and:
+        mvcResult.response.contentAsString.equals(response.toString())
 
         and: "the tmp folder is deleted"
         !Files.exists(tempFolder)
@@ -69,7 +75,6 @@ class LevaDocControllerSpec extends Specification {
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()
         buildNumber = "2"
     }
-
 
     def "BuildDocument when LevaDoc Throw exception"() {
         given: "A temporal folder "
@@ -112,9 +117,21 @@ class LevaDocControllerSpec extends Specification {
         serviceParam << data
         serviceParam.documentType = projectFixture.docType
         serviceParam.projectBuild = "${projectFixture.project}-${buildNumber}"
+        serviceParam.projectId = projectFixture.project
         serviceParam.buildNumber = buildNumber
         serviceParam.tmpFolder = tempFolder.toFile().absolutePath
         return serviceParam
+    }
+
+    private List<DocumentHistoryEntry> buildExpectedResponse(){
+        Map map =   [bugs: [], components: [], epics: [key: "ORDGP-124", action: "add"]]
+        DocumentHistoryEntry historyEntry = new DocumentHistoryEntry(
+                map,
+                1,
+                "1.0",
+                "",
+                "Initial document version.")
+        return [historyEntry]
     }
 
 }
