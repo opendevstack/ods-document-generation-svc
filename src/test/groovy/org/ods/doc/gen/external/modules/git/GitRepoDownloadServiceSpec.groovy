@@ -19,6 +19,8 @@ import java.nio.file.Path
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
 class GitRepoDownloadServiceSpec extends Specification {
 
+    private final String NEEDED_FILE_NAME = "metadata.yml"
+
     @TempDir
     public File tmpFolder
 
@@ -54,7 +56,7 @@ class GitRepoDownloadServiceSpec extends Specification {
         boolean found = false
         dir.traverse() {
             log.info(it.getAbsolutePath())
-            if ("Jenkinsfile" == it.getName()) {
+            if (NEEDED_FILE_NAME == it.getName()) {
                 found = true
             }
         }
