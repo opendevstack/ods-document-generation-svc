@@ -65,7 +65,7 @@ class PdfGenerationServiceSpec extends Specification {
 
         where: "BB and GH repos"
         fixtureElement = FIXTURES
-        repository << ["BitBucket", "Github"]
+        repository << ["Github", "BitBucket"]
     }
 
     private Object getJsonRawData(String raw_data){
