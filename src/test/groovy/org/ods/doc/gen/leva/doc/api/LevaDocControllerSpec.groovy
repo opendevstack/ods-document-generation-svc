@@ -66,6 +66,7 @@ class LevaDocControllerSpec extends Specification {
 
         and:
         mvcResult.response.contentAsString == JsonOutput.toJson(response)
+        responseToDocumentHistoryEntry(mvcResult.response)
 
         and: "the tmp folder is deleted"
         !Files.exists(tempFolder)
@@ -73,6 +74,10 @@ class LevaDocControllerSpec extends Specification {
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()
         buildNumber = "2"
+    }
+
+    def responseToDocumentHistoryEntry(response){
+        JsonSlurperClassic().parseText(response.getBody())
     }
 
     def "BuildDocument when LevaDoc Throw exception"() {

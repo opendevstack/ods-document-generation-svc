@@ -126,6 +126,8 @@ configurations.all {
 }
 
 dependencies {
+  implementation("org.codehaus.groovy:groovy-json:3.0.9")
+
   implementation (group: 'org.codehaus.groovy', name: 'groovy-all', version: groovyallVersion){
     exclude group: "org.codehaus.groovy", module: "groovy-test-junit5"
   }
