@@ -1,6 +1,8 @@
 package org.ods.doc.gen
 
 import org.ods.doc.gen.core.test.jira.JiraServiceForWireMock
+import org.ods.doc.gen.external.modules.git.GitRepoDownloadService
+import org.ods.doc.gen.external.modules.git.GitRepoDownloadServiceForWireMock
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -27,6 +29,12 @@ class TestConfig {
     @Bean
     JiraService getJiraService(JiraServiceForWireMock jiraServiceForWireMock){
         return jiraServiceForWireMock
+    }
+
+    @Primary
+    @Bean
+    GitRepoDownloadService getGitRepoDownloadService(GitRepoDownloadServiceForWireMock gitRepoDownloadServiceForWireMock){
+        return gitRepoDownloadServiceForWireMock
     }
 
 }
