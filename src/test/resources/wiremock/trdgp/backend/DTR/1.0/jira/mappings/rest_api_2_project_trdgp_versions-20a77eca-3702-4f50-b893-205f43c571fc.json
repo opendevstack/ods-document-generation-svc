@@ -1,0 +1,35 @@
+{
+  "id" : "20a77eca-3702-4f50-b893-205f43c571fc",
+  "name" : "rest_api_2_project_trdgp_versions",
+  "request" : {
+    "url" : "/rest/api/2/project/TRDGP/versions",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "[{\"self\":\"https://jira-dev.biscrum.com/rest/api/2/version/26014\",\"id\":\"26014\",\"name\":\"1.0\",\"archived\":false,\"released\":false,\"projectId\":30108},{\"self\":\"https://jira-dev.biscrum.com/rest/api/2/version/26015\",\"id\":\"26015\",\"name\":\"2.0\",\"archived\":false,\"released\":false,\"projectId\":30108}]",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Wed, 02 Mar 2022 09:10:06 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "610x99668x1",
+      "Referrer-Policy" : "strict-origin-when-cross-origin",
+      "X-XSS-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "Content-Security-Policy" : "frame-ancestors 'self'",
+      "Strict-Transport-Security" : [ "max-age=31536000", "max-age=15768000" ],
+      "Set-Cookie" : [ "JSESSIONID=6DA93E0422B754CE2A13F62C434120AD; Path=/; Secure; HttpOnly", "atlassian.xsrf.token=BW8I-UASU-MVFU-WO2W_0cf4625547d237693e96d4b1b0fa1d292fba340b_lin; Path=/; Secure" ],
+      "X-Seraph-LoginReason" : "OK",
+      "X-ASESSIONID" : "18z87sg",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "Cache-Control" : "no-cache, no-store, no-transform",
+      "Vary" : "User-Agent"
+    }
+  },
+  "uuid" : "20a77eca-3702-4f50-b893-205f43c571fc",
+  "persistent" : true,
+  "scenarioName" : "scenario-1-rest-api-2-project-TRDGP-versions",
+  "requiredScenarioState" : "scenario-1-rest-api-2-project-TRDGP-versions-2",
+  "insertionIndex" : 16
+}

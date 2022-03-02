@@ -485,8 +485,8 @@ class LeVADocumentService extends DocGenUseCase {
         sections."sec10".modules = modules
 
         def keysInDoc = this.computeKeysInDocForSSDS(projectData.getTechnicalSpecifications(), componentsMetadata, modules)
-        def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
-        def data_ = [
+        DocumentHistory docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
+        Map data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
                         sections: sections,

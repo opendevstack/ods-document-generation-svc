@@ -5,15 +5,15 @@ import feign.Logger
 import feign.slf4j.Slf4jLogger
 import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
-import org.ods.doc.gen.pdf.builder.repository.GithubDocumentTemplatesStoreHttpAPI
+import org.ods.doc.gen.external.modules.git.GitHubRepository
 import org.springframework.stereotype.Service
 
 @Slf4j
 @Service
 class GithubClientConfig {
 
-    GithubDocumentTemplatesStoreHttpAPI getClient(URI baseUrl) {
-        String[] httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.replace('http://','')?.split(':')
+    GitHubRepository getClient() {
+        String[] httpProxyHost = getProxy()
         log.info ("Proxy setup: ${httpProxyHost ?: 'not found' }")
 
         feign.okhttp.OkHttpClient client
@@ -25,9 +25,16 @@ class GithubClientConfig {
             client = new feign.okhttp.OkHttpClient(new OkHttpClient().newBuilder().build())
         }
 
-        return Feign.builder().client(client).logger(new Slf4jLogger(GithubDocumentTemplatesStoreHttpAPI.class))
+        String githubUrl = System.getenv("GITHUB_HOST") ?: "https://www.github.com"
+        URI baseUrl = URI.create(githubUrl)
+
+        return Feign.builder().client(client).logger(new Slf4jLogger(GitHubRepository.class))
                 .logLevel(Logger.Level.FULL)
-                .target(GithubDocumentTemplatesStoreHttpAPI.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
+                .target(GitHubRepository.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
+    }
+
+    private String[] getProxy() {
+        System.getenv('HTTP_PROXY')?.trim()?.replace('http://', '')?.split(':')
     }
 
 }

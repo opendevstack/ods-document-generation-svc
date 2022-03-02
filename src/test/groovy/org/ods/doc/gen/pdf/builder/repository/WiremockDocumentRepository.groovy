@@ -8,6 +8,8 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 
 @Repository
@@ -15,6 +17,8 @@ class WiremockDocumentRepository {
 
     public static final String GH_TEMPLATE = "pdf.builder/ods-document-generation-templates-github-1.2.zip"
     public static final String BB_TEMPLATE = "pdf.builder/ods-document-generation-templates-bitbucket-1.2.zip"
+
+    public static final String WIREMOCK_SERVER = "http://localhost:9002"
 
     private WireMockFacade wireMockFacade
 
@@ -32,37 +36,40 @@ class WiremockDocumentRepository {
 
     void setUpGithubRepository(String version) {
         setupGitHubEnv()
-        mockTemplatesZipArchiveDownload(GithubDocumentTemplatesRepository.getURItoDownloadTemplates(version), GH_TEMPLATE)
+        String url = "/opendevstack/ods-document-generation-templates/archive/v${version}.zip"
+        mockTemplatesZipArchiveDownload(url, GH_TEMPLATE)
     }
 
     void setUpBitbucketRepository(String version) {
         setupBitBuckectEnv()
-        mockTemplatesZipArchiveDownload(BitBucketDocumentTemplatesRepository.getURItoDownloadTemplates(version), BB_TEMPLATE)
+        mockTemplatesZipArchiveDownload("/([a-z]*)\\format=zip", BB_TEMPLATE)
     }
 
     private setupBitBuckectEnv() {
         env.setup()
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT", "myProject")
         env.set("BITBUCKET_DOCUMENT_TEMPLATES_REPO", "myRepo")
-        env.set("BITBUCKET_URL", "http://localhost:9002")
+        env.set("BITBUCKET_URL", WIREMOCK_SERVER)
     }
 
     private setupGitHubEnv() {
         env.setup()
-        env.set("GITHUB_HOST", "http://localhost:9002")
+        env.set("GITHUB_HOST", WIREMOCK_SERVER)
     }
 
-    private void mockTemplatesZipArchiveDownload(URI uri, String templatesName, int returnStatus = 200) {
+    private void mockTemplatesZipArchiveDownload(String urlPartialPath, String templatesName, int returnStatus = 200) {
         def zipArchiveContent = getResource(templatesName).readBytes()
-        startDocumentsWiremock(uri, zipArchiveContent, returnStatus)
+        startDocumentsWiremock(urlPartialPath, zipArchiveContent, returnStatus)
     }
 
-    private StubMapping startDocumentsWiremock(URI uri, byte[] zipArchiveContent, int returnStatus = 200) {
-        wireMockFacade.startWireMockServer(uri).stubFor(WireMock.get(urlPathMatching(uri.getPath()))
-                .withHeader("Accept", equalTo("application/octet-stream"))
-                .willReturn(aResponse()
-                        .withBody(zipArchiveContent)
-                        .withStatus(returnStatus)
+    private StubMapping startDocumentsWiremock(String urlPartialPath, byte[] zipArchiveContent, int returnStatus = 200) {
+            wireMockFacade
+                    .startWireMockServer(URI.create(WIREMOCK_SERVER))
+                    .stubFor(WireMock.get(urlMatching(urlPartialPath))
+                            .withHeader("Accept", equalTo("application/octet-stream"))
+                            .willReturn(aResponse()
+                                    .withBody(zipArchiveContent)
+                                    .withStatus(returnStatus)
                 ))
     }
 

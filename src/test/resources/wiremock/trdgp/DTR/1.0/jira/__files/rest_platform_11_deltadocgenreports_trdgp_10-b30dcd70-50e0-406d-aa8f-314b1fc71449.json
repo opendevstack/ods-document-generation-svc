@@ -1,0 +1,404 @@
+{
+  "project" : {
+    "name" : "Three Releases DocGen Project",
+    "description" : "",
+    "key" : "TRDGP",
+    "jiraBaseUrl" : "https://jira-dev.biscrum.com/TRDGP",
+    "projectProperties" : {
+      "PROJECT.POO_CAT.LOW" : "Frequency of the usage of the related function is <10 times per year.",
+      "PROJECT.POO_CAT.HIGH" : "Frequency of the usage of the related function is >10 times per week.",
+      "WEBHOOK_PROXY.URL" : "https://webhook-proxy-TRDGP-cd.inh-odsapps.eu.boehringer.com/build?trigger_secret=420bd6f7-a6c0-4c93-8b15-d8f39ce4da33",
+      "RM.REPOSITORY" : "trdgp-releasemanager",
+      "PROJECT.POO_CAT.MEDIUM" : "Frequency of the usage of the related function is <10 times per week.",
+      "PROJECT.NON-GXP_EVALUATION" : "Non-GxP risks are not being evaluated",
+      "PROJECT.USES_POO" : "true",
+      "PROJECT.IS_EDP_PROJECT" : "true",
+      "PROJECT.CONFIG_ITEM" : "BI-IT-DEVSTACK"
+    },
+    "gampTopics" : [ "operational requirements", "functional requirements", "data requirements", "technical requirements", "interface requirements", "environment requirements", "performance requirements", "availability requirements", "security requirements", "maintenance requirements", "regulatory requirements", "roles", "compatibility", "procedural constraints", "overarching requirements" ],
+    "enumDictionary" : {
+      "ProbabilityOfDetection" : {
+        "1" : {
+          "value" : 1,
+          "text" : "Immediate",
+          "short" : "I"
+        },
+        "2" : {
+          "value" : 2,
+          "text" : "Before Impact",
+          "short" : "B"
+        },
+        "3" : {
+          "value" : 3,
+          "text" : "After Impact",
+          "short" : "A"
+        }
+      },
+      "SeverityOfImpact" : {
+        "1" : {
+          "value" : 1,
+          "text" : "Low",
+          "short" : "L"
+        },
+        "2" : {
+          "value" : 2,
+          "text" : "Medium",
+          "short" : "M"
+        },
+        "3" : {
+          "value" : 3,
+          "text" : "High",
+          "short" : "H"
+        }
+      },
+      "ProbabilityOfOccurrence" : {
+        "1" : {
+          "value" : 1,
+          "text" : "LOW",
+          "short" : "L"
+        },
+        "2" : {
+          "value" : 2,
+          "text" : "MEDIUM",
+          "short" : "M"
+        },
+        "3" : {
+          "value" : 3,
+          "text" : "HIGH",
+          "short" : "H"
+        }
+      },
+      "RiskPriority" : {
+        "0" : {
+          "value" : 0,
+          "text" : "N/A",
+          "short" : "N"
+        },
+        "1" : {
+          "value" : 1,
+          "text" : "HIGH",
+          "short" : "H"
+        },
+        "2" : {
+          "value" : 2,
+          "text" : "MEDIUM",
+          "short" : "M"
+        },
+        "3" : {
+          "value" : 3,
+          "text" : "LOW",
+          "short" : "L"
+        }
+      },
+      "GxPRelevance" : {
+        "R2" : {
+          "value" : 2,
+          "text" : "Relevant",
+          "short" : "R2"
+        },
+        "N0" : {
+          "value" : 0,
+          "text" : "Not relevant/ZERO",
+          "short" : "N0"
+        },
+        "N1" : {
+          "value" : 1,
+          "text" : "Not relevant/LESS",
+          "short" : "N1"
+        },
+        "N2" : {
+          "value" : 2,
+          "text" : "Not relevant/EQUAL",
+          "short" : "N2"
+        }
+      }
+    },
+    "versions" : [ "1.0", "2.0" ],
+    "id" : "30108"
+  },
+  "components" : {
+    "Technology-saas" : {
+      "name" : "Technology-saas",
+      "description" : "Technology component trdgp-saas stored at https://bitbucket-dev.biscrum.com/projects/TRDGP/repos/trdgp-saas/browse",
+      "requirements" : [ ],
+      "techSpecs" : [ ],
+      "risks" : [ ],
+      "epics" : [ ],
+      "tests" : [ ],
+      "mitigations" : [ ]
+    },
+    "Technology-test" : {
+      "name" : "Technology-test",
+      "description" : "Technology component trdgp-test stored at https://bitbucket-dev.biscrum.com/projects/TRDGP/repos/trdgp-test/browse",
+      "requirements" : [ ],
+      "techSpecs" : [ ],
+      "risks" : [ ],
+      "epics" : [ ],
+      "tests" : [ ],
+      "mitigations" : [ ]
+    },
+    "Technology-backend" : {
+      "name" : "Technology-backend",
+      "description" : "Technology component trdgp-backend stored at https://bitbucket-dev.biscrum.com/projects/TRDGP/repos/trdgp-backend/browse",
+      "requirements" : [ ],
+      "techSpecs" : [ ],
+      "risks" : [ ],
+      "epics" : [ ],
+      "tests" : [ "TRDGP-126" ],
+      "mitigations" : [ ]
+    },
+    "Technology-releasemanager" : {
+      "name" : "Technology-releasemanager",
+      "description" : "Technology component trdgp-releasemanager stored at https://bitbucket-dev.biscrum.com/projects/TRDGP/repos/trdgp-releasemanager/browse",
+      "requirements" : [ ],
+      "techSpecs" : [ ],
+      "risks" : [ ],
+      "epics" : [ ],
+      "tests" : [ ],
+      "mitigations" : [ ]
+    }
+  },
+  "releaseState" : "SLC Documents for promotion to Q Created",
+  "version" : "1.0",
+  "epics" : {
+    "TRDGP-124" : {
+      "key" : "TRDGP-124",
+      "description" : "<p>Epic 1</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ ],
+      "epicName" : "Epic 1",
+      "predecessors" : [ ],
+      "title" : "Epic 1",
+      "requirements" : [ "TRDGP-125" ]
+    }
+  },
+  "requirements" : {
+    "TRDGP-125" : {
+      "key" : "TRDGP-125",
+      "name" : "Story 1",
+      "description" : "<p>Story 1</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ ],
+      "gampTopic" : "availability requirements",
+      "acceptanceCriteria" : "Story 1",
+      "configSpec" : {
+        "name" : "Story 1",
+        "description" : "<p>Story 1</p>"
+      },
+      "funcSpec" : {
+        "name" : "Story 1",
+        "description" : "<p>Story 1</p>",
+        "acceptanceCriteria" : "Story 1"
+      },
+      "components" : [ ],
+      "epics" : [ "TRDGP-124" ],
+      "risks" : [ "TRDGP-128" ],
+      "tests" : [ "TRDGP-131", "TRDGP-130", "TRDGP-132", "TRDGP-134", "TRDGP-126" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "bugs" : [ ],
+      "mitigations" : [ "TRDGP-129", "TRDGP-135" ],
+      "predecessors" : [ ]
+    }
+  },
+  "risks" : {
+    "TRDGP-128" : {
+      "key" : "TRDGP-128",
+      "name" : "RA 1",
+      "description" : "<p>RA 1</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Defined",
+      "labels" : [ ],
+      "gxpRelevance" : "N1",
+      "probabilityOfOccurrence" : 3,
+      "severityOfImpact" : 2,
+      "probabilityOfDetection" : 1,
+      "riskPriorityNumber" : 6,
+      "riskPriority" : 2,
+      "mitigations" : [ "TRDGP-129" ],
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ ],
+      "tests" : [ ],
+      "predecessors" : [ ],
+      "riskComment" : null
+    },
+    "TRDGP-133" : {
+      "key" : "TRDGP-133",
+      "name" : "RA for TST",
+      "description" : "<p>RA for TST</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Defined",
+      "labels" : [ ],
+      "gxpRelevance" : "N0",
+      "probabilityOfOccurrence" : null,
+      "severityOfImpact" : 1,
+      "probabilityOfDetection" : null,
+      "riskPriorityNumber" : null,
+      "riskPriority" : null,
+      "mitigations" : [ "TRDGP-135" ],
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "tests" : [ "TRDGP-134" ],
+      "predecessors" : [ ],
+      "riskComment" : null
+    }
+  },
+  "tests" : {
+    "TRDGP-126" : {
+      "id" : "896901",
+      "key" : "TRDGP-126",
+      "name" : "Test 1",
+      "description" : "<p>Test 1</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ "Succeeded" ],
+      "components" : [ "Technology-backend" ],
+      "testType" : "Unit",
+      "executionType" : "Automated",
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ ],
+      "risks" : [ ],
+      "steps" : [ ],
+      "predecessors" : [ ],
+      "execLabel" : "Succeeded"
+    },
+    "TRDGP-130" : {
+      "id" : "896905",
+      "key" : "TRDGP-130",
+      "name" : "Acceptance Test",
+      "description" : "<p>Acceptance Test</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ "Succeeded" ],
+      "components" : [ ],
+      "testType" : "Acceptance",
+      "executionType" : "Automated",
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "risks" : [ ],
+      "steps" : [ ],
+      "predecessors" : [ ],
+      "execLabel" : "Succeeded"
+    },
+    "TRDGP-131" : {
+      "id" : "896906",
+      "key" : "TRDGP-131",
+      "name" : "Integration Test",
+      "description" : "<p>Integration Test</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ "Succeeded" ],
+      "components" : [ ],
+      "testType" : "Integration",
+      "executionType" : "Automated",
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "risks" : [ ],
+      "steps" : [ ],
+      "predecessors" : [ ],
+      "execLabel" : "Succeeded"
+    },
+    "TRDGP-132" : {
+      "id" : "896907",
+      "key" : "TRDGP-132",
+      "name" : "Installation Test",
+      "description" : "<p>Installation Test</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ "Succeeded" ],
+      "components" : [ ],
+      "testType" : "Installation",
+      "executionType" : "Automated",
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "risks" : [ ],
+      "steps" : [ ],
+      "predecessors" : [ ],
+      "execLabel" : "Succeeded"
+    },
+    "TRDGP-134" : {
+      "id" : "896909",
+      "key" : "TRDGP-134",
+      "name" : "Test for RA",
+      "description" : "<p>Test for RA</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ "Succeeded" ],
+      "components" : [ ],
+      "testType" : "Installation",
+      "executionType" : "Automated",
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "risks" : [ "TRDGP-133" ],
+      "steps" : [ ],
+      "predecessors" : [ ],
+      "execLabel" : "Succeeded"
+    }
+  },
+  "mitigations" : {
+    "TRDGP-129" : {
+      "key" : "TRDGP-129",
+      "name" : "Mitigation 1",
+      "description" : "<p>Mitigation 1</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Defined",
+      "labels" : [ ],
+      "risks" : [ "TRDGP-128" ],
+      "components" : [ ],
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ ],
+      "predecessors" : [ ]
+    },
+    "TRDGP-135" : {
+      "key" : "TRDGP-135",
+      "name" : "Mitigation for TST",
+      "description" : "<p>Mitigation for TST</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Defined",
+      "labels" : [ ],
+      "risks" : [ "TRDGP-133" ],
+      "components" : [ ],
+      "requirements" : [ "TRDGP-125" ],
+      "techSpecs" : [ "TRDGP-127" ],
+      "predecessors" : [ ]
+    }
+  },
+  "techSpecs" : {
+    "TRDGP-127" : {
+      "key" : "TRDGP-127",
+      "name" : "TST 1",
+      "description" : "<p>TST 1</p>",
+      "versions" : [ "1.0" ],
+      "status" : "Done",
+      "resolution" : "Implemented",
+      "labels" : [ ],
+      "systemDesignSpec" : "<p>TST 1</p>",
+      "softwareDesignSpec" : "<p>TST 1</p>",
+      "components" : [ ],
+      "requirements" : [ "TRDGP-125" ],
+      "risks" : [ "TRDGP-133" ],
+      "tests" : [ "TRDGP-132", "TRDGP-134" ],
+      "bugs" : [ ],
+      "mitigations" : [ "TRDGP-135" ],
+      "predecessors" : [ ]
+    }
+  },
+  "bugs" : { },
+  "notesAndHints" : [ ],
+  "precedingVersions" : [ ],
+  "modifiedKeys" : { },
+  "discontinuedKeys" : [ ],
+  "continuedKeys" : [ ]
+}

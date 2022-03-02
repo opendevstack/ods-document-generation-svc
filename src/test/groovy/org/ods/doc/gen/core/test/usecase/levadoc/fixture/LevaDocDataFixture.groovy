@@ -28,7 +28,7 @@ class LevaDocDataFixture {
     Map buildFixtureData(ProjectFixture projectFixture){
         Map data = [:]
         data.build = buildJobParams(projectFixture)
-        data.git =  buildGitData()
+        data.git =  buildGitData(projectFixture)
         data.openshift = [targetApiUrl:"https://openshift-sample"]
         return data
     }
@@ -44,10 +44,9 @@ class LevaDocDataFixture {
         projectData.repositories.each {repo ->
             projectFixture.component = repo.id
             repo.data.documents = (repo.data.documents)?: [:]
-            if (DocTypeProjectFixtureWithComponent.notIsReleaseModule(repo)){
-                // see @DocGenUseCase#createOverallDocument -> unstashFilesIntoPath
-                repo.data.documents[projectFixture.docType] =  copyPdfToTemp(projectFixture, data)
-            }
+
+            // see @DocGenUseCase#createOverallDocument -> unstashFilesIntoPath
+            repo.data.documents[projectFixture.docType] =  copyPdfToTemp(projectFixture, data)
         }
         projectFixture.component = null
     }
@@ -72,16 +71,16 @@ class LevaDocDataFixture {
         ]
     }
 
-    private Map<String, String> buildGitData() {
+    private Map<String, String> buildGitData(ProjectFixture projectFixture) {
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "https://bitbucket-dev.biscrum.com/scm/ordgp/ordgp-releasemanager",
+                url: "https://bitbucket-dev.biscrum.com/scm/ordgp/${projectFixture.project}-releasemanager",
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
-                releaseManagerRepo: "ordgp-releasemanager",
+                releaseManagerRepo: "${projectFixture.project}-releasemanager",
                 releaseManagerBranch: "refs/heads/master"
         ]
     }

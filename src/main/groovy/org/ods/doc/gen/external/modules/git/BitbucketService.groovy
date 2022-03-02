@@ -61,8 +61,7 @@ class BitbucketService {
 
     private void streamResult(Response response, Path zipArchive){
         if (response.status() >= 300) {
-            def methodKey = 'downloadRepo'
-            throw new ErrorDecoder.Default().decode(methodKey, response)
+            throw new ErrorDecoder.Default().decode('downloadRepo', response)
         }
         response.body().withCloseable { body ->
             body.asInputStream().withStream { is ->

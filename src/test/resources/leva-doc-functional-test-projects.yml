@@ -1,17 +1,48 @@
-#projects:
-#  - id: FRML24113
-#    releaseId: FRML24113-230
-#    version: WIP
-#    validation: >
+###############################################################################
+#
+# Also see org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureBase
+#
+#  Description of some relevant fields:
+#
+#  - id: frml24113 --> in lowe case!!!
+#
+#  - version: WIP or 1.0 ... (same as in Jenkins build param)
+#
+#  - docsToTest: docTypes to generate in the given state of the project
+#       all should be: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+#          (overall are not needed to put here as put DTR, TIR is enough)
+#
+#  - validation: > Explain here what we are validating here
 #      ### Project validates
 #      * Large images
 #      * Discontinue tests
 #
 #
+#   NOTE: We can have a project more than one time: with different "version", as will produce different pdfs
+#
+###############################################################################
 projects:
-  - id: ORDGP
+  - id: trdgp
+    description: Three releases DocGen
+    releaseId: TRFDGP-123
+    version: 1.0
+    docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
+    components: backend, saas, test
+    templatesVersion: 1.2
+    validation: >
+      ### Project validates
+      * Two alive releases
+      * Complete structure of issues (Epic, Story, TST, Test, RA and Mitigation)
+      * All Tests Documented
+      *	Saas component provisioned
+      *	Epics Documented
+
+  - id: ordgp
+    description: One release DocGen
     releaseId: ORDGP-123
     version: WIP
+    docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+    components: backend, frontend, test
     templatesVersion: 1.2
     validation: >
       ### Project validates
@@ -24,10 +55,44 @@ projects:
       *	Test Steps documented
       * Epics Documented
 
-  #  - id: OFI2004
-  #    releaseId: OFI2004-207
-  #    validation: In this project we are testing....
+  - id: trfdgp
+    description: Two releases Frozen DocGen
+    releaseId: TRFDGP-179
+    version: 4.0
+    docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
+    components: backend, frontend, test
+    templatesVersion: 1.2
+    validation: >
+      ### Project validates
+      * Issues Succeeded
+      *	Issues Discontinued
+      *	All Test Levels documented
+      *	Test Steps documented
+      * Manual Tests not documented
+      *	Failing Tests
+      *	Releases frozen
+      * Images in documents
 
-  # - id: EDPP
-  #   releaseId: EDPP-1302
-  #   validation: In this project we are testing EDPP
+  - id: g3dgp
+    description: Gamp 3 DocGen
+    releaseId: G3DGP-123
+    version: WIP
+    docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+    components: backend, frontend, test
+    templatesVersion: 1.2
+    validation: >
+      ### Project validates
+      * GAMP 3 Documentation
+      * Saas component provisioned
+
+  - id: g4dgp
+    description: Gamp 4 DocGen
+    releaseId: G4DGP-123
+    version: WIP
+    docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+    components: backend, frontend, test
+    templatesVersion: 1.2
+    validation: >
+      ### Project validates
+      * GAMP 4 Documentation
+      * Saas component provisioned

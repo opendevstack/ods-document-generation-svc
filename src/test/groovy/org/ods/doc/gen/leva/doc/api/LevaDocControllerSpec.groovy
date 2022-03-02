@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.anyMap
 import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.Mockito.when
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @Slf4j
@@ -66,7 +65,7 @@ class LevaDocControllerSpec extends Specification {
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn()
 
         and:
-        mvcResult.response.contentAsString.equals(response.toString())
+        mvcResult.response.contentAsString == JsonOutput.toJson(response)
 
         and: "the tmp folder is deleted"
         !Files.exists(tempFolder)

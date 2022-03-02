@@ -43,12 +43,12 @@ class LevaDocTestValidator {
     private String getArtifactName(ProjectFixture projectFixture, buildId) {
         def comp =  (projectFixture.component) ? "${projectFixture.component}-" : ''
         def projectId = projectFixture.project
-        return "${projectFixture.docType}-${ projectId}-${comp}${projectFixture.version}-${buildId}"
+        return "${projectFixture.docType}-${ projectId.toUpperCase()}-${comp}${projectFixture.version}-${buildId}"
     }
 
     static File expectedDoc(ProjectFixture projectFixture, String buildId) {
         def comp =  (projectFixture.component) ? "${projectFixture.component}/" : ''
-        def filePath = "src/test/resources/expected/${projectFixture.project}/${comp}"
+        def filePath = "src/test/resources/expected/${projectFixture.project.toUpperCase()}/${comp}"
         new File(filePath).mkdirs()
         return new File("${filePath}/${projectFixture.docType}-${projectFixture.version}-${buildId}.pdf")
     }
