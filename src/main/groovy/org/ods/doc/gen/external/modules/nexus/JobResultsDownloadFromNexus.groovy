@@ -1,19 +1,25 @@
 package org.ods.doc.gen.external.modules.nexus
 
+import groovy.util.logging.Slf4j
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.UnzipParameters
 import net.lingala.zip4j.model.ZipParameters
 import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.springframework.stereotype.Service
 
+import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Path
 import java.nio.file.Paths
 
+@Slf4j
+@Service
 class JobResultsDownloadFromNexus {
 
-    NexusService nexusService
+    private NexusService nexusService
 
+    @Inject
     JobResultsDownloadFromNexus(NexusService nexusService) {
         this.nexusService = nexusService
     }

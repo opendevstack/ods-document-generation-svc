@@ -8,6 +8,7 @@ import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
 import org.ods.doc.gen.external.modules.jira.OpenIssuesException
+import org.ods.doc.gen.external.modules.nexus.JobResultsDownloadFromNexus
 import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
@@ -15,6 +16,7 @@ import org.ods.doc.gen.leva.doc.services.PipelineConfig
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @SuppressWarnings(['LineLength',
@@ -39,14 +41,17 @@ class ProjectData {
 
     private final JiraService jira
     private final BitbucketService bitbucketService
+    private final JobResultsDownloadFromNexus jobResultsDownloadFromNexus
 
     String tmpFolder
     Map data = [:]
     Map build = [:]
 
-    ProjectData(JiraService jira, BitbucketService bitbucketService) {
+    ProjectData(JiraService jira, BitbucketService bitbucketService, JobResultsDownloadFromNexus jobResultsDownloadFromNexus) {
         this.jira = jira
         this.bitbucketService = bitbucketService
+        this.jobResultsDownloadFromNexus = jobResultsDownloadFromNexus
+
         this.config =  [:]
         this.build = [
             hasFailingTests: false,
@@ -73,6 +78,8 @@ class ProjectData {
                 data.git.releaseManagerRepo as String,
                 data.git.releaseManagerBranch as String,
                 tmpFolder)
+        jobResultsDownloadFromNexus.downloadTestsResults(data)
+
         this.data.metadata = loadMetadata(tmpFolder) 
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
