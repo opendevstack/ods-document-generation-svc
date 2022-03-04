@@ -641,7 +641,6 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTCR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        Path testsResults = new JobResultsDownloadFromNexus(nexus).downloadTestsResults(data)
         String documentType = Constants.DocumentType.TCR as String
 
         def sections = this.getDocumentSections(documentType, projectData)

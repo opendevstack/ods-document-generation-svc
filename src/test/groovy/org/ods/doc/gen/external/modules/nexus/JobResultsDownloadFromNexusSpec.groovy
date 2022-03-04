@@ -61,7 +61,7 @@ class JobResultsDownloadFromNexusSpec extends Specification {
                 filesDownloaded++
             }
         }
-        filesDownloaded > 4
+        filesDownloaded >= 4
     }
 
     private Map setFixture(ProjectFixture projectFixture) {
