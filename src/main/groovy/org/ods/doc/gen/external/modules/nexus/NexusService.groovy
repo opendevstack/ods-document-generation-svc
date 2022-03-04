@@ -13,6 +13,8 @@ import javax.inject.Inject
 class NexusService {
 
     static final String NEXUS_REPO_EXISTS_KEY = 'nexusRepoExists'
+    static final String DEFAULT_NEXUS_REPOSITORY = "leva-documentation"
+
     URI baseURL
 
     final String username

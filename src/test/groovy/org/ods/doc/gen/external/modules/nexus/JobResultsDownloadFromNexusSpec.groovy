@@ -16,6 +16,8 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import javax.inject.Inject
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Slf4j
 @ActiveProfiles("test")
@@ -28,15 +30,11 @@ class JobResultsDownloadFromNexusSpec extends Specification {
     @Inject
     TestsReports testsReports
 
-    Project project
-    private LevaDocDataFixture dataFixture
+
     NexusService nexusService
     JobResultsDownloadFromNexus jobResultsDownloadFromNexus
 
     def setup() {
-        project = new Project()
-        dataFixture = new LevaDocDataFixture(tempFolder, project, testsReports)
-
         String nexusUrl = System.properties["nexus.url"]
         String nexusUsername = System.properties["nexus.username"]
         String nexusPassword = System.properties["nexus.password"]
@@ -45,19 +43,25 @@ class JobResultsDownloadFromNexusSpec extends Specification {
         jobResultsDownloadFromNexus = Spy(new JobResultsDownloadFromNexus(nexusService))
     }
 
-    def "create #projectFixture.docType for project #projectFixture.project"() {
+    def "test downloadTestsResults"() {
         given: "A project data"
-        Map data = setFixture(projectFixture)
-        prepareServiceDataParam(projectFixture, data)
+        Map<String, String> testResultsURLs = buildTestResultsUrls()
+        Path tmpTargetFolder = Files.createTempDirectory("testResultsJob_" )
 
         when: "we try to download the test results from Nexus"
-        jobResultsDownloadFromNexus.downloadTestsResults(data)
+        jobResultsDownloadFromNexus.downloadTestsResults(testResultsURLs, tmpTargetFolder)
 
         then: "the generated PDF is as expected"
-        nexusService.retrieveArtifact(_,_,_,_)
+        4 * nexusService.retrieveArtifact(_,_,_,_)
 
-        where: "Doctypes without testResults"
-        projectFixture << new DocTypeProjectFixture().getProjects()
+        log.info(tmpTargetFolder.toString())
+        int filesDownloaded = 0
+        tmpTargetFolder.traverse {it ->
+            if (it.toFile().exists()) {
+                filesDownloaded++
+            }
+        }
+        filesDownloaded > 4
     }
 
     private Map setFixture(ProjectFixture projectFixture) {
@@ -75,4 +79,13 @@ class JobResultsDownloadFromNexusSpec extends Specification {
         return projectData
     }
 
+    private Map<String, String> buildTestResultsUrls() {
+        return [
+                "Unit": "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+
+        ]
+    }
 }
