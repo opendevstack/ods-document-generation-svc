@@ -8,6 +8,7 @@ import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
 import org.ods.doc.gen.external.modules.jira.OpenIssuesException
+import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
@@ -39,14 +40,16 @@ class ProjectData {
 
     private final JiraService jira
     private final BitbucketService bitbucketService
+    private final NexusService nexusService
 
     String tmpFolder
     Map data = [:]
     Map build = [:]
 
-    ProjectData(JiraService jira, BitbucketService bitbucketService) {
+    ProjectData(JiraService jira, BitbucketService bitbucketService, NexusService nexusService) {
         this.jira = jira
         this.bitbucketService = bitbucketService
+        this.nexusService = nexusService
         this.config =  [:]
         this.build = [
             hasFailingTests: false,
@@ -68,6 +71,7 @@ class ProjectData {
     }
 
     ProjectData load() {
+        nexusService.downloadTestsResults(data)
         bitbucketService.downloadRepo(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String,

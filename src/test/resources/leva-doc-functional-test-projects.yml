@@ -22,21 +22,6 @@
 #
 ###############################################################################
 projects:
-  - id: trdgp
-    description: Three releases DocGen
-    releaseId: TRFDGP-123
-    version: 1.0
-    docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
-    components: backend, saas, test
-    templatesVersion: 1.2
-    validation: >
-      ### Project validates
-      * Two alive releases
-      * Complete structure of issues (Epic, Story, TST, Test, RA and Mitigation)
-      * All Tests Documented
-      *	Saas component provisioned
-      *	Epics Documented
-
   - id: ordgp
     description: One release DocGen
     releaseId: ORDGP-123

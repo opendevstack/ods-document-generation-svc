@@ -8,6 +8,7 @@ import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.external.modules.git.BitBucketRepository
+import org.ods.doc.gen.project.data.Project
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -25,7 +26,11 @@ class BitBucketClientConfig {
     }
 
     BitBucketRepository getClient() {
-        URI baseUrl = new URIBuilder(System.getenv("BITBUCKET_URL") as String).build()
+        String bitBucketUrl = System.getenv("BITBUCKET_URL")
+        if (bitBucketUrl == null) {
+            bitBucketUrl = System.properties["bitbucket.url"]
+        }
+        URI baseUrl = new URIBuilder(bitBucketUrl).build()
         Feign.Builder builder = Feign.builder()
         builder.requestInterceptor(new BasicAuthRequestInterceptor(username, password))
         feign.okhttp.OkHttpClient client = new feign.okhttp.OkHttpClient(new OkHttpClient().newBuilder().build())

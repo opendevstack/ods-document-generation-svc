@@ -67,7 +67,17 @@ class LevaDocDataFixture {
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
                 jobName : "ordgp-cd/${projectFixture.project}-releasemanager",
-                xmlTestResultsAceptancete: ""
+                testResultsURLs: buildTestResultsUrls(),
+        ]
+    }
+
+    private Map<String, String> buildTestResultsUrls() {
+        return [
+                "Unit": "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+
         ]
     }
 

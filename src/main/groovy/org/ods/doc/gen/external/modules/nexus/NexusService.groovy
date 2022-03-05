@@ -2,17 +2,22 @@ package org.ods.doc.gen.external.modules.nexus
 
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
+import net.lingala.zip4j.ZipFile
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
+import java.nio.file.Path
+import java.nio.file.Paths
 
 @Slf4j
 @Service
 class NexusService {
 
     static final String NEXUS_REPO_EXISTS_KEY = 'nexusRepoExists'
+    static final String DEFAULT_NEXUS_REPOSITORY = "leva-documentation"
+
     URI baseURL
 
     final String username
@@ -106,8 +111,7 @@ class NexusService {
         return this.baseURL.resolve("/repository/${repository}")
     }
 
-    @SuppressWarnings(['LineLength', 'JavaIoPackageAccess'])
-    
+    @SuppressWarnings(['JavaIoPackageAccess'])
     Map<URI, File> retrieveArtifact(String nexusRepository, String nexusDirectory, String name, String extractionPath) {
         // https://nexus3-ods....../repository/leva-documentation/odsst-WIP/DTP-odsst-WIP-108.zip
         String urlToDownload = "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
@@ -153,4 +157,26 @@ class NexusService {
         return !response.getBody().contains('\"items\" : [ ]')
     }
 
+    void downloadTestsResults(Map<String, String> testResultsURLs, Path targetFolder) {
+
+        for (Map.Entry<String, String> testResultUrlPair : testResultsURLs.entrySet()) {
+            String value = testResultUrlPair.getValue()
+
+            String nexusRepository = NexusService.DEFAULT_NEXUS_REPOSITORY
+            int startsDirectoryName = value.indexOf(nexusRepository + "/") + nexusRepository.length()
+            int startsArtifactName = value.lastIndexOf("/")
+
+            String nexusDirectory = value.substring(startsDirectoryName +1, startsArtifactName)
+            String artifactName = value.substring(startsArtifactName +1)
+            Path filePath = Paths.get(targetFolder.toString(), artifactName)
+
+            if (! filePath.toFile().exists()) {
+
+                retrieveArtifact(nexusRepository, nexusDirectory, artifactName, targetFolder.toString())
+
+                ZipFile zipFile = new ZipFile(filePath.toString())
+                zipFile.extractAll(targetFolder.toString())
+            }
+        }
+    }
 }

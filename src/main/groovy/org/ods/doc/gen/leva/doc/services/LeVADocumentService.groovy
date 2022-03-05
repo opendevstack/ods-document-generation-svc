@@ -1,6 +1,6 @@
 package org.ods.doc.gen.leva.doc.services
 
-import groovy.json.JsonOutput
+
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
 import org.ods.doc.gen.core.ZipFacade
@@ -10,6 +10,7 @@ import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraUseCase
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
+import org.ods.doc.gen.external.modules.nexus.JobResultsDownloadFromNexus
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.external.modules.sonar.SonarQubeUseCase
 import org.ods.doc.gen.external.modules.xunit.JUnitTestReportsUseCase
@@ -20,6 +21,7 @@ import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
+import java.nio.file.Path
 import java.time.Clock
 import java.time.LocalDateTime
 
