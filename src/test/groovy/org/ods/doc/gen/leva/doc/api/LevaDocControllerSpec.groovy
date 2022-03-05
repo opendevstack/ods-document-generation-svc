@@ -1,6 +1,7 @@
 package org.ods.doc.gen.leva.doc.api
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
@@ -21,6 +22,8 @@ import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
 
+import static groovy.json.JsonOutput.prettyPrint
+import static groovy.json.JsonOutput.toJson
 import static org.mockito.ArgumentMatchers.anyMap
 import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.Mockito.when
@@ -66,7 +69,7 @@ class LevaDocControllerSpec extends Specification {
 
         and:
         mvcResult.response.contentAsString == JsonOutput.toJson(response)
-        responseToDocumentHistoryEntry(mvcResult.response)
+        log.debug(prettyPrint(toJson(mvcResult.response.contentAsString)))
 
         and: "the tmp folder is deleted"
         !Files.exists(tempFolder)
@@ -74,10 +77,6 @@ class LevaDocControllerSpec extends Specification {
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()
         buildNumber = "2"
-    }
-
-    def responseToDocumentHistoryEntry(response){
-        JsonSlurperClassic().parseText(response.getBody())
     }
 
     def "BuildDocument when LevaDoc Throw exception"() {
@@ -95,7 +94,7 @@ class LevaDocControllerSpec extends Specification {
                 .perform(post("/levaDoc/${projectFixture.project}/2/CSD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonOutput.toJson(data)))
-                .andExpect(status().isConflict()).andReturn();
+                .andExpect(status().isConflict()).andReturn()
 
         and: "msg error in the response"
         mvcResult.response.contentAsString.startsWith(initialMsgError)

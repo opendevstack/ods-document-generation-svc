@@ -162,7 +162,8 @@ class JiraDataItem implements Map, Serializable {
     private List<JiraDataItem> getResolvedReferences(String type) {
         // Reference this within jiraResolved (contains readily resolved references to other entities)
         def item = project.data.jiraResolved[this.type][this.key]
-        return item && item[type] ? item[type] : []
+        def references = item && item[type] ? item[type] : []
+        return references.findAll { it != null }
     }
 
 

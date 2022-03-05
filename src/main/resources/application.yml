@@ -1,0 +1,9 @@
+server:
+  port: 1111
+  maxRequestSize: 200m
+  http.MaxRequestSize: 200m
+
+spring:
+  mvc.async.request-timeout: 750
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
+  main.allow-bean-definition-overriding: true

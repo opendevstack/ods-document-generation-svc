@@ -96,3 +96,16 @@ projects:
       ### Project validates
       * GAMP 4 Documentation
       * Saas component provisioned
+
+  - id: brassp
+    description: test a real one
+    releaseId: BRASSP-125
+    version: CHG0059116
+    docsToTest: SSDS
+    components: airflowservice-postgresql, airflowservice-postgresql, airflowservice-ws, angular, be-job-scheduler-service, be-worker-aggregation-service, be-worker-report-service, be-worker-reportscheduler-service, be-worker-scheduler-service, graphql-node, interactive-help, test-runner, testrunner-backend
+    templatesVersion: 1.2
+    validation: >
+      ### To execute it, update gradle properties and in LevaDocDataFixture:
+      *  url: "https://bitbucket-dev.biscrum.com/scm/ordgp/${projectFixture.project}-release-manager-mp"
+      * releaseManagerRepo: "${projectFixture.project}-release-manager-mp"
+      * releaseManagerBranch: "release/CHG0059116"

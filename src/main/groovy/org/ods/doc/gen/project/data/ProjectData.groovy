@@ -73,7 +73,7 @@ class ProjectData {
                 data.git.releaseManagerRepo as String,
                 data.git.releaseManagerBranch as String,
                 tmpFolder)
-        this.data.metadata = loadMetadata(tmpFolder) 
+        this.data.metadata = loadMetadata(tmpFolder)
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
 
@@ -226,7 +226,6 @@ class ProjectData {
         return this.data.jira.undone
     }
 
-    
     boolean hasWipJiraIssues() {
         def values = this.getWipJiraIssues().values()
         values = values.collect { it instanceof Map ? it.values() : it }.flatten()
@@ -261,7 +260,6 @@ class ProjectData {
      * @param data jira data
      * @return dict with map documentTypes -> sectionsNotDoneKeys
      */
-    
     protected Map<String,List> computeWipDocChapterPerDocument(Map data) {
         (data[JiraDataItem.TYPE_DOCS] ?: [:])
             .values()
@@ -275,14 +273,12 @@ class ProjectData {
             }
     }
 
-    
     protected boolean issueIsWIP(Map issue) {
         issue.status != null &&
             !issue.status.equalsIgnoreCase(JiraDataItem.ISSUE_STATUS_DONE) &&
             !issue.status.equalsIgnoreCase(JiraDataItem.ISSUE_STATUS_CANCELLED)
     }
 
-    
     protected Map convertJiraDataToJiraDataItems(Map data) {
         JiraDataItem.TYPES.each { type ->
             if (data.containsKey(type)) {
@@ -290,27 +286,24 @@ class ProjectData {
                     [key, new JiraDataItem(this, item, type)]
                 }
             } //else {
-                //throw new IllegalArgumentException(
-                //    "Error: Jira data does not include references to items of type '${type}'.")
+            //throw new IllegalArgumentException(
+            //    "Error: Jira data does not include references to items of type '${type}'.")
             //}
         }
 
         return data
     }
 
-    
     List<JiraDataItem> getAutomatedTests(String componentName = null, List<String> testTypes = []) {
         return this.data.jira.tests.findAll { key, testIssue ->
             return isAutomatedTest(testIssue) && hasGivenTypes(testTypes, testIssue) && hasGivenComponent(testIssue, componentName)
         }.values() as List
     }
 
-    
     boolean isAutomatedTest(testIssue) {
         testIssue.executionType?.toLowerCase() == JiraDataItem.ISSUE_TEST_EXECUTION_TYPE_AUTOMATED
     }
 
-    
     boolean hasGivenTypes(List<String> testTypes, testIssue) {
         def result = true
         if (testTypes) {
@@ -319,7 +312,6 @@ class ProjectData {
         return result
     }
 
-    
     boolean hasGivenComponent(testIssue, String componentName) {
         def result = true
         if (componentName) {
@@ -333,7 +325,7 @@ class ProjectData {
         return result
     }
 
-    
+
     Map getEnumDictionary(String name) {
         return this.data.jira.project.enumDictionary[name]
     }
@@ -342,22 +334,18 @@ class ProjectData {
         return this.data.jira.project.projectProperties
     }
 
-    
     List<JiraDataItem> getAutomatedTestsTypeAcceptance(String componentName = null) {
         return this.getAutomatedTests(componentName, [TestType.ACCEPTANCE])
     }
 
-    
     List<JiraDataItem> getAutomatedTestsTypeInstallation(String componentName = null) {
         return this.getAutomatedTests(componentName, [TestType.INSTALLATION])
     }
 
-    
     List<JiraDataItem> getAutomatedTestsTypeIntegration(String componentName = null) {
         return this.getAutomatedTests(componentName, [TestType.INTEGRATION])
     }
 
-    
     List<JiraDataItem> getAutomatedTestsTypeUnit(String componentName = null) {
         return this.getAutomatedTests(componentName, [TestType.UNIT])
     }
@@ -388,7 +376,6 @@ class ProjectData {
         return this.data.metadata.capabilities
     }
 
-    
     Object getCapability(String name) {
         def entry = this.getCapabilities().find { it instanceof Map ? it.find { it.key == name } : it == name }
         if (entry) {
@@ -398,27 +385,22 @@ class ProjectData {
         return null
     }
 
-    
     List<JiraDataItem> getBugs() {
         return this.data.jira.bugs.values() as List
     }
 
-    
     List<JiraDataItem> getComponents() {
         return this.data.jira.components.values() as List
     }
 
-    
     String getDescription() {
         return this.data.metadata.description
     }
 
-    
     List<Map> getDocumentTrackingIssues() {
         return this.data.jira.trackingDocs.values() as List
     }
 
-    
     List<Map> getDocumentTrackingIssues(List<String> labels) {
         def result = []
 
@@ -434,12 +416,10 @@ class ProjectData {
         return result.unique()
     }
 
-    
     List<Map> getDocumentTrackingIssuesForHistory() {
         return this.data.jira.trackingDocsForHistory.values() as List
     }
 
-    
     List<Map> getDocumentTrackingIssuesForHistory(List<String> labels) {
         def result = []
 
@@ -458,7 +438,7 @@ class ProjectData {
     Map getGitData() {
         return this.data.git
     }
-    
+
     Map<String, DocumentHistory> getDocumentHistories() {
         return this.data.documentHistories
     }
@@ -493,7 +473,7 @@ class ProjectData {
         return this.data.metadata.name
     }
 
-    
+
     List<Map> getRepositories() {
         return this.data.metadata.repositories
     }
@@ -501,7 +481,7 @@ class ProjectData {
     List<JiraDataItem> getRequirements() {
         return this.data.jira.requirements.values() as List
     }
-    
+
     List<JiraDataItem> getRisks() {
         return this.data.jira.risks.values() as List
     }
@@ -509,7 +489,7 @@ class ProjectData {
     Map getServices() {
         return this.data.metadata.services
     }
-    
+
     List<JiraDataItem> getSystemRequirements(String componentName = null, List<String> gampTopics = []) {
         return this.data.jira.requirements.findAll { key, req ->
             def result = true
@@ -609,7 +589,7 @@ class ProjectData {
         def result = jira.getDeltaDocGenData(projectKey, versionName)
         if (result?.project?.id == null) {
             throw new IllegalArgumentException(
-                "Error: unable to load documentation generation data from Jira. 'project.id' is undefined.")
+                    "Error: unable to load documentation generation data from Jira. 'project.id' is undefined.")
         }
 
         def docChapterData = this.getDocumentChapterData(projectKey, versionName)
@@ -850,31 +830,37 @@ class ProjectData {
     }
 
     protected Map resolveJiraDataItemReferences(Map data, List<String> jiraTypes) {
-        def result = [:]
-
-        data.each { type, values ->
+        Map result = [:]
+        data.each { String type, values ->
             if (!jiraTypes.contains(type)) {
                 return
             }
 
             result[type] = [:]
-
-            values.each { key, item ->
-                result[type][key] = [:]
-
-                jiraTypes.each { referenceType ->
-                    if (item.containsKey(referenceType)) {
-                        result[type][key][referenceType] = []
-
-                        item[referenceType].eachWithIndex { referenceKey, index ->
-                            result[type][key][referenceType][index] = data[referenceType][referenceKey]
-                        }
-                    }
-                }
+            values.each { String key, JiraDataItem item ->
+                updateResultType(result, type, key, jiraTypes, item, data)
             }
         }
 
         return result
+    }
+
+    private void updateResultType(Map result, String type, String key, List<String> jiraTypes, JiraDataItem item, Map data) {
+        result[type][key] = [:]
+        jiraTypes.each { referenceType ->
+            if (item.containsKey(referenceType)) {
+                updateResultTypeKey(item, referenceType, result, type, key, data)
+            }
+        }
+    }
+
+    private void updateResultTypeKey(JiraDataItem item, String referenceType, Map result, String type, String key, Map data) {
+        result[type][key][referenceType] = []
+        item[referenceType].eachWithIndex { referenceKey, index ->
+            if (data[referenceType][referenceKey] != null) {
+                result[type][key][referenceType][index] = data[referenceType][referenceKey]
+            }
+        }
     }
 
     String toString() {
@@ -1006,7 +992,6 @@ class ProjectData {
      * @param newComponents components for the new data
      * @return merged components with all the links
      */
-    
     private Map mergeComponentsLinks(Map oldComponents, Map newComponents) {
         oldComponents[JiraDataItem.TYPE_COMPONENTS].collectEntries { compName, oldComp ->
             def newComp = newComponents[JiraDataItem.TYPE_COMPONENTS][compName] ?: [:]
@@ -1015,7 +1000,6 @@ class ProjectData {
         }
     }
 
-    
     private static mergeJiraItemLinks(Map oldItem, Map newItem, List discontinuations = []) {
         Map oldItemWithCurrentLinks = oldItem.collectEntries { key, value ->
             if (JiraDataItem.TYPES.contains(key)) {
@@ -1105,7 +1089,7 @@ class ProjectData {
             }
         }.flatten()
     }
-    
+
     private static Map removeObsoleteIssues(Map jiraData, List<String> keysToRemove) {
         def result = jiraData.collectEntries { issueType, content ->
             if (JiraDataItem.TYPES.contains(issueType)) {
@@ -1142,7 +1126,6 @@ class ProjectData {
      * @param newData data for the current version
      * @return Map new data with the issue predecessors expanded
      */
-    
     private static Map expandPredecessorInformation(Map savedData, Map newData, List discontinuations) {
         def expandPredecessor = { String issueType, String issueKey, String predecessor ->
             def predecessorIssue = (savedData[issueType] ?: [:])[predecessor]

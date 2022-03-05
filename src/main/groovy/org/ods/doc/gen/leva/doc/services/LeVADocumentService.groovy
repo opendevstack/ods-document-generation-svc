@@ -1361,7 +1361,7 @@ class LeVADocumentService extends DocGenUseCase {
 
             def metadata = repo_.metadata
 
-            def sowftwareDesignSpecs = component.getResolvedTechnicalSpecifications()
+            List softwareDesignSpecs = component.getResolvedTechnicalSpecifications()
                 .findAll { it.softwareDesignSpec }
                 .collect { [key: it.key, softwareDesignSpec: this.convertImages(it.softwareDesignSpec)] }
 
@@ -1382,8 +1382,8 @@ class LeVADocumentService extends DocGenUseCase {
                         metadata.version,
                     requirements      : component.getResolvedSystemRequirements(),
                     requirementKeys   : component.requirements,
-                    softwareDesignSpecKeys: sowftwareDesignSpecs.collect { it.key },
-                    softwareDesignSpec: sowftwareDesignSpecs
+                    softwareDesignSpecKeys: softwareDesignSpecs.collect { it.key },
+                    softwareDesignSpec: softwareDesignSpecs
                 ]
             ]
         }
