@@ -26,6 +26,8 @@ projects:
     description: One release DocGen
     releaseId: ORDGP-123
     version: WIP
+    releaseManagerRepo: ordgp-releasemanager
+    releaseManagerBranch: master
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
     components: backend, frontend, test
     templatesVersion: 1.2
@@ -44,6 +46,8 @@ projects:
     description: Two releases Frozen DocGen
     releaseId: TRFDGP-179
     version: 4.0
+    releaseManagerRepo: trfdgp-releasemanager
+    releaseManagerBranch: release/4.0
     docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
     components: backend, frontend, test
     templatesVersion: 1.2
@@ -62,6 +66,8 @@ projects:
     description: Gamp 3 DocGen
     releaseId: G3DGP-123
     version: WIP
+    releaseManagerRepo: g3dgp-releasemanager
+    releaseManagerBranch: master
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
     components: backend, frontend, test
     templatesVersion: 1.2
@@ -74,6 +80,8 @@ projects:
     description: Gamp 4 DocGen
     releaseId: G4DGP-123
     version: WIP
+    releaseManagerRepo: g4dgp-releasemanager
+    releaseManagerBranch: master
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
     components: backend, frontend, test
     templatesVersion: 1.2
@@ -86,6 +94,8 @@ projects:
     description: test a real one
     releaseId: BRASSP-125
     version: CHG0059116
+    releaseManagerRepo: brassp-release-manager-mp
+    releaseManagerBranch: release/CHG0059116
     docsToTest: SSDS
     components: airflowservice-postgresql, airflowservice-postgresql, airflowservice-ws, angular, be-job-scheduler-service, be-worker-aggregation-service, be-worker-report-service, be-worker-reportscheduler-service, be-worker-scheduler-service, graphql-node, interactive-help, test-runner, testrunner-backend
     templatesVersion: 1.2

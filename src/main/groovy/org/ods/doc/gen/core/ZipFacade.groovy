@@ -22,8 +22,8 @@ class ZipFacade {
         return new File(parentdir.toString(), fileToBeExtracted).getBytes()
     }
 
-    byte[] createZipFileFromFiles(ProjectData projectData, String name, Map<String, byte[]> files) {
-        def path = "${projectData.tmpFolder}/${ARTIFACTS_BASE_DIR}/${name}".toString()
+    byte[] createZipFileFromFiles(String tmpFolder, String name, Map<String, byte[]> files) {
+        def path = "${tmpFolder}/${ARTIFACTS_BASE_DIR}/${name}".toString()
         Files.createDirectories(Paths.get(path).parent)
 
         def zipFile = new ZipFile(path)

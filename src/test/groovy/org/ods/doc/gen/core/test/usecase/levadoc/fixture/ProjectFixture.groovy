@@ -18,6 +18,8 @@ class ProjectFixture {
     List<String> components
     String component
     String validation
+    String releaseManagerRepo
+    String releaseManagerBranch
 
     static getProjectFixtureBuilder(Map project, String docType) {
         List<String> docsToTest = project.docsToTest?.split("\\s*,\\s*")
@@ -30,6 +32,8 @@ class ProjectFixture {
             .docsToTest(docsToTest)
             .templatesVersion(project.templatesVersion as String)
             .validation(project.validation as String)
+            .releaseManagerRepo(project.releaseManagerRepo as String)
+            .releaseManagerBranch(project.releaseManagerBranch as String)
             .components(components)
             .docType(docType)
     }

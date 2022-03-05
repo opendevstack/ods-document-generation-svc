@@ -64,7 +64,7 @@ abstract class DocGenUseCase {
 
         Map<GString, Object> artifacts = buildArchiveWithPdfAndRawData(pdfName, document, basename, data, files)
         boolean doCreateArtifact = shouldCreateArtifact(documentType, repo)
-        def artifact = this.zip.createZipFileFromFiles(projectData, "${basename}.zip", artifacts)
+        byte[] artifact = this.zip.createZipFileFromFiles(projectData.tmpFolder, "${basename}.zip", artifacts)
 
         // Concerns DTR/TIR for a single repo
         if (!doCreateArtifact) {

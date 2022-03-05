@@ -77,21 +77,21 @@ class LevaDocDataFixture {
                 "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
                 'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
                 'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
-
         ]
     }
 
     private Map<String, String> buildGitData(ProjectFixture projectFixture) {
+        String bitbucketUrl = System.properties["bitbucket.url"]?: "https://bitbucket-dev.biscrum.com"
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
-                url: "https://bitbucket-dev.biscrum.com/scm/ordgp/${projectFixture.project}-releasemanager",
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
                 targetTag: "ods-generated-v3.0-3.0-0b11-D",
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
-                releaseManagerRepo: "${projectFixture.project}-releasemanager",
-                releaseManagerBranch: "refs/heads/master"
+                url: "${bitbucketUrl}/scm/${projectFixture.project}/${projectFixture.releaseManagerRepo}.git",
+                releaseManagerRepo: "${projectFixture.releaseManagerRepo}",
+                releaseManagerBranch: "${projectFixture.releaseManagerBranch}"
         ]
     }
 
