@@ -1,25 +1,21 @@
 package org.ods.doc.gen.external.modules.xunit
 
-
-import org.ods.doc.gen.project.data.Project
-import spock.lang.Ignore
+import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
 import spock.lang.Specification
 
 import java.nio.file.Files
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
-import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
-@Ignore
-class JUnitTestReportsUseCaseSpec extends Specification {
+class JUnitReportsServiceSpec extends Specification {
 
-    Project project
-    def steps = [:]
-    JUnitReportsService usecase
+    NexusService nexusService
+    JUnitReportsService service
 
     def setup() {
-        project = createProject()
-        usecase = new JUnitReportsService(project)
+        nexusService = Mock(NexusService)
+        service = new JUnitReportsService(nexusService)
     }
 
     def "combine test results"() {
@@ -55,7 +51,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         ]
 
         when:
-        def result = usecase.combineTestResults([ testResult1, testResult2, testResult3 ])
+        def result = service.combineTestResults([testResult1, testResult2, testResult3 ])
 
         then:
         result == [
@@ -92,7 +88,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         ]
 
         when:
-        def result = usecase.getNumberOfTestCases(testResults)
+        def result = service.getNumberOfTestCases(testResults)
 
         then:
         result == 3
@@ -105,7 +101,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         def xmlFile2 = Files.createTempFile(xmlFiles, "junit", ".xml") << "JUnit XML Report 2"
 
         when:
-        def result = usecase.loadTestReportsFromPath(xmlFiles.toString())
+        def result = service.loadTestReportsFromPath(xmlFiles.toString())
 
         then:
         result.size() == 2
@@ -120,7 +116,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         def xmlFiles = Files.createTempDirectory("junit-test-reports-")
 
         when:
-        def result = usecase.loadTestReportsFromPath(xmlFiles.toString())
+        def result = service.loadTestReportsFromPath(xmlFiles.toString())
 
         then:
         result.isEmpty()
@@ -136,7 +132,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         xmlFile << "<?xml version='1.0' ?>\n" + createJUnitXMLTestResults()
 
         when:
-        def result = usecase.parseTestReportFiles([xmlFile])
+        def result = service.parseTestReportFiles([xmlFile])
 
         then:
         def expected = [
@@ -149,14 +145,4 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         xmlFiles.deleteDir()
     }
 
-    def "report test reports from path to Jenkins"() {
-        given:
-        def path = "myPath"
-
-        when:
-        usecase.reportTestReportsFromPathToJenkins(path)
-
-        then:
-        1 * steps.junit("${path}/**/*.xml")
-    }
 }
