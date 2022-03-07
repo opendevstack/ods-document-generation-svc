@@ -2,11 +2,9 @@ package org.ods.doc.gen.external.modules.xunit
 
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.external.modules.nexus.NexusService
-import org.ods.doc.gen.project.data.Project
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
-import java.nio.file.Paths
 
 @SuppressWarnings(['JavaIoPackageAccess', 'EmptyCatchBlock'])
 @Slf4j
@@ -59,7 +57,7 @@ class JUnitReportsService {
 
     void downloadTestsResults(Map<String, String> testResultsURLs, String targetFolder) {
         testResultsURLs.each {
-            nexusService.downloadZip(it.value, targetFolder)
+            nexusService.downloadAndExtractZip(it.value, targetFolder)
         }
     }
 
