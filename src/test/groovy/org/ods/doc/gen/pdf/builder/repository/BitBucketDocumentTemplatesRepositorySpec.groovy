@@ -5,22 +5,38 @@ import feign.Request
 import feign.RequestTemplate
 import org.ods.doc.gen.BitBucketClientConfig
 import org.ods.doc.gen.core.ZipFacade
+import org.ods.doc.gen.external.modules.git.BitbucketService
+import org.springframework.beans.factory.annotation.Value
 import spock.lang.Specification
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
+import javax.inject.Inject
+
 class BitBucketDocumentTemplatesRepositorySpec extends Specification {
+
+    @Value('${bitbucket.username}')
+    String bitbucketUsername
+    @Value('${bitbucket.password}')
+    String bitbucketPassword
+    @Value('${bitbucket.url}')
+    String bitbucketUrl
 
     def "error msg in request by #exceptionTypeName"(){
         given:
         def version = "1.0"
+        String bbDocProject = "?"
+        String bbRepo = "?"
+        ZipFacade zipFacade = new ZipFacade()
+        BitbucketService bitbucketService = Spy(new BitbucketService(
+                new BitBucketClientConfig(bitbucketUsername, bitbucketPassword, bitbucketUrl),
+                zipFacade
+        ))
         def repository = new BitBucketDocumentTemplatesRepository(
-                new BitBucketClientConfig(),
-                new ZipFacade(),
-                "basePath")
-        def uri = BitBucketDocumentTemplatesRepository.getURItoDownloadTemplates(version)
-        def store = Mock(BitBucketDocumentTemplatesStoreHttpAPI)
-        store.getTemplatesZipArchiveForVersion(_, _, _) >> { throw createException(exceptionTypeName)}
+                bitbucketService,
+                zipFacade,
+                "basePath", bbDocProject, bbRepo)
 
+        bitbucketService.downloadRepo(_,_,_,_) >> { throw createException(exceptionTypeName)}
         when:
         repository.getTemplatesForVersion(version)
 
