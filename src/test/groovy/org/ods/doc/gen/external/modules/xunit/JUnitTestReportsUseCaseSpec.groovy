@@ -15,11 +15,11 @@ class JUnitTestReportsUseCaseSpec extends Specification {
 
     Project project
     def steps = [:]
-    JUnitTestReportsUseCase usecase
+    JUnitReportsService usecase
 
     def setup() {
         project = createProject()
-        usecase = new JUnitTestReportsUseCase(project)
+        usecase = new JUnitReportsService(project)
     }
 
     def "combine test results"() {

@@ -3,7 +3,6 @@ package org.ods.doc.gen.leva.doc.services
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.core.ZipFacade
-import org.ods.doc.gen.external.modules.jenkins.JenkinsService
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
@@ -24,15 +23,13 @@ abstract class DocGenUseCase {
     protected final DocGenService docGen
     protected final NexusService nexus
     protected final PDFUtil pdf
-    protected final JenkinsService jenkins
 
-    DocGenUseCase(Project project, ZipFacade zip, DocGenService docGen, NexusService nexus, PDFUtil pdf, JenkinsService jenkins) {
+    DocGenUseCase(Project project, ZipFacade zip, DocGenService docGen, NexusService nexus, PDFUtil pdf) {
         this.project = project
         this.zip = zip
         this.docGen = docGen
         this.nexus = nexus
         this.pdf = pdf
-        this.jenkins = jenkins
     }
 
     String createDocument(ProjectData projectData,
@@ -112,10 +109,9 @@ abstract class DocGenUseCase {
 
             if (documentName) {
                 def path = "${projectData.tmpFolder}/reports/${repo.id}"
-                jenkins.unstashFilesIntoPath(documentName, path, documentType)
-
+                // TODO s2o Download pdf of the component
+              //  jenkins.unstashFilesIntoPath(documentName, path, documentType)
                 documents << new File("${path}/${documentName}").readBytes()
-
                 sections << [
                     heading: "${documentType} for component: ${repo.id} (merged)"
                 ]
@@ -129,7 +125,6 @@ abstract class DocGenUseCase {
             ],
         ]
 
-        // Apply any data transformations, if provided
         if (visitor) {
             visitor(data.data)
         }
@@ -172,7 +167,7 @@ abstract class DocGenUseCase {
     }
 
     @SuppressWarnings(['AbcMetric'])
-    Map resurrectAndStashDocument(ProjectData projectData, String documentType, Map repo, boolean stash = true) {
+    Map resurrectAndStashDocument(ProjectData projectData, String documentType, Map repo) {
         if (!repo.data.openshift.deployments) {
             return [found: false]
         }
@@ -189,8 +184,7 @@ abstract class DocGenUseCase {
         }
 
         def oldBuildVersion = buildVersionKey[0]
-        def basename = getDocumentBasename(
-            documentType, oldBuildVersion, buildVersionKey[1], repo)
+        def basename = getDocumentBasename(documentType, oldBuildVersion, buildVersionKey[1], repo)
         def path = "${this.steps.env.WORKSPACE}/reports/${repo.id}"
 
         def fileExtensions = getFiletypeForDocumentType(documentType)
@@ -200,11 +194,11 @@ abstract class DocGenUseCase {
 
         String contentFileName = "${basename}.${contentType}"
         String storedFileName = "${basename}.${storageType}"
-        Map documentFromNexus =
-            this.nexus.retrieveArtifact(
-                projectData.services.nexus.repository.name,
-                "${projectData.key.toLowerCase()}-${oldBuildVersion}",
-                storedFileName, path)
+        Map documentFromNexus = nexus.retrieveArtifact(
+                projectData.services.nexus.repository.name as String,
+                "${projectData.key.toLowerCase()}-${oldBuildVersion}" as String,
+                storedFileName as String,
+                path)
 
         log.info "Document found: ${storedFileName} \r${documentFromNexus}"
         byte [] resurrectedDocAsBytes

@@ -1,19 +1,16 @@
 package org.ods.doc.gen.leva.doc.services
 
-
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
-import org.ods.doc.gen.external.modules.jenkins.JenkinsService
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraUseCase
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
-import org.ods.doc.gen.external.modules.nexus.JobResultsDownloadFromNexus
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.external.modules.sonar.SonarQubeUseCase
-import org.ods.doc.gen.external.modules.xunit.JUnitTestReportsUseCase
+import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
@@ -21,7 +18,7 @@ import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
-import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -58,7 +55,7 @@ class LeVADocumentService extends DocGenUseCase {
     static final String SONARQUBE_BASE_DIR = 'sonarqube'
 
     private final JiraUseCase jiraUseCase
-    private final JUnitTestReportsUseCase junit
+    private final JUnitReportsService junit
     private final LeVADocumentChaptersFileService levaFiles
     private final SonarQubeUseCase sq
     private final BitbucketTraceabilityUseCase bbt
@@ -68,10 +65,10 @@ class LeVADocumentService extends DocGenUseCase {
 
     @Inject
     LeVADocumentService(Project project, ZipFacade util, DocGenService docGen,
-                        JenkinsService jenkins, JiraUseCase jiraUseCase, JUnitTestReportsUseCase junit,
+                        JiraUseCase jiraUseCase, JUnitReportsService junit,
                         LeVADocumentChaptersFileService levaFiles, NexusService nexus,
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
-        super(project, util, docGen, nexus, pdf, jenkins)
+        super(project, util, docGen, nexus, pdf)
         this.jiraUseCase = jiraUseCase
         this.junit = junit
         this.levaFiles = levaFiles
@@ -114,7 +111,7 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
             }
 
-            def output = sortByEpicAndRequirementKeys(updatedReqs)
+            Map output = sortByEpicAndRequirementKeys(updatedReqs)
 
             return [
                 (gampTopic.replaceAll(' ', '').toLowerCase()): output
@@ -1049,11 +1046,10 @@ class LeVADocumentService extends DocGenUseCase {
                     heading: 'Jenkins Build Log'
             ])
 
-            // Add Jenkins build log data
+            nexus.downloadZip(projectData.build.jenkinLog as String, projectData.tmpFolder)
             data_.jenkinsData = [
-                    log: this.jenkins.getCurrentBuildLogAsText()
+                    log: Paths.get(projectData.tmpFolder, "jenkins-job-log.txt" ).toFile().text
             ]
-
             data_.repositories = projectData.repositories.collect {
                 it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
             }
@@ -1294,46 +1290,6 @@ class LeVADocumentService extends DocGenUseCase {
                 riskLevel: riskLevels ? riskLevels.join(", ") : "N/A"
             ]
         }
-    }
-
-    protected List obtainCodeReviewReport(ProjectData projectData, List<Map> repos) {
-        def reports =  repos.collect { r ->
-            // resurrect?
-            Map resurrectedDocument = resurrectAndStashDocument(projectData,'SCRR-MD', r, false)
-            log.info "Resurrected 'SCRR' for ${r.id} -> (${resurrectedDocument.found})"
-            if (resurrectedDocument.found) {
-                return resurrectedDocument.content
-            }
-
-            def sqReportsPath = "${SONARQUBE_BASE_DIR}/${r.id}"
-            def sqReportsStashName = "scrr-report-${r.id}-${projectData.build.buildId}"
-
-            // Unstash SonarQube reports into path
-            def hasStashedSonarQubeReports = this.jenkins.unstashFilesIntoPath(sqReportsStashName, "${projectData.tmpFolder}/${sqReportsPath}", "SonarQube Report")
-            if (!hasStashedSonarQubeReports) {
-                throw new RuntimeException("Error: unable to unstash SonarQube reports for repo '${r.id}' from stash '${sqReportsStashName}'.")
-            }
-
-            // Load SonarQube report files from path
-            def sqReportFiles = this.sq.loadReportsFromPath("${projectData.tmpFolder}/${sqReportsPath}")
-            if (sqReportFiles.isEmpty()) {
-                throw new RuntimeException("Error: unable to load SonarQube reports for repo '${r.id}' from path '${projectData.tmpFolder}/${sqReportsPath}'.")
-            }
-
-            def name = this.getDocumentBasename('SCRR-MD', projectData.build.version, projectData.build.buildId, r)
-            def sqReportFile = sqReportFiles.first()
-
-            def generatedSCRR = this.pdf.convertFromMarkdown(sqReportFile, true)
-
-            // store doc - we may need it later for partial deployments
-            if (!resurrectedDocument.found) {
-                def result = this.storeDocument("${name}.pdf", generatedSCRR, 'application/pdf')
-                log.info "Stored 'SCRR' for later consumption -> ${result}"
-            }
-            return generatedSCRR
-        }
-
-        return reports
     }
 
     /**

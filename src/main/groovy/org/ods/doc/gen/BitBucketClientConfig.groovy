@@ -5,6 +5,7 @@ import feign.Logger
 import feign.auth.BasicAuthRequestInterceptor
 import feign.slf4j.Slf4jLogger
 import groovy.util.logging.Slf4j
+import kong.unirest.Unirest
 import okhttp3.OkHttpClient
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.external.modules.git.BitBucketRepository
@@ -26,10 +27,7 @@ class BitBucketClientConfig {
     }
 
     BitBucketRepository getClient() {
-        String bitBucketUrl = System.getenv("BITBUCKET_URL")
-        if (bitBucketUrl == null) {
-            bitBucketUrl = System.properties["bitbucket.url"]
-        }
+        String bitBucketUrl = System.properties["bitbucket.url"]
         URI baseUrl = new URIBuilder(bitBucketUrl).build()
         Feign.Builder builder = Feign.builder()
         builder.requestInterceptor(new BasicAuthRequestInterceptor(username, password))

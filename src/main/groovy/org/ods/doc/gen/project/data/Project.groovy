@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
 import org.springframework.stereotype.Service
 
 import javax.cache.annotation.CacheKey
@@ -16,19 +17,19 @@ class Project {
 
     private final JiraService jira
     private final BitbucketService bitbucketService
-    private final NexusService nexusService
+    private final JUnitReportsService jUnitReportsService
 
     @Inject
-    Project(JiraService jira, BitbucketService bitbucketService, NexusService nexusService){
+    Project(JiraService jira, BitbucketService bitbucketService, JUnitReportsService jUnitReportsService){
         this.jira = jira
         this.bitbucketService = bitbucketService
-        this.nexusService = nexusService
+        this.jUnitReportsService = jUnitReportsService
     }
 
     @CacheResult(cacheName = "projectData")
     ProjectData getProjectData(@CacheKey String projectBuildId, Map data){
         log.info("build project data for projectBuildId:${projectBuildId}")
-        return new ProjectData(jira, bitbucketService, nexusService).init(data).load()
+        return new ProjectData(jira, bitbucketService, jUnitReportsService).init(data).load()
     }
 
 }

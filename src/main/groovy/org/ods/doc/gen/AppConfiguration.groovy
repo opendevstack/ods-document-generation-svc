@@ -20,7 +20,7 @@ class AppConfiguration {
 
     @Bean
     Clock aClockBeanToMockInTesting() {
-        return Clock.systemDefaultZone();
+        return Clock.systemDefaultZone()
     }
 
     @Bean

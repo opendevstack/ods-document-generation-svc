@@ -2,10 +2,7 @@ package org.ods.doc.gen.core.test.usecase.levadoc.fixture
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
-import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.core.test.usecase.RepoDataBuilder
-import org.ods.doc.gen.core.test.wiremock.WiremockManager
-import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
@@ -68,15 +65,16 @@ class LevaDocDataFixture {
                 buildURL : "https://jenkins-sample",
                 jobName : "ordgp-cd/${projectFixture.project}-releasemanager",
                 testResultsURLs: buildTestResultsUrls(),
+                jenkinLog: "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/jenkins-job-log.zip"
         ]
     }
 
     private Map<String, String> buildTestResultsUrls() {
         return [
-                "Unit": "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
-                "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
-                'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
-                'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+                "Unit": "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
         ]
     }
 

@@ -1,22 +1,22 @@
 package org.ods.doc.gen.core.test.workspace
 
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.external.modules.xunit.JUnitTestReportsUseCase
+import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
 import org.ods.doc.gen.project.data.ProjectData
 import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
-
 /**
  * Tests results should be at "${steps.env.WORKSPACE}/xunit"
  */
 @Slf4j
 @Service
 class TestsReports {
+
     private final static List TYPES = [TestType.INSTALLATION, TestType.INTEGRATION, TestType.ACCEPTANCE, TestType.UNIT]
-    private final JUnitTestReportsUseCase jUnitTestReport
+    private final JUnitReportsService jUnitTestReport
     static final String XUNIT_DOCUMENTS_BASE_DIR = 'xunit'
 
-    TestsReports(JUnitTestReportsUseCase jUnitTestReportsUseCase){
+    TestsReports(JUnitReportsService jUnitTestReportsUseCase){
         this.jUnitTestReport = jUnitTestReportsUseCase
     }
 
@@ -46,4 +46,5 @@ class TestsReports {
             testResults: jUnitTestReport.parseTestReportFiles(testReportFiles),
         ]
     }
+
 }
