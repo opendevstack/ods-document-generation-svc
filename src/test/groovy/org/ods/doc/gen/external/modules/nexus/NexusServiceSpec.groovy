@@ -248,6 +248,6 @@ class NexusServiceSpec extends SpecHelper {
         service.downloadAndExtractZip(url, temporaryFolder.getRoot().getAbsolutePath())
 
         then: "downloads and unzips"
-
+        Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "LICENSE").toFile().exists()
     }
 }
