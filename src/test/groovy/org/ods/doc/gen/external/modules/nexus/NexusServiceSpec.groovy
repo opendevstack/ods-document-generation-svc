@@ -3,9 +3,16 @@ package org.ods.doc.gen.external.modules.nexus
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.apache.http.client.utils.URIBuilder
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.core.test.SpecHelper
 
+import java.nio.file.Paths
+
 class NexusServiceSpec extends SpecHelper {
+
+    @Rule
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     NexusService createService(int port, String username, String password) {
         return new NexusService("http://localhost:${port}", username, password)
@@ -66,6 +73,9 @@ class NexusServiceSpec extends SpecHelper {
         e.message == "Error: unable to connect to Nexus. 'password' is undefined."
     }
 
+    byte[] getExampleFileBytes() {
+        return Paths.get("src/test/resources/LICENSE.zip").toFile().getBytes()
+    }
 
     Map storeArtifactRequestData(Map mixins = [:]) {
         def result = [
@@ -218,4 +228,26 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
+    def "Tests downloadAndExtractZip"() {
+        given: "An url"
+        def request = getArtifactRequestData()
+        def response = storeArtifactResponseData([
+                status: 200,
+                body: getExampleFileBytes(),
+        ])
+
+        def server = createServer(WireMock.&get, request, response)
+        def service = createService(server.port(), request.username, request.password)
+        temporaryFolder.create()
+
+        String url = "http://localhost:" + server.port() + "/repository/" +
+                request.data.repository + "/" + request.data.directory + "/" + request.data.name
+
+        when: "execute"
+
+        service.downloadAndExtractZip(url, temporaryFolder.getRoot().getAbsolutePath())
+
+        then: "downloads and unzips"
+        Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "LICENSE").toFile().exists()
+    }
 }

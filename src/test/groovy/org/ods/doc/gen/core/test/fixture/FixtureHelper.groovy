@@ -125,10 +125,11 @@ class FakeProject extends ProjectData {
 class FixtureHelper {
     static Project createProject() {
         def steps = [:]
-        steps.env.WORKSPACE = ""
+        steps['env'] = [:]
+        steps.env['WORKSPACE'] = ""
 
-        return new FakeProject(steps)
-            .init()
+        return new FakeProject()
+            .init(steps)
             .load()
     }
 

@@ -1,25 +1,26 @@
 package org.ods.doc.gen.external.modules.xunit
 
-
-import org.ods.doc.gen.project.data.Project
-import spock.lang.Ignore
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
 import spock.lang.Specification
 
 import java.nio.file.Files
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
-import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createProject
 
-@Ignore
-class JUnitTestReportsUseCaseSpec extends Specification {
+class JUnitReportsServiceSpec extends Specification {
 
-    Project project
-    def steps = [:]
-    JUnitReportsService usecase
+    NexusService nexusService
+    JUnitReportsService service
+
+    @Rule
+    TemporaryFolder temporaryFolder
 
     def setup() {
-        project = createProject()
-        usecase = new JUnitReportsService(project)
+        nexusService = Mock(NexusService)
+        service = new JUnitReportsService(nexusService)
     }
 
     def "combine test results"() {
@@ -55,7 +56,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         ]
 
         when:
-        def result = usecase.combineTestResults([ testResult1, testResult2, testResult3 ])
+        def result = service.combineTestResults([testResult1, testResult2, testResult3 ])
 
         then:
         result == [
@@ -92,7 +93,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         ]
 
         when:
-        def result = usecase.getNumberOfTestCases(testResults)
+        def result = service.getNumberOfTestCases(testResults)
 
         then:
         result == 3
@@ -105,7 +106,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         def xmlFile2 = Files.createTempFile(xmlFiles, "junit", ".xml") << "JUnit XML Report 2"
 
         when:
-        def result = usecase.loadTestReportsFromPath(xmlFiles.toString())
+        def result = service.loadTestReportsFromPath(xmlFiles.toString())
 
         then:
         result.size() == 2
@@ -120,7 +121,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         def xmlFiles = Files.createTempDirectory("junit-test-reports-")
 
         when:
-        def result = usecase.loadTestReportsFromPath(xmlFiles.toString())
+        def result = service.loadTestReportsFromPath(xmlFiles.toString())
 
         then:
         result.isEmpty()
@@ -136,7 +137,7 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         xmlFile << "<?xml version='1.0' ?>\n" + createJUnitXMLTestResults()
 
         when:
-        def result = usecase.parseTestReportFiles([xmlFile])
+        def result = service.parseTestReportFiles([xmlFile])
 
         then:
         def expected = [
@@ -149,14 +150,22 @@ class JUnitTestReportsUseCaseSpec extends Specification {
         xmlFiles.deleteDir()
     }
 
-    def "report test reports from path to Jenkins"() {
+    def "download and unzip tests files"() {
         given:
-        def path = "myPath"
+        Map<String, String> listOfFiles = [
+                "Unit": "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+        ]
 
         when:
-        usecase.reportTestReportsFromPathToJenkins(path)
+        service.downloadTestsResults(listOfFiles, temporaryFolder)
 
         then:
-        1 * steps.junit("${path}/**/*.xml")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Unit, temporaryFolder)
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, temporaryFolder)
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Installation, temporaryFolder)
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Integration, temporaryFolder)
     }
 }
