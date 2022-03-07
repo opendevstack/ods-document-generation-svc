@@ -1,5 +1,7 @@
 package org.ods.doc.gen.external.modules.xunit
 
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
 import spock.lang.Specification
@@ -12,6 +14,9 @@ class JUnitReportsServiceSpec extends Specification {
 
     NexusService nexusService
     JUnitReportsService service
+
+    @Rule
+    TemporaryFolder temporaryFolder
 
     def setup() {
         nexusService = Mock(NexusService)
@@ -145,4 +150,22 @@ class JUnitReportsServiceSpec extends Specification {
         xmlFiles.deleteDir()
     }
 
+    def "download and unzip tests files"() {
+        given:
+        Map<String, String> listOfFiles = [
+                "Unit": "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+        ]
+
+        when:
+        service.downloadTestsResults(listOfFiles, temporaryFolder)
+
+        then:
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Unit, temporaryFolder)
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, temporaryFolder)
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Installation, temporaryFolder)
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Integration, temporaryFolder)
+    }
 }
