@@ -10,10 +10,12 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesO
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
+import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
+import org.springframework.core.env.Environment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
@@ -90,7 +92,6 @@ class LevaDocServiceFunctTest extends Specification {
     def cleanup() {
         levaDocWiremock.tearDownWiremock()
         wiremockDocumentRepository.tearDownWiremock()
-      //  wiremockReleaseRepository.tearDownWiremock()
     }
 
     def "create #projectFixture.docType for project #projectFixture.project"() {
@@ -163,7 +164,6 @@ class LevaDocServiceFunctTest extends Specification {
     private Map setFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion as String)
-//        wiremockReleaseRepository.setUpDocumentRepository(projectFixture.project, getReleaseManagerComponent(projectData), "refs/heads/master")        // We need to override the value because of the cache in ProjectData
         return dataFixture.buildFixtureData(projectFixture)
     }
 
@@ -176,20 +176,6 @@ class LevaDocServiceFunctTest extends Specification {
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         projectData.tmpFolder = tempFolder.absolutePath
         return projectData
-    }
-
-    private String getReleaseManagerComponent(projectData) {
-        for (component in projectData.components) {
-            def normComponentName = component.name.replaceAll('Technology-', '')
-            if (isReleaseManagerComponent(projectData, normComponentName)) {
-                return normComponentName
-            }
-        }
-    }
-
-    private boolean isReleaseManagerComponent(ProjectData projectData, normComponentName) {
-        def gitUrl = projectData.data.git.url
-        return gitUrl.endsWith("${projectData.key}-${normComponentName}".toLowerCase())
     }
 
 }

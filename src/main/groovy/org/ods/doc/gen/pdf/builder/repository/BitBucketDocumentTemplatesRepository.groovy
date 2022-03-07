@@ -19,38 +19,32 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
     private final ZipFacade zipFacade
     private final String basePath
     private final BitbucketService bitbucketService
+    String bbDocProject
+    String bbRepo
 
     @Inject
     BitBucketDocumentTemplatesRepository(BitbucketService bitbucketService,
                                          ZipFacade zipFacade,
-                                         @Value('${cache.documents.basePath}') String basePath){
+                                         @Value('${cache.documents.basePath}') String basePath,
+                                         @Value('${bitbucket.documents.project}') String bbDocProject,
+                                         @Value('${bitbucket.documents.repo}') String bbRepo){
         this.bitbucketService = bitbucketService
         this.basePath = basePath
         this.zipFacade = zipFacade
+        this.bbDocProject = bbDocProject
+        this.bbRepo = bbRepo
     }
 
     Path getTemplatesForVersion(String version) {
         log.info ("getTemplatesForVersion version:${version}")
-        String project = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")
-        String repo = System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")
         Path targetDir = Paths.get(basePath, version)
-        bitbucketService.downloadRepo(project, repo, "refs/heads/release/v${version}", targetDir.toString())
+        bitbucketService.downloadRepo(bbDocProject, bbRepo, "refs/heads/release/v${version}", targetDir.toString())
         return targetDir
     }
 
     boolean isApplicableToSystemConfig () {
-        List missingEnvs = [ ]
-        if (!System.getenv("BITBUCKET_URL")) {
-            missingEnvs << "BITBUCKET_URL"
-        }
-        if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT")) {
-            missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_PROJECT"
-        }
-        if (!System.getenv("BITBUCKET_DOCUMENT_TEMPLATES_REPO")) {
-            missingEnvs << "BITBUCKET_DOCUMENT_TEMPLATES_REPO"
-        }
-        if (missingEnvs.size() > 0) {
-            log.warn "Bitbucket adapter not applicable - missing config '${missingEnvs}'"
+        if (bbDocProject=="none") {
+            log.warn "Bitbucket adapter not applicable. If needed review BITBUCKET env params - Using Github'"
             return false
         }
 

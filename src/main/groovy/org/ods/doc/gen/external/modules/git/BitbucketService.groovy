@@ -73,14 +73,11 @@ class BitbucketService {
     private void checkError(repo, String branch, FeignException callException) {
         def baseErrMessage = "Could not get document zip from '${repo}'!- For version:${branch}"
         if (callException instanceof FeignException.BadRequest) {
-            throw new RuntimeException("${baseErrMessage} \rIs there a correct release branch configured?",
-                    callException)
+            throw new RuntimeException("${baseErrMessage} \rIs there a correct release branch configured?")
         } else if (callException instanceof FeignException.Unauthorized) {
-            def bbUserNameError = System.getenv("BITBUCKET_USERNAME") ?: 'Anyone'
-            throw new RuntimeException("${baseErrMessage} \rDoes '${bbUserNameError}' have access?",
-                    callException)
+            throw new RuntimeException("${baseErrMessage} \rDoes '${bitBucketClientConfig.username}' have access?")
         } else if (callException instanceof FeignException.NotFound) {
-            throw new RuntimeException("${baseErrMessage}", callException)
+            throw new RuntimeException("${baseErrMessage}")
         } else {
             throw callException
         }

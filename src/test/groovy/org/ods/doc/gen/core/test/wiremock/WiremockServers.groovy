@@ -8,31 +8,26 @@ package org.ods.doc.gen.core.test.wiremock
  */
 enum WiremockServers {
     SONAR_QU {
-        WiremockManager build() {
-            new WiremockManager("sonarQu", System.properties["sonar.url"])
+        WiremockManager build(String url) {
+            new WiremockManager("sonarQu", url)
         }
     },
     JIRA {
-        WiremockManager build() {
-            new WiremockManager("jira", System.properties["jira.url"])
+        WiremockManager build(String url) {
+            new WiremockManager("jira", url)
         }
     },
     NEXUS {
-        WiremockManager build() {
-            new WiremockManager("nexus", System.properties["nexus.url"])
-        }
-    },
-    DOC_GEN {
-        WiremockManager build() {
-            new WiremockManager("docgen", System.properties["docGen.url"])
+        WiremockManager build(String url) {
+            new WiremockManager("nexus", url)
         }
     },
     BITBUCKET {
-        WiremockManager build() {
-            new WiremockManager("bitbucket", System.properties["bitbucket.url"])
+        WiremockManager build(String url) {
+            new WiremockManager("bitbucket", url)
         }
     }
 
-    abstract WiremockManager build();
+    abstract WiremockManager build(String url);
 }
 

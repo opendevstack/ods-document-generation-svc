@@ -9,7 +9,6 @@ import kong.unirest.Unirest
 import okhttp3.OkHttpClient
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.external.modules.git.BitBucketRepository
-import org.ods.doc.gen.project.data.Project
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -17,18 +16,20 @@ import org.springframework.stereotype.Service
 @Service
 class BitBucketClientConfig {
 
-    private final String username
+    final String username
     private final String password
+    String url
 
     BitBucketClientConfig(@Value('${bitbucket.username}') String username,
-                          @Value('${bitbucket.password}') String password){
+                          @Value('${bitbucket.password}') String password,
+                          @Value('${bitbucket.url}') String url){
         this.password = password
         this.username = username
+        this.url = url
     }
 
     BitBucketRepository getClient() {
-        String bitBucketUrl = System.properties["bitbucket.url"]
-        URI baseUrl = new URIBuilder(bitBucketUrl).build()
+        URI baseUrl = new URIBuilder(url).build()
         Feign.Builder builder = Feign.builder()
         builder.requestInterceptor(new BasicAuthRequestInterceptor(username, password))
         feign.okhttp.OkHttpClient client = new feign.okhttp.OkHttpClient(new OkHttpClient().newBuilder().build())
