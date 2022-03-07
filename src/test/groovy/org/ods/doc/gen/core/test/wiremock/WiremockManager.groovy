@@ -10,6 +10,8 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
+import org.ods.doc.gen.SpringContext
+import org.springframework.core.env.Environment
 
 import static com.github.tomakehurst.wiremock.core.WireMockApp.FILES_ROOT
 import static com.github.tomakehurst.wiremock.core.WireMockApp.MAPPINGS_ROOT
@@ -99,12 +101,14 @@ class WiremockManager {
         new File("${pathToFiles}/${FILES_ROOT}").eachFileRecurse() {replaceFileInText(it, replaceAllMap)}
     }
 
-    private Map prepareReplaceMap() {
-        List domainUsers = ["bitbucket.username", "docGen.username", "jira.username"]
+    static Map prepareReplaceMap() {
+        Environment env = SpringContext.getBean(Environment.class)
+        List domainUsers = ["bitbucket.username", "nexus.username", "jira.username"]
         Map replaceAllMap = [:]
         domainUsers.each {
-            replaceAllMap[(System.properties[it])] =  "dummyUser"
+            replaceAllMap[(env.getProperty(it))] =  "dummyUser"
         }
+        replaceAllMap["boehringer-ingelheim"] = "domain"
 
         (System.properties['wiremock.textToReplace'] as String).tokenize(',').each {
             List value = it.tokenize(':')
@@ -113,7 +117,7 @@ class WiremockManager {
         return replaceAllMap
     }
 
-    private void replaceFileInText(File file, Map replaceAllMap) {
+    private static void replaceFileInText(File file, Map replaceAllMap) {
         replaceAllMap.each {
             if (file.text.contains(it.key))
                 file.text = file.text.replace(it.key, it.value)

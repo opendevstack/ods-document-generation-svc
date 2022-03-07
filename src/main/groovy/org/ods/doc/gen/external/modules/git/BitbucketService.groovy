@@ -75,8 +75,7 @@ class BitbucketService {
         if (callException instanceof FeignException.BadRequest) {
             throw new RuntimeException("${baseErrMessage} \rIs there a correct release branch configured?")
         } else if (callException instanceof FeignException.Unauthorized) {
-            def bbUserNameError = System.getenv("BITBUCKET_USERNAME") ?: 'Anyone'
-            throw new RuntimeException("${baseErrMessage} \rDoes '${bbUserNameError}' have access?")
+            throw new RuntimeException("${baseErrMessage} \rDoes '${bitBucketClientConfig.username}' have access?")
         } else if (callException instanceof FeignException.NotFound) {
             throw new RuntimeException("${baseErrMessage}")
         } else {

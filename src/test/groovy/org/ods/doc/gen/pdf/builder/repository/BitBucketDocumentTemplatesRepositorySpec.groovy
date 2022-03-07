@@ -10,19 +10,6 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
 class BitBucketDocumentTemplatesRepositorySpec extends Specification {
 
-    EnvironmentVariables env = new EnvironmentVariables()
-
-    def setup(){
-        env.setup()
-        env.set("BITBUCKET_DOCUMENT_TEMPLATES_PROJECT", "myProject")
-        env.set("BITBUCKET_DOCUMENT_TEMPLATES_REPO", "myRepo")
-        env.set("BITBUCKET_URL", "http://localhost:9002")
-    }
-
-    def cleanup(){
-        env.teardown()
-    }
-
     def "error msg in request by #exceptionTypeName"(){
         given:
         def version = "1.0"

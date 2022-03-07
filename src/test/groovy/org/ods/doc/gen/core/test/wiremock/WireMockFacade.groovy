@@ -12,6 +12,12 @@ class WireMockFacade {
         stopWireMockServer()
     }
 
+    WireMockServer startWireMockServer() {
+        this.wireMockServer = new WireMockServer()
+        this.wireMockServer.start()
+        return this.wireMockServer
+    }
+
     WireMockServer startWireMockServer(URI uri) {
         this.wireMockServer = new WireMockServer(options().port(uri.getPort()))
         this.wireMockServer.start()

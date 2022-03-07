@@ -22,12 +22,6 @@ import java.nio.file.Path
 @ContextConfiguration(classes= [TestConfig.class])
 class PdfGenerationServiceSpec extends Specification {
 
-    private static final Map FIXTURES = [
-            expected:"pdf.builder/CFTP-ordgp-WIP-8.pdf",
-            raw_data:"pdf.builder/CFTP-ordgp-WIP-8.json",
-            metadata: [ type: "CFTP-5", version: "1.2" ]
-    ]
-
     @Inject
     PdfGenerationService pdfGenerationService
 
@@ -64,8 +58,12 @@ class PdfGenerationServiceSpec extends Specification {
         comparePdfs(fixtureElement.expected as String, resultFile)
 
         where: "BB and GH repos"
-        fixtureElement = FIXTURES
         repository << ["Github", "BitBucket"]
+        fixtureElement =  [
+                expected:"pdf.builder/CFTP-ordgp-WIP-8.pdf",
+                raw_data:"pdf.builder/CFTP-ordgp-WIP-8.json",
+                metadata: [ type: "CFTP-5", version: "1.2" ]
+        ]
     }
 
     private Object getJsonRawData(String raw_data){

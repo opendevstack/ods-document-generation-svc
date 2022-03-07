@@ -1,9 +1,32 @@
 server:
   port: 1111
-  maxRequestSize: 200m
-  http.MaxRequestSize: 200m
 
 spring:
   mvc.async.request-timeout: 750
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
   main.allow-bean-definition-overriding: true
+
+cache:
+  documents.basePath: /tmp/doc-gen-templates
+  projectData.expiration.minutes: 30
+
+bitbucket:
+  url: ${BITBUCKET_URL:mylocaluser}
+  username: ${BITBUCKET_USERNAME:dummy}
+  password: ${BITBUCKET_PASSWORD:dummy}
+  documents:
+    project: ${BITBUCKET_DOCUMENT_TEMPLATES_PROJECT:none}
+    repo:  ${BITBUCKET_DOCUMENT_TEMPLATES_REPO:none}
+
+jira:
+  url: ${JIRA_URL:mylocaluser}
+  username: ${JIRA_USERNAME:dummy}
+  password: ${JIRA_PASSWORD:dummy}
+
+nexus:
+  url: ${NEXUS_URL:mylocaluser}
+  username: ${NEXUS_USERNAME:dummy}
+  password: ${NEXUS_PASSWORD:dummy}
+
+github:
+  url: ${GITHUB_HOST:https://www.github.com}

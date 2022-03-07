@@ -2,6 +2,7 @@ package org.ods.doc.gen
 
 import org.ods.doc.gen.core.test.jira.JiraServiceForWireMock
 import org.ods.doc.gen.external.modules.jira.JiraService
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -13,7 +14,8 @@ import java.time.Instant
 import java.time.ZoneId
 
 @TestConfiguration
-@PropertySource("classpath:application.properties")
+@ConfigurationProperties(prefix = "yaml")
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 @ComponentScan("org.ods")
 class TestConfig {
 

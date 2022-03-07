@@ -8,6 +8,7 @@ import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
 
@@ -17,12 +18,13 @@ import javax.inject.Inject
 @Component
 class LevaDocWiremock {
 
-    private static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
-    private static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
+    static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
+    static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
 
     private final BitbucketService bitbucketService
     private final JiraService jiraService
     private final NexusService nexusService
+    private final Environment environment
 
     private WiremockManager jiraServer
     private WiremockManager nexusServer
@@ -30,10 +32,14 @@ class LevaDocWiremock {
     private WiremockManager bitbucketServer
 
     @Inject
-    LevaDocWiremock(BitbucketService bitbucketService, JiraService jiraService, NexusService nexusService){
+    LevaDocWiremock(BitbucketService bitbucketService,
+                    JiraService jiraService,
+                    NexusService nexusService,
+                    Environment environment){
         this.bitbucketService = bitbucketService
         this.jiraService = jiraService
         this.nexusService = nexusService
+        this.environment = environment
     }
 
     void setUpWireMock(ProjectFixture projectFixture, File tempFolder) {
@@ -57,9 +63,9 @@ class LevaDocWiremock {
 
         String component = (projectFixture.component) ? "/${projectFixture.component}" : ""
         String scenarioPath = "${projectKey}${component}/${doctype}/${projectFixture.version}"
-        jiraServer = WiremockServers.JIRA.build().withScenario(scenarioPath).startServer(RECORD)
-        nexusServer = WiremockServers.NEXUS.build().withScenario(scenarioPath).startServer(RECORD)
-        bitbucketServer = WiremockServers.BITBUCKET.build().withScenario(scenarioPath).startServer(RECORD)
+        jiraServer = WiremockServers.JIRA.build(environment.getProperty("jira.url")).withScenario(scenarioPath).startServer(RECORD)
+        nexusServer = WiremockServers.NEXUS.build(environment.getProperty("nexus.url")).withScenario(scenarioPath).startServer(RECORD)
+        bitbucketServer = WiremockServers.BITBUCKET.build(environment.getProperty("bitbucket.url")).withScenario(scenarioPath).startServer(RECORD)
     }
     EnvironmentVariables env = new EnvironmentVariables()
 
@@ -68,7 +74,7 @@ class LevaDocWiremock {
         nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
         jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
         //bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
-        env.set("BITBUCKET_URL",bitbucketServer.server().baseUrl())
+        env.set("bitbucket.url",bitbucketServer.server().baseUrl())
     }
 
 }
