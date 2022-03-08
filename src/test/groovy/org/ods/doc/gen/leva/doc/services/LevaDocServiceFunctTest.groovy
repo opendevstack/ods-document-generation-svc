@@ -10,12 +10,10 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesO
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
-import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
-import org.springframework.core.env.Environment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification

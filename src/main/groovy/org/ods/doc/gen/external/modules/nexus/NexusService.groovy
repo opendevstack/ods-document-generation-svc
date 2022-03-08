@@ -138,8 +138,9 @@ class NexusService {
         return response
     }
 
-    void downloadAndExtractZip(String urlToDownload, String extractionPath){
-        String artifactName = Paths.get(urlToDownload).toFile().name
+    void
+    downloadAndExtractZip(String urlToDownload, String extractionPath){
+        String artifactName = new URL(urlToDownload).getFile().split("/").last()
         downloadToPath(urlToDownload, artifactName, extractionPath)
         ZipFile zipFile = new ZipFile(Paths.get(extractionPath, artifactName).toString())
         zipFile.extractAll(extractionPath)
