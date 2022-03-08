@@ -2,13 +2,10 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import net.lingala.zip4j.ZipFile
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
-
-import java.nio.file.Paths
 
 @Slf4j
 @SuppressWarnings([
@@ -113,8 +110,8 @@ abstract class DocGenUseCase {
             if (documentName) {
                 def path = "${projectData.tmpFolder}/reports/${repo.id}"
                 String jiraProjectKey = projectData.getJiraProjectKey()
-                String repoKey = repo.id
-                downloadComponentPDF(jiraProjectKey, repoKey, path, documentName)
+                String version = projectData.build.version
+                nexus.downloadAndExtractZip(jiraProjectKey.toLowerCase(), version, path, documentName)
                 documents << new File("${path}/${documentName}").readBytes()
                 sections << [
                     heading: "${documentType} for component: ${repo.id} (merged)"
@@ -147,14 +144,6 @@ abstract class DocGenUseCase {
         }
 
         return result
-    }
-
-    public void downloadComponentPDF(String jiraProjectKey, String repoKey, String extractionPath, String artifactName) {
-        final String NEXUS_REPOSITORY = "leva-documentation"
-        String nexusDirectory = "${jiraProjectKey}" + (repoKey ? "/${repoKey}" : "")
-        nexus.retrieveArtifact(NEXUS_REPOSITORY, nexusDirectory, artifactName, extractionPath)
-        ZipFile zipFile = new ZipFile(Paths.get(extractionPath, artifactName).toString())
-        zipFile.extractAll(extractionPath)
     }
 
     String getDocumentBasename(ProjectData projectData, String documentType, String version, String build = null, Map repo = null) {

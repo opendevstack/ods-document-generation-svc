@@ -8,9 +8,6 @@ import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.springframework.beans.factory.annotation.Value
 import spock.lang.Specification
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
-
-import javax.inject.Inject
 
 class BitBucketDocumentTemplatesRepositorySpec extends Specification {
 

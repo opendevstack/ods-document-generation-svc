@@ -15,6 +15,8 @@ import java.nio.file.Paths
 @Service
 class NexusService {
 
+    static final String NEXUS_REPOSITORY = "leva-documentation"
+
     URI baseURL
 
     final String username
@@ -110,12 +112,16 @@ class NexusService {
 
     @SuppressWarnings(['JavaIoPackageAccess'])
     Map<URI, File> retrieveArtifact(String nexusRepository, String nexusDirectory, String name, String extractionPath) {
-        String urlToDownload = "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
+        String urlToDownload = getURL(nexusRepository, nexusDirectory, name)
         HttpResponse<File> response = downloadToPath(urlToDownload, name, extractionPath)
         return [
             uri: this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
             content: response.getBody(),
         ]
+    }
+
+    String getURL(String nexusRepository, String nexusDirectory, String name) {
+        return "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
     }
 
     HttpResponse<File> downloadToPath(String urlToDownload, String name, String extractionPath) {
@@ -138,10 +144,19 @@ class NexusService {
         return response
     }
 
-    void
-    downloadAndExtractZip(String urlToDownload, String extractionPath){
+    void downloadAndExtractZip(String jiraProjectKey, String version, String extractionPath, String artifactName) {
+        String nexusDirectory = "${jiraProjectKey}-${version}"
+        def urlToDownload = getURL(NexusService.NEXUS_REPOSITORY, nexusDirectory, artifactName)
+        downloadAndExtractZip(urlToDownload, extractionPath)
+    }
+
+    void downloadAndExtractZip(String urlToDownload, String extractionPath) {
         String artifactName = new URL(urlToDownload).getFile().split("/").last()
         downloadToPath(urlToDownload, artifactName, extractionPath)
+        extractZip(extractionPath, artifactName)
+    }
+
+    private void extractZip(String extractionPath, String artifactName) {
         ZipFile zipFile = new ZipFile(Paths.get(extractionPath, artifactName).toString())
         zipFile.extractAll(extractionPath)
     }
@@ -152,5 +167,4 @@ class NexusService {
             artifactExists.delete()
         }
     }
-
 }
