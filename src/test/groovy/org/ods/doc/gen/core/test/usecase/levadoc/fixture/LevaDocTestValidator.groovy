@@ -1,10 +1,9 @@
 package org.ods.doc.gen.core.test.usecase.levadoc.fixture
 
+import fr.opensagres.xdocreport.utils.StringUtils
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.test.pdf.PdfCompare
-import org.ods.doc.gen.project.data.Project
-import org.ods.doc.gen.project.data.ProjectData
 
 @Slf4j
 class LevaDocTestValidator {
@@ -50,7 +49,11 @@ class LevaDocTestValidator {
         def comp =  (projectFixture.component) ? "${projectFixture.component}/" : ''
         def filePath = "src/test/resources/expected/${projectFixture.project.toUpperCase()}/${comp}"
         new File(filePath).mkdirs()
-        return new File("${filePath}/${projectFixture.docType}-${projectFixture.version}-${buildId}.pdf")
+        def file = "${filePath}/${projectFixture.docType}-${projectFixture.version}-${buildId}.pdf"
+        if (!StringUtils.isEmpty(comp)) {
+            file = "${filePath}/${projectFixture.docType}-${projectFixture.project.toLowerCase()}-${projectFixture.component}-${projectFixture.version}-${buildId}.pdf"
+        }
+        return new File(file)
     }
 
     private void copyDocWhenRecording(ProjectFixture projectFixture, String buildId) {
