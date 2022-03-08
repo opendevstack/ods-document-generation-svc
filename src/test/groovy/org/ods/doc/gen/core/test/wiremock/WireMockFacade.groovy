@@ -13,7 +13,7 @@ class WireMockFacade {
     }
 
     WireMockServer startWireMockServer() {
-        this.wireMockServer = new WireMockServer()
+        this.wireMockServer = new WireMockServer(options().dynamicPort())
         this.wireMockServer.start()
         return this.wireMockServer
     }
