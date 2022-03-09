@@ -108,11 +108,12 @@ abstract class DocGenUseCase {
             def documentName = repo.data.documents[documentType]
 
             if (documentName) {
+                String documentNamePdf = documentName.replaceFirst("zip", "pdf")
                 def path = "${projectData.tmpFolder}/reports/${repo.id}"
                 String jiraProjectKey = projectData.getJiraProjectKey()
                 String version = projectData.build.version
                 nexus.downloadAndExtractZip(jiraProjectKey.toLowerCase(), version, path, documentName)
-                documents << new File("${path}/${documentName}").readBytes()
+                documents << new File("${path}/${documentNamePdf}").readBytes()
                 sections << [
                     heading: "${documentType} for component: ${repo.id} (merged)"
                 ]
