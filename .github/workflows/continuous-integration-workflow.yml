@@ -16,8 +16,8 @@ jobs:
     - name: download and install wkhtml 
       run: | 
         sudo apt install curl
-        sudo curl -kLO https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb --output wkhtmltox.deb
-        sudo dpkg -i wkhtmltox.deb 
+        sudo curl -kLO https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb 
+        sudo dpkg -i wkhtmltox_0.12.6-1.focal_amd64.deb 
     - name: Build with Gradle
       run: ./gradlew clean check --stacktrace --no-daemon
       env:
