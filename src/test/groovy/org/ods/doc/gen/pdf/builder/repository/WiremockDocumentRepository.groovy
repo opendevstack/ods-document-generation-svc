@@ -42,7 +42,8 @@ class WiremockDocumentRepository {
     void setUpGithubRepository(String version) {
         String urlPath = "/opendevstack/ods-document-generation-templates/archive/v${version}.zip"
         // TODO: s2o check the effects of the following line please!
-        githubClientConfig.url = mockTemplatesZipArchiveDownload(urlPath, GH_TEMPLATE)
+        // githubClientConfig.url =
+        mockTemplatesZipArchiveDownload(urlPath, GH_TEMPLATE)
     }
 
     void setUpBitbucketRepository(String version) {
@@ -54,7 +55,8 @@ class WiremockDocumentRepository {
     }
 
     private setupBitBuckectEnv(String url) {
-        bitBucketClientConfig.url = url
+        // TODO: s2o check the effects of the following line please!
+        // bitBucketClientConfig.url = url
         bitBucketDocumentTemplatesRepository.bbDocProject = BB_PROJECT
         bitBucketDocumentTemplatesRepository.bbRepo = BB_REPO
     }

@@ -73,8 +73,9 @@ class LevaDocWiremock {
         env.setup()
         nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
         jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
-        //bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
-        env.set("bitbucket.url",bitbucketServer.server().baseUrl())
+        // bitbucketService.baseURL = new URIBuilder(bitbucketServer.server().baseUrl()).build()
+        // TODO: s2o check the effects of the following line please!
+        // env.set("bitbucket.url",bitbucketServer.server().baseUrl())
     }
 
 }
