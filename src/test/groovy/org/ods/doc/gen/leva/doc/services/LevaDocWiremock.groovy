@@ -65,7 +65,7 @@ class LevaDocWiremock {
         String scenarioPath = "${projectKey}${component}/${doctype}/${projectFixture.version}"
         jiraServer = WiremockServers.JIRA.build(environment.getProperty("jira.url")).withScenario(scenarioPath).startServer(RECORD)
         nexusServer = WiremockServers.NEXUS.build(environment.getProperty("nexus.url")).withScenario(scenarioPath).startServer(RECORD)
-        bitbucketServer = WiremockServers.BITBUCKET.build(environment.getProperty("bitbucket.url")).withScenario(scenarioPath).startServer(false)
+        bitbucketServer = WiremockServers.BITBUCKET.build(environment.getProperty("bitbucket.url")).withScenario(scenarioPath).startServer(RECORD)
     }
     EnvironmentVariables env = new EnvironmentVariables()
 
