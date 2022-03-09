@@ -15,7 +15,7 @@ jobs:
         java-version: 11
     - name: download and install wkhtml 
       run: | 
-        sudo apt install curl
+        sudo apt install --no-install-recommends curl xfonts-75dpi xfonts-base 
         sudo curl -kLO https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb 
         sudo dpkg -i wkhtmltox_0.12.6-1.focal_amd64.deb 
     - name: Build with Gradle
