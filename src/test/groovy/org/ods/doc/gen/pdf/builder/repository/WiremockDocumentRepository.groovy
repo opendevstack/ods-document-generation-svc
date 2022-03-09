@@ -41,6 +41,7 @@ class WiremockDocumentRepository {
 
     void setUpGithubRepository(String version) {
         String urlPath = "/opendevstack/ods-document-generation-templates/archive/v${version}.zip"
+        // TODO: s2o check the effects of the following line please!
         githubClientConfig.url = mockTemplatesZipArchiveDownload(urlPath, GH_TEMPLATE)
     }
 
