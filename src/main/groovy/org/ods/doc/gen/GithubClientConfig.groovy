@@ -36,6 +36,7 @@ class GithubClientConfig {
                 .target(GitHubRepository.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
     }
 
+    //In local env add env variable with value: HTTP_PROXY=http://appaccess-zscaler.boehringer.com:80
     private String[] getProxy() {
         System.getenv('HTTP_PROXY')?.trim()?.replace('http://', '')?.split(':')
     }

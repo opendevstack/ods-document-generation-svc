@@ -26,6 +26,11 @@ enum WiremockServers {
         WiremockManager build(String url) {
             new WiremockManager("bitbucket", url)
         }
+    },
+    GITHUB {
+        WiremockManager build(String url) {
+            new WiremockManager("github", url)
+        }
     }
 
     abstract WiremockManager build(String url);

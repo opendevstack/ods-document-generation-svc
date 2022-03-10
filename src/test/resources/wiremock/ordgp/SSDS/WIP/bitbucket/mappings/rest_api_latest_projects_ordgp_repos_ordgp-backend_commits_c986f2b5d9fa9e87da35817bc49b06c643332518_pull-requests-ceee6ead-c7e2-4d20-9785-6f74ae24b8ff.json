@@ -1,0 +1,30 @@
+{
+  "id" : "ceee6ead-c7e2-4d20-9785-6f74ae24b8ff",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-backend_commits_c986f2b5d9fa9e87da35817bc49b06c643332518_pull-requests",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ORDGP/repos/ordgp-backend/commits/c986f2b5d9fa9e87da35817bc49b06c643332518/pull-requests",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"size\":0,\"limit\":25,\"isLastPage\":true,\"values\":[],\"start\":0}",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Thu, 10 Mar 2022 11:22:01 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "@1POZ2QTx742x232591x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=902507245CDC7D73441987BA047F2A52; Max-Age=1209600; Expires=Thu, 24-Mar-2022 11:22:01 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=d6SwounPkIMrAml3GQqNjgAAAAAAnoABYW5nZWxfMi5tYXJ0aW5lekBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "13892",
+      "X-AUSERNAME" : "angel_2.martinez%40domain.com",
+      "X-ASESSIONID" : "anen43",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : "accept-encoding,x-auserid,cookie,x-ausername,accept-encoding",
+      "X-Content-Type-Options" : "nosniff",
+      "Strict-Transport-Security" : "max-age=15768000"
+    }
+  },
+  "uuid" : "ceee6ead-c7e2-4d20-9785-6f74ae24b8ff",
+  "persistent" : true,
+  "insertionIndex" : 9
+}
