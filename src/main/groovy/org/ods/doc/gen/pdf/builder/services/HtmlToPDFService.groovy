@@ -8,7 +8,9 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
+import org.ods.doc.gen.pdf.builder.util.CmdToRunAdaptions
 import org.ods.doc.gen.pdf.builder.util.OSService
+
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -21,6 +23,9 @@ class HtmlToPDFService {
 
     @Inject
     private OSService OSService;
+
+    @Inject
+    private CmdToRunAdaptions cmdToRunAdaptions
 
     String executeTemplate(Path path, Object data) {
         def loader = new FileTemplateLoader("", "")
@@ -36,7 +41,9 @@ class HtmlToPDFService {
     }
 
     private List<String> generateCmd(Map data, Path documentHtmlFile, Path documentPDFFile) {
-        def cmd = [getServiceName(), "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+        def cmd = []
+        cmd.addAll(cmdToRunAdaptions.modify(getServiceName()))
+        cmd.addAll(["--encoding", "UTF-8", "--no-outline", "--print-media-type"])
         cmd << "--enable-local-file-access"
         cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
         cmd.addAll(controlSize())
