@@ -11,7 +11,6 @@ import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -72,9 +71,6 @@ class LevaDocServiceFunctTest extends Specification {
     @Inject
     LevaDocWiremock levaDocWiremock
 
-    @Inject
-    WiremockDocumentRepository wiremockDocumentRepository
-
     private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
 
@@ -89,7 +85,6 @@ class LevaDocServiceFunctTest extends Specification {
 
     def cleanup() {
         levaDocWiremock.tearDownWiremock()
-        wiremockDocumentRepository.tearDownWiremock()
     }
 
     def "create #projectFixture.docType for project #projectFixture.project"() {
@@ -161,8 +156,6 @@ class LevaDocServiceFunctTest extends Specification {
 
     private Map setFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
-        // TODO: s2o check this method please!
-//        wiremockDocumentRepository.setUpBitbucketRepository(projectFixture.templatesVersion as String)
         return dataFixture.buildFixtureData(projectFixture)
     }
 
@@ -176,6 +169,5 @@ class LevaDocServiceFunctTest extends Specification {
         projectData.tmpFolder = tempFolder.absolutePath
         return projectData
     }
-
 }
 

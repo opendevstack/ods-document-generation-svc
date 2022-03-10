@@ -2,7 +2,6 @@ package org.ods.doc.gen.pdf.builder.repository
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.ods.doc.gen.BitBucketClientConfig
 import org.ods.doc.gen.GithubClientConfig
 import org.ods.doc.gen.core.test.wiremock.WireMockFacade
