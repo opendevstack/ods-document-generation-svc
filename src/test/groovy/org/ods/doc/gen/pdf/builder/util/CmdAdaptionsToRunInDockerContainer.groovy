@@ -7,13 +7,14 @@ import org.springframework.stereotype.Service
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 
+import javax.inject.Inject
+
 @Slf4j
 @Service
 class CmdAdaptionsToRunInDockerContainer extends CmdToRunAdaptions {
 
     static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse("ods-document-generation-svc:local");
 
-    @Value('${runCmdsInDockerContainer}')
     String runCmdsInDockerContainer
 
     boolean enabled
@@ -21,11 +22,12 @@ class CmdAdaptionsToRunInDockerContainer extends CmdToRunAdaptions {
 
     GenericContainer<?> container
 
-    CmdAdaptionsToRunInDockerContainer() {
-        startedServer = false
+    @Inject
+    CmdAdaptionsToRunInDockerContainer(@Value('${runCmdsInDockerContainer}') String runCmdsInDockerContainer) {
+        this.runCmdsInDockerContainer = runCmdsInDockerContainer
         enabled = StringUtils.isNotBlank(runCmdsInDockerContainer) && "true".equalsIgnoreCase(runCmdsInDockerContainer)
-
-        log.info("Using docker container to run cmds? ${enabled}")
+        startedServer = false
+        log.info("Using docker container to run cmds? runCmdsInDockerContainer = ${enabled}")
     }
 
     List<String> modify(String cmd) {
@@ -37,15 +39,17 @@ class CmdAdaptionsToRunInDockerContainer extends CmdToRunAdaptions {
 
         String containerId = container.getContainerId()
 
-        String [] cmdOut = [ : ]
-        cmdOut.addAll(["docker", "exec", "-it", containerId ])
-        cmdOut << cmd
+        // Does not work when allocate tty using -t
+        String [] cmdOut = ["docker", "exec", "-i", containerId, cmd ]
         log.info("CMD: " + String.join(" ", cmdOut))
         return cmdOut
     }
 
     private startServer() {
-        container = new GenericContainer<>(DOCGEN_IMAGE).withEnv("ROOT_LOG_LEVEL", "TRACE")
+        container = new GenericContainer<>(DOCGEN_IMAGE)
+                .withEnv("ROOT_LOG_LEVEL", "TRACE")
+                .withFileSystemBind("/tmp", "/tmp")
+        container.start()
     }
 
 }
