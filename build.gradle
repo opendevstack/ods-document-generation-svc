@@ -250,7 +250,7 @@ Map executionProperties(){
   def nexus_username = "${project.findProperty('nexus_username') ?: System.getenv('NEXUS_USERNAME')}"
   def nexus_password = "${project.findProperty('nexus_password') ?: System.getenv('NEXUS_PASSWORD')}"
 
-  def runCmdsInDockerContainer = "${project.findProperty('runCmdsInDockerContainer') ?: System.getenv('RUN_CMDS_IN_DOCKER_CONTAINER')}"
+  def runWkHtmlToPdfInDockerContainer = "${project.findProperty('runWkHtmlToPdfInDockerContainer') ?: System.getenv('RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER')}"
   return [
           "BITBUCKET_URL": bitbucket_url,
           "BITBUCKET_USERNAME": bitbucket_username,
@@ -264,6 +264,6 @@ Map executionProperties(){
           "NEXUS_USERNAME": nexus_username,
           "NEXUS_PASSWORD": nexus_password,
 
-          "RUN_CMDS_IN_DOCKER_CONTAINER": runCmdsInDockerContainer,
+          "RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER": runWkHtmlToPdfInDockerContainer,
           ]
 }

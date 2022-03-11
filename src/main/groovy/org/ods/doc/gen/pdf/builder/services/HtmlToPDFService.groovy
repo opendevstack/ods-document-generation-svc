@@ -8,9 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
-import org.ods.doc.gen.pdf.builder.util.CmdToRunAdaptions
-import org.ods.doc.gen.pdf.builder.util.OSService
-
+import org.ods.doc.gen.pdf.builder.util.WkHtmlToPdfService
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -22,10 +20,7 @@ import java.nio.file.Path
 class HtmlToPDFService {
 
     @Inject
-    private OSService OSService;
-
-    @Inject
-    private CmdToRunAdaptions cmdToRunAdaptions
+    private WkHtmlToPdfService wkHtmlToPdfService
 
     String executeTemplate(Path path, Object data) {
         def loader = new FileTemplateLoader("", "")
@@ -42,7 +37,7 @@ class HtmlToPDFService {
 
     private List<String> generateCmd(Map data, Path documentHtmlFile, Path documentPDFFile) {
         def cmd = []
-        cmd.addAll(cmdToRunAdaptions.modify(getServiceName()))
+        cmd.addAll(wkHtmlToPdfService.getServiceCmd())
         cmd.addAll(["--encoding", "UTF-8", "--no-outline", "--print-media-type"])
         cmd << "--enable-local-file-access"
         cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
@@ -59,10 +54,6 @@ class HtmlToPDFService {
         return ["--dpi", "75",
                 "--image-dpi", "600",
                 "--minimum-font-size", "10"]
-    }
-
-    private String getServiceName() {
-        return "wkhtmltopdf" + OSService.getOSApplicationsExtension();
     }
 
     private void setOrientation(Map data, ArrayList<String> cmd) {
