@@ -36,9 +36,8 @@ class WkHtmlToPdfInDockerService extends WkHtmlToPdfService {
     }
 
     List<String> getServiceCmd() {
-        String rawServiceName = getRawServiceName()
         if (! enabled) {
-            return [ rawServiceName ]
+            return [ SERVICE_CMD_NAME + OSService.getOSApplicationsExtension() ]
         }
 
         if (! startedServer) {
@@ -49,7 +48,8 @@ class WkHtmlToPdfInDockerService extends WkHtmlToPdfService {
         String containerId = container.getContainerId()
 
         // Does not work when allocate tty using -t
-        String [] cmdOut = [getDockerDaemonServiceName(), "exec", "-i", containerId, rawServiceName ]
+        ArrayList<String> cmdOut = []
+        cmdOut.addAll([ getDockerDaemonServiceName(), "exec", "-i", containerId, SERVICE_CMD_NAME ])
         // log.info("CMD: " + String.join(" ", cmdOut))
         return cmdOut
     }
