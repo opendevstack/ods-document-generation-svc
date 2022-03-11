@@ -9,19 +9,13 @@ import javax.inject.Inject
 @Service
 class WkHtmlToPdfService {
 
+    protected final String SERVICE_CMD_NAME = "wkhtmltopdf"
+
     @Inject
     private OSService OSService;
 
     List<String> getServiceCmd() {
-        return [ getServiceName() ]
-    }
-
-    private String getServiceName() {
-        return getRawServiceName() + OSService.getOSApplicationsExtension();
-    }
-
-    protected String getRawServiceName() {
-        return "wkhtmltopdf"
+        return [ SERVICE_CMD_NAME + OSService.getOSApplicationsExtension() ]
     }
 
 }

@@ -13,8 +13,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo
 class WiremockDocumentRepository {
 
     public static final String BB_URL_PATH = "/rest/api/latest/projects/OPENDEVSTACK/repos/ods-document-generation-templates/archive"
-    public static final String BB_PROJECT = "myProject"
-    public static final String BB_REPO = "myRepo"
+    public static final String BB_PROJECT = "OPENDEVSTACK"
+    public static final String BB_REPO = "ods-document-generation-templates"
 
     private WireMockFacade wireMockFacade
 
