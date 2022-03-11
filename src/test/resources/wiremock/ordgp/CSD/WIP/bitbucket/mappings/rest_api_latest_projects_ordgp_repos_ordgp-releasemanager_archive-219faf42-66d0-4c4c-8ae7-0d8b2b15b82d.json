@@ -1,0 +1,31 @@
+{
+  "id" : "219faf42-66d0-4c4c-8ae7-0d8b2b15b82d",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ordgp/repos/ordgp-releasemanager/archive?at=master&format=zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive-219faf42-66d0-4c4c-8ae7-0d8b2b15b82d.txt",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Fri, 11 Mar 2022 12:41:10 GMT",
+      "Content-Type" : "application/octet-stream",
+      "X-AREQUESTID" : "@1POZ2QTx821x242486x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=2C4BC9B947A60B1646BD90866932CAB8; Max-Age=1209600; Expires=Fri, 25-Mar-2022 12:41:10 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=fIX_aU-laE-47ldR3naHHwAAAAAAnoABdmljdG9yLnBhYmxvc19jZXJ1ZWxvLmV4dEBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "144448",
+      "X-AUSERNAME" : "victor.pablos_ceruelo.ext%40domain.com",
+      "X-ASESSIONID" : "d3toey",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : [ "X-AUSERNAME", "X-AUSERID", "Cookie" ],
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Disposition" : "attachment; filename=\"ordgp-releasemanager-master@4e693552bfd.zip\"; filename*=UTF-8''ordgp-releasemanager-master%404e693552bfd.zip",
+      "Strict-Transport-Security" : "max-age=15768000"
+    }
+  },
+  "uuid" : "219faf42-66d0-4c4c-8ae7-0d8b2b15b82d",
+  "persistent" : true,
+  "insertionIndex" : 1
+}
