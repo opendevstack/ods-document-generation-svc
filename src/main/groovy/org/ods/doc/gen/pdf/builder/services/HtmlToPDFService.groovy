@@ -8,7 +8,6 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
-import org.ods.doc.gen.pdf.builder.util.OSService
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -19,13 +18,11 @@ import java.nio.file.Paths
 @Service
 class HtmlToPDFService {
 
-    private final OSService osService
     private final WkhtmltopdfService wkhtmltopdfService
 
     @Inject
-    HtmlToPDFService(OSService osService, WkhtmltopdfService wkhtmltopdfService){
+    HtmlToPDFService(WkhtmltopdfService wkhtmltopdfService){
         this.wkhtmltopdfService = wkhtmltopdfService
-        this.osService = osService
     }
 
     String executeTemplate(Path path, Object data) {
@@ -61,7 +58,7 @@ class HtmlToPDFService {
     }
 
     private String getServiceName() {
-        return "wkhtmltopdf" + osService.getOSApplicationsExtension();
+        return "wkhtmltopdf"
     }
 
     private void setOrientation(Map data, ArrayList<String> cmd) {

@@ -18,19 +18,38 @@ import java.nio.file.Path
 class WkhtmltopdfDockerService extends WkhtmltopdfService {
 
     static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse("docgen-base:latest")
+    static final String TMP_PDF = "/tmp/pdf"
+    public static final String WINDOWS_MNT = "/mnt/c/"
+    public static final String WINDOWS_C = "C:\\"
 
     void executeCmd(Path tmpDir, Path documentHtmlFile, List<String> cmd) {
         log.info "executing cmd: ${cmd}"
 
         new GenericContainer<>(DOCGEN_IMAGE)
-                .withFileSystemBind(tmpDir.toString(), tmpDir.toString(), BindMode.READ_WRITE)
+                .withFileSystemBind(replaceWindowsPath(tmpDir), TMP_PDF, BindMode.READ_WRITE)
                 .withLogConsumer(new Slf4jLogConsumer(log))
-                .withCommand(cmd as String[])
+                .withCommand(useDockerPaths(cmd, tmpDir.toString()))
                 .withStartupCheckStrategy(
                         new IndefiniteWaitOneShotStartupCheckStrategy()
                 ).start()
 
         log.info "executing cmd end"
+    }
+
+    private String replaceWindowsPath(Path tmpDir) {
+        return tmpDir.toString().replace(WINDOWS_C, WINDOWS_MNT).replace("\\", "/")
+    }
+
+    private String[] useDockerPaths(List<String> cmd, String tmpDirPath) {
+        def cmdLinux = []
+        cmd.forEach { it ->
+            if (it.contains(tmpDirPath)) {
+                cmdLinux << it.replace(tmpDirPath, TMP_PDF).replace("\\", "/")
+            } else {
+                cmdLinux << it
+            }
+        }
+        return cmdLinux
     }
 
 }

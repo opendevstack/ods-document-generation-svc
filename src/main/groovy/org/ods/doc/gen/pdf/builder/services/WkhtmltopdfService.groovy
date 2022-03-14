@@ -13,6 +13,7 @@ class WkhtmltopdfService {
 
     void executeCmd(Path tmpDir, Path documentHtmlFile, List<String> cmd) {
         log.info "executing cmd: ${cmd}"
+
         def proc = cmd.execute()
         File tempFile  = Paths.get(tmpDir.toString(), "shell.bin").toFile()
         FileOutputStream tempFileOutputStream = new FileOutputStream(tempFile)
@@ -28,6 +29,7 @@ class WkhtmltopdfService {
             tempFileOutputStream.close()
         }
 
+        log.info "executing cmd end"
     }
 
 }
