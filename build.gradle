@@ -158,6 +158,17 @@ test {
   finalizedBy jacocoTestReport
 }
 
+task dockerTest(type: Test) {
+  // dependsOn(test)
+  group("verification")
+  filter {
+    includeTestsMatching "*IT"
+  }
+  systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
+
+  useJUnitPlatform()
+}
+
 jacocoTestReport {
   dependsOn test
   reports {
@@ -193,6 +204,7 @@ docker {
 }
 buildImage.dependsOn(bootJar)
 dockerBuildImage.dependsOn(buildImage)
+dockerTest.dependsOn(dockerBuildImage)
 
 bootRun {
   systemProperties << executionProperties()
@@ -219,6 +231,9 @@ task stopDocGenServer(type: DockerStopContainer) {
 }
 
 gatlingRun.group("verification")
+gatlingRun.dependsOn(dockerTest, startDocGenServer)
+gatlingRun.finalizedBy(stopDocGenServer)
+
 check.dependsOn(jacocoTestCoverageVerification, gatlingRun)
 
 
