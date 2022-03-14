@@ -12,25 +12,31 @@ import org.ods.doc.gen.pdf.builder.util.OSService
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
-import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 @Slf4j
 @Service
 class HtmlToPDFService {
 
+    private final OSService osService
+    private final WkhtmltopdfService wkhtmltopdfService
+
     @Inject
-    private OSService OSService;
+    HtmlToPDFService(OSService osService, WkhtmltopdfService wkhtmltopdfService){
+        this.wkhtmltopdfService = wkhtmltopdfService
+        this.osService = osService
+    }
 
     String executeTemplate(Path path, Object data) {
         def loader = new FileTemplateLoader("", "")
         return new Handlebars(loader).compile(path.toString()).apply(data)
     }
 
-    Path convert(Path documentHtmlFile, Map data = null) {
-        Path documentPDFFile = Files.createTempFile("document", ".pdf")
+    Path convert(Path tmpDir, Path documentHtmlFile, Map data = null) {
+        Path documentPDFFile = Paths.get(tmpDir.toString(), "document.pdf")
         List cmd = generateCmd(data, documentHtmlFile, documentPDFFile)
-        executeCmd(documentHtmlFile, cmd)
+        wkhtmltopdfService.executeCmd(tmpDir, documentHtmlFile, cmd)
         fixDestinations(documentPDFFile.toFile())
         return documentPDFFile
     }
@@ -55,7 +61,7 @@ class HtmlToPDFService {
     }
 
     private String getServiceName() {
-        return "wkhtmltopdf" + OSService.getOSApplicationsExtension();
+        return "wkhtmltopdf" + osService.getOSApplicationsExtension();
     }
 
     private void setOrientation(Map data, ArrayList<String> cmd) {
@@ -75,26 +81,6 @@ class HtmlToPDFService {
             cmd.addAll(["--header-font-size", "10", "--header-spacing", "10", "--header-font-name", "Arial"])
         }
         return cmd
-    }
-
-    private void executeCmd(documentHtmlFile, List<String> cmd) {
-        log.info "executing cmd: ${cmd}"
-        def proc = cmd.execute()
-        Path tempFilePath = Files.createTempFile("shell", ".bin")
-        File tempFile = tempFilePath.toFile()
-        FileOutputStream tempFileOutputStream = new FileOutputStream(tempFile)
-        def errOutputStream = new TeeOutputStream(tempFileOutputStream, System.err)
-        try {
-            proc.waitForProcessOutput(System.out, errOutputStream)
-        } finally {
-            tempFileOutputStream.close()
-        }
-
-        if (proc.exitValue() != 0) {
-            String errorDesc =   "${documentHtmlFile} failed: code:${proc.exitValue()}\r Description:${tempFile.text}"
-            log.error errorDesc
-            throw new IllegalStateException(errorDesc)
-        }
     }
 
     /**

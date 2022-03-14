@@ -154,12 +154,9 @@ test {
 
   maxHeapSize = "2048m"
   useJUnitPlatform()
-
-  finalizedBy jacocoTestReport
 }
 
 task dockerTest(type: Test) {
-  dependsOn(test)
   group("verification")
   filter {
     includeTestsMatching "*IT"
@@ -189,7 +186,8 @@ jacocoTestCoverageVerification {
 }
 
 import com.bmuschko.gradle.docker.tasks.image.*
-task buildImage(type: DockerBuildImage) {
+task buildImageBase(type: DockerBuildImage) {
+  group = "docker"
   inputDir = file("src/main/resources")
   images.add('docgen-base:latest')
 }
@@ -202,8 +200,9 @@ docker {
     jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
   }
 }
-buildImage.dependsOn(bootJar)
-dockerBuildImage.dependsOn(buildImage)
+
+test.dependsOn(buildImageBase)
+dockerBuildImage.dependsOn(bootJar, buildImageBase)
 dockerTest.dependsOn(dockerBuildImage)
 
 bootRun {
@@ -229,10 +228,10 @@ task stopDocGenServer(type: DockerStopContainer) {
 }
 
 gatlingRun.group("verification")
-gatlingRun.dependsOn(dockerTest, startDocGenServer)
+gatlingRun.dependsOn(startDocGenServer)
 gatlingRun.finalizedBy(stopDocGenServer)
 
-check.dependsOn(jacocoTestCoverageVerification, gatlingRun)
+check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
 
 Map executionProperties(){
