@@ -5,3 +5,6 @@ COPY yum.repos.d/centos8.repo /etc/yum.repos.d/centos8.repo
 COPY install_wkhtmltopdf.sh /root/
 RUN chmod +x /root/install_wkhtmltopdf.sh && \
     /root/install_wkhtmltopdf.sh ${HTTP_PROXY}
+
+EXPOSE 8080
+EXPOSE 9090
