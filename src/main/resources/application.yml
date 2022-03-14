@@ -31,4 +31,4 @@ nexus:
 github:
   url: ${GITHUB_HOST:https://www.github.com}
 
-runCmdsInDockerContainer: ${RUN_CMDS_IN_DOCKER_CONTAINER:false}
+runWkHtmlToPdfInDockerContainer: ${RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER:false}

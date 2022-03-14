@@ -159,7 +159,7 @@ test {
 }
 
 task dockerTest(type: Test) {
-  dependsOn(test)
+  // dependsOn(test)
   group("verification")
   filter {
     includeTestsMatching "*IT"
@@ -217,6 +217,8 @@ task createDocGenServer(type: DockerCreateContainer) {
   targetImageId dockerBuildImage.getImageId()
   hostConfig.portBindings = ['8080:8080']
   hostConfig.autoRemove = true
+  // containerName = "docGenServer"
+  // hostConfig.binds = [ file("src/main/resources") : '/sys/fs/cgroup']
 }
 
 task startDocGenServer(type: DockerStartContainer) {
@@ -247,6 +249,8 @@ Map executionProperties(){
   def nexus_url = "${project.findProperty('nexus_url') ?: System.getenv('NEXUS_HOST')}"
   def nexus_username = "${project.findProperty('nexus_username') ?: System.getenv('NEXUS_USERNAME')}"
   def nexus_password = "${project.findProperty('nexus_password') ?: System.getenv('NEXUS_PASSWORD')}"
+
+  def runWkHtmlToPdfInDockerContainer = "${project.findProperty('runWkHtmlToPdfInDockerContainer') ?: System.getenv('RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER')}"
   return [
           "BITBUCKET_URL": bitbucket_url,
           "BITBUCKET_USERNAME": bitbucket_username,
@@ -258,6 +262,8 @@ Map executionProperties(){
 
           "NEXUS_URL": nexus_url,
           "NEXUS_USERNAME": nexus_username,
-          "NEXUS_PASSWORD": nexus_password
+          "NEXUS_PASSWORD": nexus_password,
+
+          "RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER": runWkHtmlToPdfInDockerContainer,
           ]
 }
