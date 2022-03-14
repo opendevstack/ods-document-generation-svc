@@ -1,4 +1,4 @@
-package org.ods.doc.gen.pdf.builder.api
+package org.ods.doc.gen.core.api
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
@@ -23,7 +23,7 @@ class HealthController {
 
     @GetMapping( "/health")
     Map check( ) {
-        log.info("health executed")
+        log.info("health check to verify a pdf can be generated, executed")
         generatePdfData()
         Map result = [
                 service: "docgen",
@@ -35,7 +35,7 @@ class HealthController {
     }
 
     private byte[] generatePdfData() {
-        Path tmpDir = Files.createTempDirectory("health")
+        Path tmpDir = Files.createTempDirectory("generatePdfDataFolderTest")
         def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
 
         def pdfBytesToString
