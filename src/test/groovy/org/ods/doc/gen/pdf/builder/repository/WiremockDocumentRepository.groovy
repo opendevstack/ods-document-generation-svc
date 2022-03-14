@@ -12,12 +12,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo
 @Repository
 class WiremockDocumentRepository {
 
-    public static final String GH_TEMPLATE = "pdf.builder/ods-document-generation-templates-github-1.2.zip"
-    public static final String BB_TEMPLATE = "pdf.builder/ods-document-generation-templates-bitbucket-1.2.zip"
-
-    public static final String BB_URL_PATH = "/rest/api/latest/projects/myProject/repos/myRepo/archive"
-    public static final String BB_PROJECT = "myProject"
-    public static final String BB_REPO = "myRepo"
+    public static final String BB_URL_PATH = "/rest/api/latest/projects/OPENDEVSTACK/repos/ods-document-generation-templates/archive"
+    public static final String BB_PROJECT = "OPENDEVSTACK"
+    public static final String BB_REPO = "ods-document-generation-templates"
 
     private WireMockFacade wireMockFacade
 
@@ -39,17 +36,20 @@ class WiremockDocumentRepository {
     }
 
     void setUpGithubRepository(String version) {
+        String templatePath = getTemplatePathForVersion("github", version)
         String urlPath = "/opendevstack/ods-document-generation-templates/archive/v${version}.zip"
         // TODO: s2o check the effects of the following line please!
         // githubClientConfig.url =
-        mockTemplatesZipArchiveDownload(urlPath, GH_TEMPLATE)
+        mockTemplatesZipArchiveDownload(urlPath, templatePath)
     }
 
     void setUpBitbucketRepository(String version) {
+        String templatePath = getTemplatePathForVersion("bitbucket", version)
         Map queryParams = [:]
         queryParams.at = equalTo("refs/heads/release/v${version}")
         queryParams.format = equalTo("zip")
-        String url = mockTemplatesZipArchiveDownload(BB_URL_PATH, BB_TEMPLATE, 200, queryParams)
+
+        String url = mockTemplatesZipArchiveDownload(BB_URL_PATH, templatePath, 200, queryParams)
         setupBitBuckectEnv(url)
     }
 
@@ -58,6 +58,12 @@ class WiremockDocumentRepository {
         // bitBucketClientConfig.url = url
         bitBucketDocumentTemplatesRepository.bbDocProject = BB_PROJECT
         bitBucketDocumentTemplatesRepository.bbRepo = BB_REPO
+    }
+
+    private String getTemplatePathForVersion(String repo, String version) {
+        // repo = github | bitbucket
+        // version = 1.1 | 1.2
+        return "pdf.builder/ods-document-generation-templates-${repo}-${version}.zip"
     }
 
     private String mockTemplatesZipArchiveDownload(String urlPartialPath,

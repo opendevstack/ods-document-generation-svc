@@ -30,3 +30,5 @@ nexus:
 
 github:
   url: ${GITHUB_HOST:https://www.github.com}
+
+runWkHtmlToPdfInDockerContainer: ${RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER:false}

@@ -1,0 +1,27 @@
+{
+  "id" : "b3d2c4a7-bf7d-4feb-b0d2-1ae08d360c87",
+  "name" : "repository_leva-documentation_ordgp-wip_tir-ordgp-test-wip-2022-01-22_23-59-59zip",
+  "request" : {
+    "url" : "/repository/leva-documentation/ordgp-WIP/TIR-ORDGP-test-WIP-2022-01-22_23-59-59.zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "repository_leva-documentation_ordgp-wip_tir-ordgp-test-wip-2022-01-22_23-59-59zip-b3d2c4a7-bf7d-4feb-b0d2-1ae08d360c87.zip",
+    "headers" : {
+      "Date" : "Fri, 11 Mar 2022 12:43:11 GMT",
+      "Server" : "Nexus/3.28.1-01 (OSS)",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Security-Policy" : "sandbox allow-forms allow-modals allow-popups allow-presentation allow-scripts allow-top-navigation",
+      "X-XSS-Protection" : "1; mode=block",
+      "Last-Modified" : "Fri, 11 Mar 2022 12:43:07 GMT",
+      "Content-Disposition" : "inline",
+      "Content-Type" : "application/zip",
+      "Set-Cookie" : "b7bd9d362cf28fa3746ddf3faaa39cfe=13a61aa10205f36ad051ed3d9d80bf64; path=/; HttpOnly; Secure; SameSite=None",
+      "Cache-control" : "private"
+    }
+  },
+  "uuid" : "b3d2c4a7-bf7d-4feb-b0d2-1ae08d360c87",
+  "persistent" : true,
+  "insertionIndex" : 3
+}
