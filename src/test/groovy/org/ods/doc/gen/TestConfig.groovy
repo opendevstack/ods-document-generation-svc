@@ -1,9 +1,9 @@
 package org.ods.doc.gen
 
 import org.ods.doc.gen.core.test.jira.JiraServiceForWireMock
+import org.ods.doc.gen.core.test.pdf.WkhtmltopdfDockerService
 import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.pdf.builder.util.WkHtmlToPdfInDockerService
-import org.ods.doc.gen.pdf.builder.util.WkHtmlToPdfService
+import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfService
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -35,8 +35,8 @@ class TestConfig {
 
     @Primary
     @Bean
-    WkHtmlToPdfService getWkHtmlToPdfService(WkHtmlToPdfInDockerService wkHtmlToPdfInDockerService){
-        return wkHtmlToPdfInDockerService
+    WkhtmltopdfService getWkhtmltopdfService(WkhtmltopdfDockerService wkhtmltopdfDockerService) {
+        return wkhtmltopdfDockerService
     }
 
 }

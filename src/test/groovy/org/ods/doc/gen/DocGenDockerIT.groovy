@@ -12,7 +12,6 @@ import spock.lang.Specification
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.equalTo
 
-
 /**
  * Run it with DockerTest action, you should have a Docker client
  */
@@ -24,7 +23,7 @@ class DocGenDockerIT extends Specification {
 
     @Shared
     GenericContainer<?> docGenContainer = new GenericContainer<>(DOCGEN_IMAGE)
-            .withExposedPorts(8080)
+            .withExposedPorts(1111)
             .withEnv("ROOT_LOG_LEVEL", "TRACE")
 
     def "docgen is running in docker"() {
@@ -46,6 +45,5 @@ class DocGenDockerIT extends Specification {
                 .statusCode(200)
                 .body("status", equalTo("passing"))
     }
-
 
 }

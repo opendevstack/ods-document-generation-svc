@@ -154,12 +154,9 @@ test {
 
   maxHeapSize = "2048m"
   useJUnitPlatform()
-
-  finalizedBy jacocoTestReport
 }
 
 task dockerTest(type: Test) {
-  // dependsOn(test)
   group("verification")
   filter {
     includeTestsMatching "*IT"
@@ -189,7 +186,8 @@ jacocoTestCoverageVerification {
 }
 
 import com.bmuschko.gradle.docker.tasks.image.*
-task buildImage(type: DockerBuildImage) {
+task buildImageBase(type: DockerBuildImage) {
+  group = "docker"
   inputDir = file("src/main/resources")
   images.add('docgen-base:latest')
 }
@@ -202,8 +200,9 @@ docker {
     jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
   }
 }
-buildImage.dependsOn(bootJar)
-dockerBuildImage.dependsOn(buildImage)
+
+test.dependsOn(buildImageBase)
+dockerBuildImage.dependsOn(bootJar, buildImageBase)
 dockerTest.dependsOn(dockerBuildImage)
 
 bootRun {
@@ -217,8 +216,6 @@ task createDocGenServer(type: DockerCreateContainer) {
   targetImageId dockerBuildImage.getImageId()
   hostConfig.portBindings = ['8080:8080']
   hostConfig.autoRemove = true
-  // containerName = "docGenServer"
-  // hostConfig.binds = [ file("src/main/resources") : '/sys/fs/cgroup']
 }
 
 task startDocGenServer(type: DockerStartContainer) {
@@ -231,10 +228,10 @@ task stopDocGenServer(type: DockerStopContainer) {
 }
 
 gatlingRun.group("verification")
-gatlingRun.dependsOn(dockerTest, startDocGenServer)
+gatlingRun.dependsOn(startDocGenServer)
 gatlingRun.finalizedBy(stopDocGenServer)
 
-check.dependsOn(jacocoTestCoverageVerification, gatlingRun)
+check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
 
 Map executionProperties(){
@@ -249,8 +246,6 @@ Map executionProperties(){
   def nexus_url = "${project.findProperty('nexus_url') ?: System.getenv('NEXUS_HOST')}"
   def nexus_username = "${project.findProperty('nexus_username') ?: System.getenv('NEXUS_USERNAME')}"
   def nexus_password = "${project.findProperty('nexus_password') ?: System.getenv('NEXUS_PASSWORD')}"
-
-  def runWkHtmlToPdfInDockerContainer = "${project.findProperty('runWkHtmlToPdfInDockerContainer') ?: System.getenv('RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER')}"
   return [
           "BITBUCKET_URL": bitbucket_url,
           "BITBUCKET_USERNAME": bitbucket_username,
@@ -262,8 +257,6 @@ Map executionProperties(){
 
           "NEXUS_URL": nexus_url,
           "NEXUS_USERNAME": nexus_username,
-          "NEXUS_PASSWORD": nexus_password,
-
-          "RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER": runWkHtmlToPdfInDockerContainer,
+          "NEXUS_PASSWORD": nexus_password
           ]
 }

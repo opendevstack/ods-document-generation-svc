@@ -27,7 +27,7 @@ class PdfGenerationService {
         copyTemplatesToTempFolder(metadata.version as String, tmpDir)
         Map<String, Path> partials = getPartialTemplates(metadata.type as String, tmpDir)
         Map<String, Path> partialsWithPathOk = generateHtmlFromTemplates(partials, data)
-        return htmlToPDFService.convert(partialsWithPathOk.document, data)
+        return htmlToPDFService.convert(tmpDir, partialsWithPathOk.document, data)
     }
 
     private copyTemplatesToTempFolder(String version, Path tmpDir) {
