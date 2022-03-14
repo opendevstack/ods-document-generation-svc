@@ -2,13 +2,8 @@ package org.ods.doc.gen.project.data
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import kong.unirest.Unirest
 import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.jira.CustomIssueFields
-import org.ods.doc.gen.external.modules.jira.IssueTypes
-import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.external.modules.jira.LabelPrefix
-import org.ods.doc.gen.external.modules.jira.OpenIssuesException
+import org.ods.doc.gen.external.modules.jira.*
 import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
 import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
@@ -68,17 +63,20 @@ class ProjectData {
         this.data.openshift = data.openshift
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
+        this.data.repo = data.repo
         return this
     }
 
     ProjectData load() {
-        jUnitReportsService.downloadTestsResults(build.testResultsURLs as Map, tmpFolder)
+        this.data.tests = jUnitReportsService.getTestData(tmpFolder, build.testResultsURLs as Map, data)
+
         bitbucketService.downloadRepo(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String,
                 data.git.releaseManagerBranch as String,
-                tmpFolder)
-        this.data.metadata = loadMetadata(tmpFolder)
+                tmpFolder + "/releasemanager")
+
+        this.data.metadata = loadMetadata(tmpFolder + "/releasemanager")
         this.data.jira.issueTypes = this.loadJiraDataIssueTypes()
         this.data.jira << this.loadJiraData(this.jiraProjectKey)
 

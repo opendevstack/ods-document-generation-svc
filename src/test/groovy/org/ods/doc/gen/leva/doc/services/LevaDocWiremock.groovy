@@ -31,7 +31,6 @@ class LevaDocWiremock {
     private WiremockManager nexusServer
     private WiremockManager sonarServer
     private WiremockManager bitbucketServer
-//    private WiremockManager githubServer
 
     @Inject
     LevaDocWiremock(BitbucketService bitbucketService,
@@ -55,7 +54,6 @@ class LevaDocWiremock {
         nexusServer?.tearDown()
         sonarServer?.tearDown()
         bitbucketServer?.tearDown()
-//        githubServer?.tearDown()
     }
 
     private void startUpWiremockServers(ProjectFixture projectFixture, File tempFolder) {
@@ -70,7 +68,6 @@ class LevaDocWiremock {
         jiraServer = WiremockServers.JIRA.build(environment.getProperty("jira.url")).withScenario(scenarioPath).startServer(RECORD)
         nexusServer = WiremockServers.NEXUS.build(environment.getProperty("nexus.url")).withScenario(scenarioPath).startServer(RECORD)
         bitbucketServer = WiremockServers.BITBUCKET.build(environment.getProperty("bitbucket.url")).withScenario(scenarioPath).startServer(RECORD)
-//        githubServer = WiremockServers.GITHUB.build("https://github.com").withScenario(scenarioPath).startServer(RECORD)
 
         updateServicesWithWiremockConfig()
     }
@@ -79,7 +76,6 @@ class LevaDocWiremock {
         nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
         jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
         bitbucketService.bitBucketClientConfig.url = bitbucketServer.server().baseUrl()
-//        githubService.githubClientConfig.url = githubServer.server().baseUrl()
     }
 
 }

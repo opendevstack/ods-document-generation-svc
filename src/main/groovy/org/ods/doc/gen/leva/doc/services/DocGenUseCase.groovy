@@ -187,7 +187,7 @@ abstract class DocGenUseCase {
 
         def oldBuildVersion = buildVersionKey[0]
         def basename = getDocumentBasename(documentType, oldBuildVersion, buildVersionKey[1], repo)
-        def path = "${this.steps.env.WORKSPACE}/reports/${repo.id}"
+        def path = "${projectData.tmpFolder}/reports/${repo.id}"
 
         def fileExtensions = getFiletypeForDocumentType(documentType)
         String storageType = fileExtensions.storage ?: 'zip'

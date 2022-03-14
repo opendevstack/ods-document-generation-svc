@@ -2,7 +2,6 @@ package org.ods.doc.gen.core
 
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
-import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 import org.springframework.util.FileSystemUtils
 
@@ -37,7 +36,9 @@ class ZipFacade {
     }
 
     void extractZipArchive(Path zipArchive, Path targetDir) {
-        cleanTargetFolder(targetDir)
+
+        // TODO: AMP it is necessary?
+//        cleanTargetFolder(targetDir)
         new ZipFile(zipArchive.toFile()).extractAll(targetDir.toString())
     }
 

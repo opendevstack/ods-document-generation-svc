@@ -21,7 +21,9 @@ enum LevaDocType {
     TCR(LeVADocumentService::createTCR),
     TIP(LeVADocumentService::createTIP),
     TIR(LeVADocumentService::createTIR),
-    TRC(LeVADocumentService::createTRC)
+    TRC(LeVADocumentService::createTRC),
+    OVERALL_DTR(LeVADocumentService::createOverallDTR),
+    OVERALL_TIR(LeVADocumentService::createOverallTIR)
 
     public final BiFunction<LeVADocumentService, Map, List<DocumentHistoryEntry> > buildDocument;
 

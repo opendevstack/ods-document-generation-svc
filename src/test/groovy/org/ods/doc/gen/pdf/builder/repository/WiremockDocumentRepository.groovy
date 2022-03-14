@@ -50,12 +50,10 @@ class WiremockDocumentRepository {
         queryParams.at = equalTo("refs/heads/release/v${version}")
         queryParams.format = equalTo("zip")
         String url = mockTemplatesZipArchiveDownload(BB_URL_PATH, BB_TEMPLATE, 200, queryParams)
-        setupBitBuckectEnv(url)
+        setupBitBuckectEnv()
     }
 
-    private setupBitBuckectEnv(String url) {
-        // TODO: s2o check the effects of the following line please!
-        // bitBucketClientConfig.url = url
+    private setupBitBuckectEnv() {
         bitBucketDocumentTemplatesRepository.bbDocProject = BB_PROJECT
         bitBucketDocumentTemplatesRepository.bbRepo = BB_REPO
     }

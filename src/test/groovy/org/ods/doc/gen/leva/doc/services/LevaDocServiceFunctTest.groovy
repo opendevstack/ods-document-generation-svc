@@ -105,8 +105,7 @@ class LevaDocServiceFunctTest extends Specification {
     def "create #projectFixture.docType with tests results for project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
-        ProjectData projectData = prepareServiceDataParam(projectFixture, data)
-        data << testsReports.getAllResults(projectData, projectData.repositories)
+        prepareServiceDataParam(projectFixture, data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -141,7 +140,8 @@ class LevaDocServiceFunctTest extends Specification {
     def "create Overall #projectFixture.docType for project #projectFixture.project"() {
         given: "A project data"
         Map data = setFixture(projectFixture)
-        ProjectData projectData = prepareServiceDataParam(projectFixture, data)
+        prepareServiceDataParam(projectFixture, data)
+        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         dataFixture.updateExpectedComponentDocs(projectData, data, projectFixture)
 
         when: "the user creates a LeVA document"
@@ -159,15 +159,12 @@ class LevaDocServiceFunctTest extends Specification {
         return dataFixture.buildFixtureData(projectFixture)
     }
 
-    private ProjectData prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
-        data.tmpFolder = tempFolder.absolutePath
+    private void prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
+//        data.tmpFolder = tempFolder.absolutePath
         data.documentType = projectFixture.docType
         data.projectBuild =  "${projectFixture.project}-1"
         data.projectId = projectFixture.project
         data.buildNumber = "666"
-        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        projectData.tmpFolder = tempFolder.absolutePath
-        return projectData
     }
 }
 
