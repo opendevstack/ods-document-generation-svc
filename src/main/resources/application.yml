@@ -1,5 +1,5 @@
 server:
-  port: 1111
+  port: ${SERVER_PORT:1111}
 
 spring:
   mvc.async.request-timeout: 750

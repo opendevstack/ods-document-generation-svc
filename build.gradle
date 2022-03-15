@@ -194,7 +194,7 @@ task buildImageBase(type: DockerBuildImage) {
 docker {
   springBootApplication {
     baseImage = 'docgen-base:latest'
-    ports = [9090, 8080]
+    ports = [9090, 1111]
     images = ['ods-document-generation-svc:local']
     jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
   }
@@ -213,7 +213,7 @@ import com.bmuschko.gradle.docker.tasks.container.*
 task createDocGenServer(type: DockerCreateContainer) {
   dependsOn dockerBuildImage
   targetImageId dockerBuildImage.getImageId()
-  hostConfig.portBindings = ['8080:8080']
+  hostConfig.portBindings = ['8080:1111']
   hostConfig.autoRemove = true
 }
 

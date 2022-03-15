@@ -26,6 +26,7 @@ class DocGenDockerIT extends Specification {
     GenericContainer<?> docGenContainer = new GenericContainer<>(DOCGEN_IMAGE)
             .withExposedPorts(8080)
             .withEnv("ROOT_LOG_LEVEL", "TRACE")
+            .withEnv("SERVER_PORT", "8080")
 
     def "docgen is running in docker"() {
         given:
