@@ -90,7 +90,7 @@ class LevaDocDataFixture {
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
-                url: "${bitbucketUrl}/scm/${projectFixture.project}/${projectFixture.releaseManagerRepo}.git",
+                repoURL: "${bitbucketUrl}/scm/${projectFixture.project}/${projectFixture.releaseManagerRepo}.git",
                 releaseManagerRepo: "${projectFixture.releaseManagerRepo}",
                 releaseManagerBranch: "${projectFixture.releaseManagerBranch}"
         ]

@@ -555,10 +555,6 @@ class LeVADocumentService extends DocGenUseCase {
         def keysInDoc = this.computeKeysInDocForTIP(projectData.getComponents())
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        //def repositories = projectData.repositories.findAll {
-        //    !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())
-        //}
-
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
@@ -638,15 +634,16 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTCR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         String documentType = Constants.DocumentType.TCR as String
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
-        def integrationTestData = data.tests.integration
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def integrationTestData = testData.integration
         def integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
-
-        def acceptanceTestData = data.tests.acceptance
+        def acceptanceTestData = testData.acceptance
         def acceptanceTestIssues = projectData.getAutomatedTestsTypeAcceptance()
 
         def matchedHandler = { result ->
@@ -728,9 +725,12 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createCFTR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.CFTR as String
-        def acceptanceTestData = data.tests.acceptance
-        def integrationTestData = data.tests.integration
+
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def acceptanceTestData = testData.acceptance
+        def integrationTestData = testData.integration
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
@@ -803,9 +803,11 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createIVR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.IVR as String
 
-        def installationTestData = data.tests.installation
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def installationTestData = testData.installation
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
@@ -863,7 +865,7 @@ class LeVADocumentService extends DocGenUseCase {
                 documentHistory: docHistory?.getDocGenFormat() ?: [],
         ]
 
-        def files = data.tests.installation.testReportFiles.collectEntries { file ->
+        def files = installationTestData.testReportFiles.collectEntries { file ->
             ["raw/${file.getName()}", file.getBytes()]
         }
 
@@ -878,7 +880,6 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createDTR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
-        Map repoData = data.repo.data
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.DTR as String
@@ -888,7 +889,8 @@ class LeVADocumentService extends DocGenUseCase {
             return resurrectedDocument.uri
         }
 
-        def unitTestData = repoData.tests.unit
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def unitTestData = testData.unit
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
@@ -966,11 +968,12 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTIR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
-        Map repoData = data.repo.data
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.TIR as String
 
-        def installationTestData = repoData?.tests?.installation
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def installationTestData = testData.installation
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
@@ -1010,7 +1013,7 @@ class LeVADocumentService extends DocGenUseCase {
         return docHistory.data
     }
 
-    String createOverallDTR(Map data) {
+    List<DocumentHistoryEntry> createOverallDTR(Map data) {
         log.info("createOverallDTR for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -1023,10 +1026,12 @@ class LeVADocumentService extends DocGenUseCase {
         def uri = this.createOverallDocument('Overall-Cover', documentType, metadata, null, watermarkText, projectData)
         def docVersion = projectData.getDocumentVersionFromHistories(documentType) as String
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docVersion)
-        return uri
+
+        def docHistory = this.getAndStoreDocumentHistory(documentType, [], projectData)
+        return docHistory.data
     }
 
-    String createOverallTIR(Map data) {
+    List<DocumentHistoryEntry> createOverallTIR(Map data) {
         log.info("createOverallTIR for ${data.projectBuild}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
@@ -1046,7 +1051,7 @@ class LeVADocumentService extends DocGenUseCase {
                     heading: 'Jenkins Build Log'
             ])
 
-            nexus.downloadAndExtractZip(projectData.build.jenkinLog as String, projectData.tmpFolder)
+            nexus.downloadAndExtractZip(data.build.jenkinLog as String, projectData.tmpFolder)
             data_.jenkinsData = [
                     log: Paths.get(projectData.tmpFolder, "jenkins-job-log.txt" ).toFile().text
             ]
@@ -1058,7 +1063,9 @@ class LeVADocumentService extends DocGenUseCase {
         def uri = this.createOverallDocument('Overall-TIR-Cover', documentType, metadata, visitor, watermarkText, projectData)
         def docVersion = projectData.getDocumentVersionFromHistories(documentType) as String
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docVersion)
-        return uri
+
+        def docHistory = this.getAndStoreDocumentHistory(documentType, [], projectData)
+        return docHistory.data
     }
 
     private def computeKeysInDocForDTR(def data) {
@@ -1348,7 +1355,7 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     private boolean isReleaseManagerComponent(ProjectData projectData, normComponentName) {
-        def gitUrl = projectData.data.git.url // TODO s2o review this code
+        def gitUrl = projectData.data.git.repoURL.toLowerCase() // TODO s2o review this code
         return gitUrl?.endsWith("${projectData.key}-${normComponentName}.git".toLowerCase())
     }
 

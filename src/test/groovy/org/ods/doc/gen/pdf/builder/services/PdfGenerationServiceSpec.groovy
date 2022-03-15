@@ -1,6 +1,5 @@
 package org.ods.doc.gen.pdf.builder.services
 
-
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.TestConfig
@@ -75,4 +74,5 @@ class PdfGenerationServiceSpec extends Specification {
         new PdfCompare( "build/reports/pdf")
                 .compareAreEqual(resultFile.toString(), new FixtureHelper().getResource(expected).absolutePath)
     }
+
 }

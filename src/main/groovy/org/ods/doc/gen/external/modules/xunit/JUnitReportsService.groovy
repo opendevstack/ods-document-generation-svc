@@ -1,7 +1,9 @@
 package org.ods.doc.gen.external.modules.xunit
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -36,10 +38,11 @@ class JUnitReportsService {
         return result
     }
     
-    List<File> loadTestReportsFromPath(String path) {
+    List<File> loadTestReportsFromPath(String path, String typeIn = 'unit', String component = null) {
         def result = []
         try {
-            new File(path).traverse(nameFilter: ~/.*\.xml$/, type: groovy.io.FileType.FILES) { file ->
+            def pattern = (StringUtils.isEmpty(component)) ? ~/.*${typeIn}.*\.xml$/ : ~/.*${component}.*\.xml$/
+            new File(path).traverse(nameFilter: pattern, type: groovy.io.FileType.FILES) { file ->
                 result << file
             }
         } catch (FileNotFoundException e) {}
@@ -59,6 +62,44 @@ class JUnitReportsService {
         testResultsURLs.each {
             nexusService.downloadAndExtractZip(it.value, targetFolder)
         }
+    }
+
+    Map getTestData(String tmpFolder, Map testResultsURLs, Map data) {
+        downloadTestsResults(testResultsURLs as Map, tmpFolder)
+
+        Map tests = createTestDataStructure()
+        tests.each {
+            Map testResult = getTestResults(it.key.capitalize(), tmpFolder, data.repo?.id?.capitalize())
+            it.value.testReportFiles = testResult.testReportFiles
+            it.value.testResults = testResult.testResults
+        }
+        return tests
+    }
+
+    private Map createTestDataStructure() {
+        Map testData = [
+                (TestType.UNIT.uncapitalize())        : [:],
+                (TestType.ACCEPTANCE.uncapitalize())  : [:],
+                (TestType.INSTALLATION.uncapitalize()): [:],
+                (TestType.INTEGRATION.uncapitalize()) : [:],
+        ]
+        testData.each {
+            it.value.testReportFiles = []
+            it.value.testResults = [ testsuites: [] ]
+        }
+        return testData
+    }
+
+    private Map getTestResults(String typeIn = 'unit', String targetFolder, String component = null) {
+
+        def testReportFiles = loadTestReportsFromPath(targetFolder, typeIn, component)
+
+        return [
+                // Load JUnit test report files from path
+                testReportFiles: testReportFiles,
+                // Parse JUnit test report files into a report
+                testResults: parseTestReportFiles(testReportFiles),
+        ]
     }
 
 }

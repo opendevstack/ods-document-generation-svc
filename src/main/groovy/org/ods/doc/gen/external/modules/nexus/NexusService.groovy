@@ -125,7 +125,8 @@ class NexusService {
     }
 
     HttpResponse<File> downloadToPath(String urlToDownload, String name, String extractionPath) {
-        deleteIfAlreadyExist(extractionPath, name)
+        // TODO: AMP it is necessary?
+//        deleteIfAlreadyExist(extractionPath, name)
 
         def restCall = Unirest.get("${urlToDownload}").basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")

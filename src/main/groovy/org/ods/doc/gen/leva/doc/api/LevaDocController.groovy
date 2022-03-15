@@ -1,7 +1,6 @@
 package org.ods.doc.gen.leva.doc.api
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
@@ -46,21 +45,18 @@ class LevaDocController {
             @RequestBody Map body){
         validateRequestParams(body)
         logData(projectId, buildNumber, levaDocType, body)
-        List<DocumentHistoryEntry> document = createDocument(projectId, buildNumber, levaDocType, body)
-        return document
+        return createDocument(projectId, buildNumber, levaDocType, body)
     }
 
     @PostMapping("{projectId}/{build}/overall/{levaDocType}")
-    Map<String, String> buildOverAllDocument(
+    void buildOverAllDocument(
             @PathVariable("projectId") String projectId,
             @PathVariable("build") String buildNumber,
             @PathVariable("levaDocType") LevaDocType levaDocType,
             @RequestBody Map body){
         validateRequestParams(body)
         logData(projectId, buildNumber, levaDocType, body)
-        def url = createDocument(projectId, buildNumber, levaDocType, body)
-        log.info "buildDocument return:${url}"
-        return [nexusURL: url]
+        createDocument(projectId, buildNumber, levaDocType, body)
     }
 
     private List<DocumentHistoryEntry> createDocument(String projectId, String buildNumber, LevaDocType levaDocType, Map data) {
@@ -76,10 +72,6 @@ class LevaDocController {
                 msgWithDetails = msg + ". " + e.getMessage();
             }
             throw new RuntimeException(msgWithDetails, e)
-        } finally {
-            if (tmpDir) {
-                FileUtils.deleteDirectory(tmpDir)
-            }
         }
     }
 
