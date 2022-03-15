@@ -55,7 +55,7 @@ class LeVADocumentService extends DocGenUseCase {
     static final String SONARQUBE_BASE_DIR = 'sonarqube'
 
     private final JiraUseCase jiraUseCase
-    private final JUnitReportsService junit
+    private final JUnitReportsService junitReportsService
     private final LeVADocumentChaptersFileService levaFiles
     private final SonarQubeUseCase sq
     private final BitbucketTraceabilityUseCase bbt
@@ -70,7 +70,7 @@ class LeVADocumentService extends DocGenUseCase {
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
         super(project, util, docGen, nexus, pdf)
         this.jiraUseCase = jiraUseCase
-        this.junit = junit
+        this.junitReportsService = junit
         this.levaFiles = levaFiles
         this.sq = sq
         this.bbt = bbt
@@ -637,16 +637,18 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createTCR for ${data.projectBuild}")
         log.trace("createTCR - data:${data}")
 
+        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         String documentType = Constants.DocumentType.TCR as String
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
-        def integrationTestData = projectData.data.tests.integration
+        def integrationTestData = data.tests.integration
         def integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
 
-        def acceptanceTestData = projectData.data.tests.acceptance
+        def acceptanceTestData = data.tests.acceptance
         def acceptanceTestIssues = projectData.getAutomatedTestsTypeAcceptance()
 
         def matchedHandler = { result ->
@@ -727,10 +729,12 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createCFTR for ${data.projectBuild}")
         log.trace("createCFTR - data:${data}")
 
+        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.CFTR as String
-        def acceptanceTestData = projectData.data.tests.acceptance
-        def integrationTestData = projectData.data.tests.integration
+        def acceptanceTestData = data.tests.acceptance
+        def integrationTestData = data.tests.integration
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
@@ -740,7 +744,7 @@ class LeVADocumentService extends DocGenUseCase {
         def discrepancies = this
                 .computeTestDiscrepancies("Integration and Acceptance Tests",
                         (acceptanceTestIssues + integrationTestIssues),
-                        junit.combineTestResults([acceptanceTestData.testResults, integrationTestData.testResults]),
+                        junitReportsService.combineTestResults([acceptanceTestData.testResults, integrationTestData.testResults]),
                         false)
 
         def keysInDoc = this.computeKeysInDocForCFTR(integrationTestIssues + acceptanceTestIssues)
@@ -751,8 +755,8 @@ class LeVADocumentService extends DocGenUseCase {
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
                         sections                     : sections,
-                        numAdditionalAcceptanceTests : junit.getNumberOfTestCases(acceptanceTestData.testResults) - acceptanceTestIssues.count { !it.isUnexecuted },
-                        numAdditionalIntegrationTests: junit.getNumberOfTestCases(integrationTestData.testResults) - integrationTestIssues.count { !it.isUnexecuted },
+                        numAdditionalAcceptanceTests : junitReportsService.getNumberOfTestCases(acceptanceTestData.testResults) - acceptanceTestIssues.count { !it.isUnexecuted },
+                        numAdditionalIntegrationTests: junitReportsService.getNumberOfTestCases(integrationTestData.testResults) - integrationTestIssues.count { !it.isUnexecuted },
                         conclusion                   : [
                                 summary  : discrepancies.conclusion.summary,
                                 statement: discrepancies.conclusion.statement
@@ -802,10 +806,12 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createIVR for ${data.projectBuild}")
         log.trace("createIVR - data:${data}")
 
+        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.IVR as String
 
-        def installationTestData = projectData.data.tests.installation
+        def installationTestData = data.tests.installation
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
@@ -848,7 +854,7 @@ class LeVADocumentService extends DocGenUseCase {
                                     techSpec   : testIssue.techSpecs.join(", ") ?: "N/A"
                             ]
                         }),
-                        numAdditionalTests: junit.getNumberOfTestCases(installationTestData.testResults) - installationTestIssues.count { !it.isUnexecuted },
+                        numAdditionalTests: junitReportsService.getNumberOfTestCases(installationTestData.testResults) - installationTestIssues.count { !it.isUnexecuted },
                         testFiles         : SortUtil.sortIssuesByProperties(installationTestData.testReportFiles.collect { file ->
                             [name: file.name, path: file.path, text: file.text]
                         } ?: [], ["name"]),
@@ -878,6 +884,7 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createDTR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
+        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.DTR as String
@@ -887,7 +894,7 @@ class LeVADocumentService extends DocGenUseCase {
             return resurrectedDocument.uri
         }
 
-        def unitTestData = projectData.data.tests.unit
+        def unitTestData = data.tests.unit
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
@@ -936,7 +943,7 @@ class LeVADocumentService extends DocGenUseCase {
                         repo              : repo,
                         sections          : sections,
                         tests             : tests,
-                        numAdditionalTests: junit.getNumberOfTestCases(unitTestData.testResults) - testIssues.count { !it.isUnexecuted },
+                        numAdditionalTests: junitReportsService.getNumberOfTestCases(unitTestData.testResults) - testIssues.count { !it.isUnexecuted },
                         testFiles         : SortUtil.sortIssuesByProperties(unitTestData.testReportFiles.collect { file ->
                             [name: file.name, path: file.path, text: XmlUtil.serialize(file.text)]
                         } ?: [], ["name"]),
@@ -965,10 +972,12 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTIR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
+        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.TIR as String
 
-        def installationTestData = projectData.data.tests.installation
+        def installationTestData = data.tests.installation
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
