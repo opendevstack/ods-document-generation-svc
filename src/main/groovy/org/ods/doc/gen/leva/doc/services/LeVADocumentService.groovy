@@ -55,7 +55,7 @@ class LeVADocumentService extends DocGenUseCase {
     static final String SONARQUBE_BASE_DIR = 'sonarqube'
 
     private final JiraUseCase jiraUseCase
-    private final JUnitReportsService junitReportsService
+    private final JUnitReportsService junit
     private final LeVADocumentChaptersFileService levaFiles
     private final SonarQubeUseCase sq
     private final BitbucketTraceabilityUseCase bbt
@@ -70,7 +70,7 @@ class LeVADocumentService extends DocGenUseCase {
                         PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
         super(project, util, docGen, nexus, pdf)
         this.jiraUseCase = jiraUseCase
-        this.junitReportsService = junit
+        this.junit = junit
         this.levaFiles = levaFiles
         this.sq = sq
         this.bbt = bbt
@@ -637,7 +637,7 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createTCR for ${data.projectBuild}")
         log.trace("createTCR - data:${data}")
 
-        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        data.tests = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         String documentType = Constants.DocumentType.TCR as String
@@ -729,7 +729,7 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createCFTR for ${data.projectBuild}")
         log.trace("createCFTR - data:${data}")
 
-        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        data.tests = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.CFTR as String
@@ -744,7 +744,7 @@ class LeVADocumentService extends DocGenUseCase {
         def discrepancies = this
                 .computeTestDiscrepancies("Integration and Acceptance Tests",
                         (acceptanceTestIssues + integrationTestIssues),
-                        junitReportsService.combineTestResults([acceptanceTestData.testResults, integrationTestData.testResults]),
+                        junit.combineTestResults([acceptanceTestData.testResults, integrationTestData.testResults]),
                         false)
 
         def keysInDoc = this.computeKeysInDocForCFTR(integrationTestIssues + acceptanceTestIssues)
@@ -755,8 +755,8 @@ class LeVADocumentService extends DocGenUseCase {
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
                         sections                     : sections,
-                        numAdditionalAcceptanceTests : junitReportsService.getNumberOfTestCases(acceptanceTestData.testResults) - acceptanceTestIssues.count { !it.isUnexecuted },
-                        numAdditionalIntegrationTests: junitReportsService.getNumberOfTestCases(integrationTestData.testResults) - integrationTestIssues.count { !it.isUnexecuted },
+                        numAdditionalAcceptanceTests : junit.getNumberOfTestCases(acceptanceTestData.testResults) - acceptanceTestIssues.count { !it.isUnexecuted },
+                        numAdditionalIntegrationTests: junit.getNumberOfTestCases(integrationTestData.testResults) - integrationTestIssues.count { !it.isUnexecuted },
                         conclusion                   : [
                                 summary  : discrepancies.conclusion.summary,
                                 statement: discrepancies.conclusion.statement
@@ -806,7 +806,7 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createIVR for ${data.projectBuild}")
         log.trace("createIVR - data:${data}")
 
-        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        data.tests = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.IVR as String
@@ -854,7 +854,7 @@ class LeVADocumentService extends DocGenUseCase {
                                     techSpec   : testIssue.techSpecs.join(", ") ?: "N/A"
                             ]
                         }),
-                        numAdditionalTests: junitReportsService.getNumberOfTestCases(installationTestData.testResults) - installationTestIssues.count { !it.isUnexecuted },
+                        numAdditionalTests: junit.getNumberOfTestCases(installationTestData.testResults) - installationTestIssues.count { !it.isUnexecuted },
                         testFiles         : SortUtil.sortIssuesByProperties(installationTestData.testReportFiles.collect { file ->
                             [name: file.name, path: file.path, text: file.text]
                         } ?: [], ["name"]),
@@ -884,7 +884,7 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createDTR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
-        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        data.tests = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.DTR as String
@@ -943,7 +943,7 @@ class LeVADocumentService extends DocGenUseCase {
                         repo              : repo,
                         sections          : sections,
                         tests             : tests,
-                        numAdditionalTests: junitReportsService.getNumberOfTestCases(unitTestData.testResults) - testIssues.count { !it.isUnexecuted },
+                        numAdditionalTests: junit.getNumberOfTestCases(unitTestData.testResults) - testIssues.count { !it.isUnexecuted },
                         testFiles         : SortUtil.sortIssuesByProperties(unitTestData.testReportFiles.collect { file ->
                             [name: file.name, path: file.path, text: XmlUtil.serialize(file.text)]
                         } ?: [], ["name"]),
@@ -972,7 +972,7 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTIR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
-        data.tests = junitReportsService.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        data.tests = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.TIR as String
