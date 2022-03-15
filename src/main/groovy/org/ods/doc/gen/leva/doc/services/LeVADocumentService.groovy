@@ -555,10 +555,6 @@ class LeVADocumentService extends DocGenUseCase {
         def keysInDoc = this.computeKeysInDocForTIP(projectData.getComponents())
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        //def repositories = projectData.repositories.findAll {
-        //    !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())
-        //}
-
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
@@ -638,15 +634,16 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTCR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         String documentType = Constants.DocumentType.TCR as String
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
-        def integrationTestData = projectData.data.tests.integration
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def integrationTestData = testData.integration
         def integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
-
-        def acceptanceTestData = projectData.data.tests.acceptance
+        def acceptanceTestData = testData.acceptance
         def acceptanceTestIssues = projectData.getAutomatedTestsTypeAcceptance()
 
         def matchedHandler = { result ->
@@ -728,9 +725,12 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createCFTR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.CFTR as String
-        def acceptanceTestData = projectData.data.tests.acceptance
-        def integrationTestData = projectData.data.tests.integration
+
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def acceptanceTestData = testData.acceptance
+        def integrationTestData = testData.integration
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
@@ -803,9 +803,11 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createIVR - data:${data}")
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.IVR as String
 
-        def installationTestData = projectData.data.tests.installation
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def installationTestData = testData.installation
 
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
@@ -887,7 +889,8 @@ class LeVADocumentService extends DocGenUseCase {
             return resurrectedDocument.uri
         }
 
-        def unitTestData = projectData.data.tests.unit
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def unitTestData = testData.unit
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
@@ -966,9 +969,11 @@ class LeVADocumentService extends DocGenUseCase {
 
         Map repo = data.repo
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+
         def documentType = Constants.DocumentType.TIR as String
 
-        def installationTestData = projectData.data.tests.installation
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def installationTestData = testData.installation
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
