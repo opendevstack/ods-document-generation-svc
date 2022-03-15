@@ -1,6 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
+import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
@@ -15,8 +16,8 @@ import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.TempDir
 
 import javax.inject.Inject
 /**
@@ -55,9 +56,9 @@ import javax.inject.Inject
 @ActiveProfiles("test")
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
 class LevaDocServiceFunctTest extends Specification {
-    
-    @TempDir
-    public File tempFolder
+
+    @Shared
+    TemporaryFolder tempFolder = new TemporaryFolder()
 
     @Inject
     LeVADocumentService leVADocumentService
@@ -75,12 +76,13 @@ class LevaDocServiceFunctTest extends Specification {
     private LevaDocDataFixture dataFixture
 
     def setupSpec(){
-       new File(LevaDocTestValidator.SAVED_DOCUMENTS).mkdirs()
+        tempFolder.create()
+        new File(LevaDocTestValidator.SAVED_DOCUMENTS).mkdirs()
     }
 
     def setup() {
-        dataFixture = new LevaDocDataFixture(tempFolder, project, testsReports)
-        testValidator = new LevaDocTestValidator(tempFolder)
+        dataFixture = new LevaDocDataFixture(tempFolder.getRoot(), project, testsReports)
+        testValidator = new LevaDocTestValidator(tempFolder.getRoot())
     }
 
     def cleanup() {
@@ -155,12 +157,12 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     private Map setFixture(ProjectFixture projectFixture) {
-        levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
+        levaDocWiremock.setUpWireMock(projectFixture, tempFolder.getRoot())
         return dataFixture.buildFixtureData(projectFixture)
     }
 
     private void prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
-//        data.tmpFolder = tempFolder.absolutePath
+        data.tmpFolder = tempFolder.getRoot().getAbsolutePath()
         data.documentType = projectFixture.docType
         data.projectBuild =  "${projectFixture.project}-1"
         data.projectId = projectFixture.project
