@@ -633,7 +633,6 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createTCR for ${data.projectBuild}")
         log.trace("createTCR - data:${data}")
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         String documentType = Constants.DocumentType.TCR as String
@@ -641,9 +640,9 @@ class LeVADocumentService extends DocGenUseCase {
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         def integrationTestData = testData.integration
         def integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
-
         def acceptanceTestData = testData.acceptance
         def acceptanceTestIssues = projectData.getAutomatedTestsTypeAcceptance()
 
@@ -725,10 +724,11 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createCFTR for ${data.projectBuild}")
         log.trace("createCFTR - data:${data}")
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.CFTR as String
+
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         def acceptanceTestData = testData.acceptance
         def integrationTestData = testData.integration
 
@@ -802,11 +802,11 @@ class LeVADocumentService extends DocGenUseCase {
         log.info("createIVR for ${data.projectBuild}")
         log.trace("createIVR - data:${data}")
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.IVR as String
 
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         def installationTestData = testData.installation
 
         def sections = this.getDocumentSections(documentType, projectData)
@@ -880,7 +880,6 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createDTR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.DTR as String
@@ -890,6 +889,7 @@ class LeVADocumentService extends DocGenUseCase {
             return resurrectedDocument.uri
         }
 
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         def unitTestData = testData.unit
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
@@ -968,11 +968,11 @@ class LeVADocumentService extends DocGenUseCase {
         log.trace("createTIR - data:${prettyPrint(toJson(data))}")
 
         Map repo = data.repo
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
 
         def documentType = Constants.DocumentType.TIR as String
 
+        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
         def installationTestData = testData.installation
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
