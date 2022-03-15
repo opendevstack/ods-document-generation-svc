@@ -160,7 +160,7 @@ class LevaDocServiceFunctTest extends Specification {
     }
 
     private void prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
-//        data.tmpFolder = tempFolder.absolutePath
+        data.tmpFolder = tempFolder.absolutePath
         data.documentType = projectFixture.docType
         data.projectBuild =  "${projectFixture.project}-1"
         data.projectId = projectFixture.project
