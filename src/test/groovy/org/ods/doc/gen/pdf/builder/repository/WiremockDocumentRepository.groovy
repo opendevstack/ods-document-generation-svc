@@ -15,10 +15,6 @@ class WiremockDocumentRepository {
     public static final String GH_TEMPLATE = "pdf.builder/ods-document-generation-templates-github-1.2.zip"
     public static final String BB_TEMPLATE = "pdf.builder/ods-document-generation-templates-bitbucket-1.2.zip"
 
-    public static final String BB_URL_PATH = "/rest/api/latest/projects/myProject/repos/myRepo/archive"
-    public static final String BB_PROJECT = "myProject"
-    public static final String BB_REPO = "myRepo"
-
     private WireMockFacade wireMockFacade
 
     private final BitBucketClientConfig bitBucketClientConfig
@@ -40,8 +36,6 @@ class WiremockDocumentRepository {
 
     void setUpGithubRepository(String version) {
         String urlPath = "/opendevstack/ods-document-generation-templates/archive/v${version}.zip"
-        // TODO: s2o check the effects of the following line please!
-        // githubClientConfig.url =
         mockTemplatesZipArchiveDownload(urlPath, GH_TEMPLATE)
     }
 
@@ -49,13 +43,8 @@ class WiremockDocumentRepository {
         Map queryParams = [:]
         queryParams.at = equalTo("refs/heads/release/v${version}")
         queryParams.format = equalTo("zip")
-        String url = mockTemplatesZipArchiveDownload(BB_URL_PATH, BB_TEMPLATE, 200, queryParams)
-        setupBitBuckectEnv()
-    }
-
-    private setupBitBuckectEnv() {
-        bitBucketDocumentTemplatesRepository.bbDocProject = BB_PROJECT
-        bitBucketDocumentTemplatesRepository.bbRepo = BB_REPO
+        String urlPath = "/rest/api/latest/projects/opendevstack/repos/ods-document-generation-templates/archive"
+        mockTemplatesZipArchiveDownload(urlPath, BB_TEMPLATE, 200, queryParams)
     }
 
     private String mockTemplatesZipArchiveDownload(String urlPartialPath,
