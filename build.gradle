@@ -98,8 +98,8 @@ dependencies {
   testImplementation "org.junit.jupiter:junit-jupiter-api"
   testImplementation "org.junit.jupiter:junit-jupiter-engine"
   testImplementation("uk.org.webcompere:system-stubs-core:1.2.0")
-  testImplementation "org.testcontainers:spock:1.16.2"
-  testImplementation("org.testcontainers:testcontainers:1.16.2")
+  testImplementation "org.testcontainers:spock:1.16.3"
+  testImplementation("org.testcontainers:testcontainers:1.16.3")
 
   testImplementation("org.spockframework:spock-core:${spockCoreVersion}")
   testImplementation ("com.athaydes:spock-reports:$spockReportsVersion"){ transitive = false }
@@ -129,7 +129,7 @@ dependencies {
 
   testImplementation "com.github.stefanbirkner:system-rules:1.19.0" // for managing environment variables
   testImplementation "org.hamcrest:hamcrest:2.1"
-  testImplementation "org.skyscreamer:jsonassert:1.5.0"             // JSON Asserts
+  testImplementation "org.skyscreamer:jsonassert:1.5.0"
 
   testImplementation("au.com.dius:pact-jvm-provider:4.0.10")
   testImplementation("au.com.dius:pact-jvm-provider-junit:4.0.10")
@@ -162,7 +162,6 @@ task dockerTest(type: Test) {
     includeTestsMatching "*IT"
   }
   systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
-
   useJUnitPlatform()
 }
 
@@ -195,7 +194,7 @@ task buildImageBase(type: DockerBuildImage) {
 docker {
   springBootApplication {
     baseImage = 'docgen-base:latest'
-    ports = [9090, 8080]
+    ports = [1111]
     images = ['ods-document-generation-svc:local']
     jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
   }
@@ -214,7 +213,7 @@ import com.bmuschko.gradle.docker.tasks.container.*
 task createDocGenServer(type: DockerCreateContainer) {
   dependsOn dockerBuildImage
   targetImageId dockerBuildImage.getImageId()
-  hostConfig.portBindings = ['8080:8080']
+  hostConfig.portBindings = ['8080:1111']
   hostConfig.autoRemove = true
 }
 
@@ -246,6 +245,7 @@ Map executionProperties(){
   def nexus_url = "${project.findProperty('nexus_url') ?: System.getenv('NEXUS_HOST')}"
   def nexus_username = "${project.findProperty('nexus_username') ?: System.getenv('NEXUS_USERNAME')}"
   def nexus_password = "${project.findProperty('nexus_password') ?: System.getenv('NEXUS_PASSWORD')}"
+
   return [
           "BITBUCKET_URL": bitbucket_url,
           "BITBUCKET_USERNAME": bitbucket_username,
@@ -258,5 +258,5 @@ Map executionProperties(){
           "NEXUS_URL": nexus_url,
           "NEXUS_USERNAME": nexus_username,
           "NEXUS_PASSWORD": nexus_password
-          ]
+   ]
 }

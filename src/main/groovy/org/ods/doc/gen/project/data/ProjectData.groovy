@@ -68,8 +68,6 @@ class ProjectData {
     }
 
     ProjectData load() {
-        this.data.tests = jUnitReportsService.getTestData(tmpFolder, build.testResultsURLs as Map, data)
-
         bitbucketService.downloadRepo(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String,
