@@ -189,6 +189,16 @@ task buildImageBase(type: DockerBuildImage) {
   group = "docker"
   inputDir = file("src/main/resources")
   images.add('docgen-base:latest')
+  buildArgs = getProxyMap()
+}
+
+def getProxyMap(){
+  def http_proxy = "${project.findProperty('http_proxy') ?: System.getenv('HTTP_PROXY')}"
+  def https_proxy = "${project.findProperty('https_proxy') ?: System.getenv('HTTPS_PROXY')}"
+  if (http_proxy)
+    return  ["http_proxy": http_proxy, "https_proxy": https_proxy]
+  else
+    return [:]
 }
 
 docker {
@@ -231,7 +241,6 @@ gatlingRun.dependsOn(startDocGenServer)
 gatlingRun.finalizedBy(stopDocGenServer)
 
 check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
-
 
 Map executionProperties(){
   def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"

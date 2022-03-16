@@ -71,8 +71,8 @@ class LevaDocControllerSpec extends Specification {
         mvcResult.response.contentAsString == JsonOutput.toJson(response)
         log.debug(prettyPrint(toJson(mvcResult.response.contentAsString)))
 
-        and: "the tmp folder is deleted"
-        !Files.exists(tempFolder)
+        and: "the tmp folder exist"
+        Files.exists(tempFolder)
 
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()

@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -30,6 +31,7 @@ import java.nio.file.Path
 /**
  * https://github.com/pact-foundation/pact-jvm/issues/1384
  */
+@Ignore
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
