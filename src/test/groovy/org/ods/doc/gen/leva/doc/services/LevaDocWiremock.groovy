@@ -1,14 +1,10 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
-import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
-import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.git.GithubService
-import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
@@ -21,42 +17,26 @@ class LevaDocWiremock {
     static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
     static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
 
-    private final BitbucketService bitbucketService
-    private final JiraService jiraService
-    private final NexusService nexusService
-    private final GithubService githubService
+    public static final String JIRA_URL = "jira.url"
+    public static final String NEXUS_URL = "nexus.url"
+    public static final String BB_URL = "bitbucket.url"
+
     private final Environment environment
+    private final WiremockDocumentRepository wiremockDocumentRepository
 
     private WiremockManager jiraServer
     private WiremockManager nexusServer
-    private WiremockManager sonarServer
     private WiremockManager bitbucketServer
 
     @Inject
-    LevaDocWiremock(BitbucketService bitbucketService,
-                    JiraService jiraService,
-                    NexusService nexusService,
-                    GithubService githubService,
+    LevaDocWiremock(
+                    WiremockDocumentRepository wiremockDocumentRepository,
                     Environment environment){
-        this.bitbucketService = bitbucketService
-        this.jiraService = jiraService
-        this.nexusService = nexusService
-        this.githubService = githubService
+        this.wiremockDocumentRepository = wiremockDocumentRepository
         this.environment = environment
     }
 
     void setUpWireMock(ProjectFixture projectFixture, File tempFolder) {
-        startUpWiremockServers(projectFixture, tempFolder)
-    }
-
-    void tearDownWiremock(){
-        jiraServer?.tearDown()
-        nexusServer?.tearDown()
-        sonarServer?.tearDown()
-        bitbucketServer?.tearDown()
-    }
-
-    private void startUpWiremockServers(ProjectFixture projectFixture, File tempFolder) {
         String projectKey = projectFixture.project, doctype = projectFixture.docType
         log.info "Using PROJECT_KEY:${projectKey}"
         log.info "Using RECORD Wiremock:${RECORD}"
@@ -65,17 +45,21 @@ class LevaDocWiremock {
 
         String component = (projectFixture.component) ? "/${projectFixture.component}" : ""
         String scenarioPath = "${projectKey}${component}/${doctype}/${projectFixture.version}"
-        jiraServer = WiremockServers.JIRA.build(environment.getProperty("jira.url")).withScenario(scenarioPath).startServer(RECORD)
-        nexusServer = WiremockServers.NEXUS.build(environment.getProperty("nexus.url")).withScenario(scenarioPath).startServer(RECORD)
-        bitbucketServer = WiremockServers.BITBUCKET.build(environment.getProperty("bitbucket.url")).withScenario(scenarioPath).startServer(RECORD)
+        String jiraUrl = environment.getProperty(JIRA_URL)
+        String nexusUrl = environment.getProperty(NEXUS_URL)
+        String bbUrl = environment.getProperty(BB_URL)
 
-        updateServicesWithWiremockConfig()
+        jiraServer = WiremockServers.JIRA.build(jiraUrl).withScenario(scenarioPath).startServer(RECORD)
+        nexusServer = WiremockServers.NEXUS.build(nexusUrl).withScenario(scenarioPath).startServer(RECORD)
+        bitbucketServer = WiremockServers.BITBUCKET.build(bbUrl).withScenario(scenarioPath).startServer(RECORD)
+        wiremockDocumentRepository.setUpGithubRepository(projectFixture.templatesVersion)
     }
 
-    private void updateServicesWithWiremockConfig() {
-        nexusService.baseURL = new URIBuilder(nexusServer.server().baseUrl()).build()
-        jiraService.baseURL = new URIBuilder(jiraServer.server().baseUrl()).build()
-        bitbucketService.bitBucketClientConfig.url = bitbucketServer.server().baseUrl()
+    void tearDownWiremock(){
+        jiraServer?.tearDown()
+        nexusServer?.tearDown()
+        bitbucketServer?.tearDown()
+        wiremockDocumentRepository.tearDownWiremock()
     }
 
 }

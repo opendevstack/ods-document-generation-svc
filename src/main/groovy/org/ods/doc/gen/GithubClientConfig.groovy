@@ -14,14 +14,15 @@ import org.springframework.stereotype.Service
 class GithubClientConfig {
 
     String url
+    String[] httpProxyHost
 
     GithubClientConfig(@Value('${github.url}') String url){
         this.url = url
+        httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.replace('http://', '')?.split(':')
     }
 
     GitHubRepository getClient() {
         feign.okhttp.OkHttpClient client
-        String[] httpProxyHost = getProxy()
         if (httpProxyHost) {
             log.info ("Proxy setup: ${httpProxyHost}")
             int httpProxyPort = httpProxyHost.size() == 2 ? Integer.parseInt(httpProxyHost[1]) : 80
@@ -34,11 +35,6 @@ class GithubClientConfig {
         return Feign.builder().client(client).logger(new Slf4jLogger(GitHubRepository.class))
                 .logLevel(Logger.Level.FULL)
                 .target(GitHubRepository.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
-    }
-
-    //In local env add env variable with value: HTTP_PROXY=http://appaccess-zscaler.boehringer.com:80
-    private String[] getProxy() {
-        System.getenv('HTTP_PROXY')?.trim()?.replace('http://', '')?.split(':')
     }
 
 }

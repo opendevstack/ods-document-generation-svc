@@ -640,11 +640,11 @@ class LeVADocumentService extends DocGenUseCase {
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
-        def integrationTestData = testData.integration
-        def integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
-        def acceptanceTestData = testData.acceptance
-        def acceptanceTestIssues = projectData.getAutomatedTestsTypeAcceptance()
+        Map testData = junit.getTestData(data.tmpFolder as String, data.build.testResultsURLs as Map, data)
+        Map integrationTestData = testData.integration
+        List integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
+        Map acceptanceTestData = testData.acceptance
+        List acceptanceTestIssues = projectData.getAutomatedTestsTypeAcceptance()
 
         def matchedHandler = { result ->
             result.each { testIssue, testCase ->

@@ -193,12 +193,13 @@ task buildImageBase(type: DockerBuildImage) {
 }
 
 def getProxyMap(){
+  def buildArgs = [:]
   def http_proxy = "${project.findProperty('http_proxy') ?: System.getenv('HTTP_PROXY')}"
   def https_proxy = "${project.findProperty('https_proxy') ?: System.getenv('HTTPS_PROXY')}"
-  if (http_proxy)
-    return  ["http_proxy": http_proxy, "https_proxy": https_proxy]
-  else
-    return [:]
+  if (http_proxy && http_proxy != "null")
+    buildArgs <<  ["http_proxy": http_proxy, "https_proxy": https_proxy]
+
+  return buildArgs
 }
 
 docker {

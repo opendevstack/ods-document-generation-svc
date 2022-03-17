@@ -24,12 +24,6 @@ class PdfGenerationServiceSpec extends Specification {
     @Inject
     PdfGenerationService pdfGenerationService
 
-    @Inject
-    GithubDocumentTemplatesRepository githubDocumentTemplatesRepo
-
-    @Inject
-    BitBucketDocumentTemplatesRepository bitBucketDocumentTemplatesRepo
-
     @TempDir
     public Path tempFolder
 
