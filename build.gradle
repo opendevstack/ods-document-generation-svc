@@ -214,6 +214,7 @@ docker {
 test.dependsOn(buildImageBase)
 dockerBuildImage.dependsOn(bootJar, buildImageBase)
 dockerTest.dependsOn(dockerBuildImage)
+dockerTest.mustRunAfter(test)
 
 bootRun {
   systemProperties << executionProperties()
@@ -229,20 +230,22 @@ task createDocGenServer(type: DockerCreateContainer) {
 }
 
 task startDocGenServer(type: DockerStartContainer) {
+  group = "docker"
   dependsOn createDocGenServer
   targetContainerId createDocGenServer.getContainerId()
 }
 
 task stopDocGenServer(type: DockerStopContainer) {
+  group = "docker"
   targetContainerId createDocGenServer.getContainerId()
 }
 
 gatlingRun.group("verification")
+gatlingRun.mustRunAfter(dockerTest)
 gatlingRun.dependsOn(startDocGenServer)
 gatlingRun.finalizedBy(stopDocGenServer)
 
-//check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
-check.dependsOn(jacocoTestCoverageVerification)
+check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
 Map executionProperties(){
   def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"
