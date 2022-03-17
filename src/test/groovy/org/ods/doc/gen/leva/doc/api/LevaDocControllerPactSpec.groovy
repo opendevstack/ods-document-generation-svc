@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -34,6 +35,7 @@ import java.nio.file.Path
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
 @ActiveProfiles('test')
+@Ignore
 class LevaDocControllerPactSpec extends Specification {
 
     private static String PACT_FILE = 'pacts/buildDocument.defaultParams-createDoc.defaultParams.json'

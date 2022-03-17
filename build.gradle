@@ -241,7 +241,7 @@ gatlingRun.group("verification")
 gatlingRun.dependsOn(startDocGenServer)
 gatlingRun.finalizedBy(stopDocGenServer)
 
-check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
+check.dependsOn(test, jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
 Map executionProperties(){
   def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"

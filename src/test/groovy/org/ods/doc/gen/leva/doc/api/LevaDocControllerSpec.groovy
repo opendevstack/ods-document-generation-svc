@@ -99,8 +99,8 @@ class LevaDocControllerSpec extends Specification {
         and: "msg error in the response"
         mvcResult.response.contentAsString.startsWith(initialMsgError)
 
-        and: "the tmp folder is deleted"
-        !Files.exists(tempFolder)
+        and: "the tmp folder is not deleted"
+        Files.exists(tempFolder)
 
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()
