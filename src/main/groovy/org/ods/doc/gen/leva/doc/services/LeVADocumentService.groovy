@@ -137,7 +137,7 @@ class LeVADocumentService extends DocGenUseCase {
         def uri = this.createDocument(projectData, documentType, null, data_, [:], null, 
                 getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
-        log.info("createDTR - data:${prettyPrint(toJson(docHistory.data))}")
+        log.info("createCSD - data:${prettyPrint(toJson(docHistory.data))}")
         return docHistory.data
     }
 
