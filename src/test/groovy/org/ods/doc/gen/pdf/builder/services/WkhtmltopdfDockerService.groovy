@@ -25,10 +25,16 @@ class WkhtmltopdfDockerService extends WkhtmltopdfService {
     void executeCmd(Path tmpDir, Path documentHtmlFile, List<String> cmd) {
         log.info "executing cmd: ${cmd}"
 
+        String[] cmdInDocker = useDockerPaths(cmd, tmpDir.toString())
+        log.info "cmdInDocker: ${cmdInDocker}"
+
+        String pathToFiles = replaceWindowsPath(tmpDir)
+        log.info "pathToFiles: ${pathToFiles}"
+
         new GenericContainer<>(DOCGEN_IMAGE)
-                .withFileSystemBind(replaceWindowsPath(tmpDir), TMP_PDF, BindMode.READ_WRITE)
+                .withFileSystemBind(pathToFiles, TMP_PDF, BindMode.READ_WRITE)
                 .withLogConsumer(new Slf4jLogConsumer(log))
-                .withCommand(useDockerPaths(cmd, tmpDir.toString()))
+                .withCommand(cmdInDocker)
                 .withStartupCheckStrategy(
                         new IndefiniteWaitOneShotStartupCheckStrategy()
                 ).start()

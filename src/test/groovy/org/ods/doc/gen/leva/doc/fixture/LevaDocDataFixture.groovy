@@ -1,8 +1,7 @@
-package org.ods.doc.gen.core.test.usecase.levadoc.fixture
+package org.ods.doc.gen.leva.doc.fixture
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
-import org.ods.doc.gen.core.test.usecase.RepoDataBuilder
 import org.ods.doc.gen.core.test.workspace.TestsReports
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData

@@ -5,8 +5,6 @@ import groovy.util.logging.Slf4j
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.core.test.pdf.PdfCompare
-import org.ods.doc.gen.pdf.builder.repository.BitBucketDocumentTemplatesRepository
-import org.ods.doc.gen.pdf.builder.repository.GithubDocumentTemplatesRepository
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration

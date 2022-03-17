@@ -3,19 +3,14 @@ package org.ods.doc.gen.external.modules.git
 import feign.FeignException
 import feign.Response
 import feign.codec.ErrorDecoder
-import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
-import org.ods.doc.gen.BitBucketClientConfig
 import org.ods.doc.gen.GithubClientConfig
 import org.ods.doc.gen.core.ZipFacade
-import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 @Slf4j

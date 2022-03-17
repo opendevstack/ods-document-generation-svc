@@ -9,11 +9,11 @@ import groovy.util.logging.Slf4j
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.core.test.workspace.TestsReports
-import org.ods.doc.gen.leva.doc.services.LevaDocWiremock
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
+import org.ods.doc.gen.leva.doc.fixture.LevaDocDataFixture
+import org.ods.doc.gen.leva.doc.fixture.LevaDocTestValidator
+import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremock
+import org.ods.doc.gen.leva.doc.fixture.ProjectFixture
 import org.ods.doc.gen.project.data.Project
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort

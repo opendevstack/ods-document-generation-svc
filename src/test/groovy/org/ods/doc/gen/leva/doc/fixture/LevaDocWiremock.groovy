@@ -1,7 +1,6 @@
-package org.ods.doc.gen.leva.doc.services
+package org.ods.doc.gen.leva.doc.fixture
 
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository

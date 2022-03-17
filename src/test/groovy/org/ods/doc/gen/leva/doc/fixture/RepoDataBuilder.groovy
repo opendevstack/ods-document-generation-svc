@@ -1,4 +1,4 @@
-package org.ods.doc.gen.core.test.usecase
+package org.ods.doc.gen.leva.doc.fixture
 
 class RepoDataBuilder {
     static Map getRepoForComponent(component) {

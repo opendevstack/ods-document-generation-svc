@@ -1,10 +1,9 @@
 package org.ods.doc.gen.leva.doc.repositories
 
-import groovy.json.JsonOutput
+
 import groovy.json.JsonSlurperClassic
 
 import java.nio.file.NoSuchFileException
-
 
 class ProjectDataRepository {
 

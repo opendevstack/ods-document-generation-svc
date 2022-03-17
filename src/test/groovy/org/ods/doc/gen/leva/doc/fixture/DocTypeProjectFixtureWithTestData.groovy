@@ -1,4 +1,4 @@
-package org.ods.doc.gen.core.test.usecase.levadoc.fixture
+package org.ods.doc.gen.leva.doc.fixture
 
 class DocTypeProjectFixtureWithTestData extends DocTypeProjectFixture {
 

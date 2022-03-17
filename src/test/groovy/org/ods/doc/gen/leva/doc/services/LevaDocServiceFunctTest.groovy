@@ -4,14 +4,16 @@ import groovy.util.logging.Slf4j
 import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithComponent
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithTestData
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesOverall
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixture
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureWithComponent
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureWithTestData
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixturesOverall
+import org.ods.doc.gen.leva.doc.fixture.LevaDocDataFixture
+import org.ods.doc.gen.leva.doc.fixture.LevaDocTestValidator
+import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremock
+import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremockURLMapper
+import org.ods.doc.gen.leva.doc.fixture.ProjectFixture
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -20,6 +22,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.inject.Inject
+
 /**
  * IMPORTANT: this test use Wiremock files to mock all the external interactions.
  *
