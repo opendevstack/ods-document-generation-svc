@@ -1,0 +1,30 @@
+{
+  "id" : "4a23c020-70eb-48be-a5a3-2f18b0705946",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-test_commits_61a229c55991e0e89362016bf53d968df233aa80_pull-requests",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ORDGP/repos/ordgp-test/commits/61a229c55991e0e89362016bf53d968df233aa80/pull-requests",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"size\":0,\"limit\":25,\"isLastPage\":true,\"values\":[],\"start\":0}",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Wed, 16 Mar 2022 14:48:14 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "@1POZ2QTx948x342379x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=2D936ADCB62282DBF260ACD2A2CF99A0; Max-Age=1209600; Expires=Wed, 30-Mar-2022 14:48:14 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=mMLazb6vSi8t_nHgnwlE0gAAAAAAnoABc2VyZ2lvLnNhY3Jpc3RhbkBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "13482",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "X-ASESSIONID" : "1100837",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : "accept-encoding,x-auserid,cookie,x-ausername,accept-encoding",
+      "X-Content-Type-Options" : "nosniff",
+      "Strict-Transport-Security" : "max-age=15768000"
+    }
+  },
+  "uuid" : "4a23c020-70eb-48be-a5a3-2f18b0705946",
+  "persistent" : true,
+  "insertionIndex" : 17
+}

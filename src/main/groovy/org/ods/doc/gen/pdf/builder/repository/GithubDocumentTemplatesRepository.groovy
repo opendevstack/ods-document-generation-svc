@@ -1,31 +1,17 @@
 package org.ods.doc.gen.pdf.builder.repository
 
-import feign.FeignException
-import feign.Headers
-import feign.Param
-import feign.RequestLine
-import feign.Response
-import feign.codec.ErrorDecoder
+
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
-import org.apache.http.client.utils.URIBuilder
-import org.ods.doc.gen.BitBucketClientConfig
-import org.ods.doc.gen.GithubClientConfig
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.git.GithubService
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Repository
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 
 import javax.inject.Inject
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 
 @Slf4j
 @Order(1)
