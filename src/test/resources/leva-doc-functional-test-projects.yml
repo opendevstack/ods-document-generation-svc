@@ -24,6 +24,7 @@
 projects:
   - id: ordgp
     description: One release DocGen
+    buildNumber: 666
     releaseId: ORDGP-123
     version: WIP
     releaseManagerRepo: ordgp-releasemanager
@@ -44,6 +45,7 @@ projects:
 
   - id: trfdgp
     description: Two releases Frozen DocGen
+    buildNumber: 666
     releaseId: TRFDGP-179
     version: 4.0
     releaseManagerRepo: trfdgp-releasemanager
@@ -64,6 +66,7 @@ projects:
 
   - id: g3dgp
     description: Gamp 3 DocGen
+    buildNumber: 666
     releaseId: G3DGP-123
     version: WIP
     releaseManagerRepo: g3dgp-releasemanager
@@ -78,6 +81,7 @@ projects:
 
   - id: g4dgp
     description: Gamp 4 DocGen
+    buildNumber: 666
     releaseId: G4DGP-123
     version: WIP
     releaseManagerRepo: g4dgp-releasemanager
@@ -92,6 +96,7 @@ projects:
 
   - id: brassp
     description: test a real one
+    buildNumber: 666
     releaseId: BRASSP-125
     version: CHG0059116
     releaseManagerRepo: brassp-release-manager-mp
