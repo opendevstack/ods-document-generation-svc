@@ -51,6 +51,7 @@ class LevaDocDataFixture {
 
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
+        String projectWithBuild = "${projectFixture.project}/${projectFixture.buildNumber}"
         return  [
                 targetEnvironment: "dev",
                 targetEnvironmentToken: "D",
@@ -64,19 +65,23 @@ class LevaDocDataFixture {
                 releaseParamVersion : "3.0",
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
-                jobName : "ordgp-cd/${projectFixture.project}-releasemanager",
-                testResultsURLs: buildTestResultsUrls(),
-                jenkinLog: "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/jenkins-job-log.zip"
+                jobName : "${projectFixture.project}-cd/${projectFixture.project}-releasemanager",
+                testResultsURLs: buildTestResultsUrls(projectWithBuild),
+                jenkinLog: getJenkinsLogUrl(projectWithBuild)
         ]
     }
 
-    private Map<String, String> buildTestResultsUrls() {
+    private String getJenkinsLogUrl(String projectWithBuild) {
+        "https://dummy/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
+    }
+
+    private Map<String, String> buildTestResultsUrls(String projectWithBuild) {
         return [
-                "Unit-backend": "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/unit-backend.zip",
-                "Unit-frontend": "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/unit-frontend.zip",
-                "Acceptance" : "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/acceptance.zip",
-                'Installation' : "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/installation.zip",
-                'Integration' : "https://nexus-odsalpha.inh-odsapps.eu.boehringer.com/repository/leva-documentation/ordgp/666/integration.zip",
+                "Unit-backend": "https://dummy/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
+                "Unit-frontend": "https://dummy/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
+                "Acceptance" : "https://dummy/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
+                'Installation' : "https://dummy/repository/leva-documentation/${projectWithBuild}/installation.zip",
+                'Integration' : "https://dummy/repository/leva-documentation/${projectWithBuild}/integration.zip",
         ]
     }
 
