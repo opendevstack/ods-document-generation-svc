@@ -15,6 +15,18 @@ class WiremockDocumentRepository {
     public static final String GH_TEMPLATE = "pdf.builder/ods-document-generation-templates-github-1.2.zip"
     public static final String BB_TEMPLATE = "pdf.builder/ods-document-generation-templates-bitbucket-1.2.zip"
 
+    public static final String BB_URL = "/rest/api/latest/projects/myProject/repos/myRepo/archive"
+    public static final String BB_PROJECT = "myProject"
+    public static final String BB_REPO = "myRepo"
+
+    public static final String GH_URL = "/opendevstack/ods-document-generation-templates/archive/vVERSION_ID.zip"
+    public static final String VERSION = "VERSION_ID"
+
+    public static final int RETURN_OK = 200
+    public static final String APP = "application/octet-stream"
+    public static final String ACCEPT = "Accept"
+    public static final String ZIP = "zip"
+
     private WireMockFacade wireMockFacade
 
     private final BitBucketClientConfig bitBucketClientConfig
@@ -35,22 +47,24 @@ class WiremockDocumentRepository {
     }
 
     void setUpGithubRepository(String version) {
-        String urlPath = "/opendevstack/ods-document-generation-templates/archive/v${version}.zip"
-        mockTemplatesZipArchiveDownload(urlPath, GH_TEMPLATE)
+        githubClientConfig.setUrl(mockTemplatesZipArchiveDownload(GH_URL.replace(VERSION, version), GH_TEMPLATE))
+        githubClientConfig.setHttpProxyHost(null)
+        bitBucketDocumentTemplatesRepository.bbDocProject = BitBucketDocumentTemplatesRepository.NONE
     }
 
     void setUpBitbucketRepository(String version) {
         Map queryParams = [:]
-        queryParams.at = equalTo("refs/heads/release/v${version}")
-        queryParams.format = equalTo("zip")
-        String urlPath = "/rest/api/latest/projects/opendevstack/repos/ods-document-generation-templates/archive"
-        mockTemplatesZipArchiveDownload(urlPath, BB_TEMPLATE, 200, queryParams)
+        queryParams.at = equalTo("${BitBucketDocumentTemplatesRepository.BRANCH}${version}")
+        queryParams.format = equalTo(ZIP)
+        bitBucketClientConfig.setUrl(mockTemplatesZipArchiveDownload(BB_URL, BB_TEMPLATE, RETURN_OK, queryParams))
+        bitBucketDocumentTemplatesRepository.bbDocProject = BB_PROJECT
+        bitBucketDocumentTemplatesRepository.bbRepo = BB_REPO
     }
 
     private String mockTemplatesZipArchiveDownload(String urlPartialPath,
-                                                 String templatesName,
-                                                 int returnStatus = 200,
-                                                 Map queryParams = null) {
+                                                   String templatesName,
+                                                   int returnStatus = RETURN_OK,
+                                                   Map queryParams = null) {
         def zipArchiveContent = getResource(templatesName).readBytes()
         return startDocumentsWiremock(urlPartialPath, zipArchiveContent, returnStatus, queryParams)
     }
@@ -58,17 +72,16 @@ class WiremockDocumentRepository {
     private String startDocumentsWiremock(
             String urlPartialPath,
             byte[] zipArchiveContent,
-            int returnStatus = 200,
+            int returnStatus = RETURN_OK,
             Map queryParams = null) {
-        wireMockFacade.startWireMockServer()
-                .stubFor(stubMaps(urlPartialPath, queryParams, zipArchiveContent, returnStatus))
+        MappingBuilder mappingBuilder = stubMap(urlPartialPath, queryParams, zipArchiveContent, returnStatus)
+        wireMockFacade.startWireMockServer().stubFor(mappingBuilder)
         return wireMockFacade.wireMockServer.baseUrl()
     }
 
-    private MappingBuilder stubMaps(String urlPartialPath, Map queryParams, byte[] zipArchiveContent, int returnStatus) {
-        MappingBuilder maps = WireMock
-                .get(WireMock.urlPathEqualTo(urlPartialPath))
-                .withHeader("Accept", WireMock.equalTo("application/octet-stream"))
+    private MappingBuilder stubMap(String urlPartialPath, Map queryParams, byte[] zipArchiveContent, int returnStatus) {
+        MappingBuilder maps
+        maps = WireMock.get(WireMock.urlPathEqualTo(urlPartialPath)).withHeader(ACCEPT, WireMock.equalTo(APP))
         if (queryParams)
             maps.withQueryParams(queryParams)
         maps.willReturn(WireMock.aResponse().withBody(zipArchiveContent).withStatus(returnStatus))

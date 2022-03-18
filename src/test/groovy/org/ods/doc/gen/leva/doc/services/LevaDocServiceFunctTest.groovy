@@ -4,14 +4,16 @@ import groovy.util.logging.Slf4j
 import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.AppConfiguration
 import org.ods.doc.gen.TestConfig
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithComponent
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixtureWithTestData
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.DocTypeProjectFixturesOverall
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocTestValidator
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
 import org.ods.doc.gen.core.test.workspace.TestsReports
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixture
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureWithComponent
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureWithTestData
+import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixturesOverall
+import org.ods.doc.gen.leva.doc.fixture.LevaDocDataFixture
+import org.ods.doc.gen.leva.doc.fixture.LevaDocTestValidator
+import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremock
+import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremockURLMapper
+import org.ods.doc.gen.leva.doc.fixture.ProjectFixture
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.test.context.ActiveProfiles
@@ -20,6 +22,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.inject.Inject
+
 /**
  * IMPORTANT: this test use Wiremock files to mock all the external interactions.
  *
@@ -64,6 +67,9 @@ class LevaDocServiceFunctTest extends Specification {
     LeVADocumentService leVADocumentService
 
     @Inject
+    LevaDocWiremockURLMapper levaDocWiremockProxyData
+
+    @Inject
     TestsReports testsReports
 
     @Inject
@@ -89,9 +95,9 @@ class LevaDocServiceFunctTest extends Specification {
         levaDocWiremock.tearDownWiremock()
     }
 
-    def "create #projectFixture.docType for project #projectFixture.project"() {
+    def "#projectFixture.docType for project #projectFixture.project"() {
         given: "A project data"
-        Map data = setFixture(projectFixture)
+        Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
 
         when: "the user creates a LeVA document"
@@ -104,9 +110,9 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
-    def "create #projectFixture.docType with tests results for project #projectFixture.project"() {
+    def "#projectFixture.docType with tests results for project #projectFixture.project"() {
         given: "A project data"
-        Map data = setFixture(projectFixture)
+        Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
 
         when: "the user creates a LeVA document"
@@ -119,9 +125,9 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixtureWithTestData().getProjects()
     }
 
-    def "create #projectFixture.docType for component #projectFixture.component and project #projectFixture.project"() {
+    def "#projectFixture.docType for component #projectFixture.component and project #projectFixture.project"() {
         given: "A project data"
-        Map data = setFixture(projectFixture)
+        Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
         data.repo = dataFixture.getModuleData(projectFixture, data)
 
@@ -139,9 +145,9 @@ class LevaDocServiceFunctTest extends Specification {
      * When creating a new test for a project, this test depends on
      * @return
      */
-    def "create Overall #projectFixture.docType for project #projectFixture.project"() {
+    def "Overall #projectFixture.docType for project #projectFixture.project"() {
         given: "A project data"
-        Map data = setFixture(projectFixture)
+        Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         dataFixture.updateExpectedComponentDocs(projectData, data, projectFixture)
@@ -156,9 +162,11 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixturesOverall().getProjects()
     }
 
-    private Map setFixture(ProjectFixture projectFixture) {
+    private Map setUpFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder.getRoot())
-        return dataFixture.buildFixtureData(projectFixture)
+        Map data = dataFixture.buildFixtureData(projectFixture)
+        levaDocWiremockProxyData.updateURLs(levaDocWiremock, data)
+        return data
     }
 
     private void prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {

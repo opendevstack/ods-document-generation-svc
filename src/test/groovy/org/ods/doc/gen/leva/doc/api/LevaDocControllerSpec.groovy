@@ -1,10 +1,9 @@
 package org.ods.doc.gen.leva.doc.api
 
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.LevaDocDataFixture
-import org.ods.doc.gen.core.test.usecase.levadoc.fixture.ProjectFixture
+import org.ods.doc.gen.leva.doc.fixture.LevaDocDataFixture
+import org.ods.doc.gen.leva.doc.fixture.ProjectFixture
 import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -12,7 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
-import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import spock.lang.Specification
@@ -99,8 +97,8 @@ class LevaDocControllerSpec extends Specification {
         and: "msg error in the response"
         mvcResult.response.contentAsString.startsWith(initialMsgError)
 
-        and: "the tmp folder is deleted"
-        !Files.exists(tempFolder)
+        and: "the tmp folder is not deleted"
+        Files.exists(tempFolder)
 
         where: "use valid data to generate pdf"
         projectFixture =  ProjectFixture.getProjectFixtureBuilder(getProject(), "CSD").build()

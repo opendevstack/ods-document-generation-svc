@@ -12,25 +12,21 @@ import spock.lang.Specification
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.equalTo
 
-/**
- * Run it with DockerTest action, you should have a Docker client
- */
 @Slf4j
 @Testcontainers
 class DocGenDockerIT extends Specification {
 
-    static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse("ods-document-generation-svc:local");
-    static final int SERVER_PORT = 1111
-    static final String SERVER_PORT_CHANGED_WITH_ENV_VAR = "8080"
+    static final String IMAGE_NAME = "ods-document-generation-svc:local"
+    static final int SERVER_PORT = 8080
     static final String ROOT__LOG__LEVEL = "ROOT_LOG_LEVEL"
-    static final String TRACE = "TRACE"
+    static final String LOG_LEVEL = "DEBUG"
     static final String SERVER_PORT_NAME = "SERVER_PORT"
 
     @Shared
-    GenericContainer<?> docGenContainer = new GenericContainer<>(DOCGEN_IMAGE)
+    GenericContainer<?> docGenContainer = new GenericContainer<>(DockerImageName.parse(IMAGE_NAME))
             .withExposedPorts(SERVER_PORT)
-            .withEnv(ROOT__LOG__LEVEL, TRACE)
-            .withEnv(SERVER_PORT_NAME, SERVER_PORT_CHANGED_WITH_ENV_VAR)
+            .withEnv(ROOT__LOG__LEVEL, LOG_LEVEL)
+            .withEnv(SERVER_PORT_NAME, SERVER_PORT as String)
 
     def "docgen is running in docker"() {
         given:

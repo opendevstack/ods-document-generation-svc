@@ -17,9 +17,9 @@ import static io.restassured.RestAssured.given;
 
 public class LoadSimulation extends Simulation {
 
-    public static final String HEALTH = "http://localhost:1111/health";
+    public static final String HEALTH = "http://localhost:8080/health";
     // TODO -> change POST_PDF by "http://localhost:8080/document" and test a big doc
-    public static final String POST_PDF = "http://localhost:1111/health";
+    public static final String POST_PDF = "http://localhost:8080/health";
     public static final int STATUS_CODE_OK = 200;
 
     public static final int EXECUTION_TIMES = 100;

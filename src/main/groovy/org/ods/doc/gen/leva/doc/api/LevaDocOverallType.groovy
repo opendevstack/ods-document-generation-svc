@@ -1,6 +1,7 @@
 package org.ods.doc.gen.leva.doc.api
 
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
+
 import java.util.function.BiFunction
 
 enum LevaDocOverallType {
