@@ -3,7 +3,6 @@ package org.ods.doc.gen.pdf.builder.services
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.io.FileTemplateLoader
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.output.TeeOutputStream
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink

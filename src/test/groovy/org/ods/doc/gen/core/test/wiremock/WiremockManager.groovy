@@ -103,7 +103,7 @@ class WiremockManager {
 
     static Map prepareReplaceMap() {
         Environment env = SpringContext.getBean(Environment.class)
-        List domainUsers = ["bitbucket.username", "nexus.username", "jira.username"]
+        List domainUsers = ["bitbucket_username", "nexus_username", "jira_username"]
         Map replaceAllMap = [:]
         domainUsers.each {
             replaceAllMap[(env.getProperty(it))] =  "dummyUser"
@@ -114,12 +114,12 @@ class WiremockManager {
             List value = it.tokenize(':')
             replaceAllMap[value[0]] =  value[1]
         }
-        return replaceAllMap
+        return replaceAllMap.findAll { it != null && it.key != null}
     }
 
     private static void replaceFileInText(File file, Map replaceAllMap) {
         replaceAllMap.each {
-            if (file.text.contains(it.key))
+            if (file.text?.contains(it.key))
                 file.text = file.text.replace(it.key, it.value)
         }
     }

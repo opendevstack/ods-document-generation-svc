@@ -16,6 +16,9 @@ import java.nio.file.Paths
 @Repository
 class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepository {
 
+    public static final String BRANCH = "refs/heads/release/v"
+    public static final String NONE = "none"
+
     private final ZipFacade zipFacade
     private final String basePath
     private final BitbucketService bitbucketService
@@ -38,12 +41,12 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
     Path getTemplatesForVersion(String version) {
         log.info ("getTemplatesForVersion version:${version}")
         Path targetDir = Paths.get(basePath, version)
-        bitbucketService.downloadRepo(bbDocProject, bbRepo, "refs/heads/release/v${version}", targetDir.toString())
+        bitbucketService.downloadRepo(bbDocProject, bbRepo, "${BRANCH}${version}", targetDir.toString())
         return targetDir
     }
 
     boolean isApplicableToSystemConfig () {
-        if (bbDocProject=="none") {
+        if (bbDocProject== NONE) {
             log.warn "Bitbucket adapter not applicable. If needed review BITBUCKET env params - Using Github'"
             return false
         }

@@ -5,7 +5,6 @@ import feign.Logger
 import feign.auth.BasicAuthRequestInterceptor
 import feign.slf4j.Slf4jLogger
 import groovy.util.logging.Slf4j
-import kong.unirest.Unirest
 import okhttp3.OkHttpClient
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.external.modules.git.BitBucketRepository

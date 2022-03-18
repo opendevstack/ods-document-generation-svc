@@ -124,10 +124,8 @@ class NexusService {
         return "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
     }
 
-    HttpResponse<File> downloadToPath(String urlToDownload, String name, String extractionPath) {
-        // TODO: AMP it is necessary?
-//        deleteIfAlreadyExist(extractionPath, name)
-
+    private HttpResponse<File> downloadToPath(String urlToDownload, String name, String extractionPath) {
+        deleteIfAlreadyExist(extractionPath, name)
         def restCall = Unirest.get("${urlToDownload}").basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {
