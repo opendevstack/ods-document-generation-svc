@@ -1,0 +1,23 @@
+name: Document Generation Service
+
+on: [ pull_request ]
+
+jobs:
+  e2eTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Docker test
+        run: ./gradlew dockerTest --stacktrace --no-daemon
+
+      - name: Performance test
+        run: ./gradlew gatlingRun --stacktrace --no-daemon
+
+      - name: TestReport
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: JUnit e2e Report
+          path: build/reports/**/**

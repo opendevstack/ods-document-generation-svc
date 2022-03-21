@@ -2,6 +2,7 @@ package org.ods.doc.gen.leva.doc.fixture
 
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.BitBucketClientConfig
+import org.ods.doc.gen.core.URLHelper
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremock
@@ -37,26 +38,16 @@ class LevaDocWiremockURLMapper {
     }
 
     private void updateDataURL(Map data) {
-        data.build.jenkinLog = updateNexusUrl(data.build.jenkinLog)
+        data.build.jenkinLog = URLHelper.replaceHostInUrl(data.build.jenkinLog as String, nexusService.baseURL.toString())
         data.build.testResultsURLs = updateMapNexusUrl(data.build.testResultsURLs)
     }
 
     private Map updateMapNexusUrl(Map nexusUrls) {
         Map updatedUrls = [:]
         nexusUrls.each {entry ->
-            updatedUrls[entry.key] = updateNexusUrl(entry.value)
+            updatedUrls[entry.key] = URLHelper.replaceHostInUrl(entry.value as String, nexusService.baseURL.toString())
         }
         return updatedUrls
     }
 
-    private String updateNexusUrl(String hardcodedUrl) {
-        return replaceHostInUrl(hardcodedUrl, nexusService.baseURL.toString())
-    }
-
-    private static String replaceHostInUrl(String originalUrl, String newUrl) {
-        URI uri = new URI(originalUrl)
-        URI newUri = new URI(newUrl)
-        URI uriUPdated = new URI(newUri.getScheme(), newUri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getFragment());
-        return uriUPdated.toString();
-    }
 }

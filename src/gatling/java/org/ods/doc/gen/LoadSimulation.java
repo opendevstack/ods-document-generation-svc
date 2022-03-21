@@ -27,7 +27,7 @@ public class LoadSimulation extends Simulation {
     // Assertions: https://gatling.io/docs/gatling/reference/current/core/assertions/
     public static final double SUCCESSFUL_REQUEST_PERCENT = 100.0;
     public static final int MAX_RESPONSE_TIME = 400;
-    public static final int MEAN_RESPONSE_TIME = 245;
+    public static final int MEAN_RESPONSE_TIME = 300;
 
     ScenarioBuilder scn = scenario( "postPDF").repeat(EXECUTION_TIMES).on(
             exec(

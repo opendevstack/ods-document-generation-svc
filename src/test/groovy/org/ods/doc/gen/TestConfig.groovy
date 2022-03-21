@@ -35,8 +35,12 @@ class TestConfig {
 
     @Primary
     @Bean
-    WkhtmltopdfService getWkhtmltopdfService(WkhtmltopdfDockerService wkhtmltopdfDockerService) {
-        return wkhtmltopdfDockerService
+    WkhtmltopdfService getWkhtmltopdfService(WkhtmltopdfDockerService wkhtmltopdfDockerService,
+                                             WkhtmltopdfService wkhtmltopdfService) {
+        String wk = System.getenv('WKHTML_TO_PDF_WITH_DOCKER') ?: 'true'
+        if ( 'true' == wk)
+            return wkhtmltopdfDockerService
+        return wkhtmltopdfService
     }
 
 }

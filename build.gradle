@@ -109,6 +109,8 @@ dependencies {
   testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
   testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
   testImplementation 'io.rest-assured:rest-assured:4.4.0'
+  testImplementation("de.redsix:pdfcompare:1.1.61")
+  testImplementation("com.github.romankh3:image-comparison:4.4.0")
 
   gatlingImplementation 'org.awaitility:awaitility:4.1.1'
   gatlingImplementation 'io.rest-assured:rest-assured:4.4.0'
@@ -150,7 +152,7 @@ test {
   systemProperty "generateExpectedPdfFiles", project.findProperty('generateExpectedPdfFiles')?: false
   systemProperty "wiremock.textToReplace", project.findProperty('wiremock.textToReplace')?: ""
 
-  systemProperties << executionProperties()
+  systemProperties << propertiesForTest()
 
   maxHeapSize = "2048m"
   useJUnitPlatform()
@@ -185,10 +187,10 @@ jacocoTestCoverageVerification {
 }
 
 import com.bmuschko.gradle.docker.tasks.image.*
-task buildImageBase(type: DockerBuildImage) {
+task buildImageForTest(type: DockerBuildImage) {
   group = "docker"
-  inputDir = file("src/main/resources")
-  images.add('docgen-base:latest')
+  inputDir = file("docker")
+  images.add('s2obcn/jdk-11_openj9-wkhtmltopdf-ubi:test')
   buildArgs = getProxyMap()
 }
 
@@ -204,15 +206,15 @@ def getProxyMap(){
 
 docker {
   springBootApplication {
-    baseImage = 'docgen-base:latest'
+    baseImage = 's2obcn/jdk-11_openj9-wkhtmltopdf-ubi:main'
     ports = [1111]
     images = ['ods-document-generation-svc:local']
     jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
   }
 }
 
-test.dependsOn(buildImageBase)
-dockerBuildImage.dependsOn(bootJar, buildImageBase)
+test.dependsOn(buildImageForTest)
+dockerBuildImage.dependsOn(bootJar)
 dockerTest.dependsOn(dockerBuildImage)
 dockerTest.mustRunAfter(test)
 
@@ -272,5 +274,16 @@ Map executionProperties(){
           "NEXUS_URL": nexus_url,
           "NEXUS_USERNAME": nexus_username,
           "NEXUS_PASSWORD": nexus_password
-   ]
+  ]
+}
+
+Map propertiesForTest(){
+  List urls = ["BITBUCKET_URL", "JIRA_URL", "NEXUS_URL"]
+  Map execProp = executionProperties()
+  urls.each {
+    if (execProp[it] = "null"){
+      execProp[it] = "http://dummy"
+    }
+  }
+  return execProp
 }

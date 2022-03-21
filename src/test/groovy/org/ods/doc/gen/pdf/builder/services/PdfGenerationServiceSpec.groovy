@@ -1,10 +1,12 @@
 package org.ods.doc.gen.pdf.builder.services
 
+import de.redsix.pdfcompare.CompareResultWithPageOverflow
+import de.redsix.pdfcompare.PdfComparator
+import de.redsix.pdfcompare.env.SimpleEnvironment
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
-import org.ods.doc.gen.core.test.pdf.PdfCompare
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -19,6 +21,7 @@ import java.nio.file.Path
 @ContextConfiguration(classes= [TestConfig.class])
 class PdfGenerationServiceSpec extends Specification {
 
+    public static final String REPORT_FOLDER = "build/reports/pdf"
     @Inject
     PdfGenerationService pdfGenerationService
 
@@ -63,8 +66,14 @@ class PdfGenerationServiceSpec extends Specification {
     }
 
     private comparePdfs(String expected, Path resultFile) {
-        new PdfCompare( "build/reports/pdf")
-                .compareAreEqual(resultFile.toString(), new FixtureHelper().getResource(expected).absolutePath)
+        new File(REPORT_FOLDER).mkdirs()
+        File expectedFile = new FixtureHelper().getResource(expected)
+        return new PdfComparator(expectedFile.absolutePath, resultFile.toString(), new CompareResultWithPageOverflow())
+                .withEnvironment(new SimpleEnvironment()
+                        .setAllowedDiffInPercent(0.0)
+                        .setParallelProcessing(true)
+                        .setAddEqualPagesToResult(false)
+                ).compare().writeTo(REPORT_FOLDER + "/${expectedFile.name}")
     }
 
 }

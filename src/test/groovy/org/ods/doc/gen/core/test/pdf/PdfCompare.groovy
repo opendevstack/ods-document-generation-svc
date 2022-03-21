@@ -1,5 +1,8 @@
 package org.ods.doc.gen.core.test.pdf
 
+import com.github.romankh3.image.comparison.ImageComparison
+import com.github.romankh3.image.comparison.model.ImageComparisonResult
+import com.github.romankh3.image.comparison.model.ImageComparisonState
 import groovy.util.logging.Slf4j
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.ImageType
@@ -57,14 +60,18 @@ class PdfCompare {
         return result
     }
 
-    private boolean comparePageIsEqual(PDFRenderer pdfRenderer1, int iPage, PDFRenderer pdfRenderer2, String file1, ImageCompare imageCompare) {
-        BufferedImage image1 = pdfRenderer1.renderImageWithDPI(iPage, DPI, ImageType.RGB)
-        BufferedImage image2 = pdfRenderer2.renderImageWithDPI(iPage, DPI, ImageType.RGB)
-        def errorFile = errorFileName(file1, iPage)
-        def compareResultWithDiff = imageCompare.compareAndHighlightDiffInNewImage(image1, image2)
-        if (compareResultWithDiff) {
-            imageCompare.saveImage(compareResultWithDiff, errorFile)
-            log.error("Error in test, see the image file with pdf difference:$errorFile")
+    private boolean comparePageIsEqual(PDFRenderer actualPdfRenderer1, int iPage, PDFRenderer expectePpdfRenderer, String file1, ImageCompare imageCompare) {
+        BufferedImage actualImage = actualPdfRenderer1.renderImageWithDPI(iPage, DPI, ImageType.RGB)
+        BufferedImage expectedImage = expectePpdfRenderer.renderImageWithDPI(iPage, DPI, ImageType.RGB)
+        ImageComparisonResult result = new ImageComparison(expectedImage, actualImage)
+                .setDifferenceRectangleFilling(true, 50.0)
+                .setRectangleLineWidth(2)
+                .setPixelToleranceLevel(0.9)
+                .compareImages()
+        if (result.imageComparisonState != ImageComparisonState.MATCH){
+            def errorFile = errorFileName(file1, iPage)
+            result.writeResultTo(new File(errorFile))
+            log.error("PDF error, see image file with pdf diff:[$errorFile]")
             return false
         }
         return true

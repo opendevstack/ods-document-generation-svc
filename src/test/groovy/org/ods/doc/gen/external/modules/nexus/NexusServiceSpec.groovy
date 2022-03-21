@@ -74,7 +74,7 @@ class NexusServiceSpec extends SpecHelper {
     }
 
     byte[] getExampleFileBytes() {
-        return Paths.get("src/test/resources/LICENSE.zip").toFile().getBytes()
+        return Paths.get("src/test/resources/nexus/LICENSE.zip").toFile().getBytes()
     }
 
     Map storeArtifactRequestData(Map mixins = [:]) {
