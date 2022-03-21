@@ -153,23 +153,21 @@ class NexusService {
 
     void downloadAndExtractZip(String urlToDownload, String extractionPath) {
 
-        if (StringUtils.isEmpty(urlToDownload)) {
-            throw new InvalidParameterException("empty urlToDownlad")
-        }
-
-        if (urlToDownload.startsWith("http")) {
-            throw new InvalidParameterException("urlToDownload can't be a full URL")
-        }
-
-        if (!urlToDownload.startsWith("/")) {
-            urlToDownload = "/" + urlToDownload
-        }
-
         if (StringUtils.isEmpty(extractionPath)) {
             throw new InvalidParameterException("empty extractionPath")
         }
 
-        urlToDownload = this.baseURL + urlToDownload
+        if (StringUtils.isEmpty(urlToDownload)) {
+            throw new InvalidParameterException("empty urlToDownlad")
+        }
+
+        // Some urls have baseUrl but some others don't.
+        if (! urlToDownload.startsWith(this.baseURL.toString())) {
+            if (!urlToDownload.startsWith("/")) {
+                urlToDownload = "/" + urlToDownload
+            }
+            urlToDownload = this.baseURL.toString() + urlToDownload
+        }
 
         String artifactName = new URL(urlToDownload).getFile().split("/").last()
         downloadToPath(urlToDownload, artifactName, extractionPath)

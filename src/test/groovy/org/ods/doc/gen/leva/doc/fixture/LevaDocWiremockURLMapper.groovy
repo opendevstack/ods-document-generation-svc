@@ -28,7 +28,6 @@ class LevaDocWiremockURLMapper {
 
     void updateURLs(LevaDocWiremock levaDocWiremock, Map data){
         updateServersUrlBase(levaDocWiremock)
-        updateDataURL(data)
     }
     private void updateServersUrlBase(LevaDocWiremock levaDocWiremock) {
         nexusService.baseURL = new URIBuilder(levaDocWiremock.nexusServer.server().baseUrl()).build()
@@ -36,27 +35,4 @@ class LevaDocWiremockURLMapper {
         bitBucketClientConfig.url = levaDocWiremock.bitbucketServer.server().baseUrl()
     }
 
-    private void updateDataURL(Map data) {
-        data.build.jenkinLog = updateNexusUrl(data.build.jenkinLog)
-        data.build.testResultsURLs = updateMapNexusUrl(data.build.testResultsURLs)
-    }
-
-    private Map updateMapNexusUrl(Map nexusUrls) {
-        Map updatedUrls = [:]
-        nexusUrls.each {entry ->
-            updatedUrls[entry.key] = updateNexusUrl(entry.value)
-        }
-        return updatedUrls
-    }
-
-    private String updateNexusUrl(String hardcodedUrl) {
-        return replaceHostInUrl(hardcodedUrl, nexusService.baseURL.toString())
-    }
-
-    private static String replaceHostInUrl(String originalUrl, String newUrl) {
-        URI uri = new URI(originalUrl)
-        URI newUri = new URI(newUrl)
-        URI uriUPdated = new URI(newUri.getScheme(), newUri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getFragment());
-        return uriUPdated.toString();
-    }
 }
