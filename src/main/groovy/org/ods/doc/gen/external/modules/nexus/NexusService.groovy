@@ -4,12 +4,14 @@ import groovy.util.logging.Slf4j
 import kong.unirest.HttpResponse
 import kong.unirest.Unirest
 import net.lingala.zip4j.ZipFile
+import org.apache.commons.lang3.StringUtils
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
 import java.nio.file.Paths
+import java.security.InvalidParameterException
 
 @Slf4j
 @Service
@@ -150,6 +152,25 @@ class NexusService {
     }
 
     void downloadAndExtractZip(String urlToDownload, String extractionPath) {
+
+        if (StringUtils.isEmpty(urlToDownload)) {
+            throw new InvalidParameterException("empty urlToDownlad")
+        }
+
+        if (urlToDownload.startsWith("http")) {
+            throw new InvalidParameterException("urlToDownload can't be a full URL")
+        }
+
+        if (!urlToDownload.startsWith("/")) {
+            urlToDownload = "/" + urlToDownload
+        }
+
+        if (StringUtils.isEmpty(extractionPath)) {
+            throw new InvalidParameterException("empty extractionPath")
+        }
+
+        urlToDownload = this.baseURL + urlToDownload
+
         String artifactName = new URL(urlToDownload).getFile().split("/").last()
         downloadToPath(urlToDownload, artifactName, extractionPath)
         extractZip(extractionPath, artifactName)
