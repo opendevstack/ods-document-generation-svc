@@ -20,7 +20,7 @@ jobs:
         run: ./gradlew clean test --stacktrace --no-daemon
 
       - name: TestReport
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: ${{ always() }}
         with:
           name: JUnit Report
