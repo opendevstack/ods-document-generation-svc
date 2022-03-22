@@ -1355,8 +1355,9 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     private boolean isReleaseManagerComponent(ProjectData projectData, normComponentName) {
-        def gitUrl = projectData.data.git.repoURL.toLowerCase() // TODO s2o review this code
-        return gitUrl?.endsWith("${projectData.key}-${normComponentName}.git".toLowerCase())
+        String releaseManagerRepo = "${projectData.data.git.releaseManagerRepo}"
+        String thisComponentRepo = "${projectData.key}-${normComponentName}"
+        return thisComponentRepo.equalsIgnoreCase(releaseManagerRepo)
     }
 
     protected Map computeComponentsUnitTests(List<Map> tests) {

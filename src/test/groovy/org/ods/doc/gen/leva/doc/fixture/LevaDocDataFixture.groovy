@@ -86,7 +86,6 @@ class LevaDocDataFixture {
     }
 
     private Map<String, String> buildGitData(ProjectFixture projectFixture) {
-        String bitbucketUrl = System.properties["bitbucket.url"]?: "https://bitbucket-dev.biscrum.com"
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
@@ -94,9 +93,8 @@ class LevaDocDataFixture {
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
-                repoURL: "${bitbucketUrl}/scm/${projectFixture.project}/${projectFixture.releaseManagerRepo}.git",
                 releaseManagerRepo: "${projectFixture.releaseManagerRepo}",
-                releaseManagerBranch: "${projectFixture.releaseManagerBranch}"
+                releaseManagerBranch: "${projectFixture.releaseManagerBranch}",
         ]
     }
 
