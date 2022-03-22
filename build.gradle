@@ -285,7 +285,7 @@ Map propertiesForTest(){
   List urls = ["BITBUCKET_URL", "JIRA_URL", "NEXUS_URL"]
   Map execProp = executionProperties()
   urls.each {
-    if (execProp[it] = "null"){
+    if (execProp[it] == "null"){
       execProp[it] = "http://dummy"
     }
   }
