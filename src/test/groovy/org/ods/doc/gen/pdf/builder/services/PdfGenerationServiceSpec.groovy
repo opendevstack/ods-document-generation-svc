@@ -49,7 +49,7 @@ class PdfGenerationServiceSpec extends Specification {
         Path resultFile = pdfGenerationService.generatePdfFile(fixtureElement.metadata as Map, jsonRawData as Map, tempFolder)
 
         then: "the result is the expected pdf"
-        comparePdfs(fixtureElement.expected as String, resultFile)
+        comparePdfs(fixtureElement.expected as String, resultFile.toString())
 
         where: "BB and GH repos"
         repository << ["Github", "BitBucket"]
@@ -65,15 +65,21 @@ class PdfGenerationServiceSpec extends Specification {
         return new JsonSlurper().parse(pdfRawData)
     }
 
-    private comparePdfs(String expected, Path resultFile) {
+    private comparePdfs(String expected, String resultFile) {
         new File(REPORT_FOLDER).mkdirs()
         File expectedFile = new FixtureHelper().getResource(expected)
-        return new PdfComparator(expectedFile.absolutePath, resultFile.toString(), new CompareResultWithPageOverflow())
+        String expectedPath = expectedFile.absolutePath
+        String diffFileName = REPORT_FOLDER + "/${expectedFile.name}"
+
+        boolean filesAreEqual = new PdfComparator(expectedPath, resultFile, new CompareResultWithPageOverflow())
                 .withEnvironment(new SimpleEnvironment()
-                        .setAllowedDiffInPercent(0.0)
                         .setParallelProcessing(true)
-                        .setAddEqualPagesToResult(false)
-                ).compare().writeTo(REPORT_FOLDER + "/${expectedFile.name}")
+                        .setAddEqualPagesToResult(false))
+                .compare().writeTo(diffFileName)
+        if (filesAreEqual) {
+            new File("${diffFileName}.pdf").delete()
+        }
+        return filesAreEqual
     }
 
 }

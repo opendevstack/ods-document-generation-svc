@@ -9,8 +9,7 @@ import org.apache.commons.io.FileUtils
 @Slf4j
 class LevaDocTestValidator {
 
-    private static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
-
+    static final boolean GENERATE_EXPECTED_PDF_FILES = Boolean.parseBoolean(System.properties["generateExpectedPdfFiles"] as String)
     static final String SAVED_DOCUMENTS = "build/reports/LeVADocs"
 
     private final File tempFolder
@@ -27,24 +26,28 @@ class LevaDocTestValidator {
             copyDocWhenRecording(buildId)
             return true
         } else {
-            def actualFile = actualDoc(buildId)
-            log.info("Validating pdf:${actualFile}")
-            File expectedFile = expectedDoc(buildId)
-
-            String diffFileName = pdfDiffFileName(expectedFile)
-            boolean filesAreEqual = new PdfComparator(
-                    expectedFile.absolutePath,
-                    actualFile.absolutePath,
-                    new CompareResultWithPageOverflow())
-                    .withEnvironment(new SimpleEnvironment()
-                            .setParallelProcessing(true)
-                            .setAddEqualPagesToResult(false))
-                    .compare()
-                    .writeTo(diffFileName)
-            if (filesAreEqual)
-                new File("${diffFileName}.pdf").delete()
-            return filesAreEqual
+            return comparefiles(buildId)
         }
+    }
+
+    private boolean comparefiles(String buildId) {
+        String actualPath = actualDoc(buildId).absolutePath
+        File expectedFile = expectedDoc(buildId)
+        String expectedPath = expectedFile.absolutePath
+        log.info("validatePDF - Expected pdf:${expectedPath}")
+
+        String diffFileName = pdfDiffFileName(expectedFile)
+
+        boolean filesAreEqual = new PdfComparator(expectedPath, actualPath, new CompareResultWithPageOverflow())
+                .withEnvironment(new SimpleEnvironment()
+                        .setParallelProcessing(true)
+                        .setAddEqualPagesToResult(false))
+                .compare()
+                .writeTo(diffFileName)
+        if (filesAreEqual) {
+            new File("${diffFileName}.pdf").delete()
+        }
+        return filesAreEqual
     }
 
     String pdfDiffFileName(String buildId){

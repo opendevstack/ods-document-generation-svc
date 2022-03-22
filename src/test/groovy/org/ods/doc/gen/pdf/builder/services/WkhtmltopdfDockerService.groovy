@@ -1,7 +1,6 @@
-package org.ods.doc.gen.core.test.pdf
+package org.ods.doc.gen.pdf.builder.services
 
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.testcontainers.containers.BindMode

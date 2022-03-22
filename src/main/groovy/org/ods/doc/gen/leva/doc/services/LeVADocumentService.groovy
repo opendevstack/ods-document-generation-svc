@@ -1184,7 +1184,6 @@ class LeVADocumentService extends DocGenUseCase {
     protected String convertImages(String content) {
         def result = content
         if (content && content.contains("<img")) {
-            log.debug("convertImages - content:${content}")
             result = this.jiraUseCase.convertHTMLImageSrcIntoBase64Data(content)
         }
         result
