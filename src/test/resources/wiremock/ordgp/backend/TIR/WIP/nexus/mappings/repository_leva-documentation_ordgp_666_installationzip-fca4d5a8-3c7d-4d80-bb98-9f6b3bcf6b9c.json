@@ -1,0 +1,27 @@
+{
+  "id" : "fca4d5a8-3c7d-4d80-bb98-9f6b3bcf6b9c",
+  "name" : "repository_leva-documentation_ordgp_666_installationzip",
+  "request" : {
+    "url" : "/repository/leva-documentation/ordgp/666/installation.zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "repository_leva-documentation_ordgp_666_installationzip-fca4d5a8-3c7d-4d80-bb98-9f6b3bcf6b9c.zip",
+    "headers" : {
+      "Date" : "Tue, 22 Mar 2022 15:01:37 GMT",
+      "Server" : "Nexus/3.28.1-01 (OSS)",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Security-Policy" : "sandbox allow-forms allow-modals allow-popups allow-presentation allow-scripts allow-top-navigation",
+      "X-XSS-Protection" : "1; mode=block",
+      "Last-Modified" : "Thu, 17 Mar 2022 07:45:05 GMT",
+      "Content-Disposition" : "inline",
+      "Content-Type" : "application/zip",
+      "Set-Cookie" : "b7bd9d362cf28fa3746ddf3faaa39cfe=13a61aa10205f36ad051ed3d9d80bf64; path=/; HttpOnly; Secure; SameSite=None",
+      "Cache-control" : "private"
+    }
+  },
+  "uuid" : "fca4d5a8-3c7d-4d80-bb98-9f6b3bcf6b9c",
+  "persistent" : true,
+  "insertionIndex" : 4
+}
