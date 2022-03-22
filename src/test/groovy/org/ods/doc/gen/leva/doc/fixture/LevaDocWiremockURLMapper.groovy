@@ -26,7 +26,7 @@ class LevaDocWiremockURLMapper {
         this.nexusService = nexusService
     }
 
-    void updateURLs(LevaDocWiremock levaDocWiremock, Map data){
+    void updateURLs(LevaDocWiremock levaDocWiremock){
         updateServersUrlBase(levaDocWiremock)
     }
     private void updateServersUrlBase(LevaDocWiremock levaDocWiremock) {

@@ -188,7 +188,7 @@ class LevaDocServiceFunctTest extends Specification {
     private Map setUpFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder.getRoot())
         Map data = dataFixture.buildFixtureData(projectFixture)
-        levaDocWiremockProxyData.updateURLs(levaDocWiremock, data)
+        levaDocWiremockProxyData.updateURLs(levaDocWiremock)
         return data
     }
 

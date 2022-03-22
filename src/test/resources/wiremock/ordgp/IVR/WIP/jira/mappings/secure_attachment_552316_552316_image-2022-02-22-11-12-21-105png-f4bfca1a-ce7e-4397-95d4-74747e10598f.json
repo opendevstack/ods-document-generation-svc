@@ -1,0 +1,34 @@
+{
+  "id" : "f4bfca1a-ce7e-4397-95d4-74747e10598f",
+  "name" : "secure_attachment_552316_552316_image-2022-02-22-11-12-21-105png",
+  "request" : {
+    "url" : "/secure/attachment/552316/552316_image-2022-02-22-11-12-21-105.png",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "secure_attachment_552316_552316_image-2022-02-22-11-12-21-105png-f4bfca1a-ce7e-4397-95d4-74747e10598f.png",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Tue, 22 Mar 2022 15:34:28 GMT",
+      "Content-Type" : "image/png",
+      "X-AREQUESTID" : "994x496144x1",
+      "Referrer-Policy" : "strict-origin-when-cross-origin",
+      "X-XSS-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "Content-Security-Policy" : "frame-ancestors 'self'",
+      "Strict-Transport-Security" : [ "max-age=31536000", "max-age=15768000" ],
+      "Set-Cookie" : [ "JSESSIONID=39C4B17122FECE8C1FAAF33B83EC2338; Path=/; Secure; HttpOnly", "atlassian.xsrf.token=BW8I-UASU-MVFU-WO2W_c264fc0d455cafe2b30df64088345d480ae4a2f9_lin; Path=/; Secure" ],
+      "X-Seraph-LoginReason" : "OK",
+      "X-ASESSIONID" : "1fx1y81",
+      "Accept-Ranges" : "bytes",
+      "Content-Disposition" : "inline; filename*=UTF-8''image-2022-02-22-11-12-21-105.png;",
+      "Cache-control" : "private, max-age=31536000",
+      "Expires" : "Wed, 31 Dec 1969 23:59:59 GMT"
+    }
+  },
+  "uuid" : "f4bfca1a-ce7e-4397-95d4-74747e10598f",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

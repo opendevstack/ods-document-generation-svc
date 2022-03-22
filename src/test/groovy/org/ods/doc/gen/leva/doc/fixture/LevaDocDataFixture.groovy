@@ -74,12 +74,21 @@ class LevaDocDataFixture {
     }
 
     private Map<String, String> buildTestResultsUrls(String projectWithBuild) {
-        return [
+        Map testResults =  [
                 "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
                 "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
                 "Acceptance" : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
                 'Installation' : "/repository/leva-documentation/${projectWithBuild}/installation.zip",
                 'Integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
+
+        ]
+        return testResults << buildUnitTestResultsUrls(projectWithBuild)
+    }
+
+    private Map<String, String> buildUnitTestResultsUrls(String projectWithBuild) {
+        return [
+                "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
+                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip"
         ]
     }
 

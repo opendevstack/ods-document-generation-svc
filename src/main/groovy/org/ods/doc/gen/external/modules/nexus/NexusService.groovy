@@ -4,7 +4,6 @@ import groovy.util.logging.Slf4j
 import kong.unirest.HttpResponse
 import kong.unirest.Unirest
 import net.lingala.zip4j.ZipFile
-import org.apache.commons.lang3.StringUtils
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -116,20 +115,20 @@ class NexusService {
     @SuppressWarnings(['JavaIoPackageAccess'])
     Map<URI, File> retrieveArtifact(String nexusRepository, String nexusDirectory, String name, String extractionPath) {
         String urlToDownload = getURL(nexusRepository, nexusDirectory, name)
-        HttpResponse<File> response = downloadToPath(urlToDownload, name, extractionPath)
+        HttpResponse<File> response = downloadToPath(urlToDownload, extractionPath, name)
         return [
             uri: this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
             content: response.getBody(),
         ]
     }
 
-    String getURL(String nexusRepository, String nexusDirectory, String name) {
-        return "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
+    private String getURL(String nexusRepository, String nexusDirectory, String name) {
+        return "/repository/${nexusRepository}/${nexusDirectory}/${name}"
     }
 
-    private HttpResponse<File> downloadToPath(String urlToDownload, String name, String extractionPath) {
+    private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        def restCall = Unirest.get("${urlToDownload}").basicAuth(this.username, this.password)
+        def restCall = Unirest.get("${baseURL}${urlToDownload}").basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {
             def message = 'Error: unable to get artifact. ' +
@@ -153,25 +152,9 @@ class NexusService {
     }
 
     void downloadAndExtractZip(String urlToDownload, String extractionPath) {
-
-        if (StringUtils.isEmpty(extractionPath)) {
-            throw new InvalidParameterException("empty extractionPath")
-        }
-
-        if (StringUtils.isEmpty(urlToDownload)) {
-            throw new InvalidParameterException("empty urlToDownlad")
-        }
-
-        // Some urls have baseUrl but some others don't.
-        if (! urlToDownload.startsWith(this.baseURL.toString())) {
-            if (!urlToDownload.startsWith("/")) {
-                urlToDownload = "/" + urlToDownload
-            }
-            urlToDownload = this.baseURL.toString() + urlToDownload
-        }
-
-        String artifactName = new URL(urlToDownload).getFile().split("/").last()
-        downloadToPath(urlToDownload, artifactName, extractionPath)
+        log.debug("downloadAndExtractZip: urlToDownload:${urlToDownload}, extractionPath:${extractionPath}")
+        String artifactName = urlToDownload.split("/").last()
+        downloadToPath(urlToDownload, extractionPath, artifactName)
         extractZip(extractionPath, artifactName)
     }
 
