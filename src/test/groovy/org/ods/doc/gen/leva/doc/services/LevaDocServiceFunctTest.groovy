@@ -92,7 +92,7 @@ class LevaDocServiceFunctTest extends Specification {
         levaDocWiremock.tearDownWiremock()
     }
 
-    def "#projectFixture.docType for project #projectFixture.project"() {
+    def "#projectFixture.docType - project: #projectFixture.project"() {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
@@ -110,7 +110,7 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
-    def "#projectFixture.docType with tests results for project #projectFixture.project"() {
+    def "#projectFixture.docType with tests results - project: #projectFixture.project"() {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
@@ -127,7 +127,7 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixtureWithTestData().getProjects()
     }
 
-    def "#projectFixture.docType for component #projectFixture.component and project #projectFixture.project"() {
+    def "#projectFixture.docType - component: #projectFixture.component - project: #projectFixture.project"() {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)

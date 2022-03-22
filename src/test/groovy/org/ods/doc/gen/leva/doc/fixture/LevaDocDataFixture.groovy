@@ -50,6 +50,7 @@ class LevaDocDataFixture {
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         String projectWithBuild = "${projectFixture.project}/${projectFixture.buildNumber}"
+        List<String> testResults = projectFixture.testResults
         return  [
                 targetEnvironment: "dev",
                 targetEnvironmentToken: "D",
@@ -64,7 +65,7 @@ class LevaDocDataFixture {
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
                 jobName : "${projectFixture.project}-cd/${projectFixture.project}-releasemanager",
-                testResultsURLs: buildTestResultsUrls(projectWithBuild),
+                testResultsURLs: buildTestResultsUrls(testResults, projectWithBuild),
                 jenkinLog: getJenkinsLogUrl(projectWithBuild)
         ]
     }
@@ -73,14 +74,20 @@ class LevaDocDataFixture {
         "https://dummy/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
     }
 
-    private Map<String, String> buildTestResultsUrls(String projectWithBuild) {
-        return [
+    private Map<String, String> buildTestResultsUrls(List<String> testResults, String projectWithBuild) {
+        Map hardcodedUrls = [
                 "Unit-backend": "https://dummy/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
                 "Unit-frontend": "https://dummy/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
                 "Acceptance" : "https://dummy/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
                 'Installation' : "https://dummy/repository/leva-documentation/${projectWithBuild}/installation.zip",
                 'Integration' : "https://dummy/repository/leva-documentation/${projectWithBuild}/integration.zip",
         ]
+
+        Map<String, String> testResultsUrl = [:]
+        testResults.each {
+            testResultsUrl[it] = hardcodedUrls[it]
+        }
+        return testResultsUrl
     }
 
     private Map<String, String> buildGitData(ProjectFixture projectFixture) {

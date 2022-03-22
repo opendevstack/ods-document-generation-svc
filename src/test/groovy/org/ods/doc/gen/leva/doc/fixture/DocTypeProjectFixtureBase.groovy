@@ -8,8 +8,8 @@ abstract class DocTypeProjectFixtureBase {
     private static final String FILENAME_PATH = "src/test/resources"
     private static final String LEVA_DOC_FUNCTIONAL_TESTS_PROJECTS = "${FILENAME_PATH}/${FILENAME_WITH_PROJECTS}"
 
-    private static final String ONLY_TEST_ONE_PROJECT = ""
-    private static final List<String> SKIP_TEST_PROJECTS = ["trfdgp", "g3dgp", "g4dgp", "brassp"]
+    private static final String ONLY_TEST_ONE_PROJECT = "trfdgp"
+    private static final List<String> SKIP_TEST_PROJECTS = ["ordgp", "g3dgp", "g4dgp", "brassp"]
 
     protected final List docTypes
 

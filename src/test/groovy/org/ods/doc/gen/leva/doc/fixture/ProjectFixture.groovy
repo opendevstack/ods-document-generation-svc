@@ -13,6 +13,7 @@ class ProjectFixture {
     String releaseKey
     String version
     List<String> docsToTest
+    List<String> testResults
     String templatesVersion
     String docType
     Boolean overall
@@ -24,6 +25,7 @@ class ProjectFixture {
 
     static getProjectFixtureBuilder(Map project, String docType) {
         List<String> docsToTest = project.docsToTest?.split("\\s*,\\s*")
+        List<String> testResults = project.testResults?.split("\\s*,\\s*")
         List<String> components = project.components?.split("\\s*,\\s*")
         return ProjectFixture.builder()
             .project(project.id as String)
@@ -32,6 +34,7 @@ class ProjectFixture {
             .releaseKey(project.releaseId as String)
             .version(project.version as String)
             .docsToTest(docsToTest)
+            .testResults(testResults)
             .templatesVersion(project.templatesVersion as String)
             .validation(project.validation as String)
             .releaseManagerRepo(project.releaseManagerRepo as String)
