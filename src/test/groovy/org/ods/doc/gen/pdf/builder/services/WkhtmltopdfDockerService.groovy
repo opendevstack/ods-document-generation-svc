@@ -16,7 +16,7 @@ import java.nio.file.Path
 @Profile("test")
 class WkhtmltopdfDockerService extends WkhtmltopdfService {
 
-    static final String IMAGE__BASE = "s2obcn/jdk-11_openj9-wkhtmltopdf-ubi:test"
+    static final String IMAGE__BASE = "jdk-11_openj9-wkhtmltopdf-ubi:local"
     static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse(IMAGE__BASE)
     static final String TMP_PDF = "/tmp/pdf"
     public static final String WINDOWS_MNT = "/mnt/c/"
