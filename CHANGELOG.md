@@ -11,6 +11,7 @@
 - Added IT (Docker tests)
 - Added performance tests
 - logback.xml can be overridden from command line
+- removed unused params from payloads.
 
 ## [4.0] - 2021-18-11
 
