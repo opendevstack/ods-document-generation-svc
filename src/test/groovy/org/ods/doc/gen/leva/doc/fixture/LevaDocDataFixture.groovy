@@ -29,10 +29,8 @@ class LevaDocDataFixture {
         return data
     }
 
-    Map getModuleData(ProjectFixture projectFixture, Map data) {
+    Map getModuleData(ProjectFixture projectFixture) {
         Map input = RepoDataBuilder.getRepoForComponent(projectFixture.component)
-        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        input.data.tests << [unit: testsReports.getResults(projectData, projectFixture.component, "unit")]
         return input
     }
 
@@ -75,12 +73,9 @@ class LevaDocDataFixture {
 
     private Map<String, String> buildTestResultsUrls(String projectWithBuild) {
         Map testResults =  [
-                "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
-                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
                 "Acceptance" : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
                 'Installation' : "/repository/leva-documentation/${projectWithBuild}/installation.zip",
                 'Integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
-
         ]
         return testResults << buildUnitTestResultsUrls(projectWithBuild)
     }

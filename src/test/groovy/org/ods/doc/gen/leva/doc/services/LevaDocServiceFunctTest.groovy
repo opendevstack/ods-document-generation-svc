@@ -133,7 +133,7 @@ class LevaDocServiceFunctTest extends Specification {
         prepareServiceDataParam(projectFixture, data)
         LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder.getRoot(), projectFixture)
         String buildId = data.build.buildId
-        data.repo = dataFixture.getModuleData(projectFixture, data)
+        data.repo = dataFixture.getModuleData(projectFixture)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
