@@ -54,7 +54,6 @@ import javax.inject.Inject
  *  - LevaDocWiremock.RECORD=true & GENERATE_EXPECTED_PDF_FILES=true will record and generate new pdf expected files
  *
  */
-
 @Slf4j
 @ActiveProfiles("test")
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
@@ -78,7 +77,6 @@ class LevaDocServiceFunctTest extends Specification {
     @Inject
     LevaDocWiremock levaDocWiremock
 
-    private LevaDocTestValidator testValidator
     private LevaDocDataFixture dataFixture
 
     def setupSpec(){
@@ -88,7 +86,6 @@ class LevaDocServiceFunctTest extends Specification {
 
     def setup() {
         dataFixture = new LevaDocDataFixture(tempFolder.getRoot(), project, testsReports)
-        testValidator = new LevaDocTestValidator(tempFolder.getRoot())
     }
 
     def cleanup() {
@@ -99,12 +96,15 @@ class LevaDocServiceFunctTest extends Specification {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
+        LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder.getRoot(), projectFixture)
+        String buildId = data.build.buildId
 
         when: "the user creates a LeVA document"
         List<DocumentHistoryEntry> history = leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(projectFixture, data.build.buildId as String)
+        assert testValidator.validatePDF(buildId), "see actual pdf:${testValidator.pdfDiffFileName(buildId)}"
+
 
         where: "Doctypes without testResults"
         projectFixture << new DocTypeProjectFixture().getProjects()
@@ -114,12 +114,14 @@ class LevaDocServiceFunctTest extends Specification {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
+        LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder.getRoot(), projectFixture)
+        String buildId = data.build.buildId
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(projectFixture, data.build.buildId as String)
+        assert testValidator.validatePDF(buildId), "see actual pdf:${testValidator.pdfDiffFileName(buildId)}"
 
         where: "Doctypes with tests results"
         projectFixture << new DocTypeProjectFixtureWithTestData().getProjects()
@@ -129,13 +131,15 @@ class LevaDocServiceFunctTest extends Specification {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
+        LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder.getRoot(), projectFixture)
+        String buildId = data.build.buildId
         data.repo = dataFixture.getModuleData(projectFixture, data)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(projectFixture, data.build.buildId as String)
+        assert testValidator.validatePDF(buildId), "see actual pdf:${testValidator.pdfDiffFileName(buildId)}"
 
         where: "Doctypes with modules"
         projectFixture << new DocTypeProjectFixtureWithComponent().getProjects()
@@ -149,6 +153,8 @@ class LevaDocServiceFunctTest extends Specification {
         given: "A project data"
         Map data = setUpFixture(projectFixture)
         prepareServiceDataParam(projectFixture, data)
+        LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder.getRoot(), projectFixture)
+        String buildId = data.build.buildId
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         dataFixture.updateExpectedComponentDocs(projectData, data, projectFixture)
 
@@ -156,7 +162,7 @@ class LevaDocServiceFunctTest extends Specification {
         leVADocumentService."createOverall${projectFixture.docType}"(data)
 
         then: "the generated PDF is as expected"
-        testValidator.validatePDF(projectFixture, data.build.buildId as String)
+        assert testValidator.validatePDF(buildId), "see actual pdf:${testValidator.pdfDiffFileName(buildId)}"
 
         where:
         projectFixture << new DocTypeProjectFixturesOverall().getProjects()

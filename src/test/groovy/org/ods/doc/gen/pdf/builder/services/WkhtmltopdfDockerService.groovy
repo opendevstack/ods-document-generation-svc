@@ -1,7 +1,6 @@
-package org.ods.doc.gen.core.test.pdf
+package org.ods.doc.gen.pdf.builder.services
 
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.testcontainers.containers.BindMode
@@ -17,7 +16,8 @@ import java.nio.file.Path
 @Profile("test")
 class WkhtmltopdfDockerService extends WkhtmltopdfService {
 
-    static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse("docgen-base:latest")
+    static final String IMAGE__BASE = "jdk-11_openj9-wkhtmltopdf-ubi:local"
+    static final DockerImageName DOCGEN_IMAGE = DockerImageName.parse(IMAGE__BASE)
     static final String TMP_PDF = "/tmp/pdf"
     public static final String WINDOWS_MNT = "/mnt/c/"
     public static final String WINDOWS_C = "C:\\"

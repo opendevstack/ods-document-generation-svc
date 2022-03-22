@@ -11,7 +11,7 @@ cache:
   projectData.expiration.minutes: 30
 
 bitbucket:
-  url: ${BITBUCKET_URL:mylocaluser}
+  url: ${BITBUCKET_URL:dummyURL}
   username: ${BITBUCKET_USERNAME:dummy}
   password: ${BITBUCKET_PASSWORD:dummy}
   documents:
@@ -19,12 +19,12 @@ bitbucket:
     repo:  ${BITBUCKET_DOCUMENT_TEMPLATES_REPO:none}
 
 jira:
-  url: ${JIRA_URL:mylocaluser}
+  url: ${JIRA_URL:dummyURL}
   username: ${JIRA_USERNAME:dummy}
   password: ${JIRA_PASSWORD:dummy}
 
 nexus:
-  url: ${NEXUS_URL:mylocaluser}
+  url: ${NEXUS_URL:dummyURL}
   username: ${NEXUS_USERNAME:dummy}
   password: ${NEXUS_PASSWORD:dummy}
 

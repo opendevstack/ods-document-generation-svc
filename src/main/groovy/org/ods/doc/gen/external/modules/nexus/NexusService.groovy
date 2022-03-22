@@ -28,7 +28,8 @@ class NexusService {
     NexusService(@Value('${nexus.url}') String baseURL,
                  @Value('${nexus.username}') String username,
                  @Value('${nexus.password}') String password) {
-        if (!baseURL?.trim()) {
+        log.info("NexusService - url:[${baseURL}], username:[${username}]")
+        if (!baseURL?.trim() || baseURL=="null") {
             throw new IllegalArgumentException("Error: unable to connect to Nexus. 'baseURL' is undefined.")
         }
 

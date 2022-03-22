@@ -12,7 +12,6 @@ class LevaDocDataFixture {
     private final File tempFolder
     private final Project project
     private final TestsReports testsReports
-    private LevaDocTestValidator testValidator
 
     LevaDocDataFixture(File tempFolder,
                        Project project = null,
@@ -20,7 +19,6 @@ class LevaDocDataFixture {
         this.tempFolder = tempFolder
         this.testsReports = testsReports
         this.project = project
-        this.testValidator = new LevaDocTestValidator(tempFolder)
     }
 
     Map buildFixtureData(ProjectFixture projectFixture){
@@ -101,7 +99,8 @@ class LevaDocDataFixture {
     private String copyPdfToTemp(ProjectFixture projectFixture, Map data) {
         def destPath = "${tempFolder}/reports/${projectFixture.component}"
         new File(destPath).mkdirs()
-        File expected = testValidator.expectedDoc(projectFixture, data.build.buildId as String)
+        LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder, projectFixture)
+        File expected = testValidator.expectedDoc(data.build.buildId as String)
         FileUtils.copyFile(expected, new File("${destPath}/${expected.name}"))
         return expected.name.replaceFirst("pdf", "zip")
     }

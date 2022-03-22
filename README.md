@@ -5,7 +5,9 @@
 A document generation service that transforms document templates in a remote Bitbucket repository into PDF documents.
 
 ## Distribute
-
+TODO:
+- Udate documentation:
+- Add the need of docker to develop it (to test it).
 ```
 make shadowJar
 ```
