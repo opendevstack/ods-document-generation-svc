@@ -12,6 +12,10 @@ jobs:
       - name: Docker test
         run: ./gradlew dockerTest --stacktrace --no-daemon
 
+  performanceTest:
+    needs: e2eTest
+    runs-on: ubuntu-latest
+    steps:
       - name: Performance test
         run: ./gradlew gatlingRun --stacktrace --no-daemon
 
