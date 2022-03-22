@@ -1,8 +1,8 @@
 package org.ods.doc.gen
 
 import org.ods.doc.gen.core.test.jira.JiraServiceForWireMock
-import org.ods.doc.gen.core.test.pdf.WkhtmltopdfDockerService
 import org.ods.doc.gen.external.modules.jira.JiraService
+import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfDockerService
 import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfService
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.test.context.TestConfiguration
@@ -21,6 +21,9 @@ import java.time.ZoneId
 @ComponentScan("org.ods")
 class TestConfig {
 
+    public static final String WKHTML__TO__PDF__WITH__DOCKER = 'WKHTML_TO_PDF_WITH_DOCKER'
+    public static final String TRUE = 'true'
+
     @Primary
     @Bean
     Clock getSameInstant(){
@@ -35,8 +38,13 @@ class TestConfig {
 
     @Primary
     @Bean
-    WkhtmltopdfService getWkhtmltopdfService(WkhtmltopdfDockerService wkhtmltopdfDockerService) {
-        return wkhtmltopdfDockerService
+    WkhtmltopdfService getWkhtmltopdfService(WkhtmltopdfDockerService wkhtmltopdfDockerService,
+                                             WkhtmltopdfService wkhtmltopdfService) {
+        String wk = System.getenv(WKHTML__TO__PDF__WITH__DOCKER) ?: TRUE
+        if ( TRUE == wk) {
+            return wkhtmltopdfDockerService
+        }
+        return wkhtmltopdfService
     }
 
 }

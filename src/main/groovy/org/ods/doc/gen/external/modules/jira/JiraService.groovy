@@ -5,6 +5,7 @@ import groovy.json.JsonSlurperClassic
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
 import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.core.URLHelper
 import org.ods.doc.gen.leva.doc.services.StringCleanup
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -24,7 +25,8 @@ class JiraService {
     JiraService(@Value('${jira.url}') String baseURL,
                 @Value('${jira.username}')  String username,
                 @Value('${jira.password}') String password) {
-        if (!baseURL?.trim()) {
+        log.info("JiraService - url:[${baseURL}], username:[${username}]")
+        if (!baseURL?.trim() || baseURL=="null") {
             throw new IllegalArgumentException('Error: unable to connect to Jira. \'baseURL\' is undefined.')
         }
 
@@ -196,9 +198,9 @@ class JiraService {
     }
 
     private String changeRLWhenUsingWiremock(String url) {
-        return (baseURL == targetURL)? baseURL : url.replace(targetURL.toString(), baseURL.toString())
+        String finalUrl = (baseURL == targetURL)? baseURL : URLHelper.replaceHostInUrl(url, baseURL.toString())
+        return finalUrl
     }
-
 
     List getIssuesForJQLQuery(Map query) {
         return searchByJQLQuery(query).issues

@@ -22,6 +22,8 @@ class BitBucketClientConfig {
     BitBucketClientConfig(@Value('${bitbucket.username}') String username,
                           @Value('${bitbucket.password}') String password,
                           @Value('${bitbucket.url}') String url){
+        log.info("BitBucketClientConfig - url:[${url}], username:[${username}]")
+
         this.password = password
         this.username = username
         this.url = url
@@ -33,7 +35,7 @@ class BitBucketClientConfig {
         builder.requestInterceptor(new BasicAuthRequestInterceptor(username, password))
         feign.okhttp.OkHttpClient client = new feign.okhttp.OkHttpClient(new OkHttpClient().newBuilder().build())
         return builder.client(client).logger(new Slf4jLogger(BitBucketRepository.class))
-                .logLevel(Logger.Level.FULL)
+                .logLevel(Logger.Level.BASIC)
                 .target(BitBucketRepository.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
     }
 

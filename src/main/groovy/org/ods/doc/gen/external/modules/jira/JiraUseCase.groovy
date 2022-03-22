@@ -29,10 +29,10 @@ class JiraUseCase {
     }
 
     String convertHTMLImageSrcIntoBase64Data(String html) {
-        def pattern = ~/src="(${this.jira.targetURL}.*?\.(?:gif|GIF|jpg|JPG|jpeg|JPEG|png|PNG))"/
+        def pattern = ~/src="(http.*?\.(?:gif|GIF|jpg|JPG|jpeg|JPEG|png|PNG))"/
         def result = html.replaceAll(pattern) { match ->
             def src = match[1]
-            def img = this.jira.getFileFromJira(src)
+            Map img = this.jira.getFileFromJira(src)
             return "src=\"data:${img.contentType};base64,${img.data.encodeBase64()}\""
         }
 

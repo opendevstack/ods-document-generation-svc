@@ -17,6 +17,8 @@ class GithubClientConfig {
     String[] httpProxyHost
 
     GithubClientConfig(@Value('${github.url}') String url){
+        log.info("GithubClientConfig - url:[${url}]")
+
         this.url = url
         httpProxyHost = System.getenv('HTTP_PROXY')?.trim()?.replace('http://', '')?.split(':')
     }
@@ -33,7 +35,7 @@ class GithubClientConfig {
         }
         URI baseUrl = URI.create(url)
         return Feign.builder().client(client).logger(new Slf4jLogger(GitHubRepository.class))
-                .logLevel(Logger.Level.FULL)
+                .logLevel(Logger.Level.BASIC)
                 .target(GitHubRepository.class, baseUrl.getScheme() + "://" + baseUrl.getAuthority())
     }
 
