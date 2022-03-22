@@ -32,5 +32,5 @@ jobs:
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: JUnit e2e Report
+          name: JUnit performance test Report
           path: build/reports/**/**
