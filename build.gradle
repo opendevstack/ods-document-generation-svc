@@ -47,7 +47,7 @@ repositories {
 group = 'org.ods'
 version = '1.0'
 ext {
-  // TODO we will generete it from ODS
+  // TODO https://github.com/opendevstack/ods-quickstarters/issues/766
   imageBaseForApp ="s2obcn/jdk-11_openj9-wkhtmltopdf-ubi:main"
   imageForTest = "jdk-11_openj9-wkhtmltopdf-ubi:local"
 }
