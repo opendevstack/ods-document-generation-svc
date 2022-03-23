@@ -45,7 +45,6 @@ class LevaDocDataFixture {
         projectFixture.component = null
     }
 
-
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         String projectWithBuild = "${projectFixture.project}/${projectFixture.buildNumber}"
         List<String> testResults = projectFixture.testResults
@@ -75,10 +74,10 @@ class LevaDocDataFixture {
     private Map<String, String> buildTestResultsUrls(List<String> testResults, String projectWithBuild) {
         Map hardcodedUrls = [
                 "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
-                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip"
-                "Acceptance" : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
-                'Installation' : "/repository/leva-documentation/${projectWithBuild}/installation.zip",
-                'Integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
+                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
+                "Acceptance": "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
+                'Installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip",
+                'Integration': "/repository/leva-documentation/${projectWithBuild}/integration.zip",
         ]
 
         Map<String, String> testResultsUrl = [:]

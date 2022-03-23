@@ -1,10 +1,10 @@
 buildscript {
   ext {
-    groovyallVersion = '3.0.9'
-    springbootVersion = "2.6.2"
-    springCloudVersion = '3.1.0'
+    groovyallVersion = '3.0.10'
+    springbootVersion = "2.6.4"
+    springCloudVersion = '3.1.1'
     spockCoreVersion = "2.1-groovy-3.0"
-    spockReportsVersion = '2.1-groovy-3.0'
+    spockReportsVersion = '2.3.0-groovy-3.0'
   }
 
   repositories {
@@ -29,11 +29,11 @@ buildscript {
 
 plugins {
   id "groovy"
-  id 'com.adarshr.test-logger' version '3.1.0'
+  id 'com.adarshr.test-logger' version '3.2.0'
   id 'jacoco'
   id 'org.springframework.boot' version "${springbootVersion}"
-  id 'com.bmuschko.docker-spring-boot-application' version '7.1.0'
-  id "io.gatling.gradle" version "3.7.3"
+  id 'com.bmuschko.docker-spring-boot-application' version '7.3.0'
+  id "io.gatling.gradle" version "3.7.6.1"
 }
 // related to gatling and Springboot
 ext['netty.version'] = '4.0.51.Final'
@@ -69,7 +69,7 @@ configurations.all {
 }
 
 dependencies {
-  implementation("org.codehaus.groovy:groovy-json:3.0.9")
+  implementation('org.codehaus.groovy:groovy-json:3.0.10')
 
   implementation (group: 'org.codehaus.groovy', name: 'groovy-all', version: groovyallVersion){
     exclude group: "org.codehaus.groovy", module: "groovy-test-junit5"
@@ -78,7 +78,6 @@ dependencies {
   implementation "org.springframework.boot:spring-boot-starter:${springbootVersion}"
   implementation "org.springframework.boot:spring-boot-starter-web:${springbootVersion}"
   implementation "org.springframework.boot:spring-boot-starter-cache:${springbootVersion}"
-  implementation "org.springframework.cloud:spring-cloud-starter-loadbalancer:${springCloudVersion}"
   implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudVersion}"
 
   implementation("javax.inject:javax.inject:1")
@@ -95,9 +94,9 @@ dependencies {
 
   implementation 'net.lingala.zip4j:zip4j:2.9.1'
   implementation 'org.apache.httpcomponents:httpclient:4.5.13'
-  implementation "org.apache.pdfbox:pdfbox:2.0.24"
+  implementation 'org.apache.pdfbox:pdfbox:2.0.25'
 
-  implementation("ch.qos.logback:logback-classic:1.2.10")
+  implementation('ch.qos.logback:logback-classic:1.2.11')
   implementation 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
 
   testImplementation "org.junit.jupiter:junit-jupiter-api"
@@ -113,18 +112,18 @@ dependencies {
 
   testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
   testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
-  testImplementation 'io.rest-assured:rest-assured:4.4.0'
+  testImplementation 'io.rest-assured:rest-assured:4.5.1'
   testImplementation("de.redsix:pdfcompare:1.1.61")
 
-  gatlingImplementation 'org.awaitility:awaitility:4.1.1'
-  gatlingImplementation 'io.rest-assured:rest-assured:4.4.0'
+  gatlingImplementation 'org.awaitility:awaitility:4.2.0'
+  gatlingImplementation 'io.rest-assured:rest-assured:4.5.1'
 
   // From shared lib
-  implementation("com.konghq:unirest-java:3.13.4")
+  implementation('com.konghq:unirest-java:3.13.6')
   implementation("org.yaml:snakeyaml:1.30")
-  implementation("com.vladsch.flexmark:flexmark-all:0.62.2")
-  implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.core:2.0.2")
-  implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.pdf:2.0.2")
+  implementation('com.vladsch.flexmark:flexmark-all:0.64.0')
+  implementation('fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.core:2.0.3')
+  implementation('fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.pdf:2.0.3')
   implementation("org.apache.poi:poi-ooxml:4.1.2")
   implementation("org.apache.pdfbox:pdfbox:2.0.25")
   implementation("net.lingala.zip4j:zip4j:2.9.1")
@@ -134,7 +133,7 @@ dependencies {
   testImplementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
 
   testImplementation "com.github.stefanbirkner:system-rules:1.19.0" // for managing environment variables
-  testImplementation "org.hamcrest:hamcrest:2.1"
+  testImplementation 'org.hamcrest:hamcrest:2.2'
   testImplementation "org.skyscreamer:jsonassert:1.5.0"
 
   testImplementation("au.com.dius:pact-jvm-provider:4.0.10")
