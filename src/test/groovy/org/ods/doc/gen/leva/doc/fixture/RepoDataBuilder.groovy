@@ -3,11 +3,6 @@ package org.ods.doc.gen.leva.doc.fixture
 class RepoDataBuilder {
     static Map getRepoForComponent(component) {
         Map data = [
-            tests: [
-                unit: [
-
-                ],
-            ],
             openshift: [
                 builds:                    [
                     "${component}": [

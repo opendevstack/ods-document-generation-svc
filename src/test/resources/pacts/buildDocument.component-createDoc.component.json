@@ -37,7 +37,7 @@
                         "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
                         "releaseManagerBranch": "refs/heads/master",
-                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "releaseManagerRepo": "ordgp-releasemanager",
                         "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
@@ -281,15 +281,6 @@
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.repoURL": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"
@@ -1013,7 +1004,7 @@
                         "commitTime": "2021-04-20T14:58:31.042152",
                         "message": "Swingin' The Bottle",
                         "releaseManagerBranch": "refs/heads/master",
-                        "repoURL": "https://bitbucket/scm/ordgp/ordgp-releasemanager.git/",
+                        "releaseManagerRepo": "ordgp-releasemanager",
                         "targetTag": "ods-generated-v3.0-3.0-0b11-D"
                     },
                     "openshift": {
@@ -1841,15 +1832,6 @@
                             "matchers": [
                                 {
                                     "match": "type"
-                                }
-                            ],
-                            "combine": "AND"
-                        },
-                        "$.*.repoURL": {
-                            "matchers": [
-                                {
-                                    "match": "regex",
-                                    "regex": ".*$"
                                 }
                             ],
                             "combine": "AND"

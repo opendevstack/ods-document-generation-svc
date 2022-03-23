@@ -640,7 +640,7 @@ class LeVADocumentService extends DocGenUseCase {
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
-        Map testData = junit.getTestData(data.tmpFolder as String, data.build.testResultsURLs as Map, data)
+        Map testData = junit.getTestData(data)
         Map integrationTestData = testData.integration
         List integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
         Map acceptanceTestData = testData.acceptance
@@ -728,7 +728,7 @@ class LeVADocumentService extends DocGenUseCase {
 
         def documentType = Constants.DocumentType.CFTR as String
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def testData = junit.getTestData(data)
         def acceptanceTestData = testData.acceptance
         def integrationTestData = testData.integration
 
@@ -806,7 +806,7 @@ class LeVADocumentService extends DocGenUseCase {
 
         def documentType = Constants.DocumentType.IVR as String
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def testData = junit.getTestData(data)
         def installationTestData = testData.installation
 
         def sections = this.getDocumentSections(documentType, projectData)
@@ -889,8 +889,9 @@ class LeVADocumentService extends DocGenUseCase {
             return resurrectedDocument.uri
         }
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def testData = junit.getTestData(data)
         def unitTestData = testData.unit
+        // input.data.tests << [unit: testsReports.getResults(projectData, projectFixture.component, "unit")]
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         def watermarkText = this.getWatermarkText(projectData)
@@ -972,7 +973,7 @@ class LeVADocumentService extends DocGenUseCase {
 
         def documentType = Constants.DocumentType.TIR as String
 
-        def testData = junit.getTestData(data.tmpFolder, data.build.testResultsURLs as Map, data)
+        def testData = junit.getTestData(data)
         def installationTestData = testData.installation
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
@@ -1355,8 +1356,9 @@ class LeVADocumentService extends DocGenUseCase {
     }
 
     private boolean isReleaseManagerComponent(ProjectData projectData, normComponentName) {
-        def gitUrl = projectData.data.git.repoURL.toLowerCase() // TODO s2o review this code
-        return gitUrl?.endsWith("${projectData.key}-${normComponentName}.git".toLowerCase())
+        String releaseManagerRepo = "${projectData.data.git.releaseManagerRepo}"
+        String thisComponentRepo = "${projectData.key}-${normComponentName}"
+        return thisComponentRepo.equalsIgnoreCase(releaseManagerRepo)
     }
 
     protected Map computeComponentsUnitTests(List<Map> tests) {

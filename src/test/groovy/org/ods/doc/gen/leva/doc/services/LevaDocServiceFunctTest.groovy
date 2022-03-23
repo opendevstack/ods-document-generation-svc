@@ -133,7 +133,7 @@ class LevaDocServiceFunctTest extends Specification {
         prepareServiceDataParam(projectFixture, data)
         LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder.getRoot(), projectFixture)
         String buildId = data.build.buildId
-        data.repo = dataFixture.getModuleData(projectFixture, data)
+        data.repo = dataFixture.getModuleData(projectFixture)
 
         when: "the user creates a LeVA document"
         leVADocumentService."create${projectFixture.docType}"(data)
@@ -168,10 +168,27 @@ class LevaDocServiceFunctTest extends Specification {
         projectFixture << new DocTypeProjectFixturesOverall().getProjects()
     }
 
+    def "computeComponentMetadata #projectFixture.docType for project #projectFixture.project"() {
+        given: "A project data"
+        Map data = setUpFixture(projectFixture)
+        prepareServiceDataParam(projectFixture, data)
+        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
+        dataFixture.updateExpectedComponentDocs(projectData, data, projectFixture)
+
+        when: "we compute the components metadata"
+        Map result = leVADocumentService.computeComponentMetadata(projectData, "${projectFixture.docType}")
+
+        then: "the size of the components is as expected."
+        result.size() == 3
+
+        where:
+        projectFixture << new DocTypeProjectFixtureWithComponent().getProjects()
+    }
+
     private Map setUpFixture(ProjectFixture projectFixture) {
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder.getRoot())
         Map data = dataFixture.buildFixtureData(projectFixture)
-        levaDocWiremockProxyData.updateURLs(levaDocWiremock, data)
+        levaDocWiremockProxyData.updateURLs(levaDocWiremock)
         return data
     }
 
