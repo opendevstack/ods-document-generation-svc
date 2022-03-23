@@ -4,12 +4,14 @@ import org.yaml.snakeyaml.Yaml
 
 abstract class DocTypeProjectFixtureBase {
 
+    public static final String DUMMY_PROJECT = "dummyProject"
+
     private static final String FILENAME_WITH_PROJECTS = "leva-doc-functional-test-projects.yml"
     private static final String FILENAME_PATH = "src/test/resources"
-    private static final String LEVA_DOC_FUNCTIONAL_TESTS_PROJECTS = "${FILENAME_PATH}/${FILENAME_WITH_PROJECTS}"
 
-    private static final String ONLY_TEST_ONE_PROJECT = "trfdgp"
-    private static final List<String> SKIP_TEST_PROJECTS = ["ordgp", "g3dgp", "g4dgp", "brassp"]
+    private static final String LEVA_DOC_FUNCTIONAL_TESTS_PROJECTS = "${FILENAME_PATH}/${FILENAME_WITH_PROJECTS}"
+    private static final String ONLY_TEST_ONE_PROJECT = "ordgp"
+    private static final List<String> SKIP_TEST_PROJECTS = [ "twrfdgp", "trdgp", "g3dgp", "g4dgp", "brassp"]
 
     protected final List docTypes
 
@@ -33,11 +35,18 @@ abstract class DocTypeProjectFixtureBase {
             projects.each{ project ->
                 addDocTypes(project as Map, projectsToTest)
             }
-        } catch(RuntimeException runtimeException){
+
+            if (projectsToTest.isEmpty()){
+                projectsToTest.add(
+                        ProjectFixture
+                                .getProjectFixtureBuilder(buildDummyProject(), "No DocTpe match")
+                                .component("No DocTpe defined")
+                                .build())
+            }
+        } catch(Throwable runtimeException){
             // If there's an error here, the log.error doesn't work
-            System.out.print("Error loading project metadata from LEVA_DOC_FUNCTIONAL_TESTS_PROJECTS")
-            System.out.print("Error:${runtimeException.message}")
-            runtimeException.printStackTrace()
+            // neither the print
+            // So, if there's an error in the startup, put a debug line here
             throw runtimeException
         }
 
@@ -45,4 +54,15 @@ abstract class DocTypeProjectFixtureBase {
     }
 
     abstract addDocTypes(Map project, List projects)
+
+    private Map buildDummyProject(){
+        return [
+                id: DUMMY_PROJECT,
+                description: """
+                    This project is created when there's no DocType related to the test to execute.
+                    As we filter the DocTypeProjectFixture* with the ones defined here
+                    leva-doc-functional-test-projects.yml --> docsToTest
+                    """
+        ]
+    }
 }

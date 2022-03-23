@@ -24,9 +24,9 @@ class ProjectFixture {
     String releaseManagerBranch
 
     static getProjectFixtureBuilder(Map project, String docType) {
-        List<String> docsToTest = project.docsToTest?.split("\\s*,\\s*")
-        List<String> testResults = project.testResults?.split("\\s*,\\s*")
-        List<String> components = project.components?.split("\\s*,\\s*")
+        List<String> docsToTest = project.docsToTest?.split("\\s*,\\s*")?:[]
+        List<String> testResults = project.testResults?.split("\\s*,\\s*")?:[]
+        List<String> components = project.components?.split("\\s*,\\s*")?:[]
         return ProjectFixture.builder()
             .project(project.id as String)
             .description(project.description as String)

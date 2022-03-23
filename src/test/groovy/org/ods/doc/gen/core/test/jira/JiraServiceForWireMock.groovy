@@ -31,4 +31,5 @@ class JiraServiceForWireMock extends JiraService {
     void updateTextFieldsOnIssue(String issueIdOrKey, Map fields) {
         log.warn("updateTextFieldsOnIssue - issueIdOrKey:$issueIdOrKey")
     }
+
 }

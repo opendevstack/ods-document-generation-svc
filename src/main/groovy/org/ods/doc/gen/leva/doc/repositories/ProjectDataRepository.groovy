@@ -1,6 +1,5 @@
 package org.ods.doc.gen.leva.doc.repositories
 
-
 import groovy.json.JsonSlurperClassic
 
 import java.nio.file.NoSuchFileException

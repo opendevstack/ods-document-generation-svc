@@ -2,6 +2,7 @@ package org.ods.doc.gen.pdf.builder.repository
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
+import groovy.util.logging.Slf4j
 import org.ods.doc.gen.BitBucketClientConfig
 import org.ods.doc.gen.GithubClientConfig
 import org.ods.doc.gen.core.test.wiremock.WireMockFacade
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo
 
+@Slf4j
 @Repository
 class WiremockDocumentRepository {
 
@@ -47,7 +49,9 @@ class WiremockDocumentRepository {
     }
 
     void setUpGithubRepository(String version) {
-        githubClientConfig.setUrl(mockTemplatesZipArchiveDownload(GH_URL.replace(VERSION, version), GH_TEMPLATE))
+        String githubUrl = mockTemplatesZipArchiveDownload(GH_URL.replace(VERSION, version), GH_TEMPLATE)
+        log.info("WireMockServer: [github: ${githubUrl}]")
+        githubClientConfig.setUrl(githubUrl)
         githubClientConfig.setHttpProxyHost(null)
         bitBucketDocumentTemplatesRepository.bbDocProject = BitBucketDocumentTemplatesRepository.NONE
     }
@@ -56,7 +60,9 @@ class WiremockDocumentRepository {
         Map queryParams = [:]
         queryParams.at = equalTo("${BitBucketDocumentTemplatesRepository.BRANCH}${version}")
         queryParams.format = equalTo(ZIP)
-        bitBucketClientConfig.setUrl(mockTemplatesZipArchiveDownload(BB_URL, BB_TEMPLATE, RETURN_OK, queryParams))
+
+        String serverUrl = mockTemplatesZipArchiveDownload(BB_URL, BB_TEMPLATE, RETURN_OK, queryParams)
+        bitBucketClientConfig.setUrl(serverUrl)
         bitBucketDocumentTemplatesRepository.bbDocProject = BB_PROJECT
         bitBucketDocumentTemplatesRepository.bbRepo = BB_REPO
     }

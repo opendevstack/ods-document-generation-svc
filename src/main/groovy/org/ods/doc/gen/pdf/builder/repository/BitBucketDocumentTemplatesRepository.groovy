@@ -41,7 +41,9 @@ class BitBucketDocumentTemplatesRepository implements DocumentTemplatesRepositor
     Path getTemplatesForVersion(String version) {
         log.info ("getTemplatesForVersion version:${version}")
         Path targetDir = Paths.get(basePath, version)
-        bitbucketService.downloadRepo(bbDocProject, bbRepo, "${BRANCH}${version}", targetDir.toString())
+        if (!targetDir.toFile().exists()) {
+            bitbucketService.downloadRepo(bbDocProject, bbRepo, "${BRANCH}${version}", targetDir.toString())
+        }
         return targetDir
     }
 

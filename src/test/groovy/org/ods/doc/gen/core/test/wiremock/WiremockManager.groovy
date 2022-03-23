@@ -47,7 +47,6 @@ class WiremockManager {
                 .wireMockConfig()
                 .usingFilesUnderDirectory(pathToFiles)
                 .dynamicPort()
-                .enableBrowserProxying(true)
         )
         wireMockServer.start()
         log.info("WireMockServer: [{}:{}]", serverType, wireMockServer.baseUrl())
@@ -65,7 +64,7 @@ class WiremockManager {
     void tearDown() {
         log.info("tearDown")
 
-        wireMockServer.stop();
+        wireMockServer.stop()
         if (recording) {
             try {
                 SnapshotRecordResult recording = wireMockServer.stopRecording()

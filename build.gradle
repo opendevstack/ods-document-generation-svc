@@ -3,7 +3,7 @@ buildscript {
     groovyallVersion = '3.0.9'
     springbootVersion = "2.6.2"
     springCloudVersion = '3.1.0'
-    spockCoreVersion = "2.0-groovy-3.0"
+    spockCoreVersion = "2.1-groovy-3.0"
     spockReportsVersion = '2.1-groovy-3.0'
   }
 
@@ -149,6 +149,7 @@ test {
   filter {
     excludeTestsMatching "*IT"
   }
+  systemProperty "spock.configuration", "SpockConfig.groovy"
   systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
   systemProperty 'com.athaydes.spockframework.report.projectName', 'docGen'
   systemProperty 'com.athaydes.spockframework.report.projectVersion', version
