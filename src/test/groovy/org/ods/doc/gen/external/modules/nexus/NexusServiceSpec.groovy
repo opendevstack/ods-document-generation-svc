@@ -240,8 +240,7 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
         temporaryFolder.create()
 
-        String url = "http://localhost:" + server.port() + "/repository/" +
-                request.data.repository + "/" + request.data.directory + "/" + request.data.name
+        String url = "/repository/" + request.data.repository + "/" + request.data.directory + "/" + request.data.name
 
         when: "execute"
 
