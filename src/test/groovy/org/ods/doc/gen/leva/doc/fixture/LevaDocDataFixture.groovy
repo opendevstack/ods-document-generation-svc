@@ -29,10 +29,8 @@ class LevaDocDataFixture {
         return data
     }
 
-    Map getModuleData(ProjectFixture projectFixture, Map data) {
+    Map getModuleData(ProjectFixture projectFixture) {
         Map input = RepoDataBuilder.getRepoForComponent(projectFixture.component)
-        ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-        input.data.tests << [unit: testsReports.getResults(projectData, projectFixture.component, "unit")]
         return input
     }
 
@@ -71,16 +69,16 @@ class LevaDocDataFixture {
     }
 
     private String getJenkinsLogUrl(String projectWithBuild) {
-        "https://dummy/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
+        "/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
     }
 
     private Map<String, String> buildTestResultsUrls(List<String> testResults, String projectWithBuild) {
         Map hardcodedUrls = [
-                "Unit-backend": "https://dummy/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
-                "Unit-frontend": "https://dummy/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
-                "Acceptance" : "https://dummy/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
-                'Installation' : "https://dummy/repository/leva-documentation/${projectWithBuild}/installation.zip",
-                'Integration' : "https://dummy/repository/leva-documentation/${projectWithBuild}/integration.zip",
+                "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
+                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip"
+                "Acceptance" : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
+                'Installation' : "/repository/leva-documentation/${projectWithBuild}/installation.zip",
+                'Integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
         ]
 
         Map<String, String> testResultsUrl = [:]
@@ -91,7 +89,6 @@ class LevaDocDataFixture {
     }
 
     private Map<String, String> buildGitData(ProjectFixture projectFixture) {
-        String bitbucketUrl = System.properties["bitbucket.url"]?: "https://bitbucket-dev.biscrum.com"
         return  [
                 commit: "1e84b5100e09d9b6c5ea1b6c2ccee8957391beec",
                 baseTag: "ods-generated-v3.0-3.0-0b11-D",
@@ -99,9 +96,8 @@ class LevaDocDataFixture {
                 author: "ODS Jenkins Shared Library System User (undefined)",
                 message: "Swingin' The Bottle",
                 time: "2021-04-20T14:58:31.042152",
-                repoURL: "${bitbucketUrl}/scm/${projectFixture.project}/${projectFixture.releaseManagerRepo}.git",
                 releaseManagerRepo: "${projectFixture.releaseManagerRepo}",
-                releaseManagerBranch: "${projectFixture.releaseManagerBranch}"
+                releaseManagerBranch: "${projectFixture.releaseManagerBranch}",
         ]
     }
 

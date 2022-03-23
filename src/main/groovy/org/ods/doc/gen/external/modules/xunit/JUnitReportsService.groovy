@@ -7,6 +7,9 @@ import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 @SuppressWarnings(['JavaIoPackageAccess', 'EmptyCatchBlock'])
 @Slf4j
@@ -58,31 +61,64 @@ class JUnitReportsService {
         return this.combineTestResults(testResults)
     }
 
-    void downloadTestsResults(Map<String, String> testResultsURLs, String targetFolder) {
-        testResultsURLs.each {
-            nexusService.downloadAndExtractZip(it.value, targetFolder)
-        }
-    }
+    Map getTestData(Map data) {
+        String tmpFolder = data.tmpFolder as String
+        Map testResultsURLs = data.build.testResultsURLs as Map
+        String component = data.repo?.id?.capitalize()
 
-    Map getTestData(String tmpFolder, Map testResultsURLs, Map data) {
-        downloadTestsResults(testResultsURLs as Map, tmpFolder)
+        Map<String, Map> tests = downloadTestsResults(testResultsURLs as Map, tmpFolder, component)
 
-        Map tests = createTestDataStructure()
         tests.each {
-            Map testResult = getTestResults(it.key.capitalize(), tmpFolder, data.repo?.id?.capitalize())
+            String targetFolder = it.value.targetFolder as String
+            Map testResult = getTestResults(it.key.capitalize(), targetFolder, component)
             it.value.testReportFiles = testResult.testReportFiles
             it.value.testResults = testResult.testResults
         }
         return tests
     }
 
-    private Map createTestDataStructure() {
-        Map testData = [
-                (TestType.UNIT.uncapitalize())        : [:],
-                (TestType.ACCEPTANCE.uncapitalize())  : [:],
-                (TestType.INSTALLATION.uncapitalize()): [:],
-                (TestType.INTEGRATION.uncapitalize()) : [:],
-        ]
+    private Map<String, Map> downloadTestsResults(Map<String, String> testResultsURLs, String targetFolder, String component) {
+        Map<String, Map> testsResults = createTestDataStructure(component)
+        String unitKeyTests = TestType.UNIT.toLowerCase()
+
+        testResultsURLs.each {testResultUrl ->
+            testsResults.each {testResult ->
+                String testResultUrlKey = testResultUrl.key.toLowerCase()
+                String testResultKey = testResult.key.toLowerCase()
+                if (unitKeyTests == testResultKey) {
+                    if ((testResultUrlKey.contains(unitKeyTests)) && component && (testResultUrlKey.contains(component.toLowerCase()))) {
+                        testResult.value.targetFolder = downloadAndExtractZip(testResultUrl.value, targetFolder, testResultKey)
+                    }
+                } else {
+                    if (testResultUrlKey == testResultKey) {
+                        testResult.value.targetFolder = downloadAndExtractZip(testResultUrl.value, targetFolder, testResultKey)
+                    }
+                }
+            }
+        }
+
+        return testsResults
+    }
+
+    private String downloadAndExtractZip(String urlToDownload, String targetFolder, String subFolder) {
+        Path targetFolderWithKey = Paths.get(targetFolder, subFolder)
+        Files.createDirectories(targetFolderWithKey)
+        nexusService.downloadAndExtractZip(urlToDownload, targetFolderWithKey.toString())
+        return targetFolderWithKey.toString()
+    }
+
+    private Map<String, Map> createTestDataStructure(String component = null) {
+        Map testData = [ : ]
+        if (component) {
+            testData.put(TestType.UNIT.uncapitalize(), [:])
+        } else {
+            testData.putAll([
+                    (TestType.ACCEPTANCE.uncapitalize())  : [:],
+                    (TestType.INSTALLATION.uncapitalize()): [:],
+                    (TestType.INTEGRATION.uncapitalize()) : [:],
+            ])
+        }
+
         testData.each {
             it.value.testReportFiles = []
             it.value.testResults = [ testsuites: [] ]
@@ -91,7 +127,12 @@ class JUnitReportsService {
     }
 
     private Map getTestResults(String typeIn = 'unit', String targetFolder, String component = null) {
-
+        if (targetFolder == null) {
+            return [
+                    testReportFiles: [],
+                    testResults: [:],
+            ]
+        }
         def testReportFiles = loadTestReportsFromPath(targetFolder, typeIn, component)
 
         return [

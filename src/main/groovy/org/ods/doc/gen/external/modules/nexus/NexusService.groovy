@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 
 import javax.inject.Inject
 import java.nio.file.Paths
+import java.security.InvalidParameterException
 
 @Slf4j
 @Service
@@ -114,27 +115,28 @@ class NexusService {
     @SuppressWarnings(['JavaIoPackageAccess'])
     Map<URI, File> retrieveArtifact(String nexusRepository, String nexusDirectory, String name, String extractionPath) {
         String urlToDownload = getURL(nexusRepository, nexusDirectory, name)
-        HttpResponse<File> response = downloadToPath(urlToDownload, name, extractionPath)
+        HttpResponse<File> response = downloadToPath(urlToDownload, extractionPath, name)
         return [
             uri: this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
             content: response.getBody(),
         ]
     }
 
-    String getURL(String nexusRepository, String nexusDirectory, String name) {
-        return "${this.baseURL}/repository/${nexusRepository}/${nexusDirectory}/${name}"
+    private String getURL(String nexusRepository, String nexusDirectory, String name) {
+        return "/repository/${nexusRepository}/${nexusDirectory}/${name}"
     }
 
-    private HttpResponse<File> downloadToPath(String urlToDownload, String name, String extractionPath) {
+    private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        def restCall = Unirest.get("${urlToDownload}").basicAuth(this.username, this.password)
+        String fullUrlToDownload = "${baseURL}${urlToDownload}"
+        def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {
             def message = 'Error: unable to get artifact. ' +
                     "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'." +
-                    " The url called was: ${urlToDownload}"
+                    " The url called was: ${fullUrlToDownload}"
             if (response.getStatus() == 404) {
-                message = "Error: unable to get artifact. Nexus could not be found at: '${urlToDownload}'."
+                message = "Error: unable to get artifact. Nexus could not be found at: '${fullUrlToDownload}'."
             }
             if (response.getStatus() != 200) {
                 throw new RuntimeException(message)
@@ -151,8 +153,9 @@ class NexusService {
     }
 
     void downloadAndExtractZip(String urlToDownload, String extractionPath) {
-        String artifactName = new URL(urlToDownload).getFile().split("/").last()
-        downloadToPath(urlToDownload, artifactName, extractionPath)
+        log.debug("downloadAndExtractZip: urlToDownload:${urlToDownload}, extractionPath:${extractionPath}")
+        String artifactName = urlToDownload.split("/").last()
+        downloadToPath(urlToDownload, extractionPath, artifactName)
         extractZip(extractionPath, artifactName)
     }
 

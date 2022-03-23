@@ -2,7 +2,6 @@ package org.ods.doc.gen.leva.doc.fixture
 
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.BitBucketClientConfig
-import org.ods.doc.gen.core.URLHelper
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremock
@@ -27,27 +26,13 @@ class LevaDocWiremockURLMapper {
         this.nexusService = nexusService
     }
 
-    void updateURLs(LevaDocWiremock levaDocWiremock, Map data){
+    void updateURLs(LevaDocWiremock levaDocWiremock){
         updateServersUrlBase(levaDocWiremock)
-        updateDataURL(data)
     }
     private void updateServersUrlBase(LevaDocWiremock levaDocWiremock) {
         nexusService.baseURL = new URIBuilder(levaDocWiremock.nexusServer.server().baseUrl()).build()
         jiraService.baseURL = new URIBuilder(levaDocWiremock.jiraServer.server().baseUrl()).build()
         bitBucketClientConfig.url = levaDocWiremock.bitbucketServer.server().baseUrl()
-    }
-
-    private void updateDataURL(Map data) {
-        data.build.jenkinLog = URLHelper.replaceHostInUrl(data.build.jenkinLog as String, nexusService.baseURL.toString())
-        data.build.testResultsURLs = updateMapNexusUrl(data.build.testResultsURLs)
-    }
-
-    private Map updateMapNexusUrl(Map nexusUrls) {
-        Map updatedUrls = [:]
-        nexusUrls.each {entry ->
-            updatedUrls[entry.key] = URLHelper.replaceHostInUrl(entry.value as String, nexusService.baseURL.toString())
-        }
-        return updatedUrls
     }
 
 }

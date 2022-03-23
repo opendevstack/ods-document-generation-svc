@@ -7,6 +7,7 @@ import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
 import spock.lang.Specification
 
 import java.nio.file.Files
+import java.nio.file.Path
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
 
@@ -152,20 +153,49 @@ class JUnitReportsServiceSpec extends Specification {
 
     def "download and unzip tests files"() {
         given:
+        Path temporaryFolder = Files.createTempDirectory("junit-test-reports-")
+        String path = temporaryFolder.toFile().getAbsolutePath()
         Map<String, String> listOfFiles = [
-                "Unit": "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
-                "Acceptance" : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
-                'Installation' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
-                'Integration' : "https://nexus-ods.ocp.odsbox.lan/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+                "Unit-releasemanager": "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
         ]
-
+        String component = null
         when:
-        service.downloadTestsResults(listOfFiles, temporaryFolder)
+        service.downloadTestsResults(listOfFiles, path, component)
 
         then:
-        1 * nexusService.downloadAndExtractZip(listOfFiles.Unit, temporaryFolder)
-        1 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, temporaryFolder)
-        1 * nexusService.downloadAndExtractZip(listOfFiles.Installation, temporaryFolder)
-        1 * nexusService.downloadAndExtractZip(listOfFiles.Integration, temporaryFolder)
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Unit, "${path}/unit")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, "${path}/acceptance")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Installation, "${path}/installation")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Integration, "${path}/integration")
+
+        cleanup:
+        temporaryFolder.deleteDir()
+    }
+
+    def "download and unzip tests files for component"() {
+        given:
+        Path temporaryFolder = Files.createTempDirectory("junit-test-reports-")
+        String path = temporaryFolder.toFile().getAbsolutePath()
+        Map<String, String> listOfFiles = [
+                "Unit-releasemanager": "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/unit-ordgp-ordgp-releasemanager.zip",
+                "Acceptance" : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/acceptance-ordgp-ordgp-releasemanager.zip",
+                'Installation' : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/installation-ordgp-ordgp-releasemanager.zip",
+                'Integration' : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
+        ]
+        String component = "releasemanager"
+        when:
+        service.downloadTestsResults(listOfFiles, path, component)
+
+        then:
+        1 * nexusService.downloadAndExtractZip(listOfFiles."Unit-releasemanager", "${path}/unit")
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, "${path}/acceptance")
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Installation, "${path}/installation")
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Integration, "${path}/integration")
+
+        cleanup:
+        temporaryFolder.deleteDir()
     }
 }
