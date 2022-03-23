@@ -128,14 +128,15 @@ class NexusService {
 
     private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        def restCall = Unirest.get("${baseURL}${urlToDownload}").basicAuth(this.username, this.password)
+        String fullUrlToDownload = "${baseURL}${urlToDownload}"
+        def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {
             def message = 'Error: unable to get artifact. ' +
                     "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'." +
-                    " The url called was: ${urlToDownload}"
+                    " The url called was: ${fullUrlToDownload}"
             if (response.getStatus() == 404) {
-                message = "Error: unable to get artifact. Nexus could not be found at: '${urlToDownload}'."
+                message = "Error: unable to get artifact. Nexus could not be found at: '${fullUrlToDownload}'."
             }
             if (response.getStatus() != 200) {
                 throw new RuntimeException(message)
