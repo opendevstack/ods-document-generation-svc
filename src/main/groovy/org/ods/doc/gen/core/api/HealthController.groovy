@@ -17,42 +17,39 @@ class HealthController {
     private HtmlToPDFService htmlToPDFService
 
     @Inject
-    HealthController(HtmlToPDFService htmlToPDFService){
+    HealthController(HtmlToPDFService htmlToPDFService) {
         this.htmlToPDFService = htmlToPDFService
     }
 
-    @GetMapping( "/health")
-    Map check( ) {
+    @GetMapping("/health")
+    Map check() {
         log.info("health check to verify a pdf can be generated, executed")
         generatePdfData()
         Map result = [
                 service: "docgen",
-                status: "passing",
-                time: new Date().toString()
+                status : "passing",
+                time   : new Date().toString()
         ]
 
         return result
     }
 
-    private byte[] generatePdfData() {
+    private generatePdfData() {
         Path tmpDir = Files.createTempDirectory("generatePdfDataFolderTest")
         def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
 
-        def pdfBytesToString
         try {
             def documentPdf = htmlToPDFService.convert(tmpDir, documentHtmlFile)
             def data = Files.readAllBytes(documentPdf)
             if (!new String(data).startsWith("%PDF-1.4\n")) {
-                throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.")
+                throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.")
             }
-            pdfBytesToString = data.encodeBase64().toString()
         } catch (e) {
-            throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.", e)
+            throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.", e)
         } finally {
             Files.delete(documentHtmlFile)
             FileUtils.deleteDirectory(tmpDir.toFile())
         }
-        return pdfBytesToString
     }
 
 }
