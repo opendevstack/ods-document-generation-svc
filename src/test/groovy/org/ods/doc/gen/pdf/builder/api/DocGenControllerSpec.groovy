@@ -46,7 +46,7 @@ class DocGenControllerSpec extends Specification {
         when(fileSystemHelper.createTempDirectory(id)).thenReturn(tempFolder)
 
         and: "PdfGenerationService is mocked"
-        Path pdfFile =  Path.of("src/test/resources","dtr_proof.pdf")
+        Path pdfFile =  Path.of("src/test/resources/pdf.builder","CFTP-ordgp-WIP-8.pdf")
         when(service.generatePdfFile(metadataValue, dataValue, tempFolder)).thenReturn(pdfFile)
 
         expect: "a client call to /document return the initial json as pdf data"

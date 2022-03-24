@@ -92,7 +92,7 @@ class LevaDocServiceTestBase extends Specification {
         log.info("setUpFixture: project:[{}], docType:[{}], overall:[{}]", projectFixture.project, projectFixture.docType, projectFixture.overall)
         levaDocWiremock.setUpWireMock(projectFixture, tempFolder)
         Map data = dataFixture.buildFixtureData(projectFixture)
-        levaDocWiremockProxyData.updateURLs(levaDocWiremock, data)
+        levaDocWiremockProxyData.updateURLs(levaDocWiremock)
         return data
     }
 
