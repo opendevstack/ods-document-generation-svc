@@ -1,18 +1,13 @@
 package org.ods.doc.gen.leva.doc.services.doc
 
-
 import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureBase
 import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureWithTestData
 import org.ods.doc.gen.leva.doc.fixture.LevaDocTestValidator
-import org.springframework.test.context.ActiveProfiles
 import spock.lang.IgnoreIf
-import spock.lang.Stepwise
 
 /**
  * see LevaDocServiceTestBase
  */
-@Stepwise
-@ActiveProfiles(["test", "LevaDocServiceWithTestSpec"])
 class LevaDocServiceWithTestSpec extends LevaDocServiceTestBase {
 
     @IgnoreIf({ data.projectFixture.project == DocTypeProjectFixtureBase.DUMMY_PROJECT })

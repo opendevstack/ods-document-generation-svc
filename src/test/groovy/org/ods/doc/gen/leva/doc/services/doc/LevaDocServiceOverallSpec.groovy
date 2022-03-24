@@ -4,15 +4,11 @@ import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureBase
 import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixturesOverall
 import org.ods.doc.gen.leva.doc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.project.data.ProjectData
-import org.springframework.test.context.ActiveProfiles
 import spock.lang.IgnoreIf
-import spock.lang.Stepwise
 
 /**
  * see LevaDocServiceTestBase
  */
-@Stepwise
-@ActiveProfiles(["test", "LevaDocServiceOverallSpec"])
 class LevaDocServiceOverallSpec extends LevaDocServiceTestBase {
 
     // When recording mode, REMEMBER this test depends on LevaDocServiceWithComponentSpec

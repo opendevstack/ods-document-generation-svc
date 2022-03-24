@@ -21,8 +21,6 @@ import java.nio.file.Path
 @Slf4j
 @ActiveProfiles("test")
 @ContextConfiguration(classes= [TestConfig.class])
-@Stepwise
-@DirtiesContext
 class PdfGenerationServiceSpec extends Specification {
 
     public static final String REPORT_FOLDER = "build/reports/pdf"

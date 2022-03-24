@@ -12,6 +12,7 @@ import org.ods.doc.gen.leva.doc.fixture.ProjectFixture
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.ods.doc.gen.project.data.Project
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Shared
 import spock.lang.Specification
@@ -52,6 +53,7 @@ import javax.inject.Inject
  */
 @Slf4j
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ActiveProfiles(["test"])
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
 class LevaDocServiceTestBase extends Specification {
 

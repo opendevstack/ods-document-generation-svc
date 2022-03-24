@@ -1,6 +1,5 @@
 package org.ods.doc.gen.leva.doc.fixture
 
-import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.core.test.wiremock.WiremockManager
 import org.ods.doc.gen.core.test.wiremock.WiremockServers
@@ -36,7 +35,6 @@ class LevaDocWiremock {
         this.environment = environment
     }
 
-    @Synchronized
     void setUpWireMock(ProjectFixture projectFixture, File tempFolder) {
         String projectKey = projectFixture.project, doctype = projectFixture.docType
         log.info "Using PROJECT_KEY:${projectKey}"
