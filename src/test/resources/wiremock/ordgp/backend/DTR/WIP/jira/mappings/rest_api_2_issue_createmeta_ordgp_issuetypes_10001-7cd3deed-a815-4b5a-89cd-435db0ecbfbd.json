@@ -1,0 +1,33 @@
+{
+  "id" : "7cd3deed-a815-4b5a-89cd-435db0ecbfbd",
+  "name" : "rest_api_2_issue_createmeta_ordgp_issuetypes_10001",
+  "request" : {
+    "url" : "/rest/api/2/issue/createmeta/ORDGP/issuetypes/10001",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "rest_api_2_issue_createmeta_ordgp_issuetypes_10001-7cd3deed-a815-4b5a-89cd-435db0ecbfbd.json",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Thu, 24 Mar 2022 18:20:09 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "1160x374x1",
+      "Referrer-Policy" : "strict-origin-when-cross-origin",
+      "X-XSS-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "Content-Security-Policy" : "frame-ancestors 'self'",
+      "Strict-Transport-Security" : [ "max-age=31536000", "max-age=15768000" ],
+      "Set-Cookie" : [ "JSESSIONID=2CF259F8D6D9BCE27B946BC36C38F500; Path=/; Secure; HttpOnly", "atlassian.xsrf.token=BW8I-UASU-MVFU-WO2W_210a6bf486065e643b90740bdb2518f84be8f7b0_lin; Path=/; Secure" ],
+      "X-Seraph-LoginReason" : "OK",
+      "X-ASESSIONID" : "1mtma8x",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "Cache-Control" : "no-cache, no-store, no-transform",
+      "Vary" : "User-Agent"
+    }
+  },
+  "uuid" : "7cd3deed-a815-4b5a-89cd-435db0ecbfbd",
+  "persistent" : true,
+  "insertionIndex" : 4
+}

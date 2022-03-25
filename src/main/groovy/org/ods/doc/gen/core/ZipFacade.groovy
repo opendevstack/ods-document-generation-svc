@@ -36,9 +36,7 @@ class ZipFacade {
     }
 
     void extractZipArchive(Path zipArchive, Path targetDir) {
-
-        // TODO: AMP it is necessary?
-//        cleanTargetFolder(targetDir)
+        cleanTargetFolder(targetDir)
         new ZipFile(zipArchive.toFile()).extractAll(targetDir.toString())
     }
 

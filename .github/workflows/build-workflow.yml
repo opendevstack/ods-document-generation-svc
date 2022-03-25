@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      # TODO we will generate it from ODS
+      # TODO https://github.com/opendevstack/ods-quickstarters/issues/766
       image: s2obcn/jdk-11_openj9-wkhtmltopdf-ubi:main
       env:
         WKHTML_TO_PDF_WITH_DOCKER: false

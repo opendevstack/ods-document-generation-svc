@@ -13,7 +13,7 @@ class WkhtmltopdfServiceSpec extends Specification {
     def "execution throw error"(){
         given:
         def service = new WkhtmltopdfService()
-        def documentHtmlFile = Path.of("src/test/resources","InstallationReport.html.tmpl")
+        def documentHtmlFile = Path.of("src/test/resources/pdf.builder","InstallationReport.html.tmpl")
         def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
 
         when:

@@ -2,6 +2,7 @@ package org.ods.doc.gen.leva.doc.api
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.leva.doc.fixture.LevaDocDataFixture
 import org.ods.doc.gen.leva.doc.fixture.ProjectFixture
 import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
@@ -9,11 +10,13 @@ import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import spock.lang.Specification
+import spock.lang.Stepwise
 import spock.lang.TempDir
 
 import javax.inject.Inject
@@ -23,6 +26,7 @@ import java.nio.file.Path
 import static groovy.json.JsonOutput.prettyPrint
 import static groovy.json.JsonOutput.toJson
 import static org.mockito.ArgumentMatchers.anyMap
+import static org.mockito.ArgumentMatchers.anyString
 import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.Mockito.when
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -30,6 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Slf4j
 @WebMvcTest(LevaDocController.class)
+@Stepwise
+@DirtiesContext
 class LevaDocControllerSpec extends Specification {
 
     @TempDir
@@ -41,6 +47,9 @@ class LevaDocControllerSpec extends Specification {
     @MockBean
     LeVADocumentService leVADocumentService
 
+    @MockBean
+    private  FileSystemHelper fileSystemHelper
+
     LevaDocDataFixture dataFixture
 
     def setup() {
@@ -49,8 +58,8 @@ class LevaDocControllerSpec extends Specification {
 
     def "BuildDocument ok"() {
         given: "A temporal folder "
-        GroovySpy(Files, global: true)
-        Files.createTempDirectory(_) >> tempFolder
+        String projectBuild = "${projectFixture.project}-${buildNumber}"
+        when(fileSystemHelper.createTempDirectory(projectBuild)).thenReturn(tempFolder)
 
         and: "leVADocumentService is mocked"
         List<DocumentHistoryEntry> response = buildExpectedResponse()
@@ -79,8 +88,7 @@ class LevaDocControllerSpec extends Specification {
 
     def "BuildDocument when LevaDoc Throw exception"() {
         given: "A temporal folder "
-        GroovySpy(Files, global: true)
-        Files.createTempDirectory(_) >> tempFolder
+        when(fileSystemHelper.createTempDirectory(anyString())).thenReturn(tempFolder)
 
         and: "leVADocumentService is mocked and Throw an exception"
         Map data = dataFixture.buildFixtureData(projectFixture)

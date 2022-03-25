@@ -3,6 +3,7 @@ package org.ods.doc.gen.pdf.builder.api
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
+import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.pdf.builder.services.PdfGenerationService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -22,9 +23,11 @@ import static groovy.json.JsonOutput.toJson
 class DocGenController {
 
     private PdfGenerationService pdfGeneration
+    private final FileSystemHelper fileSystemHelper
 
     @Inject
-    DocGenController(PdfGenerationService pdfGenerationService){
+    DocGenController(PdfGenerationService pdfGenerationService, FileSystemHelper fileSystemHelper){
+        this.fileSystemHelper = fileSystemHelper
         this.pdfGeneration = pdfGenerationService
     }
 
@@ -39,7 +42,7 @@ class DocGenController {
         Path tmpDir
         String pdfBytesToString
         try {
-            tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
+            tmpDir = fileSystemHelper.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
             Path documentPdf = pdfGeneration.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
             pdfBytesToString = Files.readAllBytes(documentPdf).encodeBase64().toString()
         } catch (Throwable e) {

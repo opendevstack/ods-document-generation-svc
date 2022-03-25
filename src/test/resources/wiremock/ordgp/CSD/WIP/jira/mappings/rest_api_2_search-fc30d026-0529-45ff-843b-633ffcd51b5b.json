@@ -1,0 +1,38 @@
+{
+  "id" : "fc30d026-0529-45ff-843b-633ffcd51b5b",
+  "name" : "rest_api_2_search",
+  "request" : {
+    "url" : "/rest/api/2/search",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"jql\":\"project = ORDGP AND issuetype = 'Documentation'\",\"maxResults\":1000}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "rest_api_2_search-fc30d026-0529-45ff-843b-633ffcd51b5b.json",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Thu, 24 Mar 2022 18:18:50 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "1158x361x1",
+      "Referrer-Policy" : "strict-origin-when-cross-origin",
+      "X-XSS-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "Content-Security-Policy" : "frame-ancestors 'self'",
+      "Strict-Transport-Security" : [ "max-age=31536000", "max-age=15768000" ],
+      "Set-Cookie" : [ "JSESSIONID=962144F4C1E8DFC4CA58577CDDE7A56E; Path=/; Secure; HttpOnly", "atlassian.xsrf.token=BW8I-UASU-MVFU-WO2W_a671227994edad5dd370a576ae804d01fb393ae1_lin; Path=/; Secure" ],
+      "X-Seraph-LoginReason" : "OK",
+      "X-ASESSIONID" : "1gxcuo8",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "Cache-Control" : "no-cache, no-store, no-transform",
+      "Vary" : "User-Agent"
+    }
+  },
+  "uuid" : "fc30d026-0529-45ff-843b-633ffcd51b5b",
+  "persistent" : true,
+  "insertionIndex" : 19
+}

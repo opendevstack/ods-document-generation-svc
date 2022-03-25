@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.equalTo
 class DocGenDockerIT extends Specification {
 
     static final String IMAGE_NAME = "ods-document-generation-svc:local"
-    static final int SERVER_PORT = 8080
+    static final int SERVER_PORT = 2222
     static final String ROOT__LOG__LEVEL = "ROOT_LOG_LEVEL"
     static final String LOG_LEVEL = "DEBUG"
     static final String SERVER_PORT_NAME = "SERVER_PORT"
