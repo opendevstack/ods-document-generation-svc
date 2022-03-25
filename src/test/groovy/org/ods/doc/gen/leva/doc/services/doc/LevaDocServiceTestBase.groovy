@@ -55,7 +55,7 @@ import javax.inject.Inject
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles(["test"])
 @ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
-class LevaDocServiceTestBase extends Specification {
+abstract class LevaDocServiceTestBase extends Specification {
 
     @Shared
     @TempDir
