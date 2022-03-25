@@ -24,8 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(DocGenController.class)
 @Slf4j
-@Stepwise
-@DirtiesContext
 class DocGenControllerSpec extends Specification {
 
     @TempDir

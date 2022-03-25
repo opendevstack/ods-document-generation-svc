@@ -211,7 +211,7 @@ def getProxyMap(){
 docker {
   springBootApplication {
     baseImage = project.ext.imageBaseForApp
-    ports = [1111]
+    ports = [8080]
     images = ['ods-document-generation-svc:local']
     jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
   }
@@ -228,28 +228,28 @@ bootRun {
 
 import com.bmuschko.gradle.docker.tasks.container.*
 
-task createDocGenServer(type: DockerCreateContainer) {
+task createServerForGalting(type: DockerCreateContainer) {
   dependsOn dockerBuildImage
   targetImageId dockerBuildImage.getImageId()
-  hostConfig.portBindings = ['8080:1111']
+  hostConfig.portBindings = ['1111:8080']
   hostConfig.autoRemove = true
 }
 
-task startDocGenServer(type: DockerStartContainer) {
+task startDocGenServerForGatling(type: DockerStartContainer) {
   group = "docker"
-  dependsOn createDocGenServer
-  targetContainerId createDocGenServer.getContainerId()
+  dependsOn createServerForGalting
+  targetContainerId createServerForGalting.getContainerId()
 }
 
-task stopDocGenServer(type: DockerStopContainer) {
+task stopDocGenServerForGatling(type: DockerStopContainer) {
   group = "docker"
-  targetContainerId createDocGenServer.getContainerId()
+  targetContainerId createServerForGalting.getContainerId()
 }
 
 gatlingRun.group("verification")
 gatlingRun.mustRunAfter(dockerTest)
-gatlingRun.dependsOn(startDocGenServer)
-gatlingRun.finalizedBy(stopDocGenServer)
+gatlingRun.dependsOn(startDocGenServerForGatling)
+gatlingRun.finalizedBy(stopDocGenServerForGatling)
 
 check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
