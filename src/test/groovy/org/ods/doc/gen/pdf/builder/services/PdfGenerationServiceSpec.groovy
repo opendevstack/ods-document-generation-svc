@@ -8,9 +8,11 @@ import groovy.util.logging.Slf4j
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
+import spock.lang.Stepwise
 import spock.lang.TempDir
 
 import javax.inject.Inject

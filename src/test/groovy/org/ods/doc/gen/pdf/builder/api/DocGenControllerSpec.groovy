@@ -2,12 +2,16 @@ package org.ods.doc.gen.pdf.builder.api
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.pdf.builder.services.PdfGenerationService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
+import spock.lang.Ignore
 import spock.lang.Specification
+import spock.lang.Stepwise
 import spock.lang.TempDir
 
 import javax.inject.Inject
@@ -31,14 +35,16 @@ class DocGenControllerSpec extends Specification {
     @MockBean
     private PdfGenerationService service;
 
+    @MockBean
+    private  FileSystemHelper fileSystemHelper
+
     def "/document API is configured OK"() {
         given: "A temporal folder "
-        GroovySpy(Files, global: true)
-        Files.createTempDirectory(_) >> tempFolder
+        String id = "${metadataValue.type}-v${metadataValue.version}"
+        when(fileSystemHelper.createTempDirectory(id)).thenReturn(tempFolder)
 
         and: "PdfGenerationService is mocked"
-        Path pdfFile =  Path.of("src/test/resources","dtr_proof.pdf")
-        String pdfValue = Files.readAllBytes(pdfFile).encodeBase64().toString()
+        Path pdfFile =  Path.of("src/test/resources/pdf.builder","CFTP-ordgp-WIP-8.pdf")
         when(service.generatePdfFile(metadataValue, dataValue, tempFolder)).thenReturn(pdfFile)
 
         expect: "a client call to /document return the initial json as pdf data"

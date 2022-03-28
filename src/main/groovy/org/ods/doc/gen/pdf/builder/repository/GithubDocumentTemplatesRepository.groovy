@@ -35,8 +35,11 @@ class GithubDocumentTemplatesRepository implements DocumentTemplatesRepository {
         log.info ("getTemplatesForVersion version:${version}")
 
         def targetDir = Paths.get(basePath, version)
-        githubService.downloadRepo(version, targetDir)
-        moveContentToRootFolder(targetDir, "ods-document-generation-templates-${version}")
+        if (!targetDir.toFile().exists()){
+            githubService.downloadRepo(version, targetDir)
+            moveContentToRootFolder(targetDir, "ods-document-generation-templates-${version}")
+        }
+
         return targetDir
     }
 

@@ -14,7 +14,7 @@ class PDFUtilSpec extends SpecHelper {
     def "add watermark text"() {
         given:
         def util = new PDFUtil()
-        def pdfFile = new FixtureHelper().getResource("Test-1.pdf")
+        def pdfFile = new FixtureHelper().getResource("pdf.builder/Test-1.pdf")
         def text = "myWatermark"
 
         when:
@@ -32,7 +32,7 @@ class PDFUtilSpec extends SpecHelper {
         given:
         def util = new PDFUtil()
 
-        def docFile = new FixtureHelper().getResource("Test.md")
+        def docFile = new FixtureHelper().getResource("pdf.builder/Test.md")
         def result
 
         when:
@@ -57,7 +57,7 @@ class PDFUtilSpec extends SpecHelper {
         given:
         def util = new PDFUtil()
 
-        def docFile = new FixtureHelper().getResource("Test.docx")
+        def docFile = new FixtureHelper().getResource("pdf.builder/Test.docx")
 
         when:
         def result = util.convertFromWordDoc(docFile)
@@ -72,8 +72,8 @@ class PDFUtilSpec extends SpecHelper {
         given:
         def util = new PDFUtil()
 
-        def docFile1 = new FixtureHelper().getResource("Test-1.pdf")
-        def docFile2 = new FixtureHelper().getResource("Test-2.pdf")
+        def docFile1 = new FixtureHelper().getResource("pdf.builder/Test-1.pdf")
+        def docFile2 = new FixtureHelper().getResource("pdf.builder/Test-2.pdf")
 
         when:
         def result = util.merge(tempFolder.absolutePath, [docFile1.bytes, docFile2.bytes])

@@ -2,6 +2,7 @@ package org.ods.doc.gen.leva.doc.api
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
 import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,10 +23,12 @@ import static groovy.json.JsonOutput.toJson
 class LevaDocController {
 
     private LeVADocumentService leVADocumentService
+    private final FileSystemHelper fileSystemHelper
 
     @Inject
-    LevaDocController(LeVADocumentService leVADocumentUseCase){
+    LevaDocController(LeVADocumentService leVADocumentUseCase, FileSystemHelper fileSystemHelper){
         this.leVADocumentService = leVADocumentUseCase
+        this.fileSystemHelper = fileSystemHelper
     }
 
     /**
@@ -60,9 +63,8 @@ class LevaDocController {
     }
 
     private List<DocumentHistoryEntry> createDocument(String projectId, String buildNumber, LevaDocType levaDocType, Map data) {
-        File tmpDir
         try {
-            tmpDir = prepareServiceDataParam(projectId, buildNumber, levaDocType, data, tmpDir)
+            prepareServiceDataParam(projectId, buildNumber, levaDocType, data)
             return levaDocType.buildDocument.apply(leVADocumentService, data)
         } catch (Throwable e) {
             String msg = "Error building document: ${levaDocType} with data:${data}"
@@ -75,14 +77,12 @@ class LevaDocController {
         }
     }
 
-    private File prepareServiceDataParam(String projectId, String buildNumber, LevaDocType levaDocType, Map data, File tmpDir) {
+    private void prepareServiceDataParam(String projectId, String buildNumber, LevaDocType levaDocType, Map data) {
         data.documentType = levaDocType.toString()
         data.projectBuild = "${projectId}-${buildNumber}"
         data.projectId = projectId
         data.buildNumber = buildNumber
-        tmpDir = Files.createTempDirectory("${data.projectBuild}").toFile()
-        data.tmpFolder = tmpDir.absolutePath
-        return tmpDir
+        data.tmpFolder = fileSystemHelper.createTempDirectory("${data.projectBuild}").toFile().absolutePath
     }
 
     private static void validateRequestParams(Map body) {

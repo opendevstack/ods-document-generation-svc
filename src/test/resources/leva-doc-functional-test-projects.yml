@@ -30,6 +30,7 @@ projects:
     releaseManagerRepo: ordgp-releasemanager
     releaseManagerBranch: master
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+    testResults: Unit-backend, Unit-frontend, Acceptance, Installation, Integration
     components: backend, frontend, test
     templatesVersion: 1.2
     validation: >
@@ -43,7 +44,7 @@ projects:
       *	Test Steps documented
       * Epics Documented
 
-  - id: trfdgp
+  - id: twrfdgp
     description: Two releases Frozen DocGen
     buildNumber: 666
     releaseId: TRFDGP-179
@@ -51,6 +52,29 @@ projects:
     releaseManagerRepo: trfdgp-releasemanager
     releaseManagerBranch: release/4.0
     docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
+    testResults:
+    components: backend, frontend, test
+    templatesVersion: 1.2
+    validation: >
+      ### Project validates
+      * Issues Succeeded
+      *	Issues Discontinued
+      *	All Test Levels documented
+      *	Test Steps documented
+      * Manual Tests not documented
+      *	Failing Tests
+      *	Releases frozen
+      * Images in documents
+
+  - id: trdgp
+    description: Two releases DocGen
+    buildNumber: 666
+    releaseId: TRFDGP-179
+    version: 4.0
+    releaseManagerRepo: trfdgp-releasemanager
+    releaseManagerBranch: release/4.0
+    docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
+    testResults:
     components: backend, frontend, test
     templatesVersion: 1.2
     validation: >
@@ -72,6 +96,7 @@ projects:
     releaseManagerRepo: g3dgp-releasemanager
     releaseManagerBranch: master
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+    testResults:
     components: backend, frontend, test
     templatesVersion: 1.2
     validation: >
@@ -87,6 +112,7 @@ projects:
     releaseManagerRepo: g4dgp-releasemanager
     releaseManagerBranch: master
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
+    testResults:
     components: backend, frontend, test
     templatesVersion: 1.2
     validation: >

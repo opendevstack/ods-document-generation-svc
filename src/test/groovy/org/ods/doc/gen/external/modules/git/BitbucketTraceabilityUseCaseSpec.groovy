@@ -51,7 +51,7 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
     }
 
     def buildProject(logger) {
-        FileUtils.copyDirectory(new FixtureHelper().getResource("workspace/metadata.yml").parentFile, tempFolder)
+        FileUtils.copyDirectory(new FixtureHelper().getResource("bitbucketTraceability/workspace/metadata.yml").parentFile, tempFolder)
 
         steps.env.buildId = "1"
         steps.env.WORKSPACE = "${tempFolder.absolutePath}"
