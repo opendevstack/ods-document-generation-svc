@@ -6,3 +6,5 @@ RUN useradd pdfuser
 USER pdfuser
 
 WORKDIR /app
+
+CMD ["/bin/bash"]
