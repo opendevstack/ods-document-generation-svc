@@ -203,12 +203,6 @@ abstract class DocGenUseCase {
                 path)
 
         log.info "Document found: ${storedFileName} \r${documentFromNexus}"
-        byte [] resurrectedDocAsBytes
-        if (storageType == 'zip') {
-            resurrectedDocAsBytes = this.zip.extractFromZipFile("${path}/${storedFileName}", contentFileName)
-        } else {
-            resurrectedDocAsBytes = documentFromNexus.content.getBytes()
-        }
 
         if (!shouldCreateArtifact(documentType, repo)) {
             repo.data.documents[documentType] = contentFileName
@@ -217,7 +211,6 @@ abstract class DocGenUseCase {
         return [
             found: true,
             'uri': documentFromNexus.uri,
-            content: resurrectedDocAsBytes,
             createdByBuild: resurrectedBuild,
         ]
     }
