@@ -60,8 +60,8 @@ class BitbucketService {
     }
 
     String getFullUrlForRepoName(String projectId, String gitReleaseManagerRepo) {
-        Path gitReleaseManagerRepoPath = Paths.get(bitBucketClientConfig.url, projectId, gitReleaseManagerRepo)
-        return gitReleaseManagerRepoPath.toUri().toString()
+        URI uri = new URI([bitBucketClientConfig.url, projectId, gitReleaseManagerRepo].join("/"))
+        return uri.normalize().toString()
     }
 
     private void streamResult(Response response, Path zipArchive){
