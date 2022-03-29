@@ -72,9 +72,8 @@ class NexusService {
 
     @SuppressWarnings('LineLength')
     URI storeComplextArtifact(String repository, byte[] artifact, String contentType, String repositoryType, Map nexusParams = [ : ]) {
-        String targetUrl = "${this.baseURL}/service/rest/v1/components?repository={repository}"
+        String targetUrl = "${this.baseURL}/service/rest/v1/components?repository=${repository}"
         def restCall = Unirest.post(targetUrl)
-            .routeParam('repository', repository)
             .basicAuth(this.username, this.password)
 
         nexusParams.each { key, value ->
