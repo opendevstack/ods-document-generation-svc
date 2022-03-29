@@ -72,7 +72,8 @@ class NexusService {
 
     @SuppressWarnings('LineLength')
     URI storeComplextArtifact(String repository, byte[] artifact, String contentType, String repositoryType, Map nexusParams = [ : ]) {
-        def restCall = Unirest.post("${this.baseURL}/service/rest/v1/components?repository={repository}")
+        String targetUrl = "${this.baseURL}/service/rest/v1/components?repository={repository}"
+        def restCall = Unirest.post(targetUrl)
             .routeParam('repository', repository)
             .basicAuth(this.username, this.password)
 
@@ -88,18 +89,18 @@ class NexusService {
         response.ifSuccess {
             if (response.getStatus() != 204) {
                 throw new RuntimeException(
-                    'Error: unable to store artifact. ' +
+                    "Error: unable to store artifact at ${targetUrl}. " +
                         "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
                 )
             }
         }
 
         response.ifFailure {
-            def message = 'Error: unable to store artifact. ' +
+            def message = "Error: unable to store artifact at ${targetUrl}. " +
                 "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
 
             if (response.getStatus() == 404) {
-                message = "Error: unable to store artifact. Nexus could not be found at: '${this.baseURL}' with repo: ${repository}."
+                message = "Error: unable to store artifact at ${targetUrl}. Nexus could not be found at: '${this.baseURL}' with repo: ${repository}."
             }
 
             throw new RuntimeException(message)
