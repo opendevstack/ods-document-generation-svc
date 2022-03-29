@@ -16,6 +16,7 @@ import org.ods.doc.gen.leva.doc.services.PipelineConfig
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @SuppressWarnings(['LineLength',
@@ -68,7 +69,16 @@ class ProjectData {
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
         this.data.repo = data.repo
+
+        rebuildGitRepoUrl()
         return this
+    }
+
+    private void rebuildGitRepoUrl() {
+        this.data.git.url = bitbucketService.getFullUrlForRepoName(
+                data.projectId as String,
+                data.gitreleaseManagerRepo as String
+        )
     }
 
     ProjectData load() {

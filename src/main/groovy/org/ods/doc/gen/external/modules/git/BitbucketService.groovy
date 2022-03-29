@@ -59,6 +59,11 @@ class BitbucketService {
         }
     }
 
+    String getFullUrlForRepoName(String projectId, String gitReleaseManagerRepo) {
+        Path gitReleaseManagerRepoPath = Paths.get(bitBucketClientConfig.url, projectId, gitReleaseManagerRepo)
+        return gitReleaseManagerRepoPath.toUri().toString()
+    }
+
     private void streamResult(Response response, Path zipArchive){
         if (response.status() >= 300) {
             throw new ErrorDecoder.Default().decode('downloadRepo', response)
