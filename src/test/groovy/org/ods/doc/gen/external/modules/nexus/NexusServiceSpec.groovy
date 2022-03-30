@@ -126,7 +126,7 @@ class NexusServiceSpec extends SpecHelper {
         return result << mixins
     }
 
-    def "store artifact"() {
+    def "store artifact (mocked server)"() {
         given:
         def request = storeArtifactRequestData()
         def response = storeArtifactResponseData()
@@ -144,7 +144,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "store artifact with HTTP 404 failure"() {
+    def "store artifact (mocked server) with HTTP 404 failure"() {
         given:
         def request = storeArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -166,7 +166,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "store artifact with HTTP 500 failure"() {
+    def "store artifact (mocked server) with HTTP 500 failure"() {
         given:
         def request = storeArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -189,7 +189,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "retrieve artifact with HTTP 404 failure"() {
+    def "retrieve artifact (mocked server) with HTTP 404 failure"() {
         given:
         def request = getArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -210,7 +210,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "retrieve artifact working"() {
+    def "retrieve artifact (mocked server) working"() {
         given:
         def request = getArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -230,7 +230,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "Tests downloadAndExtractZip"() {
+    def "Tests downloadAndExtractZip (mocked server)"() {
         given: "An url"
         def request = getArtifactRequestData()
         def response = storeArtifactResponseData([
