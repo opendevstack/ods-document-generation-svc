@@ -1,15 +1,31 @@
 package org.ods.doc.gen.external.modules.nexus
 
-
 import com.github.tomakehurst.wiremock.client.WireMock
+import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.ods.doc.gen.AppConfiguration
+import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.SpecHelper
+import org.ods.doc.gen.core.test.wiremock.WiremockManager
+import org.springframework.core.env.Environment
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
+import javax.inject.Inject
+import java.nio.file.Path
 import java.nio.file.Paths
 
+@ActiveProfiles(["test"])
+@ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
+@Slf4j
 class NexusServiceSpec extends SpecHelper {
+
+    static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
+
+    @Inject
+    Environment environment
 
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -251,4 +267,36 @@ class NexusServiceSpec extends SpecHelper {
         then: "downloads and unzips"
         Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "LICENSE").toFile().exists()
     }
+
+    def "Test upload to nexus with Wiremock" () {
+        given:
+        String nexusBaseUrl = environment.getProperty("nexus.url")
+        String nexusUsername = environment.getProperty("nexus.username")
+        String nexusPassword = environment.getProperty("nexus.password")
+
+        log.info "Using RECORD Wiremock:${RECORD}"
+        WiremockManager nexusWiremockManager = new WiremockManager("nexus", nexusBaseUrl)
+                .withScenario("").startServer(RECORD)
+        String nexusMockedBaseURL = nexusWiremockManager.wireMockServer.baseUrl()
+        NexusService nexusService = new NexusService(nexusMockedBaseURL, nexusUsername, nexusPassword)
+
+        String repository = NexusService.NEXUS_REPOSITORY
+        String directory = "ordgp/69"
+        String fileName = "LICENSE-69.zip"
+        String contentType = "application/octet-stream"
+
+        Path filePath = Paths.get("src/test/resources/nexus/LICENSE.zip")
+        byte [] fileBytes = filePath.toFile().getBytes()
+
+        when:
+        URI result = nexusService.storeArtifact(repository, directory, fileName, fileBytes, contentType)
+
+        then:
+        result != null
+        log.info("Uploaded file url: " + result.toString())
+
+        cleanup:
+        nexusWiremockManager.tearDown()
+    }
+
 }

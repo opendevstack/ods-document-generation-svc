@@ -34,6 +34,9 @@ class WiremockManager {
 
     WiremockManager withScenario(String scenario){
         this.pathToFiles = "${WIREMOCK_FILES}/${scenario}/${serverType}"
+        if (scenario.isBlank()) {
+            this.pathToFiles = "${WIREMOCK_FILES}/${serverType}"
+        }
         return this
     }
 
