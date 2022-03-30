@@ -26,11 +26,11 @@ class LevaDocTestValidator {
             copyDocWhenRecording(buildId)
             return true
         } else {
-            return comparefiles(buildId)
+            return compareFiles(buildId)
         }
     }
 
-    private boolean comparefiles(String buildId) {
+    private boolean compareFiles(String buildId) {
         String actualPath = actualDoc(buildId).absolutePath
         File expectedFile = expectedDoc(buildId)
         String expectedPath = expectedFile.absolutePath
@@ -46,6 +46,8 @@ class LevaDocTestValidator {
                 .writeTo(diffFileName)
         if (filesAreEqual) {
             new File("${diffFileName}.pdf").delete()
+        } else {
+            FileUtils.copyFile(actualDoc(buildId), reportPdfDoc(buildId))
         }
         return filesAreEqual
     }
@@ -88,4 +90,7 @@ class LevaDocTestValidator {
         return new File("${tempFolder.getAbsolutePath()}/${getArtifactName(buildId)}.pdf")
     }
 
+    private File reportPdfDoc(String buildId) {
+        return new File("${SAVED_DOCUMENTS}/${getArtifactName(buildId)}-actual.pdf")
+    }
 }

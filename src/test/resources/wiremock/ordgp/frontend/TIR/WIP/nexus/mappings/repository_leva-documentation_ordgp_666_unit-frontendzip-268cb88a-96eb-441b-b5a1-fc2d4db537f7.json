@@ -1,13 +1,13 @@
 {
   "id" : "268cb88a-96eb-441b-b5a1-fc2d4db537f7",
-  "name" : "repository_leva-documentation_ordgp_666_unit-frontendzip",
+  "name" : "repository_leva-documentation_ordgp_13_unit-frontendzip",
   "request" : {
-    "url" : "/repository/leva-documentation/ordgp/666/unit-frontend.zip",
+    "url" : "/repository/leva-documentation/ordgp/13/unit-frontend.zip",
     "method" : "GET"
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "repository_leva-documentation_ordgp_666_unit-frontendzip-268cb88a-96eb-441b-b5a1-fc2d4db537f7.zip",
+    "bodyFileName" : "repository_leva-documentation_ordgp_13_unit-frontendzip-268cb88a-96eb-441b-b5a1-fc2d4db537f7.zip",
     "headers" : {
       "Date" : "Thu, 24 Mar 2022 18:20:54 GMT",
       "Server" : "Nexus/3.28.1-01 (OSS)",

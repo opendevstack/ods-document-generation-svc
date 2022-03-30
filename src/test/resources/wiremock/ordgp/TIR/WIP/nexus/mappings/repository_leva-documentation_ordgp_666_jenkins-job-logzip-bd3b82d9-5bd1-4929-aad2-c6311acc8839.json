@@ -1,13 +1,13 @@
 {
   "id" : "bd3b82d9-5bd1-4929-aad2-c6311acc8839",
-  "name" : "repository_leva-documentation_ordgp_666_jenkins-job-logzip",
+  "name" : "repository_leva-documentation_ordgp_13_jenkins-job-logzip",
   "request" : {
-    "url" : "/repository/leva-documentation/ordgp/666/jenkins-job-log.zip",
+    "url" : "/repository/leva-documentation/ordgp/13/jenkins-job-log.zip",
     "method" : "GET"
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "repository_leva-documentation_ordgp_666_jenkins-job-logzip-bd3b82d9-5bd1-4929-aad2-c6311acc8839.zip",
+    "bodyFileName" : "repository_leva-documentation_ordgp_13_jenkins-job-logzip-bd3b82d9-5bd1-4929-aad2-c6311acc8839.zip",
     "headers" : {
       "Date" : "Thu, 24 Mar 2022 18:23:58 GMT",
       "Server" : "Nexus/3.28.1-01 (OSS)",

@@ -101,8 +101,8 @@ abstract class LevaDocServiceTestBase extends Specification {
     void prepareServiceDataParam(ProjectFixture projectFixture, Map<Object, Object> data) {
         data.tmpFolder = tempFolder.getAbsolutePath()
         data.documentType = projectFixture.docType
-        data.projectBuild =  "${projectFixture.project}-1"
+        data.projectBuild =  "${projectFixture.project}-${projectFixture.buildNumber}"
         data.projectId = projectFixture.project
-        data.buildNumber = "666"
+        data.buildNumber = projectFixture.buildNumber
     }
 }
