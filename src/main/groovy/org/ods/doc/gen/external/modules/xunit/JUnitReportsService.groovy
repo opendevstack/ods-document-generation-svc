@@ -79,24 +79,12 @@ class JUnitReportsService {
 
     private Map<String, Map> downloadTestsResults(Map<String, String> testResultsURLs, String targetFolder, String component) {
         Map<String, Map> testsResults = createTestDataStructure(component)
-        String unitKeyTests = TestType.UNIT.toLowerCase()
+        testsResults.each {testResult ->
 
-        testResultsURLs.each {testResultUrl ->
-            testsResults.each {testResult ->
-                String testResultUrlKey = testResultUrl.key.toLowerCase()
-                String testResultKey = testResult.key.toLowerCase()
-                if (unitKeyTests == testResultKey) {
-                    if ((testResultUrlKey.contains(unitKeyTests)) && component && (testResultUrlKey.contains(component.toLowerCase()))) {
-                        testResult.value.targetFolder = downloadAndExtractZip(testResultUrl.value, targetFolder, testResultKey)
-                    }
-                } else {
-                    if (testResultUrlKey == testResultKey) {
-                        testResult.value.targetFolder = downloadAndExtractZip(testResultUrl.value, targetFolder, testResultKey)
-                    }
-                }
-            }
+            String testType = (component)? "${testResult.key}-${component.toLowerCase()}" : "${testResult.key}"
+            String url = testResultsURLs[testType]
+            testResult.value.targetFolder = downloadAndExtractZip(url, targetFolder, testType)
         }
-
         return testsResults
     }
 
@@ -126,7 +114,7 @@ class JUnitReportsService {
         return testData
     }
 
-    private Map getTestResults(String typeIn = 'unit', String targetFolder, String component = null) {
+    private Map getTestResults(String typeIn, String targetFolder, String component) {
         if (targetFolder == null) {
             return [
                     testReportFiles: [],
@@ -134,11 +122,8 @@ class JUnitReportsService {
             ]
         }
         def testReportFiles = loadTestReportsFromPath(targetFolder, typeIn, component)
-
         return [
-                // Load JUnit test report files from path
                 testReportFiles: testReportFiles,
-                // Parse JUnit test report files into a report
                 testResults: parseTestReportFiles(testReportFiles),
         ]
     }

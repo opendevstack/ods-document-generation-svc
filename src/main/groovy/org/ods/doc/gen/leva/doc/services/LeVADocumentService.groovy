@@ -793,15 +793,11 @@ class LeVADocumentService extends DocGenUseCase {
             return resurrectedDocument.uri
         }
 
-        def testData = junit.getTestData(data)
-        def unitTestData = testData.unit
-        // input.data.tests << [unit: testsReports.getResults(projectData, projectFixture.component, "unit")]
-
-        def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
-        def watermarkText = this.getWatermarkText(projectData)
-
-        def testIssues = projectData.getAutomatedTestsTypeUnit("Technology-${repo.id}")
-        def discrepancies = this.computeTestDiscrepancies("Development Tests", testIssues, unitTestData.testResults)
+        Map unitTestData = junit.getTestData(data).unit
+        Map sections = this.getDocumentSectionsFileOptional(projectData, documentType)
+        String watermarkText = this.getWatermarkText(projectData)
+        List testIssues = projectData.getAutomatedTestsTypeUnit("Technology-${repo.id}")
+        Map discrepancies = computeTestDiscrepancies("Development Tests", testIssues, unitTestData.testResults)
 
         def obtainEnum = { category, value ->
             return projectData.getEnumDictionary(category)[value as String]
@@ -835,8 +831,9 @@ class LeVADocumentService extends DocGenUseCase {
             ]
         }
 
-        def keysInDoc = this.computeKeysInDocForDTR(tests)
-        DocumentHistory docHistory = this.getAndStoreDocumentHistory(documentType + '-' + repo.id, keysInDoc, projectData)
+        List<String> keysInDoc = this.computeKeysInDocForDTR(tests)
+        String documentName = "${documentType}-${repo.id}"
+        DocumentHistory docHistory = this.getAndStoreDocumentHistory(documentName, keysInDoc, projectData)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType], repo),

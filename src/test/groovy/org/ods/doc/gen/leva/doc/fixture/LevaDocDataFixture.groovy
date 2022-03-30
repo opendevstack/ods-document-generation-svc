@@ -30,8 +30,7 @@ class LevaDocDataFixture {
     }
 
     Map getModuleData(ProjectFixture projectFixture) {
-        Map input = RepoDataBuilder.getRepoForComponent(projectFixture.component)
-        return input
+        return RepoDataBuilder.getRepoForComponent(projectFixture.component)
     }
 
     void updateExpectedComponentDocs(ProjectData projectData, Map data, ProjectFixture projectFixture) {
@@ -47,7 +46,6 @@ class LevaDocDataFixture {
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         String projectWithBuild = "${projectFixture.project}/${projectFixture.buildNumber}"
-        List<String> testResults = projectFixture.testResults
         return  [
                 targetEnvironment: "dev",
                 targetEnvironmentToken: "D",
@@ -62,7 +60,7 @@ class LevaDocDataFixture {
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
                 jobName : "${projectFixture.project}-cd/${projectFixture.project}-releasemanager",
-                testResultsURLs: buildTestResultsUrls(testResults, projectWithBuild),
+                testResultsURLs: buildTestResultsUrls(projectFixture, projectWithBuild),
                 jenkinLog: getJenkinsLogUrl(projectWithBuild)
         ]
     }
@@ -71,17 +69,20 @@ class LevaDocDataFixture {
         "/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
     }
 
-    private Map<String, String> buildTestResultsUrls(List<String> testResults, String projectWithBuild) {
+    private Map<String, String> buildTestResultsUrls(ProjectFixture projectFixture, String projectWithBuild) {
         Map hardcodedUrls = [
-                "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
-                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
-                "Acceptance": "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
-                'Installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip",
-                'Integration': "/repository/leva-documentation/${projectWithBuild}/integration.zip",
+                              "acceptance": "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
+                              'installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip",
+                              'integration': "/repository/leva-documentation/${projectWithBuild}/integration.zip",
         ]
 
+        projectFixture.components.each {
+            String type = "unit-${it}"
+            hardcodedUrls[type] = "/repository/leva-documentation/${projectWithBuild}/unit-${it}.zip"
+        }
+
         Map<String, String> testResultsUrl = [:]
-        testResults.each {
+        projectFixture.testResults.each {
             testResultsUrl[it] = hardcodedUrls[it]
         }
         return testResultsUrl
@@ -101,7 +102,7 @@ class LevaDocDataFixture {
     }
 
     private String copyPdfToTemp(ProjectFixture projectFixture, Map data) {
-        def destPath = "${tempFolder}/reports/${projectFixture.component}"
+        String destPath = "${tempFolder}/reports/${projectFixture.component}"
         new File(destPath).mkdirs()
         LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder, projectFixture)
         File expected = testValidator.expectedDoc(data.build.buildId as String)
