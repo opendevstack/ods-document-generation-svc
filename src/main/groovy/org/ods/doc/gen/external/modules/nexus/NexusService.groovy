@@ -73,7 +73,8 @@ class NexusService {
     @SuppressWarnings('LineLength')
     URI storeComplextArtifact(String repository, byte[] artifact, String contentType, String repositoryType, Map nexusParams = [ : ]) {
         String targetUrl = "${this.baseURL}/service/rest/v1/components?repository=${repository}"
-        def restCall = Unirest.post(targetUrl)
+        URI uri = new URI(targetUrl).normalize()
+        def restCall = Unirest.post(uri.toString())
             .basicAuth(this.username, this.password)
 
         nexusParams.each { key, value ->
