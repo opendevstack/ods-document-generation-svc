@@ -129,7 +129,7 @@ class NexusService {
 
     private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        String fullUrlToDownload = "${baseURL}${urlToDownload}"
+        String fullUrlToDownload = "${baseURL}/${urlToDownload}"
         def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {
