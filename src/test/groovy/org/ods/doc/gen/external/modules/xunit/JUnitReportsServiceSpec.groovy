@@ -1,6 +1,5 @@
 package org.ods.doc.gen.external.modules.xunit
 
-import groovy.util.logging.Slf4j
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.external.modules.nexus.NexusService
@@ -10,11 +9,8 @@ import spock.lang.Specification
 import java.nio.file.Files
 import java.nio.file.Path
 
-import static groovy.json.JsonOutput.prettyPrint
-import static groovy.json.JsonOutput.toJson
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
 
-@Slf4j
 class JUnitReportsServiceSpec extends Specification {
 
     NexusService nexusService
@@ -60,12 +56,8 @@ class JUnitReportsServiceSpec extends Specification {
             ]
         ]
 
-        def testResult4 = [
-                testsuites: null
-        ]
-
         when:
-        def result = service.combineTestResults([testResult1, testResult2, testResult3, testResult4 ])
+        def result = service.combineTestResults([testResult1, testResult2, testResult3 ])
 
         then:
         result == [
@@ -171,21 +163,13 @@ class JUnitReportsServiceSpec extends Specification {
         ]
         String component = null
         when:
-        Map<String, Map> result = service.downloadTestsResults(listOfFiles, path, component)
-
-        String unitTestsPath = "${path}/unit"
-        String acceptanceTestsPath = "${path}/acceptance"
-        String installationTestsPath = "${path}/installation"
-        String integrationTestsPath = "${path}/integration"
+        service.downloadTestsResults(listOfFiles, path, component)
 
         then:
-        3 * nexusService.downloadAndExtractZip(! listOfFiles.Unit, ! unitTestsPath)
-        0 * nexusService.downloadAndExtractZip(_, _)
-
-        log.info(prettyPrint(toJson(result)))
-        result.acceptance.targetFolder == acceptanceTestsPath
-        result.installation.targetFolder == installationTestsPath
-        result.integration.targetFolder == integrationTestsPath
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Unit, "${path}/unit")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, "${path}/acceptance")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Installation, "${path}/installation")
+        1 * nexusService.downloadAndExtractZip(listOfFiles.Integration, "${path}/integration")
 
         cleanup:
         temporaryFolder.deleteDir()
@@ -202,27 +186,16 @@ class JUnitReportsServiceSpec extends Specification {
                 'Integration' : "/repository/leva-documentation/ordgp/ordgp-releasemanager/666/integration-ordgp-ordgp-releasemanager.zip",
         ]
         String component = "releasemanager"
-
-        String unitTestsPath = "${path}/unit"
-        String acceptanceTestsPath = "${path}/acceptance"
-        String installationTestsPath = "${path}/installation"
-        String integrationTestsPath = "${path}/integration"
-
         when:
-        Map<String, Map> result = service.downloadTestsResults(listOfFiles, path, component)
+        service.downloadTestsResults(listOfFiles, path, component)
 
         then:
-        1 * nexusService.downloadAndExtractZip(listOfFiles."Unit-releasemanager", unitTestsPath)
-        0 * nexusService.downloadAndExtractZip(_, _)
-
-        log.info(prettyPrint(toJson(result)))
-        result.unit.targetFolder == unitTestsPath
+        1 * nexusService.downloadAndExtractZip(listOfFiles."Unit-releasemanager", "${path}/unit")
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Acceptance, "${path}/acceptance")
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Installation, "${path}/installation")
+        0 * nexusService.downloadAndExtractZip(listOfFiles.Integration, "${path}/integration")
 
         cleanup:
         temporaryFolder.deleteDir()
-    }
-
-    def "getTestData" () {
-
     }
 }
