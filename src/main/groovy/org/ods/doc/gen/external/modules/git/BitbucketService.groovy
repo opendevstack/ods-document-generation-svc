@@ -20,6 +20,8 @@ import java.nio.file.StandardCopyOption
 @Service
 class BitbucketService {
 
+    private static final String MAIN_BRANCH = "master"
+
     private ZipFacade zipFacade
     private final BitBucketClientConfig bitBucketClientConfig
 
@@ -43,7 +45,19 @@ class BitbucketService {
     }
 
     void downloadRepo(String project, String repo, String branch, String tmpFolder) {
+        log.info("downloadRepo: project:${project}, repo:${repo} and branch:${branch}")
         Path zipArchive = Files.createTempFile("archive-", ".zip")
+        try {
+            downloadRepoWithFallBack(project, repo, branch, zipArchive)
+            zipFacade.extractZipArchive(zipArchive, Paths.get(tmpFolder))
+        } catch (FeignException callException) {
+            checkError(repo, branch, callException)
+        } finally {
+            Files.delete(zipArchive)
+        }
+    }
+
+    private void downloadRepoWithFallBack(String project, String repo, String branch, Path zipArchive) {
         try {
             bitBucketClientConfig
                     .getClient()
@@ -51,12 +65,16 @@ class BitbucketService {
                     .withCloseable { Response response ->
                         streamResult(response, zipArchive)
                     }
-            zipFacade.extractZipArchive(zipArchive, Paths.get(tmpFolder))
         } catch (FeignException callException) {
-            checkError(repo, branch, callException)
-        } finally {
-            Files.delete(zipArchive)
+            log.warn("Branch [${branch}] doesn't exist, using branch: [${MAIN_BRANCH}]")
+            bitBucketClientConfig
+                    .getClient()
+                    .getRepoZipArchive(project, repo, MAIN_BRANCH)
+                    .withCloseable { Response response ->
+                        streamResult(response, zipArchive)
+                    }
         }
+
     }
 
     String getFullUrlForRepoName(String projectId, String gitReleaseManagerRepo) {
