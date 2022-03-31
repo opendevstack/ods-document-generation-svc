@@ -1,7 +1,6 @@
 package org.ods.doc.gen.external.modules.xunit
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
@@ -41,11 +40,10 @@ class JUnitReportsService {
         return result
     }
     
-    List<File> loadTestReportsFromPath(String path, String typeIn = 'unit', String component = null) {
+    List<File> loadTestReportsFromPath(String path) {
         def result = []
         try {
-            def pattern = (StringUtils.isEmpty(component)) ? ~/.*${typeIn}.*\.xml$/ : ~/.*${component}.*\.xml$/
-            new File(path).traverse(nameFilter: pattern, type: groovy.io.FileType.FILES) { file ->
+            new File(path).traverse(nameFilter: ~/.*\.xml$/, type: groovy.io.FileType.FILES) { file ->
                 result << file
             }
         } catch (FileNotFoundException e) {}
@@ -121,7 +119,7 @@ class JUnitReportsService {
                     testResults: [:],
             ]
         }
-        def testReportFiles = loadTestReportsFromPath(targetFolder, typeIn, component)
+        def testReportFiles = loadTestReportsFromPath(targetFolder)
         return [
                 testReportFiles: testReportFiles,
                 testResults: parseTestReportFiles(testReportFiles),
