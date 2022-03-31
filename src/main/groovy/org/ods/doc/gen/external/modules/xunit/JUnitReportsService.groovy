@@ -11,9 +11,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import static groovy.json.JsonOutput.prettyPrint
-import static groovy.json.JsonOutput.toJson
-
 @SuppressWarnings(['JavaIoPackageAccess', 'EmptyCatchBlock'])
 @Slf4j
 @Service
@@ -77,8 +74,6 @@ class JUnitReportsService {
             it.value.testReportFiles = testResult.testReportFiles
             it.value.testResults = testResult.testResults
         }
-        log.debug("Result from obtaining tests data: " )
-        log.debug(prettyPrint(toJson(tests)))
         return tests
     }
 
