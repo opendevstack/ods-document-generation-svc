@@ -276,7 +276,7 @@ class NexusServiceSpec extends SpecHelper {
 
         log.info "Using RECORD Wiremock:${RECORD}"
         WiremockManager nexusWiremockManager = new WiremockManager("nexus", nexusBaseUrl)
-                .withScenario("").startServer(RECORD)
+                .withScenario("ordgp/zipUploadTest").startServer(RECORD)
         String nexusMockedBaseURL = nexusWiremockManager.wireMockServer.baseUrl()
         NexusService nexusService = new NexusService(nexusMockedBaseURL, nexusUsername, nexusPassword)
 
