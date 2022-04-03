@@ -9,8 +9,8 @@ import org.ods.doc.gen.external.modules.jira.IssueTypes
 import org.ods.doc.gen.external.modules.jira.JiraUseCase
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
 import org.ods.doc.gen.external.modules.nexus.NexusService
-import org.ods.doc.gen.external.modules.sonar.SonarQubeUseCase
 import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
+import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.JiraDataItem
 import org.ods.doc.gen.project.data.Project
@@ -51,31 +51,38 @@ import static groovy.json.JsonOutput.toJson
     'PublicMethodsBeforeNonPublicMethods'])
 @Slf4j
 @Service
-class LeVADocumentService extends DocGenUseCase {
+class LeVADocumentService {
 
     private static final String DOC_ID_VERSION = "Doc ID/Version: see auto-generated cover page"
     public static final String INTEGRATION = "Integration"
     public static final String ACCEPTANCE = "Acceptance"
+    public static final String OVER_COVER = 'Overall-Cover'
 
+    private final Project project
+    private final DocGenUseCase docGenUseCase
     private final JiraUseCase jiraUseCase
     private final JUnitReportsService junit
     private final LeVADocumentChaptersFileService levaFiles
-    private final SonarQubeUseCase sq
     private final BitbucketTraceabilityUseCase bbt
-
+    private final NexusService nexus
+    
     @Inject
     Clock clock
 
     @Inject
-    LeVADocumentService(Project project, ZipFacade util, DocGenService docGen,
-                        JiraUseCase jiraUseCase, JUnitReportsService junit,
-                        LeVADocumentChaptersFileService levaFiles, NexusService nexus,
-                        PDFUtil pdf, SonarQubeUseCase sq, BitbucketTraceabilityUseCase bbt) {
-        super(project, util, docGen, nexus, pdf)
+    LeVADocumentService(Project project,
+                        DocGenUseCase docGenUseCase,
+                        NexusService nexus,
+                        JiraUseCase jiraUseCase,
+                        JUnitReportsService junit,
+                        LeVADocumentChaptersFileService levaFiles,
+                        BitbucketTraceabilityUseCase bbt) {
+        this.project = project
+        this.docGenUseCase = docGenUseCase
+        this.nexus = nexus
         this.jiraUseCase = jiraUseCase
         this.junit = junit
         this.levaFiles = levaFiles
-        this.sq = sq
         this.bbt = bbt
     }
 
@@ -137,7 +144,7 @@ class LeVADocumentService extends DocGenUseCase {
             ]
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, 
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, 
                 getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         log.info("createCSD - data:${prettyPrint(toJson(docHistory.data))}")
@@ -184,7 +191,7 @@ class LeVADocumentService extends DocGenUseCase {
             data_.data.acceptanceTests = buildTestBugsDIL(acceptanceTestBugs, ACCEPTANCE)
         }
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri)
         return []
     }
@@ -215,7 +222,7 @@ class LeVADocumentService extends DocGenUseCase {
             ]
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -301,7 +308,7 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -326,7 +333,7 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -381,7 +388,7 @@ class LeVADocumentService extends DocGenUseCase {
                 documentHistory: docHistory?.getDocGenFormat() ?: [],
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -454,7 +461,7 @@ class LeVADocumentService extends DocGenUseCase {
                         documentHistory: docHistory?.getDocGenFormat() ?: [],
                 ]
         ]
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -500,7 +507,7 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -529,7 +536,7 @@ class LeVADocumentService extends DocGenUseCase {
                 ]
         ]
 
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -584,7 +591,7 @@ class LeVADocumentService extends DocGenUseCase {
         ]
 
         def watermarkText = this.getWatermarkText(projectData)
-        def uri = this.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -649,7 +656,7 @@ class LeVADocumentService extends DocGenUseCase {
         ]
 
         String templateName = getDocumentTemplateName(projectData, documentType)
-        String uri = createDocument(projectData, documentType, null, data_, [:], null, templateName, watermarkText)
+        String uri = docGenUseCase.createDocument(projectData, documentType, null, data_, [:], null, templateName, watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -708,7 +715,7 @@ class LeVADocumentService extends DocGenUseCase {
             ["raw/${file.getName()}", file.getBytes()]
         }
 
-        def uri = this.createDocument(projectData, documentType, null, data_, files, null, getDocumentTemplateName(projectData, documentType), watermarkText)
+        def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, files, null, getDocumentTemplateName(projectData, documentType), watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -774,7 +781,7 @@ class LeVADocumentService extends DocGenUseCase {
         }
 
         String templateName = getDocumentTemplateName(projectData, documentType)
-        String uri = this.createDocument(projectData, documentType, null, data_, files, null, templateName, watermarkText)
+        String uri = docGenUseCase.createDocument(projectData, documentType, null, data_, files, null, templateName, watermarkText)
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docHistory?.getVersion() as String)
         return docHistory.data
     }
@@ -785,13 +792,7 @@ class LeVADocumentService extends DocGenUseCase {
 
         Map repo = data.repo
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
-
-        def documentType = Constants.DocumentType.DTR as String
-        Map resurrectedDocument = resurrectAndStashDocument(projectData, documentType, repo)
-        log.info "Resurrected ${documentType} for ${repo.id} -> (${resurrectedDocument.found})"
-        if (resurrectedDocument.found) {
-            return resurrectedDocument.uri
-        }
+        String documentType = Constants.DocumentType.DTR as String
 
         Map unitTestData = junit.getTestData(data).unit
         Map sections = this.getDocumentSectionsFileOptional(projectData, documentType)
@@ -860,7 +861,7 @@ class LeVADocumentService extends DocGenUseCase {
 
         def modifier = { document -> return document }
         def templateName = getDocumentTemplateName(projectData, documentType, repo)
-        this.createDocument(projectData, documentType, repo, data_, files, modifier, templateName, watermarkText)
+        docGenUseCase.createDocument(projectData, documentType, repo, data_, files, modifier, templateName, watermarkText)
         return docHistory.data
     }
 
@@ -911,7 +912,7 @@ class LeVADocumentService extends DocGenUseCase {
         ]
 
         def modifier = { document -> return document }
-        this.createDocument(projectData, documentType, repo, data_, [:], modifier, getDocumentTemplateName(projectData, documentType, repo), watermarkText)
+        docGenUseCase.createDocument(projectData, documentType, repo, data_, [:], modifier, getDocumentTemplateName(projectData, documentType, repo), watermarkText)
         return docHistory.data
     }
 
@@ -925,7 +926,7 @@ class LeVADocumentService extends DocGenUseCase {
 
         def watermarkText = this.getWatermarkText(projectData)
 
-        def uri = this.createOverallDocument('Overall-Cover', documentType, metadata, null, watermarkText, projectData)
+        def uri = docGenUseCase.createOverallDocument(OVER_COVER, documentType, metadata, null, watermarkText, projectData)
         def docVersion = projectData.getDocumentVersionFromHistories(documentType) as String
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docVersion)
 
@@ -962,7 +963,7 @@ class LeVADocumentService extends DocGenUseCase {
             }
         }
 
-        def uri = this.createOverallDocument('Overall-TIR-Cover', documentType, metadata, visitor, watermarkText, projectData)
+        String uri = docGenUseCase.createOverallDocument('Overall-TIR-Cover', documentType, metadata, visitor, watermarkText, projectData)
         def docVersion = projectData.getDocumentVersionFromHistories(documentType) as String
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docVersion)
 
@@ -1050,40 +1051,7 @@ class LeVADocumentService extends DocGenUseCase {
         return data.collect { it.subMap(['key', 'requirements', 'bugs']).values() }.flatten()
     }
 
-    
-    List<String> getSupportedDocuments() {
-        return Constants.DocumentType.values().collect { it as String }
-    }
-
-    String getDocumentTemplatesVersion(ProjectData projectData) {
-        def capability = projectData.getCapability('LeVADocs')
-        return capability.templatesVersion
-    }
-
-    boolean shouldCreateArtifact (String documentType, Map repo) {
-        List nonArtifactDocTypes = [
-            Constants.DocumentType.TIR as String,
-            Constants.DocumentType.DTR as String
-        ]
-
-        return !(documentType && nonArtifactDocTypes.contains(documentType) && repo)
-    }
-
-    Map getFiletypeForDocumentType (String documentType) {
-        if (!documentType) {
-            throw new RuntimeException ('Cannot lookup Null docType for storage!')
-        }
-        Map defaultTypes = [storage: 'zip', content: 'pdf' ]
-
-        if (Constants.DOCUMENT_TYPE_NAMES.containsKey(documentType)) {
-            return defaultTypes
-        } else if (Constants.DOCUMENT_TYPE_FILESTORAGE_EXCEPTIONS.containsKey(documentType)) {
-            return Constants.DOCUMENT_TYPE_FILESTORAGE_EXCEPTIONS.get(documentType)
-        }
-        return defaultTypes
-    }
-
-    protected String convertImages(String content) {
+    private String convertImages(String content) {
         def result = content
         if (content && content.contains("<img")) {
             result = this.jiraUseCase.convertHTMLImageSrcIntoBase64Data(content)
@@ -1091,7 +1059,7 @@ class LeVADocumentService extends DocGenUseCase {
         result
     }
 
-    protected Map computeTestDiscrepancies(String name, List testIssues, Map testResults, boolean checkDuplicateTestResults = true) {
+    private Map computeTestDiscrepancies(String name, List testIssues, Map testResults, boolean checkDuplicateTestResults = true) {
         def result = [
             discrepancies: 'No discrepancies found.',
             conclusion   : [
@@ -1170,7 +1138,7 @@ class LeVADocumentService extends DocGenUseCase {
         return result
     }
 
-    protected List<Map> computeTestsWithRequirementsAndSpecs(ProjectData projectData, List<Map> tests) {
+    private List<Map> computeTestsWithRequirementsAndSpecs(ProjectData projectData, List<Map> tests) {
         def obtainEnum = { category, value ->
             return projectData.getEnumDictionary(category)[value as String]
         }
@@ -1206,7 +1174,7 @@ class LeVADocumentService extends DocGenUseCase {
      * @documentType documentType
      * @return component metadata with software design specs, requirements and info comming from the component repo
      */
-    protected Map computeComponentMetadata(ProjectData projectData, String documentType) {
+    private Map computeComponentMetadata(ProjectData projectData, String documentType) {
         return projectData.components.collectEntries { component ->
             def normComponentName = component.name.replaceAll('Technology-', '')
 
@@ -1262,7 +1230,7 @@ class LeVADocumentService extends DocGenUseCase {
         return thisComponentRepo.equalsIgnoreCase(releaseManagerRepo)
     }
 
-    protected Map computeComponentsUnitTests(List<Map> tests) {
+    private Map computeComponentsUnitTests(List<Map> tests) {
         def issueComponentMapping = tests.collect { test ->
             test.getResolvedComponents().collect { [test: test.key, component: it.name] }
         }.flatten()
@@ -1271,7 +1239,7 @@ class LeVADocumentService extends DocGenUseCase {
         }
     }
 
-    protected List<Map> getReposWithUnitTestsInfo(ProjectData projectData, List<Map> unitTests) {
+    private List<Map> getReposWithUnitTestsInfo(ProjectData projectData, List<Map> unitTests) {
         def componentTestMapping = computeComponentsUnitTests(unitTests)
         projectData.repositories.collect {
             [
@@ -1304,7 +1272,7 @@ class LeVADocumentService extends DocGenUseCase {
         }.groupBy { it.repoTypes }
     }
 
-    protected Map getDocumentMetadata(ProjectData projectData, String documentTypeName, Map repo = null) {
+    private Map getDocumentMetadata(ProjectData projectData, String documentTypeName, Map repo = null) {
         def name = projectData.name
         if (repo) {
             name += ": ${repo.id}"
@@ -1351,7 +1319,7 @@ class LeVADocumentService extends DocGenUseCase {
         return labels
     }
 
-    protected String getWatermarkText(ProjectData projectData) {
+    private String getWatermarkText(ProjectData projectData) {
         def result = null
 
         if (projectData.isDeveloperPreviewMode()) {

@@ -20,7 +20,6 @@ class DocGenService {
         this.pdfGenerationService = pdfGenerationService
     }
 
-    
     byte[] createDocument(String type, String version, Map data) {
         def body = [
                 metadata: [
@@ -45,10 +44,6 @@ class DocGenService {
         }
 
         return bytes
-    }
-    
-    private static byte[] decodeBase64(String base64String) {
-        return Base64.decoder.decode(base64String)
     }
 
 }

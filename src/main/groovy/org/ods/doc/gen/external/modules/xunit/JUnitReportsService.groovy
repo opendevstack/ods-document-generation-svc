@@ -1,9 +1,11 @@
 package org.ods.doc.gen.external.modules.xunit
 
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
+import org.springframework.util.FileSystemUtils
 
 import javax.inject.Inject
 import java.nio.file.Files
@@ -16,9 +18,11 @@ import java.nio.file.Paths
 class JUnitReportsService {
 
     private final NexusService nexusService
+    private final FileSystemHelper fileSystemHelper
 
     @Inject
-    JUnitReportsService(NexusService nexusService) {
+    JUnitReportsService(NexusService nexusService, FileSystemHelper fileSystemHelper) {
+        this.fileSystemHelper = fileSystemHelper
         this.nexusService = nexusService
     }
     
@@ -36,17 +40,6 @@ class JUnitReportsService {
         testResults.testsuites.each { testsuite ->
             result += testsuite.testcases.size()
         }
-
-        return result
-    }
-    
-    List<File> loadTestReportsFromPath(String path) {
-        def result = []
-        try {
-            new File(path).traverse(nameFilter: ~/.*\.xml$/, type: groovy.io.FileType.FILES) { file ->
-                result << file
-            }
-        } catch (FileNotFoundException e) {}
 
         return result
     }
@@ -77,11 +70,10 @@ class JUnitReportsService {
 
     private Map<String, Map> downloadTestsResults(Map<String, String> testResultsURLs, String targetFolder, String component) {
         Map<String, Map> testsResults = createTestDataStructure(component)
-        testsResults.each {testResult ->
-
-            String testType = (component)? "${testResult.key}-${component.toLowerCase()}" : "${testResult.key}"
-            String url = testResultsURLs[testType]
-            testResult.value.targetFolder = downloadAndExtractZip(url, targetFolder, testType)
+        testResultsURLs.each {testResultsURL ->
+            String testType = (component)? testResultsURL.key - "-${component.toLowerCase()}" :testResultsURL.key
+            String url = testResultsURL.value
+            testsResults[testType].targetFolder = downloadAndExtractZip(url, targetFolder, testResultsURL.key)
         }
         return testsResults
     }
@@ -119,7 +111,7 @@ class JUnitReportsService {
                     testResults: [:],
             ]
         }
-        def testReportFiles = loadTestReportsFromPath(targetFolder)
+        List<File> testReportFiles = fileSystemHelper.loadFilesFromPath(targetFolder, "xml")
         return [
                 testReportFiles: testReportFiles,
                 testResults: parseTestReportFiles(testReportFiles),

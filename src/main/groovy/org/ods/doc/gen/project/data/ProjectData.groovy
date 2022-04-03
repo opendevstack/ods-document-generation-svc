@@ -45,6 +45,7 @@ class ProjectData {
     String tmpFolder
     Map data = [:]
     Map build = [:]
+    private Map overallSubDocs = [:]
 
     ProjectData(JiraService jira, BitbucketService bitbucketService, JUnitReportsService jUnitReportsService) {
         this.jira = jira
@@ -237,18 +238,6 @@ class ProjectData {
         return !values.isEmpty()
     }
 
-    boolean getIsAssembleMode() {
-        !getIsPromotionMode()
-    }
-
-    boolean getIsPromotionMode() {
-        isPromotionMode(buildParams.targetEnvironmentToken)
-    }
-
-    static boolean isPromotionMode(String targetEnvironmentToken) {
-        ['Q', 'P'].contains(targetEnvironmentToken)
-    }
-
     protected Map<String, List> computeWipJiraIssues(Map data) {
         def result = [:]
         JiraDataItem.TYPES_WITH_STATUS.each { type ->
@@ -330,7 +319,6 @@ class ProjectData {
         return result
     }
 
-
     Map getEnumDictionary(String name) {
         return this.data.jira.project.enumDictionary[name]
     }
@@ -354,7 +342,6 @@ class ProjectData {
     List<JiraDataItem> getAutomatedTestsTypeUnit(String componentName = null) {
         return this.getAutomatedTests(componentName, [TestType.UNIT])
     }
-
 
     boolean getIsVersioningEnabled() {
         isVersioningEnabled
@@ -477,7 +464,6 @@ class ProjectData {
     String getName() {
         return this.data.metadata.name
     }
-
 
     List<Map> getRepositories() {
         return this.data.metadata.repositories
@@ -828,6 +814,21 @@ class ProjectData {
             this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${build.runDisplayUrl}")
         }
 
+    }
+
+    void addOverallDocToMerge(String documentType, String component, String pdfPath) {
+        if (overallSubDocs[documentType] == null){
+            overallSubDocs[documentType] = []
+        }
+        overallSubDocs[documentType] << [component: component, pdfPath: pdfPath]
+    }
+
+    List getOverallDocsToMerge(documentType){
+        return overallSubDocs[(documentType)]
+    }
+
+    void resetOverallDocsToMerge(){
+        overallSubDocs = [:]
     }
 
     protected Map resolveJiraDataItemReferences(Map data) {
