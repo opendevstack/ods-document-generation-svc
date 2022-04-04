@@ -44,6 +44,15 @@ class BitbucketService {
         return new JsonSlurperClassic().parseText(response)
     }
 
+    String buildReleaseManagerUrl(String projectId, String releaseManagerRepo) {
+        URI uri = new URI([getBitbucketURLForDocs(), projectId, releaseManagerRepo].join("/"))
+        return uri.normalize().toString()
+    }
+
+    String getBitbucketURLForDocs() {
+        return bitBucketClientConfig.url
+    }
+
     void downloadRepo(String project, String repo, String branch, String tmpFolder) {
         log.info("downloadRepo: project:${project}, repo:${repo} and branch:${branch}")
         Path zipArchive = Files.createTempFile("archive-", ".zip")
@@ -57,7 +66,7 @@ class BitbucketService {
         }
     }
 
-    private void downloadRepoWithFallBack(String project, String repo, String branch, Path zipArchive) {
+    protected void downloadRepoWithFallBack(String project, String repo, String branch, Path zipArchive) {
         try {
             bitBucketClientConfig
                     .getClient()
@@ -65,7 +74,7 @@ class BitbucketService {
                     .withCloseable { Response response ->
                         streamResult(response, zipArchive)
                     }
-        } catch (FeignException callException) {
+        } catch (Exception callException) {
             log.warn("Branch [${branch}] doesn't exist, using branch: [${MAIN_BRANCH}]")
             bitBucketClientConfig
                     .getClient()
@@ -77,12 +86,7 @@ class BitbucketService {
 
     }
 
-    String buildReleaseManagerUrl(String projectId, String releaseManagerRepo) {
-        URI uri = new URI([bitBucketClientConfig.url, projectId, releaseManagerRepo].join("/"))
-        return uri.normalize().toString()
-    }
-
-    private void streamResult(Response response, Path zipArchive){
+    protected void streamResult(Response response, Path zipArchive){
         if (response.status() >= 300) {
             throw new ErrorDecoder.Default().decode('downloadRepo', response)
         }
@@ -93,7 +97,7 @@ class BitbucketService {
         }
     }
 
-    private void checkError(repo, String branch, FeignException callException) {
+    protected void checkError(repo, String branch, FeignException callException) {
         def baseErrMessage = "Could not get document zip from '${repo}'!- For version:${branch}"
         if (callException instanceof FeignException.BadRequest) {
             throw new RuntimeException("${baseErrMessage} \rIs there a correct release branch configured?", callException)

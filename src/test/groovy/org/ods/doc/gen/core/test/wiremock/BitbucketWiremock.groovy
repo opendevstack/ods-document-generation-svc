@@ -11,14 +11,14 @@ import static com.github.tomakehurst.wiremock.core.WireMockApp.FILES_ROOT
 import static com.github.tomakehurst.wiremock.core.WireMockApp.MAPPINGS_ROOT
 
 @Slf4j
-class BitbucketServiceMock {
+class BitbucketWiremock {
     static final String WIREMOCK_FILES = "src/test/resources/wiremock/bitbucket"
 
     boolean recording
     WireMockServer wireMockServer
     String pathToFiles
 
-    BitbucketServiceMock setUp(String scenario){
+    BitbucketWiremock setUp(String scenario){
         pathToFiles = "${WIREMOCK_FILES}/${scenario}"
 
         wireMockServer = new WireMockServer(
@@ -28,7 +28,7 @@ class BitbucketServiceMock {
         return this
     }
 
-    BitbucketServiceMock startServer(boolean recording = false, String targetUrl = null) {
+    BitbucketWiremock startServer(boolean recording = false, String targetUrl = null) {
         log.info("startServer recording:[{}] targetUrl:[{}]",recording, targetUrl)
 
         this.recording = recording
