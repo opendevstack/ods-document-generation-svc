@@ -1,22 +1,18 @@
 package org.ods.doc.gen.external.modules.nexus
 
-
 import com.github.tomakehurst.wiremock.client.WireMock
+import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.ods.doc.gen.core.test.SpecHelper
+import spock.lang.TempDir
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class NexusServiceSpec extends SpecHelper {
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
-
-    NexusService createService(int port, String username, String password) {
-        return new NexusService("http://localhost:${port}", username, password)
-    }
+    @TempDir
+    File tempFolder
 
     def "create with invalid baseURL"() {
         when:
@@ -73,59 +69,6 @@ class NexusServiceSpec extends SpecHelper {
         e.message == "Error: unable to connect to Nexus. 'password' is undefined."
     }
 
-    byte[] getExampleFileBytes() {
-        return Paths.get("src/test/resources/nexus/LICENSE.zip").toFile().getBytes()
-    }
-
-    Map storeArtifactRequestData(Map mixins = [:]) {
-        def result = [
-            data: [
-                artifact: [0] as byte[],
-                contentType: "application/octet-stream",
-                directory: "myDirectory",
-                name: "myName",
-                repository: "myRepository",
-            ],
-            password: "password",
-            path: "/service/rest/v1/components",
-            username: "username"
-        ]
-
-        result.multipartRequestBody = [
-            "raw.directory": result.data.directory,
-            "raw.asset1": result.data.artifact,
-            "raw.asset1.filename": result.data.name
-        ]
-
-        result.queryParams = [
-            "repository": result.data.repository
-        ]
-
-        return result << mixins
-    }
-
-    Map getArtifactRequestData(Map mixins = [:]) {
-        def result = [
-            data: [
-                directory: "myDirectory",
-                name: "myName",
-                repository: "myRepository",
-            ],
-            password: "password",
-            path: "/repository/myRepository/myDirectory/myName",
-            username: "username"
-        ]
-        return result << mixins
-  }
-
-    Map storeArtifactResponseData(Map mixins = [:]) {
-        def result = [
-            status: 204
-        ]
-
-        return result << mixins
-    }
-
     def "store artifact"() {
         given:
         def request = storeArtifactRequestData()
@@ -135,7 +78,7 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
 
         when:
-        def result = service.storeArtifact(request.data.repository, request.data.directory, request.data.name, request.data.artifact, request.data.contentType)
+        def result = storeArtifact(service, request)
 
         then:
         result == new URIBuilder("http://localhost:${server.port()}/repository/${request.data.repository}/${request.data.directory}/${request.data.name}").build()
@@ -155,11 +98,11 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
 
         when:
-        service.storeArtifact(request.data.repository, request.data.directory, request.data.name, request.data.artifact, request.data.contentType)
+        storeArtifact(service, request)
 
         then:
         def e = thrown(RuntimeException)
-        e.message == "Error: unable to store artifact. Nexus could not be found at: 'http://localhost:${server.port()}' with repo: ${request.data.repository}."
+        e.message.startsWith("Error: unable to store artifact. Nexus could not be found at:")
 
         cleanup:
         stopServer(server)
@@ -177,7 +120,7 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
 
         when:
-        service.storeArtifact(request.data.repository, request.data.directory, request.data.name, request.data.artifact, request.data.contentType)
+        storeArtifact(service, request)
 
         then:
         def e = thrown(RuntimeException)
@@ -238,15 +181,87 @@ class NexusServiceSpec extends SpecHelper {
 
         def server = createServer(WireMock.&get, request, response)
         def service = createService(server.port(), request.username, request.password)
-        temporaryFolder.create()
+
 
         String url = "/repository/" + request.data.repository + "/" + request.data.directory + "/" + request.data.name
 
         when: "execute"
 
-        service.downloadAndExtractZip(url, temporaryFolder.getRoot().getAbsolutePath())
+        service.downloadAndExtractZip(url, tempFolder.absolutePath)
 
         then: "downloads and unzips"
-        Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "LICENSE").toFile().exists()
+        Paths.get(tempFolder.absolutePath, "LICENSE").toFile().exists()
     }
+
+    def getArtifact(){
+        Path artifact = Paths.get(tempFolder.absolutePath, "artifact")
+        FileUtils.writeByteArrayToFile(artifact.toFile(), [0] as byte[])
+        return artifact.toString()
+    }
+
+    byte[] getExampleFileBytes() {
+        return Paths.get("src/test/resources/nexus/LICENSE.zip").toFile().getBytes()
+    }
+
+    Map storeArtifactRequestData(Map mixins = [:]) {
+        def result = [
+                data: [
+                        artifact: [0] as byte[],
+                        contentType: "application/octet-stream",
+                        directory: "myDirectory",
+                        name: "myName",
+                        repository: NexusService.NEXUS_REPOSITORY,
+                ],
+                password: "password",
+                path: "/service/rest/v1/components",
+                username: "username"
+        ]
+
+        result.multipartRequestBody = [
+                "raw.directory": result.data.directory,
+                "raw.asset1": result.data.artifact,
+                "raw.asset1.filename": result.data.name
+        ]
+
+        result.queryParams = [
+                "repository": result.data.repository
+        ]
+
+        return result << mixins
+    }
+
+    Map getArtifactRequestData(Map mixins = [:]) {
+        def result = [
+                data: [
+                        directory: "myDirectory",
+                        name: "myName",
+                        repository: "myRepository",
+                ],
+                password: "password",
+                path: "/repository/myRepository/myDirectory/myName",
+                username: "username"
+        ]
+        return result << mixins
+    }
+
+    Map storeArtifactResponseData(Map mixins = [:]) {
+        def result = [
+                status: 204
+        ]
+
+        return result << mixins
+    }
+
+    NexusService createService(int port, String username, String password) {
+        return new NexusService("http://localhost:${port}", username, password)
+    }
+
+    private URI storeArtifact(NexusService service, Map<String, Serializable> request) {
+        service.storeArtifact(
+                request.data.directory,
+                request.data.name,
+                getArtifact(),
+                request.data.contentType)
+    }
+
 }
