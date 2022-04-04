@@ -72,7 +72,7 @@ class JUnitReportsService {
         testResultsURLs.each {testResultsURL ->
             String testType = (component)? testResultsURL.key - "-${component.toLowerCase()}" :testResultsURL.key
             String url = testResultsURL.value
-            testsResults[testType].targetFolder = downloadAndExtractZip(url, targetFolder, testResultsURL.key)
+            testsResults[testType].testReportFiles = downloadAndExtractZip(url, targetFolder, testResultsURL.key)
         }
         return testsResults
     }
