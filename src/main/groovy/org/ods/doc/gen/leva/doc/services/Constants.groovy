@@ -25,6 +25,8 @@ class Constants {
 
     }
 
+    public static List OVERALL_DOC_TYPES = [DocumentType.DTR as String, DocumentType.TIR as String, ]
+
     protected static Map DOCUMENT_TYPE_NAMES = [
             (DocumentType.CSD as String)        : 'Combined Specification Document',
             (DocumentType.DIL as String)        : 'Discrepancy Log',
@@ -51,10 +53,6 @@ class Constants {
             DocumentType.CSD as String,
             DocumentType.CFTP as String,
             DocumentType.CFTR as String
-    ]
-
-    static Map<String, Map> DOCUMENT_TYPE_FILESTORAGE_EXCEPTIONS = [
-            'SCRR-MD' : [storage: 'pdf', content: 'pdf' ]
     ]
 
     static List<String> COMPONENT_TYPE_IS_NOT_INSTALLED = [

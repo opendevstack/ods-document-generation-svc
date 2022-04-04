@@ -2,129 +2,59 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.nexus.NexusService
+import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
+import org.springframework.stereotype.Service
+
+import java.nio.file.Paths
 
 @Slf4j
-@SuppressWarnings([
-    'AbstractClassWithPublicConstructor',
-    'LineLength',
-    'ParameterCount',
-    'GStringAsMapKey',
-    'DuplicateMapLiteral'])
-abstract class DocGenUseCase {
+@Service
+class DocGenUseCase {
 
-    static final String RESURRECTED = "resurrected"
-
-    protected final Project project
     private final ZipFacade zip
     protected final DocGenService docGen
     protected final NexusService nexus
     protected final PDFUtil pdf
+    private final ComponentPdfRepository componentPdfRepository
 
-    DocGenUseCase(Project project, ZipFacade zip, DocGenService docGen, NexusService nexus, PDFUtil pdf) {
-        this.project = project
+    DocGenUseCase(ZipFacade zip,
+                  DocGenService docGen,
+                  NexusService nexus,
+                  PDFUtil pdf,
+                  ComponentPdfRepository componentPdfRepository) {
+        this.componentPdfRepository = componentPdfRepository
         this.zip = zip
         this.docGen = docGen
         this.nexus = nexus
         this.pdf = pdf
     }
 
-    String createDocument(ProjectData projectData,
-                          String documentType,
-                          Map repo,
-                          Map data,
-                          Map<String, byte[]> files = [:],
-                          Closure modifier = null,
-                          String templateName = null,
-                          String watermarkText = null) {
-        def document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
-
-        // Apply PDF document modifications, if provided
-        if (modifier) {
-            document = modifier(document)
-        }
-
-        // Apply PDF document watermark, if provided
-        if (watermarkText) {
-            document = this.pdf.addWatermarkText(document, watermarkText)
-        }
-
-        def basename = this.getDocumentBasename(projectData,
-                documentType,
-                projectData.build.version,
-                projectData.build.buildId,
-                repo)
-        def pdfName = "${basename}.pdf"
-
-        Map<GString, Object> artifacts = buildArchiveWithPdfAndRawData(pdfName, document, basename, data, files)
-        boolean doCreateArtifact = shouldCreateArtifact(documentType, repo)
-        byte[] artifact = this.zip.createZipFileFromFiles(projectData.tmpFolder, "${basename}.zip", artifacts)
-
-        // Concerns DTR/TIR for a single repo
-        if (!doCreateArtifact) {
-            if (repo) {
-                repo.data.documents[documentType] = pdfName
-            }
-        }
-
-        // Store the archive as an artifact in Nexus
-        def uri = this.nexus.storeArtifact(
-            projectData.services.nexus.repository.name,
-            "${projectData.key.toLowerCase()}-${projectData.build.version}",
-            "${basename}.zip",
-            artifact,
-            "application/zip"
-        )
-
-        def message = "Document ${documentType} created and uploaded"
-        if (repo) {
-            message += " for ${repo.id}"
-        }
-        message += " to [${uri}]"
-        log.info message
-        return uri.toString()
-    }
-
-    private Map<String, Object> buildArchiveWithPdfAndRawData(pdfName, document, basename, Map data, Map<String, byte[]> files) {
-        def artifacts = [
-                "${pdfName}"          : document,
-                "raw/${basename}.json": JsonOutput.toJson(data).getBytes(),
-        ]
-        artifacts << files.collectEntries { path, contents ->
-            [path, contents]
-        }
-        artifacts
-    }
-
-    @SuppressWarnings(['JavaIoPackageAccess'])
-    String createOverallDocument(String templateName, String documentType, Map metadata, Closure visitor = null, String watermarkText = null, ProjectData projectData) {
+    String createOverallDocument(String templateName,
+                                 String documentType,
+                                 Map metadata,
+                                 Closure visitor = null,
+                                 String watermarkText = null,
+                                 ProjectData projectData) {
         def documents = []
         def sections = []
 
-        projectData.repositories.each { repo ->
-            def documentName = repo.data.documents[documentType]
-
-            if (documentName) {
-                String documentNamePdf = documentName.replaceFirst("zip", "pdf")
-                def path = "${projectData.tmpFolder}/reports/${repo.id}"
-                String jiraProjectKey = projectData.getJiraProjectKey()
-                String version = projectData.build.version
-                nexus.downloadAndExtractZip(jiraProjectKey.toLowerCase(), version, path, documentName)
-                documents << new File("${path}/${documentNamePdf}").readBytes()
-                sections << [
-                    heading: "${documentType} for component: ${repo.id} (merged)"
-                ]
-            }
+        projectData.getOverallDocsToMerge(documentType).each { Map componentPdf ->
+            documents << Paths.get(componentPdf.pdfPath).toFile().readBytes()
+            sections << [
+                    heading: "${documentType} for component: ${componentPdf.component} (merged)"
+            ]
         }
 
         def data = [
-            metadata: metadata,
-            data: [
-                sections: sections
-            ],
+                metadata: metadata,
+                data: [
+                        sections: sections
+                ],
         ]
 
         if (visitor) {
@@ -137,21 +67,84 @@ abstract class DocGenUseCase {
             return this.pdf.merge(projectData.tmpFolder as String, documents)
         }
 
-        def result = this.createDocument(projectData, documentType, null, data, [:], modifier, templateName, watermarkText)
+        return createDocument(projectData, documentType, null, data, [:], modifier, templateName, watermarkText)
+    }
 
-        // Clean up previously stored documents
-        projectData.repositories.each { repo ->
-            repo.data.documents.remove(documentType)
+    String createDocument(ProjectData projectData,
+                          String documentType,
+                          Map repo,
+                          Map data,
+                          Map<String, byte[]> files = [:],
+                          Closure modifier = null,
+                          String templateName = null,
+                          String watermarkText = null) {
+        byte[] document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
+
+        // Apply PDF document modifications, if provided
+        if (modifier) {
+            document = modifier(document)
         }
 
-        return result
+        // Apply PDF document watermark, if provided
+        if (watermarkText) {
+            document = this.pdf.addWatermarkText(document, watermarkText)
+        }
+
+        String version = projectData.build.version
+        String buildId = projectData.build.buildId
+        String basename = this.getDocumentBasename(projectData, documentType, version, buildId, repo)
+        String pdfName = "${basename}.pdf"
+
+        Map<String, Object> artifacts = buildArchiveWithPdfAndRawData(pdfName, document, basename, data, files)
+        String pathToFile = this.zip.createZipFileFromFiles(projectData.tmpFolder, "${basename}.zip", artifacts)
+
+        if (Constants.OVERALL_DOC_TYPES.contains(documentType) && repo) {
+            File pdfFile = Paths.get(projectData.tmpFolder, pdfName).toFile()
+            FileUtils.writeByteArrayToFile(pdfFile, document)
+            projectData.addOverallDocToMerge(documentType, repo.id as String, pdfFile.absolutePath)
+        }
+
+        URI docURL = componentPdfRepository.storeDocument(projectData, "${basename}.zip", pathToFile)
+        logUploadFile(documentType, repo, docURL)
+        return docURL.toString()
     }
 
-    String getDocumentBasename(ProjectData projectData, String documentType, String version, String build = null, Map repo = null) {
-        getDocumentBasenameWithDocVersion(projectData, documentType, getDocumentVersion(projectData, version, build), repo)
+    private void logUploadFile(String documentType, Map repo, URI docURL) {
+        String message = "Document ${documentType} created and uploaded"
+        if (repo) {
+            message += " for ${repo.id}"
+        }
+        message += " to [${docURL}]"
+        log.info message
     }
 
-    String getDocumentBasenameWithDocVersion(ProjectData projectData, String documentType, String docVersion, Map repo = null) {
+    private Map<String, Object> buildArchiveWithPdfAndRawData(String pdfName,
+                                                              byte[] document,
+                                                              String basename,
+                                                              Map data,
+                                                              Map<String, byte[]> files) {
+        Map artifacts = [
+                "${pdfName}"          : document,
+                "raw/${basename}.json": JsonOutput.toJson(data).getBytes(),
+        ]
+        artifacts << files.collectEntries { path, contents ->
+            [path, contents]
+        }
+        return artifacts
+    }
+
+    private String getDocumentBasename(ProjectData projectData,
+                                       String documentType,
+                                       String version,
+                                       String build = null,
+                                       Map repo = null) {
+        getDocBasenameWithDocVersion(projectData, documentType, getDocumentVersion(projectData, version, build), repo)
+    }
+
+    private String getDocBasenameWithDocVersion(ProjectData projectData,
+                                                     String documentType,
+                                                     String docVersion,
+                                                     Map repo = null) {
         def result = projectData.key
         if (repo) {
             result += "-${repo.id}"
@@ -160,7 +153,7 @@ abstract class DocGenUseCase {
         return "${documentType}-${result}-${docVersion}".toString()
     }
 
-    String getDocumentVersion(ProjectData projectData, String projectVersion, String build = null) {
+    private String getDocumentVersion(ProjectData projectData, String projectVersion, String build = null) {
         if (build) {
             "${projectVersion}-${build}"
         } else {
@@ -168,69 +161,9 @@ abstract class DocGenUseCase {
         }
     }
 
-    @SuppressWarnings(['AbcMetric'])
-    Map resurrectAndStashDocument(ProjectData projectData, String documentType, Map repo) {
-        if (!repo.data.openshift.deployments) {
-            return [found: false]
-        }
-        String resurrectedBuild
-        if (repo.data.openshift.resurrectedBuild) {
-            resurrectedBuild = repo.data.openshift.resurrectedBuild
-            log.info "Using ${documentType} from jenkins build: ${resurrectedBuild} for repo: ${repo.id}"
-        } else {
-            return [found: false]
-        }
-        def buildVersionKey = resurrectedBuild.split('/')
-        if (buildVersionKey.size() != 2) {
-            return [found: false]
-        }
-
-        def oldBuildVersion = buildVersionKey[0]
-        def basename = getDocumentBasename(documentType, oldBuildVersion, buildVersionKey[1], repo)
-        def path = "${projectData.tmpFolder}/reports/${repo.id}"
-
-        def fileExtensions = getFiletypeForDocumentType(documentType)
-        String storageType = fileExtensions.storage ?: 'zip'
-        String contentType = fileExtensions.content ?: 'pdf'
-        log.info "Resolved documentType '${documentType}' - storage/content formats: ${fileExtensions}"
-
-        String contentFileName = "${basename}.${contentType}"
-        String storedFileName = "${basename}.${storageType}"
-        Map documentFromNexus = nexus.retrieveArtifact(
-                projectData.services.nexus.repository.name as String,
-                "${projectData.key.toLowerCase()}-${oldBuildVersion}" as String,
-                storedFileName as String,
-                path)
-
-        log.info "Document found: ${storedFileName} \r${documentFromNexus}"
-
-        if (!shouldCreateArtifact(documentType, repo)) {
-            repo.data.documents[documentType] = contentFileName
-        }
-
-        return [
-            found: true,
-            'uri': documentFromNexus.uri,
-            createdByBuild: resurrectedBuild,
-        ]
+    private String getDocumentTemplatesVersion(ProjectData projectData) {
+        def capability = projectData.getCapability('LeVADocs')
+        return capability.templatesVersion
     }
-
-    URI storeDocument (String documentName, byte [] documentAsBytes, String contentType) {
-        return this.nexus.storeArtifact(
-            projectData.services.nexus.repository.name,
-            "${projectData.key.toLowerCase()}-${projectData.build.version}",
-            "${documentName}",
-            documentAsBytes,
-            contentType
-        )
-    }
-
-    abstract String getDocumentTemplatesVersion(ProjectData projectData)
-
-    abstract Map getFiletypeForDocumentType (String documentType)
-
-    abstract List<String> getSupportedDocuments()
-
-    abstract boolean shouldCreateArtifact (String documentType, Map repo)
 
 }

@@ -24,14 +24,14 @@
 projects:
   - id: ordgp
     description: One release DocGen
-    buildNumber: 666
+    buildNumber: 13
     releaseId: ORDGP-123
     version: WIP
     releaseManagerRepo: ordgp-releasemanager
-    releaseManagerBranch: master
+    releaseManagerBranch: workInProgressBranch
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
-    testResults: Unit-backend, Unit-frontend, Acceptance, Installation, Integration
-    components: backend, frontend, test
+    testResults: unit-backend, unit-frontend, acceptance, installation, integration
+    components: backend, frontend
     templatesVersion: 1.2
     validation: >
       ### Project validates

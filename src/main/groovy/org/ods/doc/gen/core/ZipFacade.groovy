@@ -14,15 +14,8 @@ class ZipFacade {
 
     static final String ARTIFACTS_BASE_DIR = 'artifacts'
 
-    File extractFromZipFile(String path, String fileToBeExtracted) {
-        Path parentDir = Files.createDirectories(Paths.get(path).parent)
-        def zipFile = new ZipFile(path)
-        zipFile.extractFile(fileToBeExtracted, parentDir.toString())
-        return new File(parentDir.toString(), fileToBeExtracted)
-    }
-
-    byte[] createZipFileFromFiles(String tmpFolder, String name, Map<String, byte[]> files) {
-        def path = "${tmpFolder}/${ARTIFACTS_BASE_DIR}/${name}".toString()
+    String createZipFileFromFiles(String tmpFolder, String name, Map<String, byte[]> files) {
+        String path = "${tmpFolder}/${ARTIFACTS_BASE_DIR}/${name}".toString()
         Files.createDirectories(Paths.get(path).parent)
 
         def zipFile = new ZipFile(path)
@@ -32,7 +25,7 @@ class ZipFacade {
             zipFile.addStream(new ByteArrayInputStream(fileData), params)
         }
 
-        return new File(path).getBytes()
+        return path
     }
 
     void extractZipArchive(Path zipArchive, Path targetDir) {

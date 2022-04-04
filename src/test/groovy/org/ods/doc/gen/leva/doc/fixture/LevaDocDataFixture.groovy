@@ -3,6 +3,7 @@ package org.ods.doc.gen.leva.doc.fixture
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.test.workspace.TestsReports
+import org.ods.doc.gen.leva.doc.services.Constants
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 
@@ -30,24 +31,19 @@ class LevaDocDataFixture {
     }
 
     Map getModuleData(ProjectFixture projectFixture) {
-        Map input = RepoDataBuilder.getRepoForComponent(projectFixture.component)
-        return input
+        return RepoDataBuilder.getRepoForComponent(projectFixture.component)
     }
 
     void updateExpectedComponentDocs(ProjectData projectData, Map data, ProjectFixture projectFixture) {
-        projectData.repositories.each {repo ->
-            projectFixture.component = repo.id
-            repo.data.documents = (repo.data.documents)?: [:]
-
-            // see @DocGenUseCase#createOverallDocument -> unstashFilesIntoPath
-            repo.data.documents[projectFixture.docType] =  copyPdfToTemp(projectFixture, data)
+        projectFixture.components.each {String component ->
+            log.info("Moving pdf component: ${component} to merge into Overall pdf")
+            String pdfToTemp = copyPdfToTemp(projectFixture, component, data)
+            projectData.addOverallDocToMerge(projectFixture.docType, component, pdfToTemp)
         }
-        projectFixture.component = null
     }
 
     private Map<String, String> buildJobParams(ProjectFixture projectFixture){
         String projectWithBuild = "${projectFixture.project}/${projectFixture.buildNumber}"
-        List<String> testResults = projectFixture.testResults
         return  [
                 targetEnvironment: "dev",
                 targetEnvironmentToken: "D",
@@ -62,29 +58,37 @@ class LevaDocDataFixture {
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
                 jobName : "${projectFixture.project}-cd/${projectFixture.project}-releasemanager",
-                testResultsURLs: buildTestResultsUrls(testResults, projectWithBuild),
+                testResultsURLs: getTestResultsForDocType(projectFixture, projectWithBuild),
                 jenkinLog: getJenkinsLogUrl(projectWithBuild)
         ]
     }
 
     private String getJenkinsLogUrl(String projectWithBuild) {
-        "/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
+        return "/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
     }
 
-    private Map<String, String> buildTestResultsUrls(List<String> testResults, String projectWithBuild) {
-        Map hardcodedUrls = [
-                "Unit-backend": "/repository/leva-documentation/${projectWithBuild}/unit-backend.zip",
-                "Unit-frontend": "/repository/leva-documentation/${projectWithBuild}/unit-frontend.zip",
-                "Acceptance": "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
-                'Installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip",
-                'Integration': "/repository/leva-documentation/${projectWithBuild}/integration.zip",
-        ]
-
-        Map<String, String> testResultsUrl = [:]
-        testResults.each {
-            testResultsUrl[it] = hardcodedUrls[it]
+    private Map getTestResultsForDocType(ProjectFixture projectFixture, String projectWithBuild) {
+        Map hardcodedUrls
+        switch (projectFixture.docType){
+            case Constants.DocumentType.DTR as String:
+                String type = "unit-${projectFixture.component}"
+                hardcodedUrls = [(type): "/repository/leva-documentation/${projectWithBuild}/${type}.zip"]
+                break
+            case Constants.DocumentType.IVP as String:
+            case Constants.DocumentType.IVR as String:
+                hardcodedUrls = ['installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip"]
+                break
+            case Constants.DocumentType.CFTR as String:
+            case Constants.DocumentType.TCR as String:
+                hardcodedUrls = [
+                        "acceptance"  : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
+                        'integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
+                ]
+                break
+            default:
+                hardcodedUrls = [:]
         }
-        return testResultsUrl
+        return hardcodedUrls
     }
 
     private Map<String, String> buildGitData(ProjectFixture projectFixture) {
@@ -100,13 +104,14 @@ class LevaDocDataFixture {
         ]
     }
 
-    private String copyPdfToTemp(ProjectFixture projectFixture, Map data) {
-        def destPath = "${tempFolder}/reports/${projectFixture.component}"
+    private String copyPdfToTemp(ProjectFixture projectFixture, String component, Map data) {
+        String destPath = "${tempFolder}/reports/${component}"
         new File(destPath).mkdirs()
         LevaDocTestValidator testValidator = new LevaDocTestValidator(tempFolder, projectFixture)
-        File expected = testValidator.expectedDoc(data.build.buildId as String)
-        FileUtils.copyFile(expected, new File("${destPath}/${expected.name}"))
-        return expected.name.replaceFirst("pdf", "zip")
+        File expected = testValidator.expectedDoc(data.build.buildId as String, component)
+        File tempPdf = new File("${destPath}/${expected.name}")
+        FileUtils.copyFile(expected, tempPdf)
+        return tempPdf.absolutePath
     }
 
 }

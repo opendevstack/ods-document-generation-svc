@@ -12,4 +12,14 @@ class FileSystemHelper {
         return Files.createTempDirectory(id)
     }
 
+    List<File> loadFilesFromPath(String path, String fileExtension) {
+        def result = []
+        try {
+            new File(path).traverse(nameFilter: ~/.*\.${fileExtension}$/, type: groovy.io.FileType.FILES) { file ->
+                result << file
+            }
+        } catch (FileNotFoundException e) {}
+
+        return result
+    }
 }

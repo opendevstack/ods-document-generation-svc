@@ -1,6 +1,6 @@
 # Changelog
 
-- Temporal change with add LevaDoc
+- Temporal change with add LevaDoc xml
 
 ## Unreleased
 - Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
@@ -14,7 +14,7 @@
 - removed unused params from payloads.
 
 ## [4.0] - 2021-18-11
-
+=======
 ### Added
 - Added log to print /document endpoint input
 

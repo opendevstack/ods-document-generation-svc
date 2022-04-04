@@ -1,6 +1,7 @@
 package org.ods.doc.gen.external.modules.nexus
 
 import groovy.util.logging.Slf4j
+import kong.unirest.HttpRequestWithBody
 import kong.unirest.HttpResponse
 import kong.unirest.Unirest
 import net.lingala.zip4j.ZipFile
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.InvalidParameterException
 
@@ -17,6 +19,9 @@ import java.security.InvalidParameterException
 class NexusService {
 
     static final String NEXUS_REPOSITORY = "leva-documentation"
+    private static final URL_PATH = "service/rest/v1/components?repository={repository}"
+    private static final String RAW = 'raw'
+    private static final String UNABLE_STORE = 'Error: unable to store artifact. '
 
     URI baseURL
 
@@ -28,18 +33,7 @@ class NexusService {
                  @Value('${nexus.username}') String username,
                  @Value('${nexus.password}') String password) {
         log.info("NexusService - url:[${baseURL}], username:[${username}]")
-        if (!baseURL?.trim() || baseURL=="null") {
-            throw new IllegalArgumentException("Error: unable to connect to Nexus. 'baseURL' is undefined.")
-        }
-
-        if (!username?.trim()) {
-            throw new IllegalArgumentException("Error: unable to connect to Nexus. 'username' is undefined.")
-        }
-
-        if (!password?.trim()) {
-            throw new IllegalArgumentException("Error: unable to connect to Nexus. 'password' is undefined.")
-        }
-
+        checkParams(baseURL, username, password)
         try {
             this.baseURL = new URIBuilder(baseURL).build()
         } catch (e) {
@@ -52,67 +46,61 @@ class NexusService {
         this.password = password
     }
 
-    URI storeArtifact(String repository, String directory, String name, byte[] artifact, String contentType) {
+    URI storeArtifact(String directory, String name, String artifactPath, String contentType) {
         Map nexusParams = [
             'raw.directory': directory,
             'raw.asset1.filename': name,
         ]
 
-        return storeComplextArtifact(repository, artifact, contentType, 'raw', nexusParams)
+        return storeComplextArtifact(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
     }
 
-    URI storeArtifactFromFile(
-        String repository,
-        String directory,
-        String name,
-        File artifact,
-        String contentType) {
-        return storeArtifact(repository, directory, name, artifact.getBytes(), contentType)
-    }
-
-    @SuppressWarnings('LineLength')
-    URI storeComplextArtifact(String repository, byte[] artifact, String contentType, String repositoryType, Map nexusParams = [ : ]) {
-        def restCall = Unirest.post("${this.baseURL}/service/rest/v1/components?repository={repository}")
-            .routeParam('repository', repository)
-            .basicAuth(this.username, this.password)
-
-        nexusParams.each { key, value ->
-            restCall = restCall.field(key, value)
-        }
-
-        restCall = restCall.field(
-            repositoryType == 'raw' || repositoryType == 'maven2' ? "${repositoryType}.asset1" : "${repositoryType}.asset",
-            new ByteArrayInputStream(artifact), contentType)
+    private URI storeComplextArtifact(String repo,
+                                      String artifactPath,
+                                      String contentType,
+                                      String repoType,
+                                      Map nexusParams) {
+        File artifactFile = Paths.get(artifactPath).toFile()
+        log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], ")
+        byte[] artifact = artifactFile.getBytes()
+        def restCall = Unirest
+                .post("${this.baseURL}/${URL_PATH}")
+                .routeParam('repository', repo)
+                .basicAuth(this.username, this.password)
+                .field(getField(repoType), new ByteArrayInputStream(artifact), contentType)
+        nexusParams.each { key, value -> restCall = restCall.field(key, value) }
 
         def response = restCall.asString()
         response.ifSuccess {
             if (response.getStatus() != 204) {
-                throw new RuntimeException(
-                    'Error: unable to store artifact. ' +
-                        "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-                )
+                throw new RuntimeException(errorMsg(response, repo))
             }
         }
 
         response.ifFailure {
-            def message = 'Error: unable to store artifact. ' +
-                "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to store artifact. Nexus could not be found at: '${this.baseURL}' with repo: ${repository}."
-            }
-
-            throw new RuntimeException(message)
+            throw new RuntimeException(errorMsg(response, repo))
         }
 
-        if (repositoryType == 'raw') {
-            return this.baseURL.resolve("/repository/${repository}/${nexusParams['raw.directory']}/" +
-              "${nexusParams['raw.asset1.filename']}")
+        if (repoType == RAW) {
+            String url = "/repository/${repo}/${nexusParams['raw.directory']}/${nexusParams['raw.asset1.filename']}"
+            return this.baseURL.resolve(url)
         }
-        return this.baseURL.resolve("/repository/${repository}")
+        return this.baseURL.resolve("/repository/${repo}")
     }
 
-    @SuppressWarnings(['JavaIoPackageAccess'])
+    private String errorMsg(HttpResponse<String> response, String repo) {
+        String message = UNABLE_STORE +
+                "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
+        if (response.getStatus() == 404) {
+            message = "Error: unable to store artifact. Nexus could not be found at: '${this.baseURL}' - repo: ${repo}."
+        }
+        return message
+    }
+
+    private String getField(String repoType) {
+        repoType == RAW || repoType == 'maven2' ? "${repoType}.asset1" : "${repoType}.asset"
+    }
+
     Map<URI, File> retrieveArtifact(String nexusRepository, String nexusDirectory, String name, String extractionPath) {
         String urlToDownload = getURL(nexusRepository, nexusDirectory, name)
         HttpResponse<File> response = downloadToPath(urlToDownload, extractionPath, name)
@@ -148,7 +136,7 @@ class NexusService {
 
     void downloadAndExtractZip(String jiraProjectKey, String version, String extractionPath, String artifactName) {
         String nexusDirectory = "${jiraProjectKey}-${version}"
-        def urlToDownload = getURL(NexusService.NEXUS_REPOSITORY, nexusDirectory, artifactName)
+        def urlToDownload = getURL(NEXUS_REPOSITORY, nexusDirectory, artifactName)
         downloadAndExtractZip(urlToDownload, extractionPath)
     }
 
@@ -161,6 +149,7 @@ class NexusService {
 
     private void extractZip(String extractionPath, String artifactName) {
         ZipFile zipFile = new ZipFile(Paths.get(extractionPath, artifactName).toString())
+        Files.createDirectories(Paths.get(extractionPath))
         zipFile.extractAll(extractionPath)
     }
 
@@ -170,4 +159,19 @@ class NexusService {
             artifactExists.delete()
         }
     }
+
+    private void checkParams(String baseURL, String username, String password) {
+        if (!baseURL?.trim() || baseURL == "null") {
+            throw new IllegalArgumentException("Error: unable to connect to Nexus. 'baseURL' is undefined.")
+        }
+
+        if (!username?.trim()) {
+            throw new IllegalArgumentException("Error: unable to connect to Nexus. 'username' is undefined.")
+        }
+
+        if (!password?.trim()) {
+            throw new IllegalArgumentException("Error: unable to connect to Nexus. 'password' is undefined.")
+        }
+    }
+
 }

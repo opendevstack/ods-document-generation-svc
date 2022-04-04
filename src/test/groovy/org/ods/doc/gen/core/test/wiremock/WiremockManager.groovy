@@ -10,6 +10,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.ods.doc.gen.SpringContext
 import org.springframework.core.env.Environment
 
@@ -91,16 +92,29 @@ class WiremockManager {
     private cleanWiremockDatafiles() {
         log.info("cleanWiremock date_created field")
         Map replaceAllMap = prepareReplaceMap()
-        new File("${pathToFiles}/${MAPPINGS_ROOT}").eachFileRecurse() {
-            replaceFileInText(it, replaceAllMap)
-            updateDateCreated(it)
-            log.debug("File " + it.getAbsolutePath() + " contents: ")
-            log.debug(it.text)
-        }
-        new File("${pathToFiles}/${FILES_ROOT}").eachFileRecurse() {replaceFileInText(it, replaceAllMap)}
+        updateMapping(replaceAllMap)
+        updateResponses(replaceAllMap)
     }
 
-    static Map prepareReplaceMap() {
+    private updateMapping(Map replaceAllMap) {
+        new File("${pathToFiles}/${MAPPINGS_ROOT}").eachFileRecurse() { File file ->
+            log.debug("update data in ${file.absolutePath}")
+            replaceFileInText(file, replaceAllMap)
+            updateCreatedData(file)
+            log.trace("File " + file.getAbsolutePath() + " contents: \n ${file.text}")
+        }
+    }
+
+    private updateResponses(Map replaceAllMap) {
+        new File("${pathToFiles}/${FILES_ROOT}").eachFileRecurse() { File file ->
+            if (FilenameUtils.getExtension(file.name) != "zip") {
+                log.debug("update data in ${file.absolutePath}")
+                replaceFileInText(file, replaceAllMap)
+            }
+        }
+    }
+
+    private Map prepareReplaceMap() {
         Environment env = SpringContext.getBean(Environment.class)
         List domainUsers = ["bitbucket_username", "nexus_username", "jira_username"]
         Map replaceAllMap = [:]
@@ -116,14 +130,14 @@ class WiremockManager {
         return replaceAllMap.findAll { it != null && it.key != null}
     }
 
-    private static void replaceFileInText(File file, Map replaceAllMap) {
+    private void replaceFileInText(File file, Map replaceAllMap) {
         replaceAllMap.each {
             if (file.text?.contains(it.key))
                 file.text = file.text.replace(it.key, it.value)
         }
     }
 
-    private void updateDateCreated(File file) {
+    private void updateCreatedData(File file) {
         JsonBuilder jsonBuilderFromFile = getJsonFromText(file.text)
         String equalToJsonField = jsonBuilderFromFile.content?.request?.bodyPatterns?.equalToJson
         if (!equalToJsonField || !equalToJsonField.contains("date_created") || equalToJsonField.contains("json-unit.any-string"))
