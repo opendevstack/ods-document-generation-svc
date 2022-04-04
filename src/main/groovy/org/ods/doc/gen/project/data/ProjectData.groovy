@@ -16,7 +16,6 @@ import org.ods.doc.gen.leva.doc.services.PipelineConfig
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
-import java.nio.file.Path
 import java.nio.file.Paths
 
 @SuppressWarnings(['LineLength',
@@ -46,6 +45,7 @@ class ProjectData {
     String tmpFolder
     Map data = [:]
     Map build = [:]
+    private Map overallSubDocs = [:]
 
     ProjectData(JiraService jira, BitbucketService bitbucketService, JUnitReportsService jUnitReportsService) {
         this.jira = jira
@@ -64,21 +64,16 @@ class ProjectData {
         this.build << data.build
         this.data.projectId = data.projectId
         this.build.buildNumber = data.buildNumber
-        this.data.git = data.git
         this.data.openshift = data.openshift
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
         this.data.repo = data.repo
-
-        rebuildGitRepoUrl()
-        return this
-    }
-
-    private void rebuildGitRepoUrl() {
-        this.data.git.url = bitbucketService.getFullUrlForRepoName(
+        this.data.git = data.git
+        this.data.git.url = bitbucketService.buildReleaseManagerUrl(
                 data.projectId as String,
-                data.gitreleaseManagerRepo as String
+                data.git.releaseManagerRepo as String
         )
+        return this
     }
 
     ProjectData load() {
@@ -190,8 +185,6 @@ class ProjectData {
                 repo.type = PipelineConfig.REPO_TYPE_ODS_CODE
             }
 
-            repo.url = "gitURL getGitURLFromPath"
-            repo.branch = 'master'
             repo.metadata = loadMetadataRepo(repo)
         }
     }
@@ -245,18 +238,6 @@ class ProjectData {
         def values = this.getWipJiraIssues().values()
         values = values.collect { it instanceof Map ? it.values() : it }.flatten()
         return !values.isEmpty()
-    }
-
-    boolean getIsAssembleMode() {
-        !getIsPromotionMode()
-    }
-
-    boolean getIsPromotionMode() {
-        isPromotionMode(buildParams.targetEnvironmentToken)
-    }
-
-    static boolean isPromotionMode(String targetEnvironmentToken) {
-        ['Q', 'P'].contains(targetEnvironmentToken)
     }
 
     protected Map<String, List> computeWipJiraIssues(Map data) {
@@ -340,7 +321,6 @@ class ProjectData {
         return result
     }
 
-
     Map getEnumDictionary(String name) {
         return this.data.jira.project.enumDictionary[name]
     }
@@ -364,7 +344,6 @@ class ProjectData {
     List<JiraDataItem> getAutomatedTestsTypeUnit(String componentName = null) {
         return this.getAutomatedTests(componentName, [TestType.UNIT])
     }
-
 
     boolean getIsVersioningEnabled() {
         isVersioningEnabled
@@ -487,7 +466,6 @@ class ProjectData {
     String getName() {
         return this.data.metadata.name
     }
-
 
     List<Map> getRepositories() {
         return this.data.metadata.repositories
@@ -838,6 +816,21 @@ class ProjectData {
             this.jira.appendCommentToIssue(releaseStatusIssueKey, "${message}\n\nSee: ${build.runDisplayUrl}")
         }
 
+    }
+
+    void addOverallDocToMerge(String documentType, String component, String pdfPath) {
+        if (overallSubDocs[documentType] == null){
+            overallSubDocs[documentType] = []
+        }
+        overallSubDocs[documentType] << [component: component, pdfPath: pdfPath]
+    }
+
+    List getOverallDocsToMerge(documentType){
+        return overallSubDocs[(documentType)]
+    }
+
+    void resetOverallDocsToMerge(){
+        overallSubDocs = [:]
     }
 
     protected Map resolveJiraDataItemReferences(Map data) {

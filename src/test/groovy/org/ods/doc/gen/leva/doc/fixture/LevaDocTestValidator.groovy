@@ -32,7 +32,7 @@ class LevaDocTestValidator {
 
     private boolean compareFiles(String buildId) {
         String actualPath = actualDoc(buildId).absolutePath
-        File expectedFile = expectedDoc(buildId)
+        File expectedFile = expectedDoc(buildId, projectFixture.component)
         String expectedPath = expectedFile.absolutePath
         log.info("validatePDF - Expected pdf:${expectedPath}")
 
@@ -53,7 +53,7 @@ class LevaDocTestValidator {
     }
 
     String pdfDiffFileName(String buildId){
-        def expectedFile = expectedDoc(buildId)
+        def expectedFile = expectedDoc(buildId, projectFixture.component)
         return "${pdfDiffFileName(expectedFile)}.pdf"
     }
 
@@ -62,24 +62,24 @@ class LevaDocTestValidator {
     }
 
     private void unzipGeneratedArtifact(String buildId) {
-        String source = "${tempFolder.absolutePath}/artifacts/${getArtifactName(buildId)}.zip"
+        String source = "${tempFolder.absolutePath}/artifacts/${getArtifactName(buildId, projectFixture.component)}.zip"
         String destination = "${tempFolder.absolutePath}"
         log.debug("unzipGeneratedArtifact src:[${source}]")
         log.debug("unzipGeneratedArtifact dest:[${destination}]")
         new AntBuilder().unzip(src: source, dest: destination, overwrite: "true")
     }
 
-    private String getArtifactName(buildId) {
-        def comp =  (projectFixture.component) ? "${projectFixture.component}-" : ''
+    private String getArtifactName(buildId, component = null) {
+        def comp =  (component) ? "${component}-" : ''
         def projectId = projectFixture.project
         return "${projectFixture.docType}-${ projectId.toUpperCase()}-${comp}${projectFixture.version}-${buildId}"
     }
 
-    File expectedDoc(String buildId) {
-        def comp =  (projectFixture.component) ? "${projectFixture.component}/" : ''
+    File expectedDoc(String buildId, component = null) {
+        def comp =  (component) ? "${component}/" : ''
         def filePath = "src/test/resources/expected/${projectFixture.project.toUpperCase()}/${comp}"
         new File(filePath).mkdirs()
-        return new File("${filePath}/${getArtifactName(buildId)}.pdf")
+        return new File("${filePath}/${getArtifactName(buildId, component)}.pdf")
     }
 
     private void copyDocWhenRecording(String buildId) {
@@ -87,7 +87,7 @@ class LevaDocTestValidator {
     }
 
     private File actualDoc(String buildId) {
-        return new File("${tempFolder.getAbsolutePath()}/${getArtifactName(buildId)}.pdf")
+        return new File("${tempFolder.getAbsolutePath()}/${getArtifactName(buildId, projectFixture.component)}.pdf")
     }
 
     private File reportPdfDoc(String buildId) {

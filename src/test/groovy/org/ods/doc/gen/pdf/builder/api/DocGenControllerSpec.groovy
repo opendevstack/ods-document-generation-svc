@@ -7,11 +7,8 @@ import org.ods.doc.gen.pdf.builder.services.PdfGenerationService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
-import spock.lang.Ignore
 import spock.lang.Specification
-import spock.lang.Stepwise
 import spock.lang.TempDir
 
 import javax.inject.Inject

@@ -1,8 +1,9 @@
 package org.ods.doc.gen
 
-import org.ods.doc.gen.core.test.jira.JiraServiceForWireMock
 import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfDockerService
+import org.ods.doc.gen.leva.doc.test.doubles.ComponentPdfRepositoryForWireMock
+import org.ods.doc.gen.leva.doc.test.doubles.JiraServiceForWireMock
+import org.ods.doc.gen.leva.doc.test.doubles.WkhtmltopdfDockerService
 import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfService
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.test.context.TestConfiguration
@@ -34,6 +35,12 @@ class TestConfig {
     @Bean
     JiraService getJiraService(JiraServiceForWireMock jiraServiceForWireMock){
         return jiraServiceForWireMock
+    }
+
+    @Primary
+    @Bean
+    ComponentPdfRepositoryForWireMock getComp(ComponentPdfRepositoryForWireMock componentPdfRepositoryForWireMock){
+        return componentPdfRepositoryForWireMock
     }
 
     @Primary

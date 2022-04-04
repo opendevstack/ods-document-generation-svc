@@ -1,0 +1,31 @@
+{
+  "id" : "033f3d82-9fe2-4a01-8134-8c5db41cb83a",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ordgp/repos/ordgp-releasemanager/archive?at=master&format=zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive-033f3d82-9fe2-4a01-8134-8c5db41cb83a.txt",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Mon, 04 Apr 2022 08:53:51 GMT",
+      "Content-Type" : "application/octet-stream",
+      "X-AREQUESTID" : "@1POZ2QTx653x1073162x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=D935958E511C2CD9B49780E7FD284488; Max-Age=1209600; Expires=Mon, 18-Apr-2022 08:53:51 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=WaLLch3bjj6pWqkGON0c7AAAAAAAnoABc2VyZ2lvLnNhY3Jpc3RhbkBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "13482",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "X-ASESSIONID" : "1udnxw1",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : [ "X-AUSERNAME", "X-AUSERID", "Cookie" ],
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Disposition" : "attachment; filename=\"ordgp-releasemanager-master@4e693552bfd.zip\"; filename*=UTF-8''ordgp-releasemanager-master%404e693552bfd.zip",
+      "Strict-Transport-Security" : "max-age=15768000"
+    }
+  },
+  "uuid" : "033f3d82-9fe2-4a01-8134-8c5db41cb83a",
+  "persistent" : true,
+  "insertionIndex" : 2
+}

@@ -77,8 +77,8 @@ class BitbucketService {
 
     }
 
-    String getFullUrlForRepoName(String projectId, String gitReleaseManagerRepo) {
-        URI uri = new URI([bitBucketClientConfig.url, projectId, gitReleaseManagerRepo].join("/"))
+    String buildReleaseManagerUrl(String projectId, String releaseManagerRepo) {
+        URI uri = new URI([bitBucketClientConfig.url, projectId, releaseManagerRepo].join("/"))
         return uri.normalize().toString()
     }
 

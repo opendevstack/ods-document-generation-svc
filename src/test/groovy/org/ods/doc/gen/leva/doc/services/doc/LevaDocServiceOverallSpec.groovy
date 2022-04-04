@@ -11,7 +11,8 @@ import spock.lang.IgnoreIf
  */
 class LevaDocServiceOverallSpec extends LevaDocServiceTestBase {
 
-    // When recording mode, REMEMBER this test depends on LevaDocServiceWithComponentSpec
+    // When recording mode, REMEMBER
+    // this test depends on LevaDocServiceWithComponentSpec
     @IgnoreIf({ data.projectFixture.project == DocTypeProjectFixtureBase.DUMMY_PROJECT })
     def "Overall #projectFixture.docType for project #projectFixture.project"() {
         given: "A project data"

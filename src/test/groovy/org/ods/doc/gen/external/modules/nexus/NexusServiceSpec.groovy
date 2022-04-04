@@ -1,38 +1,18 @@
 package org.ods.doc.gen.external.modules.nexus
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import groovy.util.logging.Slf4j
+import org.apache.commons.io.FileUtils
 import org.apache.http.client.utils.URIBuilder
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import org.ods.doc.gen.AppConfiguration
-import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.SpecHelper
-import org.ods.doc.gen.core.test.wiremock.WiremockManager
-import org.springframework.core.env.Environment
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
+import spock.lang.TempDir
 
-import javax.inject.Inject
 import java.nio.file.Path
 import java.nio.file.Paths
 
-@ActiveProfiles(["test"])
-@ContextConfiguration(classes=[TestConfig.class, AppConfiguration.class])
-@Slf4j
 class NexusServiceSpec extends SpecHelper {
 
-    static final boolean RECORD = Boolean.parseBoolean(System.properties["testRecordMode"] as String)
-
-    @Inject
-    Environment environment
-
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
-
-    NexusService createService(int port, String username, String password) {
-        return new NexusService("http://localhost:${port}", username, password)
-    }
+    @TempDir
+    File tempFolder
 
     def "create with invalid baseURL"() {
         when:
@@ -89,60 +69,7 @@ class NexusServiceSpec extends SpecHelper {
         e.message == "Error: unable to connect to Nexus. 'password' is undefined."
     }
 
-    byte[] getExampleFileBytes() {
-        return Paths.get("src/test/resources/nexus/LICENSE.zip").toFile().getBytes()
-    }
-
-    Map storeArtifactRequestData(Map mixins = [:]) {
-        def result = [
-            data: [
-                artifact: [0] as byte[],
-                contentType: "application/octet-stream",
-                directory: "myDirectory",
-                name: "myName",
-                repository: "myRepository",
-            ],
-            password: "password",
-            path: "/service/rest/v1/components",
-            username: "username"
-        ]
-
-        result.multipartRequestBody = [
-            "raw.directory": result.data.directory,
-            "raw.asset1": result.data.artifact,
-            "raw.asset1.filename": result.data.name
-        ]
-
-        result.queryParams = [
-            "repository": result.data.repository
-        ]
-
-        return result << mixins
-    }
-
-    Map getArtifactRequestData(Map mixins = [:]) {
-        def result = [
-            data: [
-                directory: "myDirectory",
-                name: "myName",
-                repository: "myRepository",
-            ],
-            password: "password",
-            path: "/repository/myRepository/myDirectory/myName",
-            username: "username"
-        ]
-        return result << mixins
-  }
-
-    Map storeArtifactResponseData(Map mixins = [:]) {
-        def result = [
-            status: 204
-        ]
-
-        return result << mixins
-    }
-
-    def "store artifact (mocked server)"() {
+    def "store artifact"() {
         given:
         def request = storeArtifactRequestData()
         def response = storeArtifactResponseData()
@@ -151,7 +78,7 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
 
         when:
-        def result = service.storeArtifact(request.data.repository, request.data.directory, request.data.name, request.data.artifact, request.data.contentType)
+        def result = storeArtifact(service, request)
 
         then:
         result == new URIBuilder("http://localhost:${server.port()}/repository/${request.data.repository}/${request.data.directory}/${request.data.name}").build()
@@ -160,7 +87,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "store artifact (mocked server) with HTTP 404 failure"() {
+    def "store artifact with HTTP 404 failure"() {
         given:
         def request = storeArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -171,18 +98,17 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
 
         when:
-        service.storeArtifact(request.data.repository, request.data.directory, request.data.name, request.data.artifact, request.data.contentType)
+        storeArtifact(service, request)
 
         then:
         def e = thrown(RuntimeException)
-        e.message.startsWith("Error: unable to store artifact")
-        e.message.endsWith("Nexus could not be found at: 'http://localhost:${server.port()}' with repo: ${request.data.repository}.")
+        e.message.startsWith("Error: unable to store artifact. Nexus could not be found at:")
 
         cleanup:
         stopServer(server)
     }
 
-    def "store artifact (mocked server) with HTTP 500 failure"() {
+    def "store artifact with HTTP 500 failure"() {
         given:
         def request = storeArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -194,18 +120,17 @@ class NexusServiceSpec extends SpecHelper {
         def service = createService(server.port(), request.username, request.password)
 
         when:
-        service.storeArtifact(request.data.repository, request.data.directory, request.data.name, request.data.artifact, request.data.contentType)
+        storeArtifact(service, request)
 
         then:
         def e = thrown(RuntimeException)
-        e.message.startsWith("Error: unable to store artifact")
-        e.message.endsWith("Nexus responded with code: '${response.status}' and message: 'Sorry, doesn\'t work!'.")
+        e.message == "Error: unable to store artifact. Nexus responded with code: '${response.status}' and message: 'Sorry, doesn\'t work!'."
 
         cleanup:
         stopServer(server)
     }
 
-    def "retrieve artifact (mocked server) with HTTP 404 failure"() {
+    def "retrieve artifact with HTTP 404 failure"() {
         given:
         def request = getArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -226,7 +151,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "retrieve artifact (mocked server) working"() {
+    def "retrieve artifact working"() {
         given:
         def request = getArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -246,7 +171,7 @@ class NexusServiceSpec extends SpecHelper {
         stopServer(server)
     }
 
-    def "Tests downloadAndExtractZip (mocked server)"() {
+    def "Tests downloadAndExtractZip"() {
         given: "An url"
         def request = getArtifactRequestData()
         def response = storeArtifactResponseData([
@@ -256,47 +181,87 @@ class NexusServiceSpec extends SpecHelper {
 
         def server = createServer(WireMock.&get, request, response)
         def service = createService(server.port(), request.username, request.password)
-        temporaryFolder.create()
+
 
         String url = "/repository/" + request.data.repository + "/" + request.data.directory + "/" + request.data.name
 
         when: "execute"
 
-        service.downloadAndExtractZip(url, temporaryFolder.getRoot().getAbsolutePath())
+        service.downloadAndExtractZip(url, tempFolder.absolutePath)
 
         then: "downloads and unzips"
-        Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "LICENSE").toFile().exists()
+        Paths.get(tempFolder.absolutePath, "LICENSE").toFile().exists()
     }
 
-    def "Test upload to nexus with Wiremock" () {
-        given:
-        String nexusBaseUrl = environment.getProperty("nexus.url")
-        String nexusUsername = environment.getProperty("nexus.username")
-        String nexusPassword = environment.getProperty("nexus.password")
+    def getArtifact(){
+        Path artifact = Paths.get(tempFolder.absolutePath, "artifact")
+        FileUtils.writeByteArrayToFile(artifact.toFile(), [0] as byte[])
+        return artifact.toString()
+    }
 
-        log.info "Using RECORD Wiremock:${RECORD}"
-        WiremockManager nexusWiremockManager = new WiremockManager("nexus", nexusBaseUrl)
-                .withScenario("ordgp/zipUploadTest").startServer(RECORD)
-        String nexusMockedBaseURL = nexusWiremockManager.wireMockServer.baseUrl()
-        NexusService nexusService = new NexusService(nexusMockedBaseURL, nexusUsername, nexusPassword)
+    byte[] getExampleFileBytes() {
+        return Paths.get("src/test/resources/nexus/LICENSE.zip").toFile().getBytes()
+    }
 
-        String repository = NexusService.NEXUS_REPOSITORY
-        String directory = "ordgp/69"
-        String fileName = "LICENSE-69.zip"
-        String contentType = "application/octet-stream"
+    Map storeArtifactRequestData(Map mixins = [:]) {
+        def result = [
+                data: [
+                        artifact: [0] as byte[],
+                        contentType: "application/octet-stream",
+                        directory: "myDirectory",
+                        name: "myName",
+                        repository: NexusService.NEXUS_REPOSITORY,
+                ],
+                password: "password",
+                path: "/service/rest/v1/components",
+                username: "username"
+        ]
 
-        Path filePath = Paths.get("src/test/resources/nexus/LICENSE.zip")
-        byte [] fileBytes = filePath.toFile().getBytes()
+        result.multipartRequestBody = [
+                "raw.directory": result.data.directory,
+                "raw.asset1": result.data.artifact,
+                "raw.asset1.filename": result.data.name
+        ]
 
-        when:
-        URI result = nexusService.storeArtifact(repository, directory, fileName, fileBytes, contentType)
+        result.queryParams = [
+                "repository": result.data.repository
+        ]
 
-        then:
-        result != null
-        log.info("Uploaded file url: " + result.toString())
+        return result << mixins
+    }
 
-        cleanup:
-        nexusWiremockManager.tearDown()
+    Map getArtifactRequestData(Map mixins = [:]) {
+        def result = [
+                data: [
+                        directory: "myDirectory",
+                        name: "myName",
+                        repository: "myRepository",
+                ],
+                password: "password",
+                path: "/repository/myRepository/myDirectory/myName",
+                username: "username"
+        ]
+        return result << mixins
+    }
+
+    Map storeArtifactResponseData(Map mixins = [:]) {
+        def result = [
+                status: 204
+        ]
+
+        return result << mixins
+    }
+
+    NexusService createService(int port, String username, String password) {
+        return new NexusService("http://localhost:${port}", username, password)
+    }
+
+    private URI storeArtifact(NexusService service, Map<String, Serializable> request) {
+        service.storeArtifact(
+                request.data.directory,
+                request.data.name,
+                getArtifact(),
+                request.data.contentType)
     }
 
 }
