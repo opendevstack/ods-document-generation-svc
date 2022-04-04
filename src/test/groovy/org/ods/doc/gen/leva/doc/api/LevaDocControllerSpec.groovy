@@ -25,9 +25,7 @@ import java.nio.file.Path
 
 import static groovy.json.JsonOutput.prettyPrint
 import static groovy.json.JsonOutput.toJson
-import static org.mockito.ArgumentMatchers.anyMap
-import static org.mockito.ArgumentMatchers.anyString
-import static org.mockito.ArgumentMatchers.argThat
+import static org.mockito.ArgumentMatchers.*
 import static org.mockito.Mockito.when
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status

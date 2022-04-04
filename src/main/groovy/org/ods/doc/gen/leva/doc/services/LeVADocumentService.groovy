@@ -2,7 +2,6 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
-import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
@@ -10,7 +9,6 @@ import org.ods.doc.gen.external.modules.jira.JiraUseCase
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
-import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.JiraDataItem
 import org.ods.doc.gen.project.data.Project
@@ -921,12 +919,12 @@ class LeVADocumentService {
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         def documentTypeName = Constants.DOCUMENT_TYPE_NAMES[Constants.DocumentType.OVERALL_DTR as String]
-        def metadata = this.getDocumentMetadata(projectData, documentTypeName)
+        Map metadata = this.getDocumentMetadata(projectData, documentTypeName)
         def documentType = Constants.DocumentType.DTR as String
 
         def watermarkText = this.getWatermarkText(projectData)
 
-        def uri = docGenUseCase.createOverallDocument(OVER_COVER, documentType, metadata, null, watermarkText, projectData)
+        String uri = docGenUseCase.createOverallDocument(OVER_COVER, documentType, metadata, null, watermarkText, projectData)
         def docVersion = projectData.getDocumentVersionFromHistories(documentType) as String
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docVersion)
 

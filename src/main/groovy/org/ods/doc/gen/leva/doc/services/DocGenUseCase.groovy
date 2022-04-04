@@ -6,7 +6,6 @@ import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
-import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 

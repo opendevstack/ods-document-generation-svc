@@ -40,7 +40,7 @@ class RepoDataBuilder {
                 previousSucessfulCommit: null,
                 url:                     "http://bitbucket.odsbox.lan:7990/scm/ofi2004/ofi2004-${component}.git",
                 baseTag:                 '',
-                targetTag:               ''
+                targetTag:               'ods-generated-v3.0-3.0-0b11-D'
             ]
         ]
         Map repo = [

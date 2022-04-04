@@ -5,7 +5,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.json.JSONArray
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
-import org.ods.doc.gen.core.test.wiremock.BitbucketServiceMock
+import org.ods.doc.gen.core.test.wiremock.BitbucketWiremock
 import org.ods.doc.gen.leva.doc.services.StringCleanup
 import org.ods.doc.gen.project.data.Project
 import org.skyscreamer.jsonassert.JSONAssert
@@ -30,7 +30,7 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
     @TempDir
     public File tempFolder
     def steps = [:]
-    BitbucketServiceMock bitbucketServiceMock
+    BitbucketWiremock bitbucketWiremock
     Project project
     BitbucketService bitbucketService
 
@@ -39,11 +39,11 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
 
         steps.env.WORKSPACE = tempFolder.absolutePath
         project = buildProject(logger)
-        bitbucketServiceMock = new BitbucketServiceMock().setUp("csv").startServer(RECORD_WIREMOCK, BB_URL_TO_RECORD)
+        bitbucketWiremock = new BitbucketWiremock().setUp("csv").startServer(RECORD_WIREMOCK, BB_URL_TO_RECORD)
         bitbucketService = Spy(
                 new BitbucketService(
                         null,
-                        bitbucketServiceMock.getWireMockServer().baseUrl(),
+                        bitbucketWiremock.getWireMockServer().baseUrl(),
                         PROJECT_KEY,
                         "passwordCredentialsId",
                         logger))
@@ -68,7 +68,7 @@ class BitbucketTraceabilityUseCaseSpec extends Specification {
     }
 
     def cleanup() {
-        bitbucketServiceMock.tearDown()
+        bitbucketWiremock.tearDown()
     }
 
     @Ignore // TODO s2o

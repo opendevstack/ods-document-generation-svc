@@ -5,7 +5,6 @@ import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
-import org.springframework.util.FileSystemUtils
 
 import javax.inject.Inject
 import java.nio.file.Files

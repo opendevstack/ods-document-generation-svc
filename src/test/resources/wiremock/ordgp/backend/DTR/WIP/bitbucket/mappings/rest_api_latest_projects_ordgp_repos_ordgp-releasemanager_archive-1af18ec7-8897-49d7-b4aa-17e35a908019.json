@@ -1,0 +1,28 @@
+{
+  "id" : "1af18ec7-8897-49d7-b4aa-17e35a908019",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-releasemanager_archive",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ordgp/repos/ordgp-releasemanager/archive?at=workInProgressBranch&format=zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 400,
+    "body" : "{\"errors\":[{\"context\":null,\"message\":\"'workInProgressBranch' is not a valid ref and may not be archived.\",\"exceptionName\":\"com.atlassian.bitbucket.repository.InvalidRefNameException\",\"refName\":\"workInProgressBranch\"}]}",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Mon, 04 Apr 2022 08:52:19 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "@1POZ2QTx652x1073159x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=8F28B824CD7BC11AFA64BC54E953FF71; Max-Age=1209600; Expires=Mon, 18-Apr-2022 08:52:19 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=WaLLch3bjj6pWqkGON0c7AAAAAAAnoABc2VyZ2lvLnNhY3Jpc3RhbkBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "13482",
+      "X-AUSERNAME" : "sergio.sacristan%40domain.com",
+      "X-ASESSIONID" : "6vdpeo",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : "accept-encoding,x-auserid,cookie,x-ausername,accept-encoding"
+    }
+  },
+  "uuid" : "1af18ec7-8897-49d7-b4aa-17e35a908019",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

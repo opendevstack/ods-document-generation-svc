@@ -1,7 +1,6 @@
 package org.ods.doc.gen.external.modules.nexus
 
 import groovy.util.logging.Slf4j
-import kong.unirest.HttpRequestWithBody
 import kong.unirest.HttpResponse
 import kong.unirest.Unirest
 import net.lingala.zip4j.ZipFile
@@ -12,14 +11,13 @@ import org.springframework.stereotype.Service
 import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.security.InvalidParameterException
 
 @Slf4j
 @Service
 class NexusService {
 
     static final String NEXUS_REPOSITORY = "leva-documentation"
-    private static final URL_PATH = "service/rest/v1/components?repository={repository}"
+    private static final String URL_PATH = "service/rest/v1/components?repository={repository}"
     private static final String RAW = 'raw'
     private static final String UNABLE_STORE = 'Error: unable to store artifact. '
 
@@ -52,19 +50,21 @@ class NexusService {
             'raw.asset1.filename': name,
         ]
 
-        return storeComplextArtifact(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
+        return storeWithRaw(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
     }
 
-    private URI storeComplextArtifact(String repo,
+    private URI storeWithRaw(String repo,
                                       String artifactPath,
                                       String contentType,
                                       String repoType,
                                       Map nexusParams) {
         File artifactFile = Paths.get(artifactPath).toFile()
-        log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], ")
+        String targetUrl = "${this.baseURL}/${URL_PATH}"
+        log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], url:[${targetUrl}] ")
+
         byte[] artifact = artifactFile.getBytes()
         def restCall = Unirest
-                .post("${this.baseURL}/${URL_PATH}")
+                .post(targetUrl)
                 .routeParam('repository', repo)
                 .basicAuth(this.username, this.password)
                 .field(getField(repoType), new ByteArrayInputStream(artifact), contentType)
@@ -116,7 +116,8 @@ class NexusService {
 
     private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        String fullUrlToDownload = "${baseURL}${urlToDownload}"
+        String fullUrlToDownload = "${baseURL}${new URI(urlToDownload).normalize().toString()}"
+        log.info("downloadToPath::${fullUrlToDownload}")
         def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {

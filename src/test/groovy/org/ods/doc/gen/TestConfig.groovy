@@ -1,8 +1,10 @@
 package org.ods.doc.gen
 
+import org.ods.doc.gen.external.modules.git.BitbucketService
+import org.ods.doc.gen.external.modules.jira.JiraService
+import org.ods.doc.gen.leva.doc.test.doubles.BitbucketServiceMock
 import org.ods.doc.gen.leva.doc.test.doubles.ComponentPdfRepositoryForWireMock
 import org.ods.doc.gen.leva.doc.test.doubles.JiraServiceForWireMock
-import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.leva.doc.test.doubles.WkhtmltopdfDockerService
 import org.ods.doc.gen.pdf.builder.services.WkhtmltopdfService
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -35,6 +37,12 @@ class TestConfig {
     @Bean
     JiraService getJiraService(JiraServiceForWireMock jiraServiceForWireMock){
         return jiraServiceForWireMock
+    }
+
+    @Primary
+    @Bean
+    BitbucketService getBitbucketServiceMock(BitbucketServiceMock bitbucketServiceMock){
+        return bitbucketServiceMock
     }
 
     @Primary
