@@ -58,7 +58,7 @@ class LevaDocDataFixture {
                 buildId : "2022-01-22_23-59-59",
                 buildURL : "https://jenkins-sample",
                 jobName : "${projectFixture.project}-cd/${projectFixture.project}-releasemanager",
-                testResultsURLs: getTestResultsForDocType(projectFixture, projectWithBuild),
+                testResultsURLs: getAllTestResults(projectFixture, projectWithBuild),
                 jenkinLog: getJenkinsLogUrl(projectWithBuild)
         ]
     }
@@ -67,27 +67,20 @@ class LevaDocDataFixture {
         return "/repository/leva-documentation/${projectWithBuild}/jenkins-job-log.zip"
     }
 
-    private Map getTestResultsForDocType(ProjectFixture projectFixture, String projectWithBuild) {
-        Map hardcodedUrls
-        switch (projectFixture.docType){
-            case Constants.DocumentType.DTR as String:
-                String type = "unit-${projectFixture.component}"
-                hardcodedUrls = [(type): "/repository/leva-documentation/${projectWithBuild}/${type}.zip"]
-                break
-            case Constants.DocumentType.IVP as String:
-            case Constants.DocumentType.IVR as String:
-                hardcodedUrls = ['installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip"]
-                break
-            case Constants.DocumentType.CFTR as String:
-            case Constants.DocumentType.TCR as String:
-                hardcodedUrls = [
-                        "acceptance"  : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
-                        'integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
-                ]
-                break
-            default:
-                hardcodedUrls = [:]
-        }
+    /**
+     * ATTENTION!! -> As we don't have control over the parameters,
+     *                we have to think that always we have all tests types
+     */
+    private Map getAllTestResults(ProjectFixture projectFixture, String projectWithBuild) {
+        Map hardcodedUrls = [:]
+        String type = "unit-${projectFixture.component}"
+        hardcodedUrls << [(type): "/repository/leva-documentation/${projectWithBuild}/${type}.zip"]
+        hardcodedUrls << ['installation': "/repository/leva-documentation/${projectWithBuild}/installation.zip"]
+        hardcodedUrls << [
+                "acceptance"  : "/repository/leva-documentation/${projectWithBuild}/acceptance.zip",
+                'integration' : "/repository/leva-documentation/${projectWithBuild}/integration.zip",
+        ]
+         
         return hardcodedUrls
     }
 
