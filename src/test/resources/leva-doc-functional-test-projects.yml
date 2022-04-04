@@ -28,7 +28,7 @@ projects:
     releaseId: ORDGP-123
     version: WIP
     releaseManagerRepo: ordgp-releasemanager
-    releaseManagerBranch: master
+    releaseManagerBranch: workInProgressBranch
     docsToTest: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
     testResults: unit-backend, unit-frontend, acceptance, installation, integration
     components: backend, frontend
