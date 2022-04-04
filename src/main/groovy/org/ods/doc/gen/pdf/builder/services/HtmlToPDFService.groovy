@@ -43,7 +43,7 @@ class HtmlToPDFService {
         cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
         cmd.addAll(controlSize())
         cmd.addAll(addHeader(data))
-        cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10", "--footer-font-name", "Arial"])
+        cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
         setOrientation(data, cmd)
         cmd << documentHtmlFile.toFile().absolutePath
         cmd << documentPDFFile.toFile().absolutePath
@@ -51,9 +51,7 @@ class HtmlToPDFService {
     }
 
     private List controlSize(){
-        return ["--dpi", "75",
-                "--image-dpi", "600",
-                "--minimum-font-size", "10"]
+        return ["--dpi", "75", "--image-dpi", "600"]
     }
 
     private String getServiceName() {
@@ -74,7 +72,7 @@ class HtmlToPDFService {
             } else {
                 cmd.addAll(["--header-center", data.metadata.header[0]] as String)
             }
-            cmd.addAll(["--header-font-size", "10", "--header-spacing", "10", "--header-font-name", "Arial"])
+            cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
         }
         return cmd
     }

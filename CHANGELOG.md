@@ -1,6 +1,6 @@
 # Changelog
 
-- Temporal change with add LevaDoc xml
+- Temporal change with add LevaDoc
 
 ## Unreleased
 - Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
