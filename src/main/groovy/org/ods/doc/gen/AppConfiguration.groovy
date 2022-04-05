@@ -24,20 +24,28 @@ class AppConfiguration {
     }
 
     @Bean
-    CaffeineCache caffeineTemplatesConfig(@Value('${cache.documents.basePath}') String basePath) {
+    CaffeineCache caffeineTemplatesFolder(@Value('${cache.documents.basePath}') String basePath) {
         FileUtils.deleteDirectory(Paths.get(basePath).toFile())
         return new CaffeineCache(
                 "templates",
                 Caffeine.newBuilder()
                 .expireAfterWrite(Duration.ofDays(1))
                 .removalListener({ version, graph, cause ->
-                    deleteDocTemplatesForder(basePath, version)
+                    FileUtils.deleteDirectory(Paths.get(basePath, version as String).toFile())
                 }).build()
         )
     }
 
-    private deleteDocTemplatesForder(String basePath, version) {
-        FileUtils.deleteDirectory(Paths.get(basePath, version as String).toFile())
+    @Bean
+    CaffeineCache caffeineTemporalFolder() {
+        return new CaffeineCache(
+                "temporalFolder",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(Duration.ofDays(1))
+                        .removalListener({ id, graph, cause ->
+                            FileUtils.deleteDirectory(Paths.get(id as String).toFile())
+                        }).build()
+        )
     }
 
     @Bean
