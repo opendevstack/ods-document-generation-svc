@@ -1,6 +1,7 @@
 # Changelog
 
 - Temporal change with add LevaDoc
+- Added slash to the end of nexusURL if it is not present 
 
 ## Unreleased
 - Fix TIR and DTR documents are not properly indexed ([#55](https://github.com/opendevstack/ods-document-generation-svc/pull/55))
