@@ -23,11 +23,6 @@ class JiraServiceForWireMock extends JiraService {
     }
 
     @Override
-    Map createIssueType(String type, String projectKey, String summary, String description, String fixVersion = null) {
-        log.warn("createIssueType - type:${type}")
-    }
-
-    @Override
     void updateTextFieldsOnIssue(String issueIdOrKey, Map fields) {
         log.warn("updateTextFieldsOnIssue - issueIdOrKey:$issueIdOrKey")
     }

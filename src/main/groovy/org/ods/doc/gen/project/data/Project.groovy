@@ -4,10 +4,9 @@ import groovy.util.logging.Slf4j
 import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.jira.JiraService
 import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
-import javax.cache.annotation.CacheKey
-import javax.cache.annotation.CacheResult
 import javax.inject.Inject
 
 @Slf4j
@@ -25,8 +24,8 @@ class Project {
         this.jUnitReportsService = jUnitReportsService
     }
 
-    @CacheResult(cacheName = "projectData")
-    ProjectData getProjectData(@CacheKey String projectBuildId, Map data){
+    @Cacheable(value = "projectData", key = '#projectBuildId')
+    ProjectData getProjectData(String projectBuildId, Map data){
         log.info("build project data for projectBuildId:${projectBuildId}")
         return new ProjectData(jira, bitbucketService, jUnitReportsService).init(data).load()
     }

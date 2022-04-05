@@ -1,6 +1,6 @@
 package org.ods.doc.gen.pdf.builder.services
 
-import com.github.benmanes.caffeine.cache.Cache
+
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.ods.doc.gen.pdf.builder.repository.DocumentTemplateFactory
@@ -13,7 +13,6 @@ import java.nio.file.Paths
 @Service
 class PdfGenerationService {
 
-    private final Cache<String, Path> templatesCache
     private final HtmlToPDFService htmlToPDFService
     private final DocumentTemplateFactory documentTemplateFactory
 

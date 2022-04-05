@@ -1,7 +1,5 @@
 package org.ods.doc.gen.leva.doc.services
 
-
-
 class DocumentHistoryEntry implements Map, Serializable {
 
     private final Long entryId
