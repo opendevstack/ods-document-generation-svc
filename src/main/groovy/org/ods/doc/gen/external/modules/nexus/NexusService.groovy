@@ -116,7 +116,7 @@ class NexusService {
 
     private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        String fullUrlToDownload = "${baseURL}${new URI(urlToDownload).normalize().toString()}"
+        String fullUrlToDownload = getURLToDownload(this.baseURL.toString(), urlToDownload)
         log.info("downloadToPath::${fullUrlToDownload}")
         def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
@@ -133,6 +133,10 @@ class NexusService {
         }
 
         return response
+    }
+
+    private String getURLToDownload(String baseURL, String urlToDownload) {
+        new URI(baseURL + "/" + urlToDownload).normalize().toString()
     }
 
     void downloadAndExtractZip(String jiraProjectKey, String version, String extractionPath, String artifactName) {
