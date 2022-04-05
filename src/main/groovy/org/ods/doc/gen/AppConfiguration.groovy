@@ -21,6 +21,7 @@ class AppConfiguration {
     private static final String TEMPLATES = "templates"
     private static final String TEMPORAL_FOLDER = "temporalFolder"
     private static final String PROJECT_DATA = "projectData"
+    public static final int DAYS_IN_CACHE = 1
 
     @Bean
     Clock aClockBeanToMockInTesting() {
@@ -33,7 +34,7 @@ class AppConfiguration {
         return new CaffeineCache(
                 TEMPLATES,
                 Caffeine.newBuilder()
-                .expireAfterWrite(Duration.ofDays(1))
+                .expireAfterWrite(Duration.ofDays(DAYS_IN_CACHE))
                 .removalListener({ version, graph, cause ->
                     FileUtils.deleteDirectory(Paths.get(basePath, version as String).toFile())
                 }).build()
@@ -45,7 +46,7 @@ class AppConfiguration {
         return new CaffeineCache(
                 TEMPORAL_FOLDER,
                 Caffeine.newBuilder()
-                        .expireAfterWrite(Duration.ofDays(1))
+                        .expireAfterWrite(Duration.ofDays(DAYS_IN_CACHE))
                         .removalListener({ id, graph, cause ->
                             FileUtils.deleteDirectory(Paths.get(id as String).toFile())
                         }).build()
