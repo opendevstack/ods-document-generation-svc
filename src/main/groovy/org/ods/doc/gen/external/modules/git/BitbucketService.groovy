@@ -46,7 +46,7 @@ class BitbucketService {
 
     String buildReleaseManagerUrl(String projectId, String releaseManagerRepo) {
         URI uri = new URI([getBitbucketURLForDocs(), projectId, releaseManagerRepo].join("/"))
-        return uri.normalize().toString()
+        return "${uri.normalize().toString()}.git"
     }
 
     String getBitbucketURLForDocs() {

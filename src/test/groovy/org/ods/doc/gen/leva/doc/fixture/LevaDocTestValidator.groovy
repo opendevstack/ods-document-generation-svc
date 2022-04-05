@@ -83,7 +83,7 @@ class LevaDocTestValidator {
     }
 
     private void copyDocWhenRecording(String buildId) {
-        FileUtils.copyFile(actualDoc(buildId), expectedDoc(buildId))
+        FileUtils.copyFile(actualDoc(buildId), expectedDoc(buildId, projectFixture.component))
     }
 
     private File actualDoc(String buildId) {
