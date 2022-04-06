@@ -1,7 +1,6 @@
 package org.ods.doc.gen.external.modules.nexus
 
 import groovy.util.logging.Slf4j
-import kong.unirest.HttpRequestWithBody
 import kong.unirest.HttpResponse
 import kong.unirest.Unirest
 import net.lingala.zip4j.ZipFile
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service
 import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.security.InvalidParameterException
 
 @Slf4j
 @Service
@@ -38,7 +36,7 @@ class NexusService {
             this.baseURL = new URIBuilder(baseURL).build()
         } catch (e) {
             throw new IllegalArgumentException(
-                "Error: unable to connect to Nexus. '${baseURL}' is not a valid URI."
+                    "Error: unable to connect to Nexus. '${baseURL}' is not a valid URI."
             ).initCause(e)
         }
 
@@ -48,37 +46,38 @@ class NexusService {
 
     URI storeArtifact(String directory, String name, String artifactPath, String contentType) {
         Map nexusParams = [
-            'raw.directory': directory,
-            'raw.asset1.filename': name,
+                'raw.directory'      : directory,
+                'raw.asset1.filename': name,
         ]
 
-        return storeComplextArtifact(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
+        return storeComplexArtifact(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
     }
 
-    private URI storeComplextArtifact(String repo,
-                                      String artifactPath,
-                                      String contentType,
-                                      String repoType,
-                                      Map nexusParams) {
+    private URI storeComplexArtifact(String repo,
+                                     String artifactPath,
+                                     String contentType,
+                                     String repoType,
+                                     Map nexusParams) {
         File artifactFile = Paths.get(artifactPath).toFile()
         log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], ")
-        byte[] artifact = artifactFile.getBytes()
-        def restCall = Unirest
-                .post("${this.baseURL}/${URL_PATH}")
-                .routeParam('repository', repo)
-                .basicAuth(this.username, this.password)
-                .field(getField(repoType), new ByteArrayInputStream(artifact), contentType)
-        nexusParams.each { key, value -> restCall = restCall.field(key, value) }
+        try (FileInputStream fis = new FileInputStream(artifactFile)) {
+            def restCall = Unirest
+                    .post("${this.baseURL}/${URL_PATH}")
+                    .routeParam('repository', repo)
+                    .basicAuth(this.username, this.password)
+                    .field(getField(repoType), fis, contentType)
+            nexusParams.each { key, value -> restCall = restCall.field(key, value) }
 
-        def response = restCall.asString()
-        response.ifSuccess {
-            if (response.getStatus() != 204) {
+            def response = restCall.asString()
+            response.ifSuccess {
+                if (response.getStatus() != 204) {
+                    throw new RuntimeException(errorMsg(response, repo))
+                }
+            }
+
+            response.ifFailure {
                 throw new RuntimeException(errorMsg(response, repo))
             }
-        }
-
-        response.ifFailure {
-            throw new RuntimeException(errorMsg(response, repo))
         }
 
         if (repoType == RAW) {
@@ -105,8 +104,8 @@ class NexusService {
         String urlToDownload = getURL(nexusRepository, nexusDirectory, name)
         HttpResponse<File> response = downloadToPath(urlToDownload, extractionPath, name)
         return [
-            uri: this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
-            content: response.getBody(),
+                uri    : this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
+                content: response.getBody(),
         ]
     }
 
