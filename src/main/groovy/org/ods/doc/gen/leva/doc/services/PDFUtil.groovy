@@ -17,6 +17,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.springframework.stereotype.Service
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @SuppressWarnings(['JavaIoPackageAccess', 'LineLength', 'UnnecessaryObjectReferences'])
@@ -24,20 +25,18 @@ import java.nio.file.Paths
 @Service
 class PDFUtil {
 
-    byte[] addWatermarkText(byte[] file, String text) {
-        def result
+    Path addWatermarkText(Path filePath, String text) {
+        Path result = Files.createTempFile(Paths.get(filePath.toString()).parent, "temp", '.pdf')
 
         PDDocument doc
-        try {
-            doc = PDDocument.load(file)
+        try (FileInputStream fis = new FileInputStream(filePath.toFile())) {
+            doc = PDDocument.load(fis)
             doc.getPages().each { page ->
                 def font = PDType1Font.HELVETICA
                 addWatermarkTextToPage(doc, page, font, text)
             }
 
-            def os = new ByteArrayOutputStream()
-            doc.save(os)
-            result = os.toByteArray()
+            doc.save(result.toFile())
         } catch (e) {
             throw new RuntimeException("Error: unable to add watermark to PDF document: ${e.message}").initCause(e)
         } finally {
