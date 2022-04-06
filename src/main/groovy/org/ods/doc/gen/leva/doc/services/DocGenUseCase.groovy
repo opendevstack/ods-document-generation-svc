@@ -45,7 +45,7 @@ class DocGenUseCase {
         def sections = []
 
         projectData.getOverallDocsToMerge(documentType).each { Map componentPdf ->
-            documents << Paths.get(componentPdf.pdfPath).toFile().readBytes()
+            documents << Paths.get(componentPdf.pdfPath)
             sections << [
                     heading: "${documentType} for component: ${componentPdf.component} (merged)"
             ]

@@ -85,28 +85,24 @@ class PDFUtil {
 
         return result
     }
-    
-    byte[] merge(String workspacePath, List<byte[]> files) {
-        def result
-        File tmp
+
+    Path merge(String workspacePath, List<Path> files) {
+        Path tmp
         try {
-            tmp = Files.createTempFile(Paths.get(workspacePath), "merge", "pdf").toFile()
+            tmp = Files.createTempFile(Paths.get(workspacePath), "merge", "pdf")
             def merger = new PDFMergerUtility()
-            merger.setDestinationStream(new FileOutputStream(tmp))
+            merger.setDestinationStream(new FileOutputStream(tmp.toFile()))
 
             files.each { file ->
-                merger.addSource(new ByteArrayInputStream(file))
+                merger.addSource(new FileInputStream(file.toFile()))
             }
 
             merger.mergeDocuments()
-            result = tmp.bytes
         } catch (e) {
             throw new RuntimeException("Error: unable to merge PDF documents: ${e.message}").initCause(e)
-        } finally {
-            tmp?.delete()
         }
 
-        return result
+        return tmp
     }
 
     // Courtesy of https://svn.apache.org/viewvc/pdfbox/trunk/examples/src/main/java/org/apache/pdfbox/examples/util/AddWatermarkText.java
