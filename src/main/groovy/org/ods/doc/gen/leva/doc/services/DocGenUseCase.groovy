@@ -6,10 +6,11 @@ import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
-import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @Slf4j
@@ -74,11 +75,11 @@ class DocGenUseCase {
                           String documentType,
                           Map repo,
                           Map data,
-                          Map<String, byte[]> files = [:],
+                          Map<String, String> files = [:],
                           Closure modifier = null,
                           String templateName = null,
                           String watermarkText = null) {
-        byte[] document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
+        Path document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
 
         // Apply PDF document modifications, if provided
         if (modifier) {
@@ -95,7 +96,7 @@ class DocGenUseCase {
         String basename = this.getDocumentBasename(projectData, documentType, version, buildId, repo)
         String pdfName = "${basename}.pdf"
 
-        Map<String, Object> artifacts = buildArchiveWithPdfAndRawData(pdfName, document, basename, data, files)
+        Map<String, String> artifacts = buildArchiveWithPdfAndRawData(projectData.tmpFolder, pdfName, document, basename, data, files)
         String pathToFile = this.zip.createZipFileFromFiles(projectData.tmpFolder, "${basename}.zip", artifacts)
 
         if (Constants.OVERALL_DOC_TYPES.contains(documentType) && repo) {
@@ -118,17 +119,24 @@ class DocGenUseCase {
         log.info message
     }
 
-    private Map<String, Object> buildArchiveWithPdfAndRawData(String pdfName,
-                                                              byte[] document,
+    private Map<String, String> buildArchiveWithPdfAndRawData(String tmpFolder,
+                                                              String pdfName,
+                                                              Path document,
                                                               String basename,
                                                               Map data,
-                                                              Map<String, byte[]> files) {
+                                                              Map<String, String> files) {
+
+        Path jsonTemp = Files.createTempFile(Paths.get(tmpFolder), basename, '.json')
+        try (FileWriter writer = new FileWriter(jsonTemp.toFile())) {
+            writer.write(JsonOutput.toJson(data))
+        }
+
         Map artifacts = [
-                "${pdfName}"          : document,
-                "raw/${basename}.json": JsonOutput.toJson(data).getBytes(),
+                "${pdfName}"          : document.toString(),
+                "raw/${basename}.json": jsonTemp.toString(),
         ]
-        artifacts << files.collectEntries { path, contents ->
-            [path, contents]
+        artifacts << files.collectEntries { name, path ->
+            [name, path]
         }
         return artifacts
     }
