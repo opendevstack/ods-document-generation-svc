@@ -2,7 +2,7 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
+import org.aspectj.util.FileUtil
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
@@ -53,7 +53,7 @@ class DocGenUseCase {
 
         def data = [
                 metadata: metadata,
-                data: [
+                data    : [
                         sections: sections
                 ],
         ]
@@ -101,7 +101,7 @@ class DocGenUseCase {
 
         if (Constants.OVERALL_DOC_TYPES.contains(documentType) && repo) {
             File pdfFile = Paths.get(projectData.tmpFolder, pdfName).toFile()
-            FileUtils.writeByteArrayToFile(pdfFile, document)
+            FileUtil.copyFile(document.toFile(), pdfFile)
             projectData.addOverallDocToMerge(documentType, repo.id as String, pdfFile.absolutePath)
         }
 
@@ -150,9 +150,9 @@ class DocGenUseCase {
     }
 
     private String getDocBasenameWithDocVersion(ProjectData projectData,
-                                                     String documentType,
-                                                     String docVersion,
-                                                     Map repo = null) {
+                                                String documentType,
+                                                String docVersion,
+                                                Map repo = null) {
         def result = projectData.key
         if (repo) {
             result += "-${repo.id}"
