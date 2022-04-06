@@ -3,7 +3,6 @@ package org.ods.doc.gen.external.modules.xunit
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.external.modules.nexus.NexusService
-import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject

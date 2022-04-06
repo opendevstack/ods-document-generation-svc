@@ -1,4 +1,4 @@
-package org.ods.doc.gen.project.data
+package org.ods.doc.gen
 
 import groovy.util.logging.Slf4j
 import kong.unirest.Unirest
