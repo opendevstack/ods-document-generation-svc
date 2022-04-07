@@ -712,7 +712,7 @@ class LeVADocumentService {
         }
 
         def files = (acceptanceTestData.testReportFiles + integrationTestData.testReportFiles).collectEntries { file ->
-            ["raw/${file.getName()}", file.getBytes()]
+            ["raw/${file.getName()}", file.getPath()]
         }
 
         def uri = docGenUseCase.createDocument(projectData, documentType, null, data_, files, null, getDocumentTemplateName(projectData, documentType), watermarkText)
@@ -777,7 +777,7 @@ class LeVADocumentService {
         ]
 
         def files = installationTestData.testReportFiles.collectEntries { file ->
-            ["raw/${file.getName()}", file.getBytes()]
+            ["raw/${file.getName()}", file.getPath()]
         }
 
         String templateName = getDocumentTemplateName(projectData, documentType)
@@ -856,7 +856,7 @@ class LeVADocumentService {
         ]
 
         def files = unitTestData.testReportFiles.collectEntries { file ->
-            ["raw/${file.getName()}", file.getBytes()]
+            ["raw/${file.getName()}", file.getPath()]
         }
 
         def modifier = { document -> return document }
