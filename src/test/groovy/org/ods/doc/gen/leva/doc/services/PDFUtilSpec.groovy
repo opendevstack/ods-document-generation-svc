@@ -18,13 +18,15 @@ class PDFUtilSpec extends SpecHelper {
         def text = "myWatermark"
 
         when:
-        def result = util.addWatermarkText(pdfFile.bytes, text)
+        def result = util.addWatermarkText(pdfFile.toPath(), text)
 
         then:
-        def doc = PDDocument.load(result)
-        doc.getNumberOfPages() == 1
-        doc.getPage(0).getContents().text.contains(text)
-        doc.close()
+        try (FileInputStream fis = new FileInputStream(result.toFile())) {
+            def doc = PDDocument.load(fis)
+            doc.getNumberOfPages() == 1
+            doc.getPage(0).getContents().text.contains(text)
+            doc.close()
+        }
     }
 
     @Ignore
@@ -76,14 +78,16 @@ class PDFUtilSpec extends SpecHelper {
         def docFile2 = new FixtureHelper().getResource("pdf.builder/Test-2.pdf")
 
         when:
-        def result = util.merge(tempFolder.absolutePath, [docFile1.bytes, docFile2.bytes])
+        def result = util.merge(tempFolder.absolutePath, [docFile1.toPath(), docFile2.toPath()])
 
         then:
         new String(result).startsWith("%PDF-1.4\n")
 
         then:
-        def doc = PDDocument.load(result)
-        doc.getNumberOfPages() == 2
-        doc.close()
+        try (FileInputStream fis = new FileInputStream(result.toFile())) {
+            def doc = PDDocument.load(result)
+            doc.getNumberOfPages() == 2
+            doc.close()
+        }
     }
 }
