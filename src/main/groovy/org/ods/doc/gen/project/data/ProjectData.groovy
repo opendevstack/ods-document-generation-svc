@@ -64,11 +64,15 @@ class ProjectData {
         this.build << data.build
         this.data.projectId = data.projectId
         this.build.buildNumber = data.buildNumber
-        this.data.git = data.git
         this.data.openshift = data.openshift
         this.data.documents = [:]
         this.data.jira = [project: [ : ]]
         this.data.repo = data.repo
+        this.data.git = data.git
+        this.data.git.url = bitbucketService.buildReleaseManagerUrl(
+                data.projectId as String,
+                data.git.releaseManagerRepo as String
+        )
         return this
     }
 
@@ -181,8 +185,6 @@ class ProjectData {
                 repo.type = PipelineConfig.REPO_TYPE_ODS_CODE
             }
 
-            repo.url = "gitURL getGitURLFromPath"
-            repo.branch = 'master'
             repo.metadata = loadMetadataRepo(repo)
         }
     }

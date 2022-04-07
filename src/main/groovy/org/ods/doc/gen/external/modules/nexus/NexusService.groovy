@@ -17,7 +17,7 @@ import java.nio.file.Paths
 class NexusService {
 
     static final String NEXUS_REPOSITORY = "leva-documentation"
-    private static final URL_PATH = "service/rest/v1/components?repository={repository}"
+    private static final String URL_PATH = "service/rest/v1/components?repository={repository}"
     private static final String RAW = 'raw'
     private static final String UNABLE_STORE = 'Error: unable to store artifact. '
 
@@ -50,19 +50,21 @@ class NexusService {
                 'raw.asset1.filename': name,
         ]
 
-        return storeComplexArtifact(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
+        return storeWithRaw(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
     }
 
-    private URI storeComplexArtifact(String repo,
-                                     String artifactPath,
-                                     String contentType,
-                                     String repoType,
-                                     Map nexusParams) {
+    private URI storeWithRaw(String repo,
+                             String artifactPath,
+                             String contentType,
+                             String repoType,
+                             Map nexusParams) {
         File artifactFile = Paths.get(artifactPath).toFile()
-        log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], ")
+        String targetUrl = "${this.baseURL}/${URL_PATH}"
+        log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], url:[${targetUrl}] ")
+
         try (FileInputStream fis = new FileInputStream(artifactFile)) {
             def restCall = Unirest
-                    .post("${this.baseURL}/${URL_PATH}")
+                    .post(targetUrl)
                     .routeParam('repository', repo)
                     .basicAuth(this.username, this.password)
                     .field(getField(repoType), fis, contentType)
@@ -115,7 +117,8 @@ class NexusService {
 
     private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        String fullUrlToDownload = "${baseURL}${urlToDownload}"
+        String fullUrlToDownload = getURLToDownload(this.baseURL.toString(), urlToDownload)
+        log.info("downloadToPath::${fullUrlToDownload}")
         def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")
         response.ifFailure {
@@ -131,6 +134,10 @@ class NexusService {
         }
 
         return response
+    }
+
+    private String getURLToDownload(String baseURL, String urlToDownload) {
+        new URI(baseURL + "/" + urlToDownload).normalize().toString()
     }
 
     void downloadAndExtractZip(String jiraProjectKey, String version, String extractionPath, String artifactName) {

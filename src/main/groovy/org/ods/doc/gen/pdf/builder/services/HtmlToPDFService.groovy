@@ -31,51 +31,36 @@ class HtmlToPDFService {
 
     Path convert(Path tmpDir, Path documentHtmlFile, Map data = null) {
         Path documentPDFFile = Paths.get(tmpDir.toString(), "document.pdf")
-        List cmd = generateCmd(data, documentHtmlFile, documentPDFFile)
+        def cmd = generateCmd(data)
+        cmd << documentHtmlFile.toFile().absolutePath
+        cmd << documentPDFFile.toFile().absolutePath
         wkhtmltopdfService.executeCmd(tmpDir, documentHtmlFile, cmd)
         fixDestinations(documentPDFFile.toFile())
         return documentPDFFile
     }
 
-    private List<String> generateCmd(Map data, Path documentHtmlFile, Path documentPDFFile) {
-        def cmd = [getServiceName(), "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+    private List<String> generateCmd(Map data) {
+        def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
         cmd << "--enable-local-file-access"
         cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
-        cmd.addAll(controlSize())
-        cmd.addAll(addHeader(data))
-        cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10", "--footer-font-name", "Arial"])
-        setOrientation(data, cmd)
-        cmd << documentHtmlFile.toFile().absolutePath
-        cmd << documentPDFFile.toFile().absolutePath
-        return cmd
-    }
 
-    private List controlSize(){
-        return ["--dpi", "75",
-                "--image-dpi", "600",
-                "--minimum-font-size", "10"]
-    }
+        if (data?.metadata?.header) {
+            if (data.metadata.header.size() > 1) {
+                cmd.addAll(["--header-center", """${data.metadata.header[0]}
+${data.metadata.header[1]}"""])
+            } else {
+                cmd.addAll(["--header-center", data.metadata.header[0]])
+            }
 
-    private String getServiceName() {
-        return "wkhtmltopdf"
-    }
+            cmd.addAll(["--header-font-size", "10", "--header-spacing", "10"])
+        }
 
-    private void setOrientation(Map data, ArrayList<String> cmd) {
+        cmd.addAll(["--footer-center", "'Page [page] of [topage]'", "--footer-font-size", "10"])
+
         if (data?.metadata?.orientation) {
             cmd.addAll(["--orientation", data.metadata.orientation])
         }
-    }
 
-    private List<String> addHeader(Map data) {
-        List<String> cmd = []
-        if (data?.metadata?.header) {
-            if (data.metadata.header.size() > 1) {
-                cmd.addAll(["--header-center", "${data.metadata.header[0]}\n${data.metadata.header[1]}"])
-            } else {
-                cmd.addAll(["--header-center", data.metadata.header[0]] as String)
-            }
-            cmd.addAll(["--header-font-size", "10", "--header-spacing", "10", "--header-font-name", "Arial"])
-        }
         return cmd
     }
 

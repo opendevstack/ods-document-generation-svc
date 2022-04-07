@@ -18,26 +18,45 @@ import java.time.Duration
 @Configuration
 class AppConfiguration {
 
+    private static final String TEMPLATES = "templates"
+    private static final String TEMPORAL_FOLDER = "temporalFolder"
+    private static final String PROJECT_DATA = "projectData"
+    public static final int DAYS_IN_CACHE = 1
+
     @Bean
     Clock aClockBeanToMockInTesting() {
         return Clock.systemDefaultZone()
     }
 
     @Bean
-    CaffeineCache caffeineTemplatesConfig(@Value('${cache.documents.basePath}') String basePath) {
+    CaffeineCache caffeineTemplatesFolder(@Value('${cache.documents.basePath}') String basePath) {
+        FileUtils.deleteDirectory(Paths.get(basePath).toFile())
         return new CaffeineCache(
-                "templates",
+                TEMPLATES,
                 Caffeine.newBuilder()
-                .expireAfterWrite(Duration.ofDays(1))
+                .expireAfterWrite(Duration.ofDays(DAYS_IN_CACHE))
                 .removalListener({ version, graph, cause ->
-                    FileUtils.deleteDirectory(Paths.get(basePath, version as String).toFile())}).build()
+                    FileUtils.deleteDirectory(Paths.get(basePath, version as String).toFile())
+                }).build()
+        )
+    }
+
+    @Bean
+    CaffeineCache caffeineTemporalFolder() {
+        return new CaffeineCache(
+                TEMPORAL_FOLDER,
+                Caffeine.newBuilder()
+                        .expireAfterWrite(Duration.ofDays(DAYS_IN_CACHE))
+                        .removalListener({ id, graph, cause ->
+                            FileUtils.deleteDirectory(Paths.get(id as String).toFile())
+                        }).build()
         )
     }
 
     @Bean
     CaffeineCache caffeineProjectDataConfig(@Value('${cache.projectData.expiration.minutes}') Long expirationMinutes) {
         return new CaffeineCache(
-                "projectData",
+                PROJECT_DATA,
                 Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(expirationMinutes)).build()
         )
     }

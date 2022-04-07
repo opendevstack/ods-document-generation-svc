@@ -3,16 +3,13 @@ package org.ods.doc.gen.external.modules.xunit
 import groovy.util.logging.Slf4j
 import org.ods.doc.gen.core.FileSystemHelper
 import org.ods.doc.gen.external.modules.nexus.NexusService
-import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service
-import org.springframework.util.FileSystemUtils
 
 import javax.inject.Inject
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-@SuppressWarnings(['JavaIoPackageAccess', 'EmptyCatchBlock'])
 @Slf4j
 @Service
 class JUnitReportsService {
@@ -52,12 +49,12 @@ class JUnitReportsService {
         return this.combineTestResults(testResults)
     }
 
-    Map getTestData(Map data) {
+    Map getTestData(Map data, List<String> testsTypes) {
         String tmpFolder = data.tmpFolder as String
         Map testResultsURLs = data.build.testResultsURLs as Map
         String component = data.repo?.id?.capitalize()
 
-        Map<String, Map> tests = downloadTestsResults(testResultsURLs as Map, tmpFolder, component)
+        Map<String, Map> tests = downloadTestsResults(testResultsURLs as Map, tmpFolder, testsTypes, component)
 
         tests.each {
             String targetFolder = it.value.targetFolder as String
@@ -68,13 +65,19 @@ class JUnitReportsService {
         return tests
     }
 
-    private Map<String, Map> downloadTestsResults(Map<String, String> testResultsURLs, String targetFolder, String component) {
-        Map<String, Map> testsResults = createTestDataStructure(component)
-        testResultsURLs.each {testResultsURL ->
-            String testType = (component)? testResultsURL.key - "-${component.toLowerCase()}" :testResultsURL.key
-            String url = testResultsURL.value
-            testsResults[testType].targetFolder = downloadAndExtractZip(url, targetFolder, testResultsURL.key)
+    private Map<String, Map> downloadTestsResults(Map<String, String> testResultsURLs,
+                                                  String targetFolder,
+                                                  List<String> testsTypes,
+                                                  String component) {
+        Map<String, Map> testsResults = createTestDataStructure(testsTypes, component)
+        testsResults.each {testResult ->
+            String testType = (component)? "${testResult.key}-${component.toLowerCase()}" : "${testResult.key}"
+            String url = testResultsURLs[testType]
+            if (url){
+                testResult.value.targetFolder = downloadAndExtractZip(url, targetFolder, testType)
+            }
         }
+
         return testsResults
     }
 
@@ -85,16 +88,10 @@ class JUnitReportsService {
         return targetFolderWithKey.toString()
     }
 
-    private Map<String, Map> createTestDataStructure(String component = null) {
+    private Map<String, Map> createTestDataStructure(List<String> testsTypes, String component = null) {
         Map testData = [ : ]
-        if (component) {
-            testData.put(TestType.UNIT.uncapitalize(), [:])
-        } else {
-            testData.putAll([
-                    (TestType.ACCEPTANCE.uncapitalize())  : [:],
-                    (TestType.INSTALLATION.uncapitalize()): [:],
-                    (TestType.INTEGRATION.uncapitalize()) : [:],
-            ])
+        testsTypes.each {
+            testData.put(it, [:])
         }
 
         testData.each {

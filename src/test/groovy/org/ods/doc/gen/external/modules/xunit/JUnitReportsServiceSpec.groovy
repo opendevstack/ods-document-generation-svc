@@ -8,7 +8,6 @@ import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
 import spock.lang.Specification
 
 import java.nio.file.Files
-import java.nio.file.Path
 
 import static org.ods.doc.gen.core.test.fixture.FixtureHelper.createJUnitXMLTestResults
 

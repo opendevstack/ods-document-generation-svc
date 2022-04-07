@@ -2,7 +2,6 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
-import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
@@ -10,7 +9,6 @@ import org.ods.doc.gen.external.modules.jira.JiraUseCase
 import org.ods.doc.gen.external.modules.jira.LabelPrefix
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
-import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.JiraDataItem
 import org.ods.doc.gen.project.data.Project
@@ -609,7 +607,8 @@ class LeVADocumentService {
         def sections = this.getDocumentSections(documentType, projectData)
         def watermarkText = this.getWatermarkText(projectData)
 
-        Map testData = junit.getTestData(data)
+        List<String> testsTypes = [TestType.ACCEPTANCE.uncapitalize(), TestType.INTEGRATION.uncapitalize()]
+        Map testData = junit.getTestData(data, testsTypes)
         Map integrationTestData = testData.integration
         List integrationTestIssues = projectData.getAutomatedTestsTypeIntegration()
         Map acceptanceTestData = testData.acceptance
@@ -670,7 +669,8 @@ class LeVADocumentService {
 
         def documentType = Constants.DocumentType.CFTR as String
 
-        def testData = junit.getTestData(data)
+        List<String> testsTypes = [TestType.ACCEPTANCE.uncapitalize(), TestType.INTEGRATION.uncapitalize()]
+        Map testData = junit.getTestData(data, testsTypes)
         def acceptanceTestData = testData.acceptance
         def integrationTestData = testData.integration
 
@@ -728,7 +728,7 @@ class LeVADocumentService {
 
         def documentType = Constants.DocumentType.IVR as String
 
-        def testData = junit.getTestData(data)
+        def testData = junit.getTestData(data, [TestType.INSTALLATION.uncapitalize()])
         def installationTestData = testData.installation
 
         def sections = this.getDocumentSections(documentType, projectData)
@@ -794,7 +794,7 @@ class LeVADocumentService {
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         String documentType = Constants.DocumentType.DTR as String
 
-        Map unitTestData = junit.getTestData(data).unit
+        Map unitTestData = junit.getTestData(data, [TestType.UNIT.uncapitalize()]).unit
         Map sections = this.getDocumentSectionsFileOptional(projectData, documentType)
         String watermarkText = this.getWatermarkText(projectData)
         List testIssues = projectData.getAutomatedTestsTypeUnit("Technology-${repo.id}")
@@ -875,7 +875,7 @@ class LeVADocumentService {
 
         def documentType = Constants.DocumentType.TIR as String
 
-        def testData = junit.getTestData(data)
+        def testData = junit.getTestData(data, [TestType.INSTALLATION.uncapitalize()])
         def installationTestData = testData.installation
 
         def sections = this.getDocumentSectionsFileOptional(projectData, documentType)
@@ -921,12 +921,12 @@ class LeVADocumentService {
 
         ProjectData projectData = project.getProjectData(data.projectBuild as String, data)
         def documentTypeName = Constants.DOCUMENT_TYPE_NAMES[Constants.DocumentType.OVERALL_DTR as String]
-        def metadata = this.getDocumentMetadata(projectData, documentTypeName)
+        Map metadata = this.getDocumentMetadata(projectData, documentTypeName)
         def documentType = Constants.DocumentType.DTR as String
 
         def watermarkText = this.getWatermarkText(projectData)
 
-        def uri = docGenUseCase.createOverallDocument(OVER_COVER, documentType, metadata, null, watermarkText, projectData)
+        String uri = docGenUseCase.createOverallDocument(OVER_COVER, documentType, metadata, null, watermarkText, projectData)
         def docVersion = projectData.getDocumentVersionFromHistories(documentType) as String
         this.updateJiraDocumentationTrackingIssue(projectData,  documentType, uri, docVersion)
 

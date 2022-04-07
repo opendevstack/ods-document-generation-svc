@@ -5,18 +5,19 @@ import de.redsix.pdfcompare.PdfComparator
 import de.redsix.pdfcompare.env.SimpleEnvironment
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.ods.doc.gen.TestConfig
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
 import org.ods.doc.gen.pdf.builder.repository.WiremockDocumentRepository
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
-import spock.lang.Stepwise
 import spock.lang.TempDir
 
 import javax.inject.Inject
 import java.nio.file.Path
+import java.nio.file.Paths
 
 @Slf4j
 @ActiveProfiles("test")
@@ -71,8 +72,8 @@ class PdfGenerationServiceSpec extends Specification {
         new File(REPORT_FOLDER).mkdirs()
         File expectedFile = new FixtureHelper().getResource(expected)
         String expectedPath = expectedFile.absolutePath
-        String diffFileName = REPORT_FOLDER + "/${expectedFile.name}"
-
+        String fileName = FilenameUtils.removeExtension(expectedFile.name)
+        String diffFileName = REPORT_FOLDER + "/${fileName}-diff"
         boolean filesAreEqual = new PdfComparator(expectedPath, resultFile, new CompareResultWithPageOverflow())
                 .withEnvironment(new SimpleEnvironment()
                         .setParallelProcessing(true)
@@ -80,6 +81,9 @@ class PdfGenerationServiceSpec extends Specification {
                 .compare().writeTo(diffFileName)
         if (filesAreEqual) {
             new File("${diffFileName}.pdf").delete()
+        } else {
+            String actualPdf = "${REPORT_FOLDER}/${fileName}-actual.pdf"
+            FileUtils.copyFile(Paths.get(resultFile).toFile(), Paths.get(actualPdf).toFile())
         }
         return filesAreEqual
     }

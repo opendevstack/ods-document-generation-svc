@@ -84,69 +84,6 @@ class JiraService {
         }
     }
 
-    Map createIssueType(String type, String projectKey, String summary, String description, String fixVersion = null) {
-        if (!type?.trim()) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue. \'type\' is undefined.')
-        }
-
-        if (!projectKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue. \'projectKey\' is undefined.')
-        }
-
-        if (!summary?.trim()) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue. \'summary\' is undefined.')
-        }
-
-        if (!description?.trim()) {
-            throw new IllegalArgumentException('Error: unable to create Jira issue. \'description\' is undefined.')
-        }
-
-        def response = Unirest.post("${this.baseURL}/rest/api/2/issue")
-            .basicAuth(this.username, this.password)
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
-            .body(JsonOutput.toJson(
-                [
-                    fields: [
-                        project: [
-                            key: projectKey.toUpperCase()
-                        ],
-                        summary: summary,
-                        description: description,
-                        fixVersions: [
-                           [name: fixVersion]
-                        ],
-                        issuetype: [
-                            name: type
-                        ]
-                    ]
-                ]
-            ))
-            .asString()
-
-        response.ifSuccess {
-            if (response.getStatus() != 201) {
-                throw new RuntimeException("Error: unable to create Jira issue. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'.")
-            }
-        }
-
-        response.ifFailure {
-            def message = "Error: unable to create Jira issue. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to create Jira issue. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-
-        return new JsonSlurperClassic().parseText(response.getBody())
-    }
-
-    Map createIssueTypeBug(String projectKey, String summary, String description, String fixVersion = null) {
-        return createIssueType("Bug", projectKey, summary, description, fixVersion)
-    }
-
     Map getDeltaDocGenData(String projectKey, String version) {
         if (!projectKey?.trim()) {
             throw new IllegalArgumentException('Error: unable to get documentation generation data from Jira. ' +
@@ -198,7 +135,7 @@ class JiraService {
     }
 
     private String changeRLWhenUsingWiremock(String url) {
-        String finalUrl = (baseURL == targetURL)? baseURL : URLHelper.replaceHostInUrl(url, baseURL.toString())
+        String finalUrl = (baseURL == targetURL)? url : URLHelper.replaceHostInUrl(url, baseURL.toString())
         return finalUrl
     }
 
@@ -286,31 +223,6 @@ class JiraService {
         return new JsonSlurperClassic().parseText(response.getBody()).collect { jiraVersion ->
             [id: jiraVersion.id, name: jiraVersion.name]
         }
-    }
-
-    
-    Map getProject(String projectKey) {
-        if (!projectKey?.trim()) {
-            throw new IllegalArgumentException('Error: unable to get project from Jira. \'projectKey\' is undefined.')
-        }
-
-        def response = Unirest.get("${this.baseURL}/rest/api/2/project/{projectKey}")
-            .routeParam('projectKey', projectKey.toUpperCase())
-            .basicAuth(this.username, this.password)
-            .header('Accept', 'application/json')
-            .asString()
-
-        response.ifFailure {
-            def message = "Error: unable to get project. Jira responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
-
-            if (response.getStatus() == 404) {
-                message = "Error: unable to get project. Jira could not be found at: '${this.baseURL}'."
-            }
-
-            throw new RuntimeException(message)
-        }
-
-        return new JsonSlurperClassic().parseText(response.getBody())
     }
 
     Map searchByJQLQuery(Map query) {
