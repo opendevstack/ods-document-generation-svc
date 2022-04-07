@@ -1,9 +1,6 @@
 package org.ods.doc.gen.leva.doc.services
 
-import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter
-import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -13,7 +10,6 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.graphics.blend.BlendMode
 import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState
 import org.apache.pdfbox.util.Matrix
-import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.springframework.stereotype.Service
 
 import java.nio.file.Files
@@ -39,44 +35,6 @@ class PDFUtil {
             doc.save(result.toFile())
         } catch (e) {
             throw new RuntimeException("Error: unable to add watermark to PDF document: ${e.message}").initCause(e)
-        } finally {
-            if (doc) {
-                doc.close()
-            }
-        }
-
-        return result
-    }
-
-    
-    byte[] convertFromMarkdown(File wordDoc, Boolean landscape = false) {
-        def result
-
-        try {
-            def markdownContent = IOUtils.toString(new FileInputStream(wordDoc), 'UTF-8')
-            result = new MarkdownUtil().toPDF(markdownContent, landscape)
-        } catch (e) {
-            throw new RuntimeException("Error: unable to convert Markdown document to PDF: ${e.message}").initCause(e)
-        }
-
-        return result
-    }
-    
-    byte[] convertFromWordDoc(File wordDoc) {
-        def result
-
-        XWPFDocument doc
-        try {
-            def is = new FileInputStream(wordDoc)
-            doc = new XWPFDocument(is)
-
-            def options = PdfOptions.create()
-            def os = new ByteArrayOutputStream()
-            PdfConverter.getInstance().convert(doc, os, options)
-
-            result = os.toByteArray()
-        } catch (e) {
-            throw new RuntimeException("Error: unable to convert Word document to PDF: ${e.message}").initCause(e)
         } finally {
             if (doc) {
                 doc.close()

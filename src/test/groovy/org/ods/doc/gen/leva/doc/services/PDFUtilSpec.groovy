@@ -29,47 +29,6 @@ class PDFUtilSpec extends SpecHelper {
         }
     }
 
-    @Ignore
-    def "convert from mardkdown document"() {
-        given:
-        def util = new PDFUtil()
-
-        def docFile = new FixtureHelper().getResource("pdf.builder/Test.md")
-        def result
-
-        when:
-        result = util.convertFromMarkdown(docFile, false)
-
-        then:
-        def doc = PDDocument.load(result)
-        doc.getNumberOfPages() == 2
-        doc.close()
-
-        when:
-        result = util.convertFromMarkdown(docFile, true)
-
-        then:
-        def docLandscape = PDDocument.load(result)
-        docLandscape.getNumberOfPages() == 4
-        docLandscape.close()
-
-    }
-
-    def "convert from Microsoft Word document"() {
-        given:
-        def util = new PDFUtil()
-
-        def docFile = new FixtureHelper().getResource("pdf.builder/Test.docx")
-
-        when:
-        def result = util.convertFromWordDoc(docFile)
-
-        then:
-        def doc = PDDocument.load(result)
-        doc.getNumberOfPages() == 1
-        doc.close()
-    }
-
     def "merge documents"() {
         given:
         def util = new PDFUtil()
@@ -81,11 +40,11 @@ class PDFUtilSpec extends SpecHelper {
         def result = util.merge(tempFolder.absolutePath, [docFile1.toPath(), docFile2.toPath()])
 
         then:
-        new String(result).startsWith("%PDF-1.4\n")
+        new String(result.toFile().getBytes()).startsWith("%PDF-1.4\n")
 
         then:
         try (FileInputStream fis = new FileInputStream(result.toFile())) {
-            def doc = PDDocument.load(result)
+            def doc = PDDocument.load(fis)
             doc.getNumberOfPages() == 2
             doc.close()
         }
