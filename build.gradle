@@ -162,7 +162,7 @@ test {
   useJUnitPlatform()
 }
 
-task dockerTest(type: Test) {
+task integrationTest(type: Test) {
   group("verification")
   filter {
     includeTestsMatching "*IT"
@@ -219,8 +219,8 @@ docker {
 
 test.dependsOn(buildImageForTest)
 dockerBuildImage.dependsOn(bootJar)
-dockerTest.dependsOn(dockerBuildImage)
-dockerTest.mustRunAfter(test)
+integrationTest.dependsOn(dockerBuildImage)
+integrationTest.mustRunAfter(test)
 
 bootRun {
   systemProperties << executionProperties()
@@ -247,11 +247,11 @@ task stopDocGenServerForGatling(type: DockerStopContainer) {
 }
 
 gatlingRun.group("verification")
-gatlingRun.mustRunAfter(dockerTest)
+gatlingRun.mustRunAfter(integrationTest)
 gatlingRun.dependsOn(startDocGenServerForGatling)
 gatlingRun.finalizedBy(stopDocGenServerForGatling)
 
-check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
+check.dependsOn(jacocoTestCoverageVerification, integrationTest, gatlingRun)
 
 Map executionProperties(){
   def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"
