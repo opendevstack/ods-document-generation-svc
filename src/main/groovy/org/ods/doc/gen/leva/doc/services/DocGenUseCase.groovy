@@ -2,7 +2,7 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.aspectj.util.FileUtil
+import org.apache.commons.io.FileUtils
 import org.ods.doc.gen.core.ZipFacade
 import org.ods.doc.gen.external.modules.nexus.NexusService
 import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
@@ -101,7 +101,7 @@ class DocGenUseCase {
 
         if (Constants.OVERALL_DOC_TYPES.contains(documentType) && repo) {
             File pdfFile = Paths.get(projectData.tmpFolder, pdfName).toFile()
-            FileUtil.copyFile(document.toFile(), pdfFile)
+            FileUtils.copyFile(document.toFile(), pdfFile)
             projectData.addOverallDocToMerge(documentType, repo.id as String, pdfFile.absolutePath)
         }
 
