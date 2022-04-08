@@ -114,7 +114,7 @@ class JiraService {
 
     
     Map getFileFromJira(String url) {
-        def response = Unirest.get(changeRLWhenUsingWiremock(url))
+        def response = Unirest.get(changeURLWhenUsingWiremock(url))
             .basicAuth(this.username, this.password)
             .asBytes()
 
@@ -134,9 +134,8 @@ class JiraService {
         ]
     }
 
-    private String changeRLWhenUsingWiremock(String url) {
-        String finalUrl = (baseURL == targetURL)? url : URLHelper.replaceHostInUrl(url, baseURL.toString())
-        return finalUrl
+    private String changeURLWhenUsingWiremock(String url) {
+        return (baseURL == targetURL)? url : URLHelper.replaceHostInUrl(url, baseURL.toString())
     }
 
     List getIssuesForJQLQuery(Map query) {
