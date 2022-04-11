@@ -17,9 +17,9 @@ import java.nio.file.Paths
 class NexusService {
 
     static final String NEXUS_REPOSITORY = "leva-documentation"
-    private static final String URL_PATH = "service/rest/v1/components?repository={repository}"
+    private static final String UPLOAD_ARTIFACT_URL_PATH = "service/rest/v1/components?repository="
     private static final String RAW = 'raw'
-    private static final String UNABLE_STORE = 'Error: unable to store artifact. '
+    private static final String UNABLE_TO_STORE_AT = 'Error: unable to store artifact at '
 
     URI baseURL
 
@@ -59,13 +59,12 @@ class NexusService {
                                       String repoType,
                                       Map nexusParams) {
         File artifactFile = Paths.get(artifactPath).toFile()
-        String targetUrl = "${this.baseURL}/${URL_PATH}"
+        String targetUrl = new URI("${this.baseURL}/${UPLOAD_ARTIFACT_URL_PATH}${repo}").normalize().toString()
         log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], url:[${targetUrl}] ")
 
         byte[] artifact = artifactFile.getBytes()
         def restCall = Unirest
                 .post(targetUrl)
-                .routeParam('repository', repo)
                 .basicAuth(this.username, this.password)
                 .field(getField(repoType), new ByteArrayInputStream(artifact), contentType)
         nexusParams.each { key, value -> restCall = restCall.field(key, value) }
@@ -73,12 +72,12 @@ class NexusService {
         def response = restCall.asString()
         response.ifSuccess {
             if (response.getStatus() != 204) {
-                throw new RuntimeException(errorMsg(response, repo))
+                throw new RuntimeException(errorMsg(response, repo, restCall.getUrl()))
             }
         }
 
         response.ifFailure {
-            throw new RuntimeException(errorMsg(response, repo))
+            throw new RuntimeException(errorMsg(response, repo, restCall.getUrl()))
         }
 
         if (repoType == RAW) {
@@ -88,8 +87,8 @@ class NexusService {
         return this.baseURL.resolve("/repository/${repo}")
     }
 
-    private String errorMsg(HttpResponse<String> response, String repo) {
-        String message = UNABLE_STORE +
+    private String errorMsg(HttpResponse<String> response, String repo, String targetUrl) {
+        String message = UNABLE_TO_STORE_AT + targetUrl + "." +
                 "Nexus responded with code: '${response.getStatus()}' and message: '${response.getBody()}'."
         if (response.getStatus() == 404) {
             message = "Error: unable to store artifact. Nexus could not be found at: '${this.baseURL}' - repo: ${repo}."

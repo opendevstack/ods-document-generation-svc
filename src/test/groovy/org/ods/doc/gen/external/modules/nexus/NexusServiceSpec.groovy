@@ -124,7 +124,8 @@ class NexusServiceSpec extends SpecHelper {
 
         then:
         def e = thrown(RuntimeException)
-        e.message == "Error: unable to store artifact. Nexus responded with code: '${response.status}' and message: 'Sorry, doesn\'t work!'."
+        e.message.startsWith("Error: unable to store artifact at")
+        e.message.endsWith("Nexus responded with code: '${response.status}' and message: 'Sorry, doesn\'t work!'.")
 
         cleanup:
         stopServer(server)
