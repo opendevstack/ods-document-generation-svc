@@ -24,11 +24,12 @@ class JUnitReportsService {
     }
     
     Map combineTestResults(List<Map> testResults) {
-        def result = [ testsuites: [] ]
+        List testSuites = []
         for (def i = 0; i < testResults.size(); i++) {
-            result.testsuites.addAll(testResults[i].testsuites)
+            List elementsToAdd = testResults[i].testsuites
+            testSuites.addAll(elementsToAdd)
         }
-        return result
+        return [ testsuites: testSuites ]
     }
     
     int getNumberOfTestCases(Map testResults) {
@@ -109,9 +110,10 @@ class JUnitReportsService {
             ]
         }
         List<File> testReportFiles = fileSystemHelper.loadFilesFromPath(targetFolder, "xml")
+        Map testResults = parseTestReportFiles(testReportFiles)
         return [
                 testReportFiles: testReportFiles,
-                testResults: parseTestReportFiles(testReportFiles),
+                testResults: testResults,
         ]
     }
 
