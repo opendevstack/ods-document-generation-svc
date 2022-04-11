@@ -58,7 +58,7 @@ class LevaDocDataFixture {
                 buildURL : "https://jenkins-sample",
                 jobName : "${projectFixture.project}-cd/${projectFixture.project}-releasemanager",
                 testResultsURLs: getAllTestResults(projectFixture, projectWithBuild),
-                jenkinLog: getJenkinsLogUrl(projectWithBuild)
+                jenkinsLog: getJenkinsLogUrl(projectWithBuild)
         ]
     }
 

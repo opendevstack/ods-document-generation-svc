@@ -47,7 +47,12 @@ class LevaDocController {
             @RequestBody Map body){
         validateRequestParams(body)
         logData(projectId, buildNumber, levaDocType, body)
-        return createDocument(projectId, buildNumber, levaDocType, body)
+
+        List<DocumentHistoryEntry> result = createDocument(projectId, buildNumber, levaDocType, body)
+        if (log.isDebugEnabled()) {
+            log.debug(prettyPrint(toJson(result)))
+        }
+        return result
     }
 
     @PostMapping("{projectId}/{build}/overall/{levaDocType}")
