@@ -26,8 +26,8 @@ class JUnitReportsService {
     Map combineTestResults(List<Map> testResults) {
         List testSuites = []
         for (def i = 0; i < testResults.size(); i++) {
-            List elementsToAdd = testResults[i].testsuites
-            testSuites.addAll(elementsToAdd)
+            List elementsToAdd = testResults[i].testsuites as List
+            testSuites.addAll(elementsToAdd as List)
         }
         return [ testsuites: testSuites ]
     }
