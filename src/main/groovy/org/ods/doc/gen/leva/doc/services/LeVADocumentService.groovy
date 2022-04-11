@@ -954,7 +954,7 @@ class LeVADocumentService {
                     heading: 'Jenkins Build Log'
             ])
 
-            nexus.downloadAndExtractZip(data.build.jenkinLog as String, projectData.tmpFolder)
+            nexus.downloadAndExtractZip(data.build.jenkinsLog as String, projectData.tmpFolder)
             data_.jenkinsData = [
                     log: Paths.get(projectData.tmpFolder, "jenkins-job-log.txt" ).toFile().text
             ]
