@@ -82,7 +82,7 @@ ${data.metadata.header[1]}"""])
      *
      * @param pdf a PDF file.
      */
-    private static void fixDestinations(File pdf) {
+    private void fixDestinations(File pdf) {
         def memoryUsageSetting = MemoryUsageSetting.setupMixed(MAX_MEMORY_TO_FIX_DESTINATIONS)
         PDDocument.load(pdf, memoryUsageSetting).withCloseable { doc ->
             fixDestinations(doc)
@@ -101,7 +101,7 @@ ${data.metadata.header[1]}"""])
      *
      * @param doc a PDF document.
      */
-    private static void fixDestinations(PDDocument doc) {
+    private void fixDestinations(PDDocument doc) {
         def pages = doc.pages as List // Accessing pages by index is slow. This will make it fast.
         fixExplicitDestinations(pages)
         def catalog = doc.documentCatalog
@@ -109,7 +109,7 @@ ${data.metadata.header[1]}"""])
         fixOutline(catalog, pages)
     }
 
-    private static fixExplicitDestinations(pages) {
+    private fixExplicitDestinations(pages) {
         pages.each { page ->
             page.getAnnotations { it instanceof PDAnnotationLink }.each { link ->
                 fixDestinationOrAction(link, pages)
@@ -117,26 +117,26 @@ ${data.metadata.header[1]}"""])
         }
     }
 
-    private static fixNamedDestinations(catalog, pages) {
+    private fixNamedDestinations(catalog, pages) {
         fixStringDestinations(catalog.names?.dests, pages)
         fixNameDestinations(catalog.dests, pages)
     }
 
-    private static fixOutline(catalog, pages) {
+    private fixOutline(catalog, pages) {
         def outline = catalog.documentOutline
         if (outline != null) {
             fixOutlineNode(outline, pages)
         }
     }
 
-    private static fixStringDestinations(PDNameTreeNode<PDPageDestination> node, pages) {
+    private fixStringDestinations(PDNameTreeNode<PDPageDestination> node, pages) {
         if (node) {
             node.names?.each { name, dest -> fixDestination(dest, pages) }
             node.kids?.each { fixStringDestinations(it, pages) }
         }
     }
 
-    private static fixNameDestinations(PDDocumentNameDestinationDictionary dests, pages) {
+    private fixNameDestinations(PDDocumentNameDestinationDictionary dests, pages) {
         dests?.COSObject?.keySet()*.name.each { name ->
             def dest = dests.getDestination(name)
             if (dest instanceof PDPageDestination) {
@@ -145,14 +145,14 @@ ${data.metadata.header[1]}"""])
         }
     }
 
-    private static fixOutlineNode(PDOutlineNode node, pages) {
+    private fixOutlineNode(PDOutlineNode node, pages) {
         node.children().each { item ->
             fixDestinationOrAction(item, pages)
             fixOutlineNode(item, pages)
         }
     }
 
-    private static fixDestinationOrAction(item, pages) {
+    private fixDestinationOrAction(item, pages) {
         def dest = item.destination
         if (dest == null) {
             def action = item.action
@@ -165,7 +165,7 @@ ${data.metadata.header[1]}"""])
         }
     }
 
-    private static fixDestination(PDPageDestination dest, List<PDPage> pages) {
+    private fixDestination(PDPageDestination dest, List<PDPage> pages) {
         def pageNum = dest.pageNumber
         if (pageNum != -1) {
             dest.setPage(pages[pageNum])
