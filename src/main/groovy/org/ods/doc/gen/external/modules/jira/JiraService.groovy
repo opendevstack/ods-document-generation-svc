@@ -114,7 +114,7 @@ class JiraService {
 
     
     Map getFileFromJira(String url) {
-        def response = Unirest.get(changeRLWhenUsingWiremock(url))
+        def response = Unirest.get(changeURLWhenUsingWiremock(url))
             .basicAuth(this.username, this.password)
             .asBytes()
 

@@ -24,11 +24,12 @@ class JUnitReportsService {
     }
     
     Map combineTestResults(List<Map> testResults) {
-        def result = [ testsuites: [] ]
+        List testSuites = []
         for (def i = 0; i < testResults.size(); i++) {
-            result.testsuites.addAll(testResults[i].testsuites)
+            List elementsToAdd = testResults[i].testsuites as List
+            testSuites.addAll(elementsToAdd as List)
         }
-        return result
+        return [ testsuites: testSuites ]
     }
     
     int getNumberOfTestCases(Map testResults) {
@@ -75,6 +76,8 @@ class JUnitReportsService {
             String url = testResultsURLs[testType]
             if (url){
                 testResult.value.targetFolder = downloadAndExtractZip(url, targetFolder, testType)
+            } else {
+                log.warn("There are no test results of type ${testType}.")
             }
         }
 
@@ -103,15 +106,19 @@ class JUnitReportsService {
 
     private Map getTestResults(String typeIn, String targetFolder, String component) {
         if (targetFolder == null) {
+            // When targetFolder is null, we need to initialize testsuites !!
             return [
                     testReportFiles: [],
-                    testResults: [:],
+                    testResults: [
+                            testsuites:[]
+                    ],
             ]
         }
         List<File> testReportFiles = fileSystemHelper.loadFilesFromPath(targetFolder, "xml")
+        Map testResults = parseTestReportFiles(testReportFiles)
         return [
                 testReportFiles: testReportFiles,
-                testResults: parseTestReportFiles(testReportFiles),
+                testResults: testResults,
         ]
     }
 
