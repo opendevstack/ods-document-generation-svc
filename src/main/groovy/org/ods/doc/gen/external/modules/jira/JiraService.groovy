@@ -134,8 +134,9 @@ class JiraService {
         ]
     }
 
-    private String changeURLWhenUsingWiremock(String url) {
-        return (baseURL == targetURL)? url : URLHelper.replaceHostInUrl(url, baseURL.toString())
+    private String changeRLWhenUsingWiremock(String url) {
+        String finalUrl = (baseURL == targetURL)? url : URLHelper.replaceHostInUrl(url, baseURL.toString())
+        return finalUrl
     }
 
     List getIssuesForJQLQuery(Map query) {
