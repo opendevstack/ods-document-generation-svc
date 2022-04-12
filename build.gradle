@@ -213,7 +213,7 @@ docker {
     baseImage = project.ext.imageBaseForApp
     ports = [8080]
     images = ['ods-document-generation-svc:local']
-    jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=100"]
+    jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseParallelGC", "-XX:+UseParallelOldGC"]
   }
 }
 
