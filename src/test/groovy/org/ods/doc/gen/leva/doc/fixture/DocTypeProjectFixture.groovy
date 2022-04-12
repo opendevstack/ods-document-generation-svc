@@ -3,7 +3,7 @@ package org.ods.doc.gen.leva.doc.fixture
 class DocTypeProjectFixture extends DocTypeProjectFixtureBase {
 
     DocTypeProjectFixture() {
-        super(["CSD", "DIL", "DTP", "RA", "CFTP", "IVP", "SSDS", "TCP", "TRC"])
+        super(["CSD", "DIL", "DTP", "RA", "CFTP", "IVP", "SSDS", "TCP", "TIP", "TRC"])
     }
 
     DocTypeProjectFixture(docTypes) {

@@ -5,7 +5,7 @@ import org.ods.doc.gen.leva.doc.services.Constants
 class DocTypeProjectFixturesOverall extends DocTypeProjectFixtureBase {
 
     DocTypeProjectFixturesOverall() {
-        super([ Constants.DocumentType.DTR.toString() ])
+        super(Constants.OVERALL_DOC_TYPES)
     }
 
     def addDocTypes(Map project, List projects) {
