@@ -32,4 +32,17 @@ class JiraServiceForWireMock extends JiraService {
         super.baseURL = jiraNewBaseUrl
         log.info("Updated Jira baseUrl to ${super.baseURL}")
     }
+
+    Map getFileFromJira(String url) {
+        url = replaceHostInUrlWithBaseUrl(url)
+        return super.getFileFromJira(url)
+    }
+
+    private String replaceHostInUrlWithBaseUrl(String url) {
+        url = url.replace("http://", "").replace("https://", "")
+        int pos = url.indexOf("/")
+        url = url.substring(pos)
+        url = super.baseURL.toString() + url
+        return url
+    }
 }
