@@ -526,9 +526,7 @@ class LeVADocumentService {
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
                         project_key : projectData.key,
-                        repositories: projectData.repositories.collect {
-                            it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
-                        },
+                        repositories: data.repositories,
                         sections    : sections,
                         documentHistory: docHistory?.getDocGenFormat() ?: [],
                 ]
@@ -679,10 +677,12 @@ class LeVADocumentService {
 
         def acceptanceTestIssues = SortUtil.sortIssuesByKey(projectData.getAutomatedTestsTypeAcceptance())
         def integrationTestIssues = SortUtil.sortIssuesByKey(projectData.getAutomatedTestsTypeIntegration())
+        Map combinedTestResults = junit.combineTestResults(
+                [acceptanceTestData.testResults, integrationTestData.testResults])
         def discrepancies = this
                 .computeTestDiscrepancies("Integration and Acceptance Tests",
                         (acceptanceTestIssues + integrationTestIssues),
-                        junit.combineTestResults([acceptanceTestData.testResults, integrationTestData.testResults]),
+                        combinedTestResults,
                         false)
 
         def keysInDoc = this.computeKeysInDocForCFTR(integrationTestIssues + acceptanceTestIssues)
@@ -954,13 +954,12 @@ class LeVADocumentService {
                     heading: 'Jenkins Build Log'
             ])
 
-            nexus.downloadAndExtractZip(data.build.jenkinLog as String, projectData.tmpFolder)
+            nexus.downloadAndExtractZip(data.build.jenkinsLog as String, projectData.tmpFolder)
             data_.jenkinsData = [
                     log: Paths.get(projectData.tmpFolder, "jenkins-job-log.txt" ).toFile().text
             ]
-            data_.repositories = projectData.repositories.collect {
-                it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
-            }
+
+            data_.repositories = data.repositories
         }
 
         String uri = docGenUseCase.createOverallDocument('Overall-TIR-Cover', documentType, metadata, visitor, watermarkText, projectData)
