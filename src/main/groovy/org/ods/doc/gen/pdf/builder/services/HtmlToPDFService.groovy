@@ -102,7 +102,7 @@ ${data.metadata.header[1]}"""])
      * @param doc a PDF document.
      */
     private void fixDestinations(PDDocument doc) {
-        def pages = doc.pages as List // Accessing pages by index is slow. This will make it fast.
+        def pages = doc.pages as ArrayList // Accessing pages by index is slow. This will make it fast.
         fixExplicitDestinations(pages)
         def catalog = doc.documentCatalog
         fixNamedDestinations(catalog, pages)
@@ -165,7 +165,8 @@ ${data.metadata.header[1]}"""])
         }
     }
 
-    private fixDestination(PDPageDestination dest, List<PDPage> pages) {
+    // We need a RandomAccess List implementation. Enforcing ArrayList.
+    private fixDestination(PDPageDestination dest, ArrayList<PDPage> pages) {
         def pageNum = dest.pageNumber
         if (pageNum != -1) {
             dest.setPage(pages[pageNum])
