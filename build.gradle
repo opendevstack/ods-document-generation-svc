@@ -1,7 +1,7 @@
 buildscript {
   ext {
     groovyallVersion = '3.0.10'
-    springbootVersion = "2.6.4"
+    springbootVersion = "2.6.6"
     springCloudVersion = '3.1.1'
     spockCoreVersion = "2.1-groovy-3.0"
     spockReportsVersion = '2.3.0-groovy-3.0'
@@ -220,7 +220,6 @@ docker {
 test.dependsOn(buildImageForTest)
 dockerBuildImage.dependsOn(bootJar)
 dockerTest.dependsOn(dockerBuildImage)
-dockerTest.mustRunAfter(test)
 
 bootRun {
   systemProperties << executionProperties()
@@ -251,7 +250,7 @@ gatlingRun.mustRunAfter(dockerTest)
 gatlingRun.dependsOn(startDocGenServerForGatling)
 gatlingRun.finalizedBy(stopDocGenServerForGatling)
 
-check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
+//check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
 Map executionProperties(){
   def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"
