@@ -27,4 +27,9 @@ class JiraServiceForWireMock extends JiraService {
         log.warn("updateTextFieldsOnIssue - issueIdOrKey:$issueIdOrKey")
     }
 
+    void setBaseURL(URI jiraNewBaseUrl) {
+        log.info("Updating Jira baseUrl to ${jiraNewBaseUrl}")
+        super.baseURL = jiraNewBaseUrl
+        log.info("Updated Jira baseUrl to ${super.baseURL}")
+    }
 }
