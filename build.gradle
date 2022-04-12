@@ -220,6 +220,7 @@ docker {
 test.dependsOn(buildImageForTest)
 dockerBuildImage.dependsOn(bootJar)
 dockerTest.dependsOn(dockerBuildImage)
+dockerTest.mustRunAfter(test)
 
 bootRun {
   systemProperties << executionProperties()
@@ -250,7 +251,7 @@ gatlingRun.mustRunAfter(dockerTest)
 gatlingRun.dependsOn(startDocGenServerForGatling)
 gatlingRun.finalizedBy(stopDocGenServerForGatling)
 
-//check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
+check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
 
 Map executionProperties(){
   def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"
