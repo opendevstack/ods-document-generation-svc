@@ -677,10 +677,12 @@ class LeVADocumentService {
 
         def acceptanceTestIssues = SortUtil.sortIssuesByKey(projectData.getAutomatedTestsTypeAcceptance())
         def integrationTestIssues = SortUtil.sortIssuesByKey(projectData.getAutomatedTestsTypeIntegration())
+        Map combinedTestResults = junit.combineTestResults(
+                [acceptanceTestData.testResults, integrationTestData.testResults])
         def discrepancies = this
                 .computeTestDiscrepancies("Integration and Acceptance Tests",
                         (acceptanceTestIssues + integrationTestIssues),
-                        junit.combineTestResults([acceptanceTestData.testResults, integrationTestData.testResults]),
+                        combinedTestResults,
                         false)
 
         def keysInDoc = this.computeKeysInDocForCFTR(integrationTestIssues + acceptanceTestIssues)

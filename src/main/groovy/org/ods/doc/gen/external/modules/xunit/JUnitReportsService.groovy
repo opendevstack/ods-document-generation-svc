@@ -106,9 +106,12 @@ class JUnitReportsService {
 
     private Map getTestResults(String typeIn, String targetFolder, String component) {
         if (targetFolder == null) {
+            // When targetFolder is null, we need to initialize testsuites !!
             return [
                     testReportFiles: [],
-                    testResults: [:],
+                    testResults: [
+                            testsuites:[]
+                    ],
             ]
         }
         List<File> testReportFiles = fileSystemHelper.loadFilesFromPath(targetFolder, "xml")
