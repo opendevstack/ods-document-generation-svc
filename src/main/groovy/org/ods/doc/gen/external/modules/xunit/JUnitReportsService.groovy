@@ -76,6 +76,8 @@ class JUnitReportsService {
             String url = testResultsURLs[testType]
             if (url){
                 testResult.value.targetFolder = downloadAndExtractZip(url, targetFolder, testType)
+            } else {
+                throw new RuntimeException("Could not download test results of type ${testType} from testResultsURLs[${testType}] = ${url} ")
             }
         }
 
