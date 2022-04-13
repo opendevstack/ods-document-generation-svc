@@ -3,10 +3,15 @@ package org.ods.doc.gen.pdf.builder.services
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.io.FileTemplateLoader
 import groovy.util.logging.Slf4j
+import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDDocumentNameDestinationDictionary
+import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.common.PDNameTreeNode
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
@@ -64,6 +69,8 @@ ${data.metadata.header[1]}"""])
         return cmd
     }
 
+    private static final long MAX_MEMORY_TO_FIX_DESTINATIONS = 8192L
+
     /**
      * Fixes malformed PDF documents which use page numbers in local destinations, referencing the same document.
      * Page numbers should be used only for references to external documents.
@@ -73,13 +80,14 @@ ${data.metadata.header[1]}"""])
      * page object references.
      * If the document is not malformed, this method will leave it unchanged.
      *
-     * @param file a PDF file.
+     * @param pdf a PDF file.
      */
-    private void fixDestinations(File file) {
-        def doc = PDDocument.load(file)
-        fixDestinations(doc)
-        doc.save(file)
-        doc.close()
+    private void fixDestinations(File pdf) {
+        def memoryUsageSetting = MemoryUsageSetting.setupMixed(MAX_MEMORY_TO_FIX_DESTINATIONS)
+        PDDocument.load(pdf, memoryUsageSetting).withCloseable { doc ->
+            fixDestinations(doc)
+            doc.save(pdf)
+        }
     }
 
     /**
@@ -93,71 +101,76 @@ ${data.metadata.header[1]}"""])
      *
      * @param doc a PDF document.
      */
-    private  void fixDestinations(PDDocument doc) {
-        def pages = doc.pages as List // Accessing pages by index is slow. This will make it fast.
+    private void fixDestinations(PDDocument doc) {
+        def pages = doc.pages as ArrayList // Accessing pages by index is slow. This will make it fast.
+        fixExplicitDestinations(pages)
         def catalog = doc.documentCatalog
         fixNamedDestinations(catalog, pages)
         fixOutline(catalog, pages)
-        fixExplicitDestinations(pages)
     }
 
-    private  fixNamedDestinations(catalog, pages) {
-        fixStringDestinations(catalog.names?.dests, pages)
-        fixNameDestinations(catalog.dests, pages)
-    }
-
-    private  fixStringDestinations(node, pages) {
-        if (node) {
-            node.names?.each { name, dest -> fixDestination(dest, pages) }
-            node.kids?.each { fixStringDestinations(it, pages) }
-        }
-    }
-
-    private  fixNameDestinations(dests, pages) {
-        dests?.COSObject?.keySet()*.name.each { name ->
-            def dest = dests.getDestination(name)
-            if (dest in PDPageDestination) {
-                fixDestination(dest, pages)
+    private fixExplicitDestinations(pages) {
+        pages.each { page ->
+            page.getAnnotations { it instanceof PDAnnotationLink }.each { link ->
+                fixDestinationOrAction(link, pages)
             }
         }
     }
 
-    private  fixOutline(catalog, pages) {
+    private fixNamedDestinations(catalog, pages) {
+        fixStringDestinations(catalog.names?.dests, pages)
+        fixNameDestinations(catalog.dests, pages)
+    }
+
+    private fixOutline(catalog, pages) {
         def outline = catalog.documentOutline
         if (outline != null) {
             fixOutlineNode(outline, pages)
         }
     }
 
-    private  fixOutlineNode(node, pages) {
+    private fixStringDestinations(PDNameTreeNode<PDPageDestination> node, pages) {
+        if (node) {
+            node.names?.each { name, dest -> fixDestination(dest, pages) }
+            node.kids?.each { fixStringDestinations(it, pages) }
+        }
+    }
+
+    private fixNameDestinations(PDDocumentNameDestinationDictionary dests, pages) {
+        dests?.COSObject?.keySet()*.name.each { name ->
+            def dest = dests.getDestination(name)
+            if (dest instanceof PDPageDestination) {
+                fixDestination(dest, pages)
+            }
+        }
+    }
+
+    private fixOutlineNode(PDOutlineNode node, pages) {
         node.children().each { item ->
             fixDestinationOrAction(item, pages)
             fixOutlineNode(item, pages)
         }
     }
 
-    private  fixExplicitDestinations(pages) {
-        pages.each { page ->
-            page.getAnnotations { it.subtype == PDAnnotationLink.SUB_TYPE }.each { link ->
-                fixDestinationOrAction(link, pages)
+    private fixDestinationOrAction(item, pages) {
+        def dest = item.destination
+        if (dest == null) {
+            def action = item.action
+            if (action instanceof PDActionGoTo) {
+                dest = action.destination
             }
         }
-    }
-
-    private  fixDestinationOrAction(item, pages) {
-        def dest = item.destination
-        if (dest == null && item.action?.subType == PDActionGoTo.SUB_TYPE) {
-            dest = item.action.destination
-        }
-        if (dest in PDPageDestination) {
+        if (dest instanceof PDPageDestination) {
             fixDestination(dest, pages)
         }
     }
 
-    private  fixDestination(dest, pages) {
+    // We need a RandomAccess List implementation. Enforcing ArrayList.
+    private fixDestination(PDPageDestination dest, ArrayList<PDPage> pages) {
         def pageNum = dest.pageNumber
         if (pageNum != -1) {
             dest.setPage(pages[pageNum])
         }
     }
+
 }

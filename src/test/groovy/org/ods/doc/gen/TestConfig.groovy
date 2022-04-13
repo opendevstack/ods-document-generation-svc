@@ -36,6 +36,7 @@ class TestConfig {
     @Primary
     @Bean
     JiraService getJiraService(JiraServiceForWireMock jiraServiceForWireMock){
+        jiraServiceForWireMock.setBaseURL(jiraServiceForWireMock.baseURL)
         return jiraServiceForWireMock
     }
 
