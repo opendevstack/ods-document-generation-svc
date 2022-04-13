@@ -14,15 +14,17 @@ class ZipFacade {
 
     static final String ARTIFACTS_BASE_DIR = 'artifacts'
 
-    String createZipFileFromFiles(String tmpFolder, String name, Map<String, byte[]> files) {
+    String createZipFileFromFiles(String tmpFolder, String name, Map<String, String> files) {
         String path = "${tmpFolder}/${ARTIFACTS_BASE_DIR}/${name}".toString()
         Files.createDirectories(Paths.get(path).parent)
 
         def zipFile = new ZipFile(path)
-        files.each { filePath, fileData ->
+        files.each { fileName, filePath ->
             def params = new ZipParameters()
-            params.setFileNameInZip(filePath)
-            zipFile.addStream(new ByteArrayInputStream(fileData), params)
+            params.setFileNameInZip(fileName)
+            try (InputStream is = new FileInputStream(Paths.get(filePath).toFile())) {
+                zipFile.addStream(is, params)
+            }
         }
 
         return path

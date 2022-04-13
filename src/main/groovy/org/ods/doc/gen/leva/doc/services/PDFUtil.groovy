@@ -1,9 +1,6 @@
 package org.ods.doc.gen.leva.doc.services
 
-import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter
-import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -13,10 +10,10 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.graphics.blend.BlendMode
 import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState
 import org.apache.pdfbox.util.Matrix
-import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.springframework.stereotype.Service
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @SuppressWarnings(['JavaIoPackageAccess', 'LineLength', 'UnnecessaryObjectReferences'])
@@ -24,20 +21,18 @@ import java.nio.file.Paths
 @Service
 class PDFUtil {
 
-    byte[] addWatermarkText(byte[] file, String text) {
-        def result
+    Path addWatermarkText(Path filePath, String text) {
+        Path result = Files.createTempFile(Paths.get(filePath.toString()).parent, "temp", '.pdf')
 
         PDDocument doc
-        try {
-            doc = PDDocument.load(file)
+        try (FileInputStream fis = new FileInputStream(filePath.toFile())) {
+            doc = PDDocument.load(fis)
             doc.getPages().each { page ->
                 def font = PDType1Font.HELVETICA
                 addWatermarkTextToPage(doc, page, font, text)
             }
 
-            def os = new ByteArrayOutputStream()
-            doc.save(os)
-            result = os.toByteArray()
+            doc.save(result.toFile())
         } catch (e) {
             throw new RuntimeException("Error: unable to add watermark to PDF document: ${e.message}").initCause(e)
         } finally {
@@ -49,65 +44,23 @@ class PDFUtil {
         return result
     }
 
-    
-    byte[] convertFromMarkdown(File wordDoc, Boolean landscape = false) {
-        def result
-
+    Path merge(String workspacePath, List<Path> files) {
+        Path tmp
         try {
-            def markdownContent = IOUtils.toString(new FileInputStream(wordDoc), 'UTF-8')
-            result = new MarkdownUtil().toPDF(markdownContent, landscape)
-        } catch (e) {
-            throw new RuntimeException("Error: unable to convert Markdown document to PDF: ${e.message}").initCause(e)
-        }
-
-        return result
-    }
-    
-    byte[] convertFromWordDoc(File wordDoc) {
-        def result
-
-        XWPFDocument doc
-        try {
-            def is = new FileInputStream(wordDoc)
-            doc = new XWPFDocument(is)
-
-            def options = PdfOptions.create()
-            def os = new ByteArrayOutputStream()
-            PdfConverter.getInstance().convert(doc, os, options)
-
-            result = os.toByteArray()
-        } catch (e) {
-            throw new RuntimeException("Error: unable to convert Word document to PDF: ${e.message}").initCause(e)
-        } finally {
-            if (doc) {
-                doc.close()
-            }
-        }
-
-        return result
-    }
-    
-    byte[] merge(String workspacePath, List<byte[]> files) {
-        def result
-        File tmp
-        try {
-            tmp = Files.createTempFile(Paths.get(workspacePath), "merge", "pdf").toFile()
+            tmp = Files.createTempFile(Paths.get(workspacePath), "merge", "pdf")
             def merger = new PDFMergerUtility()
-            merger.setDestinationStream(new FileOutputStream(tmp))
+            merger.setDestinationStream(new FileOutputStream(tmp.toFile()))
 
             files.each { file ->
-                merger.addSource(new ByteArrayInputStream(file))
+                merger.addSource(new FileInputStream(file.toFile()))
             }
 
             merger.mergeDocuments()
-            result = tmp.bytes
         } catch (e) {
             throw new RuntimeException("Error: unable to merge PDF documents: ${e.message}").initCause(e)
-        } finally {
-            tmp?.delete()
         }
 
-        return result
+        return tmp
     }
 
     // Courtesy of https://svn.apache.org/viewvc/pdfbox/trunk/examples/src/main/java/org/apache/pdfbox/examples/util/AddWatermarkText.java
