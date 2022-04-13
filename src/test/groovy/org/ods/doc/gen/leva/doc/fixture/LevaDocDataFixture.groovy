@@ -26,6 +26,7 @@ class LevaDocDataFixture {
         data.build = buildJobParams(projectFixture)
         data.git =  buildGitData(projectFixture)
         data.openshift = [targetApiUrl:"https://openshift-sample"]
+        data.repositories = new ProjectRepositoryFixture().load()
         return data
     }
 
