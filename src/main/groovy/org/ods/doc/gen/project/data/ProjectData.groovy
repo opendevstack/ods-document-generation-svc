@@ -32,6 +32,7 @@ import java.nio.file.Paths
 @Service
 class ProjectData {
 
+    static final String DEFAULT_TEMPLATE_VERSION = '1.2'
     static final String BUILD_PARAM_VERSION_DEFAULT = 'WIP'
     static final String METADATA_FILE_NAME = 'metadata.yml'
 
