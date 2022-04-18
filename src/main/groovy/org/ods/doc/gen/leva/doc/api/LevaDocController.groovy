@@ -70,14 +70,12 @@ class LevaDocController {
         try {
             prepareServiceDataParam(projectId, buildNumber, levaDocType, data)
             return levaDocType.buildDocument.apply(leVADocumentService, data)
-        } catch (Throwable e) {
-            String msg = "Error building document: ${levaDocType} with data:${data}"
-            log.error(msg, e)
-            String msgWithDetails = msg;
-            if (! StringUtils.isEmpty(e.getMessage())) {
-                msgWithDetails = msg + ". " + e.getMessage();
+        } catch (e) {
+            if (log.isDebugEnabled()) {
+                String msg = "Error building document: ${levaDocType} with data:${data}"
+                log.debug(msg, e)
             }
-            throw new RuntimeException(msgWithDetails, e)
+            throw e
         }
     }
 

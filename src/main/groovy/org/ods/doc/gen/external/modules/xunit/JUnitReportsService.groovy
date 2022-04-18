@@ -59,7 +59,7 @@ class JUnitReportsService {
 
         tests.each {
             String targetFolder = it.value.targetFolder as String
-            Map testResult = getTestResults(it.key.capitalize(), targetFolder, component)
+            Map testResult = getTestResults(targetFolder)
             it.value.testReportFiles = testResult.testReportFiles
             it.value.testResults = testResult.testResults
         }
@@ -104,7 +104,7 @@ class JUnitReportsService {
         return testData
     }
 
-    private Map getTestResults(String typeIn, String targetFolder, String component) {
+    private Map getTestResults(String targetFolder) {
         if (targetFolder == null) {
             // When targetFolder is null, we need to initialize testsuites !!
             return [

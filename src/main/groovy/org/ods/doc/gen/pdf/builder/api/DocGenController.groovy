@@ -45,8 +45,6 @@ class DocGenController {
             tmpDir = fileSystemHelper.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
             Path documentPdf = pdfGeneration.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
             pdfBytesToString = Files.readAllBytes(documentPdf).encodeBase64().toString()
-        } catch (Throwable e) {
-            throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.", e)
         } finally {
             if (tmpDir) {
                 FileUtils.deleteDirectory(tmpDir.toFile())

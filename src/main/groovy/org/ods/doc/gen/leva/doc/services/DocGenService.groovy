@@ -35,13 +35,9 @@ class DocGenService {
         Path tmpDir
         Path documentPdf
         def bytes
-        try {
-            tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
-            documentPdf = pdfGenerationService.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
-            bytes = Files.readAllBytes(documentPdf)
-        } catch (Throwable e) {
-            throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.", e)
-        }
+        tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
+        documentPdf = pdfGenerationService.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
+        bytes = Files.readAllBytes(documentPdf)
 
         return bytes
     }

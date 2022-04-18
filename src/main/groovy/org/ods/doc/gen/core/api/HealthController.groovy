@@ -34,25 +34,20 @@ class HealthController {
         return result
     }
 
-    private byte[] generatePdfData() {
+    private void generatePdfData() {
         Path tmpDir = Files.createTempDirectory("generatePdfDataFolderTest")
         def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
 
-        def pdfBytesToString
         try {
             def documentPdf = htmlToPDFService.convert(tmpDir, documentHtmlFile)
             def data = Files.readAllBytes(documentPdf)
             if (!new String(data).startsWith("%PDF-1.4\n")) {
                 throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.")
             }
-            pdfBytesToString = data.encodeBase64().toString()
-        } catch (e) {
-            throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.", e)
         } finally {
             Files.delete(documentHtmlFile)
             FileUtils.deleteDirectory(tmpDir.toFile())
         }
-        return pdfBytesToString
     }
 
 }

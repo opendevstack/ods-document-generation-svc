@@ -67,14 +67,17 @@ class BitbucketService {
     }
 
     protected void downloadRepoWithFallBack(String project, String repo, String branch, Path zipArchive) {
-        try {
-            bitBucketClientConfig
-                    .getClient()
-                    .getRepoZipArchive(project, repo, branch)
-                    .withCloseable { Response response ->
+        boolean found = false;
+        bitBucketClientConfig
+                .getClient()
+                .getRepoZipArchive(project, repo, branch)
+                .withCloseable { Response response ->
+                    if (response.status() != 404) {
                         streamResult(response, zipArchive)
+                        found = true;
                     }
-        } catch (Exception callException) {
+                }
+        if (!found) {
             log.warn("Branch [${branch}] doesn't exist, using branch: [${MAIN_BRANCH}]")
             bitBucketClientConfig
                     .getClient()

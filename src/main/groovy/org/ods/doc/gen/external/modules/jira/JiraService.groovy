@@ -43,10 +43,11 @@ class JiraService {
         }
 
         try {
-            this.baseURL = new URIBuilder(baseURL).build()
-            this.targetURL = new URIBuilder(baseURL).build()
-        } catch (e) {
-            throw new IllegalArgumentException("Error: unable to connect to Jira. '${baseURL}' is not a valid URI.").initCause(e)
+            URI jiraURI = new URIBuilder(baseURL).build()
+            this.baseURL = jiraURI
+            this.targetURL = jiraURI
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("FATAL: Jira URL is invalid: jira.url='${baseURL}'", e)
         }
 
         this.username = username
