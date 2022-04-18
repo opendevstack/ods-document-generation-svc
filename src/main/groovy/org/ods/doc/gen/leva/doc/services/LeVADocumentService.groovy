@@ -1650,7 +1650,8 @@ class LeVADocumentService {
 
         data.repositories.each { Map repo ->
             String repoName = repo.id as String
-            repo["url"] = bitbucketService.buildRepositoryUrl(projectId, repoName)
+            repoName = "${projectId}-${repoName}"
+            repo["data"]["git"]["url"] = bitbucketService.buildRepositoryUrl(projectId, repoName)
 
             repo["doInstall"] = !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(repo.type?.toLowerCase())
         }
