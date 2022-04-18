@@ -191,13 +191,16 @@ class ProjectData {
     }
 
     private Map<String, String> loadMetadataRepo(repo) {
+        if ((! repo) || (! repo.id)) {
+            throw new RuntimeException("Repository id cannot be blank or null.")
+        }
         return  [
                 id: repo.id,
-                name: repo.name,
-                description: "myDescription-A",
-                supplier: "mySupplier-A",
-                version: "myVersion-A",
-                references: "myReferences-A"
+                name: repo.name ? repo.name : repo.id,
+                description: "myDescription-${repo.id}",
+                supplier: "mySupplier-${repo.id}",
+                version: "myVersion-${repo.id}",
+                references: "myReferences-${repo.id}"
         ]
     }
 
