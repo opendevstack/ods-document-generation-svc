@@ -44,38 +44,39 @@ class NexusService {
 
     URI storeArtifact(String directory, String name, String artifactPath, String contentType) {
         Map nexusParams = [
-            'raw.directory': directory,
-            'raw.asset1.filename': name,
+                'raw.directory'      : directory,
+                'raw.asset1.filename': name,
         ]
 
         return storeWithRaw(NEXUS_REPOSITORY, artifactPath, contentType, RAW, nexusParams)
     }
 
     private URI storeWithRaw(String repo,
-                                      String artifactPath,
-                                      String contentType,
-                                      String repoType,
-                                      Map nexusParams) {
+                             String artifactPath,
+                             String contentType,
+                             String repoType,
+                             Map nexusParams) {
         File artifactFile = Paths.get(artifactPath).toFile()
         String targetUrl = new URI("${this.baseURL}/${UPLOAD_ARTIFACT_URL_PATH}${repo}").normalize().toString()
         log.info("Nexus store artifact:[${artifactFile}] - repo: [${repo}], url:[${targetUrl}] ")
 
-        byte[] artifact = artifactFile.getBytes()
-        def restCall = Unirest
-                .post(targetUrl)
-                .basicAuth(this.username, this.password)
-                .field(getField(repoType), new ByteArrayInputStream(artifact), contentType)
-        nexusParams.each { key, value -> restCall = restCall.field(key, value) }
+        try (FileInputStream fis = new FileInputStream(artifactFile)) {
+            def restCall = Unirest
+                    .post(targetUrl)
+                    .basicAuth(this.username, this.password)
+                    .field(getField(repoType), fis, contentType)
+            nexusParams.each { key, value -> restCall = restCall.field(key, value) }
 
-        def response = restCall.asString()
-        response.ifSuccess {
-            if (response.getStatus() != 204) {
+            def response = restCall.asString()
+            response.ifSuccess {
+                if (response.getStatus() != 204) {
+                    throw new RuntimeException(errorMsg(response, repo, restCall.getUrl()))
+                }
+            }
+
+            response.ifFailure {
                 throw new RuntimeException(errorMsg(response, repo, restCall.getUrl()))
             }
-        }
-
-        response.ifFailure {
-            throw new RuntimeException(errorMsg(response, repo, restCall.getUrl()))
         }
 
         if (repoType == RAW) {
@@ -102,8 +103,8 @@ class NexusService {
         String urlToDownload = getURL(nexusRepository, nexusDirectory, name)
         HttpResponse<File> response = downloadToPath(urlToDownload, extractionPath, name)
         return [
-            uri: this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
-            content: response.getBody(),
+                uri    : this.baseURL.resolve("/repository/${nexusRepository}/${nexusDirectory}/${name}"),
+                content: response.getBody(),
         ]
     }
 
@@ -113,7 +114,7 @@ class NexusService {
 
     private HttpResponse<File> downloadToPath(String urlToDownload, String extractionPath, String name) {
         deleteIfAlreadyExist(extractionPath, name)
-        String fullUrlToDownload = new URI(baseURL.toString() + "/"+ urlToDownload).normalize().toString()
+        String fullUrlToDownload = new URI(baseURL.toString() + "/" + urlToDownload).normalize().toString()
         log.info("downloadToPath::${fullUrlToDownload}")
         def restCall = Unirest.get(fullUrlToDownload).basicAuth(this.username, this.password)
         HttpResponse<File> response = restCall.asFile("${extractionPath}/${name}")

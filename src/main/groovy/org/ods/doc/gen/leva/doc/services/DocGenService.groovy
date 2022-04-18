@@ -12,7 +12,6 @@ import java.nio.file.Path
 @Service
 class DocGenService {
 
-    URI baseURL
     private final PdfGenerationService pdfGenerationService
 
     @Inject
@@ -20,7 +19,7 @@ class DocGenService {
         this.pdfGenerationService = pdfGenerationService
     }
 
-    byte[] createDocument(String type, String version, Map data) {
+    Path createDocument(String type, String version, Map data) {
         def body = [
                 metadata: [
                         type   : type,
@@ -31,15 +30,13 @@ class DocGenService {
         return convertToPdf(body)
     }
 
-    private byte[] convertToPdf(Map body) {
+    private Path convertToPdf(Map body) {
         Path tmpDir
         Path documentPdf
-        def bytes
         tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
         documentPdf = pdfGenerationService.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
-        bytes = Files.readAllBytes(documentPdf)
 
-        return bytes
+        return documentPdf
     }
 
 }

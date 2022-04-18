@@ -14,6 +14,7 @@
 - logback.xml can be overridden from command line
 - removed unused params from payloads.
 - removed param jekins to jenkins
+- Removed byte[] use
 
 ## [4.0] - 2021-18-11
 =======

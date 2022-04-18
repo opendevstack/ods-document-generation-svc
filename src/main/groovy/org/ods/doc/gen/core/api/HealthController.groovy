@@ -17,18 +17,18 @@ class HealthController {
     private HtmlToPDFService htmlToPDFService
 
     @Inject
-    HealthController(HtmlToPDFService htmlToPDFService){
+    HealthController(HtmlToPDFService htmlToPDFService) {
         this.htmlToPDFService = htmlToPDFService
     }
 
-    @GetMapping( "/health")
-    Map check( ) {
+    @GetMapping("/health")
+    Map check() {
         log.info("health check to verify a pdf can be generated, executed")
         generatePdfData()
         Map result = [
                 service: "docgen",
-                status: "passing",
-                time: new Date().toString()
+                status : "passing",
+                time   : new Date().toString()
         ]
 
         return result
@@ -42,7 +42,7 @@ class HealthController {
             def documentPdf = htmlToPDFService.convert(tmpDir, documentHtmlFile)
             def data = Files.readAllBytes(documentPdf)
             if (!new String(data).startsWith("%PDF-1.4\n")) {
-                throw new RuntimeException( "Conversion form HTML to PDF failed, corrupt data.")
+                throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.")
             }
         } finally {
             Files.delete(documentHtmlFile)
