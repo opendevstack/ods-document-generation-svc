@@ -70,7 +70,7 @@ class ProjectData {
         this.data.jira = [project: [ : ]]
         this.data.repo = data.repo
         this.data.git = data.git
-        this.data.git.url = bitbucketService.buildReleaseManagerUrl(
+        this.data.git.url = bitbucketService.buildRepositoryUrl(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String
         )

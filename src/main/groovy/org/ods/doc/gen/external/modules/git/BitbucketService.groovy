@@ -44,8 +44,8 @@ class BitbucketService {
         return new JsonSlurperClassic().parseText(response)
     }
 
-    String buildReleaseManagerUrl(String projectId, String releaseManagerRepo) {
-        URI uri = new URI([getBitbucketURLForDocs(), projectId, releaseManagerRepo].join("/"))
+    String buildRepositoryUrl(String projectId, String repositoryName) {
+        URI uri = new URI([getBitbucketURLForDocs(), projectId, repositoryName].join("/"))
         return "${uri.normalize().toString()}.git"
     }
 
