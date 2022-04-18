@@ -2,6 +2,7 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
+import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
@@ -63,6 +64,7 @@ class LeVADocumentService {
     private final LeVADocumentChaptersFileService levaFiles
     private final BitbucketTraceabilityUseCase bbt
     private final NexusService nexus
+    private final BitbucketService bitbucketService
     
     @Inject
     Clock clock
@@ -74,7 +76,8 @@ class LeVADocumentService {
                         JiraUseCase jiraUseCase,
                         JUnitReportsService junit,
                         LeVADocumentChaptersFileService levaFiles,
-                        BitbucketTraceabilityUseCase bbt) {
+                        BitbucketTraceabilityUseCase bbt,
+                        BitbucketService bitbucketService) {
         this.project = project
         this.docGenUseCase = docGenUseCase
         this.nexus = nexus
@@ -82,6 +85,7 @@ class LeVADocumentService {
         this.junit = junit
         this.levaFiles = levaFiles
         this.bbt = bbt
+        this.bitbucketService = bitbucketService
     }
 
     @SuppressWarnings('CyclomaticComplexity')
@@ -522,7 +526,7 @@ class LeVADocumentService {
         def keysInDoc = this.computeKeysInDocForTIP(projectData.getComponents())
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        generateDataRepositoriesComputedData(data.repositories)
+        generateDataRepositoriesComputedData(data)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
@@ -1641,8 +1645,13 @@ class LeVADocumentService {
         junit.getNumberOfTestCases(testData.testResults) - testIssues.count { !it.isUnexecuted }
     }
 
-    private generateDataRepositoriesComputedData(List repositories) {
-        repositories.each {Map repo ->
+    private generateDataRepositoriesComputedData(Map data) {
+        String projectId = data.projectId as String
+
+        data.repositories.each { Map repo ->
+            String repoName = repo.id as String
+            repo["url"] = bitbucketService.buildRepositoryUrl(projectId, repoName)
+
             repo["doInstall"] = !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(repo.type?.toLowerCase())
         }
     }
