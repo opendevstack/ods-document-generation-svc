@@ -9,6 +9,8 @@ import org.ods.doc.gen.leva.doc.repositories.ComponentPdfRepository
 import org.ods.doc.gen.project.data.ProjectData
 import org.springframework.stereotype.Service
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @Slf4j
@@ -43,7 +45,7 @@ class DocGenUseCase {
         def sections = []
 
         projectData.getOverallDocsToMerge(documentType).each { Map componentPdf ->
-            documents << Paths.get(componentPdf.pdfPath).toFile().readBytes()
+            documents << Paths.get(componentPdf.pdfPath)
             sections << [
                     heading: "${documentType} for component: ${componentPdf.component} (merged)"
             ]
@@ -51,7 +53,7 @@ class DocGenUseCase {
 
         def data = [
                 metadata: metadata,
-                data: [
+                data    : [
                         sections: sections
                 ],
         ]
@@ -73,11 +75,11 @@ class DocGenUseCase {
                           String documentType,
                           Map repo,
                           Map data,
-                          Map<String, byte[]> files = [:],
+                          Map<String, String> files = [:],
                           Closure modifier = null,
                           String templateName = null,
                           String watermarkText = null) {
-        byte[] document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
+        Path document = docGen.createDocument(templateName ?: documentType, getDocumentTemplatesVersion(projectData), data)
 
         // Apply PDF document modifications, if provided
         if (modifier) {
@@ -94,12 +96,12 @@ class DocGenUseCase {
         String basename = this.getDocumentBasename(projectData, documentType, version, buildId, repo)
         String pdfName = "${basename}.pdf"
 
-        Map<String, Object> artifacts = buildArchiveWithPdfAndRawData(pdfName, document, basename, data, files)
+        Map<String, String> artifacts = buildArchiveWithPdfAndRawData(projectData.tmpFolder, pdfName, document, basename, data, files)
         String pathToFile = this.zip.createZipFileFromFiles(projectData.tmpFolder, "${basename}.zip", artifacts)
 
         if (Constants.OVERALL_DOC_TYPES.contains(documentType) && repo) {
             File pdfFile = Paths.get(projectData.tmpFolder, pdfName).toFile()
-            FileUtils.writeByteArrayToFile(pdfFile, document)
+            FileUtils.copyFile(document.toFile(), pdfFile)
             projectData.addOverallDocToMerge(documentType, repo.id as String, pdfFile.absolutePath)
         }
 
@@ -117,33 +119,40 @@ class DocGenUseCase {
         log.info message
     }
 
-    private Map<String, Object> buildArchiveWithPdfAndRawData(String pdfName,
-                                                              byte[] document,
-                                                              String basename, 
+    private Map<String, String> buildArchiveWithPdfAndRawData(String tmpFolder,
+                                                              String pdfName,
+                                                              Path document,
+                                                              String basename,
                                                               Map data,
-                                                              Map<String, byte[]> files) {
+                                                              Map<String, String> files) {
+
+        Path jsonTemp = Files.createTempFile(Paths.get(tmpFolder), basename, '.json')
+        try (FileWriter writer = new FileWriter(jsonTemp.toFile())) {
+            writer.write(JsonOutput.toJson(data))
+        }
+
         Map artifacts = [
-                "${pdfName}"          : document,
-                "raw/${basename}.json": JsonOutput.toJson(data).getBytes(),
+                "${pdfName}"          : document.toString(),
+                "raw/${basename}.json": jsonTemp.toString(),
         ]
-        artifacts << files.collectEntries { path, contents ->
-            [path, contents]
+        artifacts << files.collectEntries { name, path ->
+            [name, path]
         }
         return artifacts
     }
 
-    private String getDocumentBasename(ProjectData projectData, 
-                                       String documentType, 
-                                       String version, 
-                                       String build = null, 
+    private String getDocumentBasename(ProjectData projectData,
+                                       String documentType,
+                                       String version,
+                                       String build = null,
                                        Map repo = null) {
         getDocBasenameWithDocVersion(projectData, documentType, getDocumentVersion(projectData, version, build), repo)
     }
 
-    private String getDocBasenameWithDocVersion(ProjectData projectData, 
-                                                     String documentType, 
-                                                     String docVersion, 
-                                                     Map repo = null) {
+    private String getDocBasenameWithDocVersion(ProjectData projectData,
+                                                String documentType,
+                                                String docVersion,
+                                                Map repo = null) {
         def result = projectData.key
         if (repo) {
             result += "-${repo.id}"

@@ -1,6 +1,6 @@
 # Changelog
 
-- Temporal change with add LevaDoc 2
+- Temporal change with add LevaDoc 3
 
 
 ## Unreleased
@@ -13,6 +13,7 @@
 - Added performance tests
 - logback.xml can be overridden from command line
 - removed unused params from payloads, jekins -> jenkins, computes values gitUrl and doInstall for each repository.
+- Removed byte[] usage
 
 ## [4.0] - 2021-18-11
 =======
