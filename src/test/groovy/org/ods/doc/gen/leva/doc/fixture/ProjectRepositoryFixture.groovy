@@ -6,6 +6,7 @@ class ProjectRepositoryFixture {
         return [
                 [
                         "id": "backend",
+                        "type": "ods",
                         "data": [
                             "git": [
                                 "branch": "master",
@@ -18,6 +19,7 @@ class ProjectRepositoryFixture {
                 ],
                 [
                         "id": "frontend",
+                        "type": "ods",
                         "data": [
                             "git": [
                                 "branch": "master",
@@ -30,6 +32,7 @@ class ProjectRepositoryFixture {
                 ],
                 [
                         "id": "test",
+                        "type": "ods-test",
                         "data": [
                             "git": [
                                 "branch": "master",
