@@ -522,6 +522,8 @@ class LeVADocumentService {
         def keysInDoc = this.computeKeysInDocForTIP(projectData.getComponents())
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
+        generateDataRepositoriesComputedData(data.repositories)
+
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
@@ -1639,4 +1641,9 @@ class LeVADocumentService {
         junit.getNumberOfTestCases(testData.testResults) - testIssues.count { !it.isUnexecuted }
     }
 
+    private generateDataRepositoriesComputedData(List repositories) {
+        repositories.each {Map repo ->
+            repo["doInstall"] = !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(repo.type?.toLowerCase())
+        }
+    }
 }
