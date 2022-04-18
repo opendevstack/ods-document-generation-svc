@@ -28,7 +28,10 @@ class LevaDocTestValidator {
     boolean validatePDF(String buildId) {
         unzipGeneratedArtifact(buildId)
         if (GENERATE_EXPECTED_PDF_FILES) {
-            copyDocWhenRecording(buildId)
+            boolean comparisonResult = compareFiles(buildId)
+            if (! comparisonResult) {
+                copyDocWhenRecording(buildId)
+            }
             return true
         } else {
             return compareFiles(buildId)
