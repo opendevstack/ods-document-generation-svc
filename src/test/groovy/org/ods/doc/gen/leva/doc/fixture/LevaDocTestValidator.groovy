@@ -30,6 +30,8 @@ class LevaDocTestValidator {
         if (GENERATE_EXPECTED_PDF_FILES) {
             boolean comparisonResult = compareFiles(buildId)
             if (! comparisonResult) {
+                log.info("validatePDF - Comparison returned differences.")
+                log.info("validatePDF - Updating expected pdf since GENERATE_EXPECTED_PDF_FILES=true.")
                 copyDocWhenRecording(buildId)
             }
             return true
