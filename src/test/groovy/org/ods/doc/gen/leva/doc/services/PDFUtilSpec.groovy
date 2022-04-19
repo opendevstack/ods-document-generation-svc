@@ -3,7 +3,6 @@ package org.ods.doc.gen.leva.doc.services
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.ods.doc.gen.core.test.SpecHelper
 import org.ods.doc.gen.core.test.fixture.FixtureHelper
-import spock.lang.Ignore
 import spock.lang.TempDir
 
 class PDFUtilSpec extends SpecHelper {
@@ -13,7 +12,7 @@ class PDFUtilSpec extends SpecHelper {
 
     def "add watermark text"() {
         given:
-        def util = new PDFUtil()
+        def util = new PDFService()
         def pdfFile = new FixtureHelper().getResource("pdf.builder/Test-1.pdf")
         def text = "myWatermark"
 
@@ -31,7 +30,7 @@ class PDFUtilSpec extends SpecHelper {
 
     def "merge documents"() {
         given:
-        def util = new PDFUtil()
+        def util = new PDFService()
 
         def docFile1 = new FixtureHelper().getResource("pdf.builder/Test-1.pdf")
         def docFile2 = new FixtureHelper().getResource("pdf.builder/Test-2.pdf")

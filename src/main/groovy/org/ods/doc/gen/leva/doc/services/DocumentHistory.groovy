@@ -1,6 +1,7 @@
 package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.core.SortUtil
 import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.JiraDataItem

@@ -7,7 +7,7 @@ import feign.slf4j.Slf4jLogger
 import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
 import org.apache.http.client.utils.URIBuilder
-import org.ods.doc.gen.external.modules.git.BitBucketRepository
+import org.ods.doc.gen.adapters.git.BitBucketRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 

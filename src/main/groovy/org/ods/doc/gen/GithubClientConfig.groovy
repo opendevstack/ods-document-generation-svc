@@ -5,7 +5,7 @@ import feign.Logger
 import feign.slf4j.Slf4jLogger
 import groovy.util.logging.Slf4j
 import okhttp3.OkHttpClient
-import org.ods.doc.gen.external.modules.git.GitHubRepository
+import org.ods.doc.gen.adapters.git.GitHubRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 

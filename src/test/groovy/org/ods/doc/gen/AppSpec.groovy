@@ -5,14 +5,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.equalTo
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("pro")
 @DirtiesContext
 class AppSpec extends Specification {
 

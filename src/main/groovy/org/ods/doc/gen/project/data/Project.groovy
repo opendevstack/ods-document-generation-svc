@@ -1,9 +1,9 @@
 package org.ods.doc.gen.project.data
 
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
+import org.ods.doc.gen.adapters.git.BitbucketService
+import org.ods.doc.gen.adapters.jira.JiraService
+import org.ods.doc.gen.leva.doc.services.xunit.JUnitReportsService
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 

@@ -1,6 +1,6 @@
 # Changelog
 
-- Temporal change with add LevaDoc 3
+- Temporal change with add LevaDoc 3.
 
 
 ## Unreleased

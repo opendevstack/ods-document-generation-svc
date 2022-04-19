@@ -4,7 +4,7 @@ import groovy.json.JsonSlurperClassic
 import groovy.transform.InheritConstructors
 import org.apache.http.client.utils.URIBuilder
 import org.junit.contrib.java.lang.system.EnvironmentVariables
-import org.ods.doc.gen.external.modules.xunit.parser.JUnitParser
+import org.ods.doc.gen.leva.doc.services.xunit.parser.JUnitParser
 import org.ods.doc.gen.project.data.Project
 import org.ods.doc.gen.project.data.ProjectData
 import org.yaml.snakeyaml.Yaml

@@ -2,32 +2,22 @@ package org.ods.doc.gen.project.data
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.external.modules.git.BitbucketService
-import org.ods.doc.gen.external.modules.jira.CustomIssueFields
-import org.ods.doc.gen.external.modules.jira.IssueTypes
-import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.external.modules.jira.LabelPrefix
-import org.ods.doc.gen.external.modules.jira.OpenIssuesException
-import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
+import org.ods.doc.gen.adapters.git.BitbucketService
+import org.ods.doc.gen.adapters.jira.CustomIssueFields
+import org.ods.doc.gen.adapters.jira.IssueTypes
+import org.ods.doc.gen.adapters.jira.JiraService
+import org.ods.doc.gen.adapters.jira.LabelPrefix
+import org.ods.doc.gen.adapters.jira.OpenIssuesException
 import org.ods.doc.gen.leva.doc.repositories.ProjectDataRepository
 import org.ods.doc.gen.leva.doc.services.DocumentHistory
 import org.ods.doc.gen.leva.doc.services.LeVADocumentUtil
 import org.ods.doc.gen.leva.doc.services.PipelineConfig
+import org.ods.doc.gen.leva.doc.services.xunit.JUnitReportsService
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.Paths
 
-@SuppressWarnings(['LineLength',
-        'AbcMetric',
-        'IfStatementBraces',
-        'Instanceof',
-        'CyclomaticComplexity',
-        'GStringAsMapKey',
-        'ImplementationAsType',
-        'UseCollectMany',
-        'MethodCount',
-        'PublicMethodsBeforeNonPublicMethods'])
 @Slf4j
 @Service
 class ProjectData {

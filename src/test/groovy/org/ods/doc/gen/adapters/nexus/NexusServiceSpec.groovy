@@ -1,0 +1,268 @@
+package org.ods.doc.gen.adapters.nexus
+
+import com.github.tomakehurst.wiremock.client.WireMock
+import org.apache.commons.io.FileUtils
+import org.apache.http.client.utils.URIBuilder
+import org.ods.doc.gen.core.test.SpecHelper
+import spock.lang.TempDir
+
+import java.nio.file.Path
+import java.nio.file.Paths
+
+class NexusServiceSpec extends SpecHelper {
+
+    @TempDir
+    File tempFolder
+
+    def "create with invalid baseURL"() {
+        when:
+        new NexusService(null, "username", "password")
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'baseURL' is undefined."
+
+        when:
+        new NexusService(" ", "username", "password")
+
+        then:
+        e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'baseURL' is undefined."
+
+        when:
+        new NexusService("invalid URL", "username", "password")
+
+        then:
+        e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'invalid URL' is not a valid URI."
+    }
+
+    def "create with invalid username"() {
+        when:
+        new NexusService("http://localhost", null, "password")
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'username' is undefined."
+
+        when:
+        new NexusService("http://localhost", " ", "password")
+
+        then:
+        e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'username' is undefined."
+    }
+
+    def "create with invalid password"() {
+        when:
+        new NexusService("http://localhost", "username", null)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'password' is undefined."
+
+        when:
+        new NexusService("http://localhost", "username", " ")
+
+        then:
+        e = thrown(IllegalArgumentException)
+        e.message == "Error: unable to connect to Nexus. 'password' is undefined."
+    }
+
+    def "store artifact"() {
+        given:
+        def request = storeArtifactRequestData()
+        def response = storeArtifactResponseData()
+
+        def server = createServer(WireMock.&post, request, response)
+        def service = createService(server.port(), request.username, request.password)
+
+        when:
+        def result = storeArtifact(service, request)
+
+        then:
+        result == new URIBuilder("http://localhost:${server.port()}/repository/${request.data.repository}/${request.data.directory}/${request.data.name}").build()
+
+        cleanup:
+        stopServer(server)
+    }
+
+    def "store artifact with HTTP 404 failure"() {
+        given:
+        def request = storeArtifactRequestData()
+        def response = storeArtifactResponseData([
+            status: 404
+        ])
+
+        def server = createServer(WireMock.&post, request, response)
+        def service = createService(server.port(), request.username, request.password)
+
+        when:
+        storeArtifact(service, request)
+
+        then:
+        def e = thrown(RuntimeException)
+        e.message.startsWith("Error: unable to store artifact. Nexus could not be found at:")
+
+        cleanup:
+        stopServer(server)
+    }
+
+    def "store artifact with HTTP 500 failure"() {
+        given:
+        def request = storeArtifactRequestData()
+        def response = storeArtifactResponseData([
+            body: "Sorry, doesn't work!",
+            status: 500
+        ])
+
+        def server = createServer(WireMock.&post, request, response)
+        def service = createService(server.port(), request.username, request.password)
+
+        when:
+        storeArtifact(service, request)
+
+        then:
+        def e = thrown(RuntimeException)
+        e.message.startsWith("Error: unable to store artifact at")
+        e.message.endsWith("Nexus responded with code: '${response.status}' and message: 'Sorry, doesn\'t work!'.")
+
+        cleanup:
+        stopServer(server)
+    }
+
+    def "retrieve artifact with HTTP 404 failure"() {
+        given:
+        def request = getArtifactRequestData()
+        def response = storeArtifactResponseData([
+            status: 404
+        ])
+
+        def server = createServer(WireMock.&get, request, response)
+        def service = createService(server.port(), request.username, request.password)
+
+        when:
+        service.retrieveArtifact(request.data.repository, request.data.directory, request.data.name, "abc")
+
+        then:
+        def e = thrown(RuntimeException)
+        e.message == "Error: unable to get artifact. Nexus could not be found at: 'http://localhost:${server.port()}${request.path}'."
+
+        cleanup:
+        stopServer(server)
+    }
+
+    def "retrieve artifact working"() {
+        given:
+        def request = getArtifactRequestData()
+        def response = storeArtifactResponseData([
+            status: 200
+        ])
+
+        def server = createServer(WireMock.&get, request, response)
+        def service = createService(server.port(), request.username, request.password)
+
+        when:
+        Map result = service.retrieveArtifact(request.data.repository, request.data.directory, request.data.name, "abc")
+
+        then:
+        result.uri == new URI("http://localhost:${server.port()}${request.path}")
+
+        cleanup:
+        stopServer(server)
+    }
+
+    def "Tests downloadAndExtractZip"() {
+        given: "An url"
+        def request = getArtifactRequestData()
+        def response = storeArtifactResponseData([
+                status: 200,
+                body: getExampleFileBytes(),
+        ])
+
+        def server = createServer(WireMock.&get, request, response)
+        def service = createService(server.port(), request.username, request.password)
+
+
+        String url = "/repository/" + request.data.repository + "/" + request.data.directory + "/" + request.data.name
+
+        when: "execute"
+
+        service.downloadAndExtractZip(url, tempFolder.absolutePath)
+
+        then: "downloads and unzips"
+        Paths.get(tempFolder.absolutePath, "LICENSE").toFile().exists()
+    }
+
+    def getArtifact(){
+        Path artifact = Paths.get(tempFolder.absolutePath, "artifact")
+        FileUtils.writeByteArrayToFile(artifact.toFile(), [0] as byte[])
+        return artifact.toString()
+    }
+
+    byte[] getExampleFileBytes() {
+        return Paths.get("src/test/resources/nexus/LICENSE.zip").toFile().getBytes()
+    }
+
+    Map storeArtifactRequestData(Map mixins = [:]) {
+        def result = [
+                data: [
+                        artifact: [0] as byte[],
+                        contentType: "application/octet-stream",
+                        directory: "myDirectory",
+                        name: "myName",
+                        repository: NexusService.NEXUS_REPOSITORY,
+                ],
+                password: "password",
+                path: "/service/rest/v1/components",
+                username: "username"
+        ]
+
+        result.multipartRequestBody = [
+                "raw.directory": result.data.directory,
+                "raw.asset1": result.data.artifact,
+                "raw.asset1.filename": result.data.name
+        ]
+
+        result.queryParams = [
+                "repository": result.data.repository
+        ]
+
+        return result << mixins
+    }
+
+    Map getArtifactRequestData(Map mixins = [:]) {
+        def result = [
+                data: [
+                        directory: "myDirectory",
+                        name: "myName",
+                        repository: "myRepository",
+                ],
+                password: "password",
+                path: "/repository/myRepository/myDirectory/myName",
+                username: "username"
+        ]
+        return result << mixins
+    }
+
+    Map storeArtifactResponseData(Map mixins = [:]) {
+        def result = [
+                status: 204
+        ]
+
+        return result << mixins
+    }
+
+    NexusService createService(int port, String username, String password) {
+        return new NexusService("http://localhost:${port}", username, password)
+    }
+
+    private URI storeArtifact(NexusService service, Map<String, Serializable> request) {
+        service.storeArtifact(
+                request.data.directory,
+                request.data.name,
+                getArtifact(),
+                request.data.contentType)
+    }
+
+}

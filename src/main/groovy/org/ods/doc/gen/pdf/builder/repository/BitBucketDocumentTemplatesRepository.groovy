@@ -1,8 +1,8 @@
 package org.ods.doc.gen.pdf.builder.repository
 
 import groovy.util.logging.Slf4j
+import org.ods.doc.gen.adapters.git.BitbucketService
 import org.ods.doc.gen.core.ZipFacade
-import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Repository
