@@ -526,7 +526,7 @@ class LeVADocumentService {
         def keysInDoc = this.computeKeysInDocForTIP(projectData.getComponents())
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        computeRepositoriesDataNeededInDocs(data)
+        updateRepositoriesData(data)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
@@ -951,7 +951,7 @@ class LeVADocumentService {
 
         def watermarkText = this.getWatermarkText(projectData)
 
-        computeRepositoriesDataNeededInDocs(data)
+        updateRepositoriesData(data)
 
         def visitor = { data_ ->
             // Prepend a section for the Jenkins build log
@@ -1647,7 +1647,7 @@ class LeVADocumentService {
         junit.getNumberOfTestCases(testData.testResults) - testIssues.count { !it.isUnexecuted }
     }
 
-    private computeRepositoriesDataNeededInDocs(Map data) {
+    private updateRepositoriesData(Map data) {
         String projectId = data.projectId as String
 
         data.repositories.each { Map repo ->
