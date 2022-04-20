@@ -17,7 +17,7 @@ class RepoMetadata {
     }
 
     String getDescription() {
-        return privateMetadata.name
+        return privateMetadata.description
     }
 
     String getSupplier() {
@@ -30,5 +30,9 @@ class RepoMetadata {
 
     String getReferences() {
         return privateMetadata.references
+    }
+
+    String getGitUrl() {
+        return privateMetadata.gitUrl
     }
 }

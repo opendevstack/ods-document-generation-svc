@@ -142,8 +142,7 @@ class ProjectData {
     private Map loadMetadata(String workspace){
         Map result = parseMetadataFile(workspace)
         result.description = (result.description)?: ""
-        result.repositories = (result.repositories)?: ""
-        updateRepositories(result)
+        result.repositories = loadRepositories(result.repositories)
         result.capabilities = (result.capabilities )?: []
         updateLevaDocCapability(result)
         result.environments = (result.environments)?: [:]
@@ -173,28 +172,16 @@ class ProjectData {
         }
     }
 
-    private void updateRepositories(Map result) {
-        result.repositories.eachWithIndex { repo, index ->
-            // Check for existence of required attribute 'repositories[i].id'
-            if (!repo.id?.trim()) {
-                throw new IllegalArgumentException(
-                        "Error: unable to parse project meta data. Required attribute 'repositories[${index}].id' is undefined.")
-            }
-
-            repo.data = [
-                    openshift: [:],
-                    documents: [:],
-            ]
-
-            // Set repo type, if not provided
-            if (!repo.type?.trim()) {
-                repo.type = PipelineConfig.REPO_TYPE_ODS_CODE
-            }
-
-            repo.metadata = loadRepoMetadataFromRepo(repo)
+    private loadRepositories(List repositories) {
+        List<RepoData> reposData = []
+        for(Map repo : repositories) {
+            def repoMetadata = loadRepoMetadataFromRepo(repo)
+            RepoData repoData = new RepoData(repo, repoMetadata)
+            reposData.add(repoData)
         }
+        return reposData
     }
-
+    
     private RepoMetadata loadRepoMetadataFromRepo(repo) {
         if ((! repo) || (! repo.id)) {
             throw new RuntimeException("Repository id cannot be blank or null.")
@@ -207,9 +194,9 @@ class ProjectData {
         String defaultBranch = repo.branch ?: "master"
         bitbucketService.downloadRepoMetadata(projectId, repoId, branch, defaultBranch, targetFolder)
         Map repoMetadata = parseRepoMetadataFile(targetFolder)
-
         log.debug(prettyPrint(toJson(repoMetadata)))
 
+        String gitUrl = bitbucketService.buildRepositoryUrl(projectId, repoId)
         return new RepoMetadata([
                 id: repo.id,
                 name: repoMetadata.name,
@@ -217,6 +204,7 @@ class ProjectData {
                 supplier: repoMetadata.supplier,
                 version: repoMetadata.version,
                 references: repoMetadata.references,
+                gitUrl: gitUrl
         ])
     }
 
@@ -498,7 +486,7 @@ class ProjectData {
         return this.data.metadata.name
     }
 
-    List<Map> getRepositories() {
+    List<RepoData> getRepositories() {
         return this.data.metadata.repositories
     }
 
