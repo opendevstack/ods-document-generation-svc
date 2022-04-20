@@ -368,14 +368,14 @@ class LeVADocumentService {
         def keysInDoc = this.computeKeysInDocForIPV(installationTestIssues)
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        def installedRepos = projectData.repositories.collect {
-            it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
-        }
+        updateProjectRepositoriesDoInstall(projectData)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
-                        repositories   : installedRepos.collect { [id: it.id, type: it.type, doInstall: it.doInstall, data: [git: [url: it.data.git == null ? null : it.data.git.url]]] },
+                        repositories   : projectData.repositories.collect {
+                            [id: it.id, type: it.type, doInstall: it.doInstall,
+                             data: [git: [url: it.metadata.gitUrl]]] },
                         sections       : sections,
                         tests          : SortUtil.sortIssuesByKey(installationTestIssues.collect { testIssue ->
                             [
@@ -759,14 +759,14 @@ class LeVADocumentService {
         def keysInDoc =  this.computeKeysInDocForIVR(installationTestIssues)
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        def installedRepos = projectData.repositories.collect {
-            it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
-        }
+        updateProjectRepositoriesDoInstall(projectData)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
-                        repositories   : installedRepos.collect { [id: it.id, type: it.type, doInstall: it.doInstall, data: [git: [url: it.data.git == null ? null : it.data.git.url]]] },
+                        repositories   : projectData.repositories.collect {
+                            [id: it.id, type: it.type, doInstall: it.doInstall,
+                             data: [git: [url: it.metadata.gitUrl]]] },
                         sections          : sections,
                         tests             : buildTestResultsIVR(installationTestIssues),
                         numAdditionalTests: getNumAdditionalTest(installationTestData, installationTestIssues),
@@ -1645,6 +1645,12 @@ class LeVADocumentService {
 
     private void getNumAdditionalTest(Map testData, List<JiraDataItem> testIssues) {
         junit.getNumberOfTestCases(testData.testResults) - testIssues.count { !it.isUnexecuted }
+    }
+
+    private void updateProjectRepositoriesDoInstall(ProjectData projectData) {
+        projectData.repositories.forEach({
+            it.doInstall = !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())
+        })
     }
 
     private updateRepositoriesData(Map data) {

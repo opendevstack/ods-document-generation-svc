@@ -181,7 +181,7 @@ class ProjectData {
         }
         return reposData
     }
-    
+
     private RepoMetadata loadRepoMetadataFromRepo(repo) {
         if ((! repo) || (! repo.id)) {
             throw new RuntimeException("Repository id cannot be blank or null.")
