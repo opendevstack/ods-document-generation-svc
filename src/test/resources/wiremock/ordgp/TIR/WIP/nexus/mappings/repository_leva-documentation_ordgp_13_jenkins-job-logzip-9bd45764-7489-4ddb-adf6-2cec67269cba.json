@@ -1,0 +1,27 @@
+{
+  "id" : "9bd45764-7489-4ddb-adf6-2cec67269cba",
+  "name" : "repository_leva-documentation_ordgp_13_jenkins-job-logzip",
+  "request" : {
+    "url" : "/repository/leva-documentation/ordgp/13/jenkins-job-log.zip",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "repository_leva-documentation_ordgp_13_jenkins-job-logzip-9bd45764-7489-4ddb-adf6-2cec67269cba.zip",
+    "headers" : {
+      "Date" : "Wed, 20 Apr 2022 15:51:21 GMT",
+      "Server" : "Nexus/3.28.1-01 (OSS)",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Security-Policy" : "sandbox allow-forms allow-modals allow-popups allow-presentation allow-scripts allow-top-navigation",
+      "X-XSS-Protection" : "1; mode=block",
+      "Last-Modified" : "Mon, 11 Apr 2022 13:12:23 GMT",
+      "Content-Disposition" : "inline",
+      "Content-Type" : "application/zip",
+      "Set-Cookie" : "b7bd9d362cf28fa3746ddf3faaa39cfe=13a61aa10205f36ad051ed3d9d80bf64; path=/; HttpOnly; Secure; SameSite=None",
+      "Cache-control" : "private"
+    }
+  },
+  "uuid" : "9bd45764-7489-4ddb-adf6-2cec67269cba",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

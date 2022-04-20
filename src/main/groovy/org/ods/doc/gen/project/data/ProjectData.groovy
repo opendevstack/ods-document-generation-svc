@@ -18,6 +18,9 @@ import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.Paths
 
+import static groovy.json.JsonOutput.prettyPrint
+import static groovy.json.JsonOutput.toJson
+
 @SuppressWarnings(['LineLength',
         'AbcMetric',
         'IfStatementBraces',
@@ -32,8 +35,10 @@ import java.nio.file.Paths
 @Service
 class ProjectData {
 
+    static final String DEFAULT_TEMPLATE_VERSION = '1.2'
     static final String BUILD_PARAM_VERSION_DEFAULT = 'WIP'
     static final String METADATA_FILE_NAME = 'metadata.yml'
+    private static final String DEFAULT_BRANCH_RELEASE_MANAGER = "master"
 
     protected Map config
     protected Boolean isVersioningEnabled = false
@@ -69,7 +74,7 @@ class ProjectData {
         this.data.jira = [project: [ : ]]
         this.data.repo = data.repo
         this.data.git = data.git
-        this.data.git.url = bitbucketService.buildReleaseManagerUrl(
+        this.data.git.url = bitbucketService.buildRepositoryUrl(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String
         )
@@ -77,10 +82,11 @@ class ProjectData {
     }
 
     ProjectData load() {
-        bitbucketService.downloadRepo(
+        bitbucketService.downloadRepoWithFallBack(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String,
                 data.git.releaseManagerBranch as String,
+                DEFAULT_BRANCH_RELEASE_MANAGER,
                 tmpFolder + "/releasemanager")
 
         this.data.metadata = loadMetadata(tmpFolder + "/releasemanager")
@@ -136,8 +142,7 @@ class ProjectData {
     private Map loadMetadata(String workspace){
         Map result = parseMetadataFile(workspace)
         result.description = (result.description)?: ""
-        result.repositories = (result.repositories)?: ""
-        updateRepositories(result)
+        result.repositories = loadRepositories(result.repositories)
         result.capabilities = (result.capabilities )?: []
         updateLevaDocCapability(result)
         result.environments = (result.environments)?: [:]
@@ -167,37 +172,51 @@ class ProjectData {
         }
     }
 
-    private void updateRepositories(Map result) {
-        result.repositories.eachWithIndex { repo, index ->
-            // Check for existence of required attribute 'repositories[i].id'
-            if (!repo.id?.trim()) {
-                throw new IllegalArgumentException(
-                        "Error: unable to parse project meta data. Required attribute 'repositories[${index}].id' is undefined.")
-            }
-
-            repo.data = [
-                    openshift: [:],
-                    documents: [:],
-            ]
-
-            // Set repo type, if not provided
-            if (!repo.type?.trim()) {
-                repo.type = PipelineConfig.REPO_TYPE_ODS_CODE
-            }
-
-            repo.metadata = loadMetadataRepo(repo)
+    private loadRepositories(List repositories) {
+        List<RepoData> reposData = []
+        for(Map repo : repositories) {
+            def repoMetadata = loadRepoMetadataFromRepo(repo)
+            RepoData repoData = new RepoData(repo, repoMetadata)
+            reposData.add(repoData)
         }
+        return reposData
     }
 
-    private Map<String, String> loadMetadataRepo(repo) {
-        return  [
+    private RepoMetadata loadRepoMetadataFromRepo(repo) {
+        if ((! repo) || (! repo.id)) {
+            throw new RuntimeException("Repository id cannot be blank or null.")
+        }
+        String projectId = data.projectId as String
+        String repoId = "${projectId}-${repo.id}"
+        String branch = data.git.releaseManagerBranch as String
+        String targetFolder = tmpFolder + "/" + repoId
+
+        String defaultBranch = repo.branch ?: "master"
+        bitbucketService.downloadRepoMetadata(projectId, repoId, branch, defaultBranch, targetFolder)
+        Map repoMetadata = parseRepoMetadataFile(targetFolder)
+        log.debug(prettyPrint(toJson(repoMetadata)))
+
+        String gitUrl = bitbucketService.buildRepositoryUrl(projectId, repoId)
+        return new RepoMetadata([
                 id: repo.id,
-                name: repo.name,
-                description: "myDescription-A",
-                supplier: "mySupplier-A",
-                version: "myVersion-A",
-                references: "myReferences-A"
-        ]
+                name: repoMetadata.name,
+                description: repoMetadata.description,
+                supplier: repoMetadata.supplier,
+                version: repoMetadata.version,
+                references: repoMetadata.references,
+                gitUrl: gitUrl
+        ])
+    }
+
+    private Map parseRepoMetadataFile(String repoFolder) {
+        String filename = METADATA_FILE_NAME
+        def file = Paths.get(repoFolder, filename).toFile()
+        if (!file.exists()) {
+            throw new RuntimeException("Error: unable to load project meta data. File '${repoFolder}/${filename}' does not exist.")
+        }
+
+        Map result = new Yaml().load(file.text)
+        return result
     }
 
     private Map parseMetadataFile(String workspace) {
@@ -467,7 +486,7 @@ class ProjectData {
         return this.data.metadata.name
     }
 
-    List<Map> getRepositories() {
+    List<RepoData> getRepositories() {
         return this.data.metadata.repositories
     }
 

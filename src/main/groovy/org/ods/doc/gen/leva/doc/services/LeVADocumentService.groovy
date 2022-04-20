@@ -2,6 +2,7 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
+import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
 import org.ods.doc.gen.external.modules.jira.CustomIssueFields
 import org.ods.doc.gen.external.modules.jira.IssueTypes
@@ -63,6 +64,7 @@ class LeVADocumentService {
     private final LeVADocumentChaptersFileService levaFiles
     private final BitbucketTraceabilityUseCase bbt
     private final NexusService nexus
+    private final BitbucketService bitbucketService
     
     @Inject
     Clock clock
@@ -74,7 +76,8 @@ class LeVADocumentService {
                         JiraUseCase jiraUseCase,
                         JUnitReportsService junit,
                         LeVADocumentChaptersFileService levaFiles,
-                        BitbucketTraceabilityUseCase bbt) {
+                        BitbucketTraceabilityUseCase bbt,
+                        BitbucketService bitbucketService) {
         this.project = project
         this.docGenUseCase = docGenUseCase
         this.nexus = nexus
@@ -82,6 +85,7 @@ class LeVADocumentService {
         this.junit = junit
         this.levaFiles = levaFiles
         this.bbt = bbt
+        this.bitbucketService = bitbucketService
     }
 
     @SuppressWarnings('CyclomaticComplexity')
@@ -364,14 +368,14 @@ class LeVADocumentService {
         def keysInDoc = this.computeKeysInDocForIPV(installationTestIssues)
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        def installedRepos = projectData.repositories.collect {
-            it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
-        }
+        updateProjectRepositoriesDoInstall(projectData)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
-                        repositories   : installedRepos.collect { [id: it.id, type: it.type, doInstall: it.doInstall, data: [git: [url: it.data.git == null ? null : it.data.git.url]]] },
+                        repositories   : projectData.repositories.collect {
+                            [id: it.id, type: it.type, doInstall: it.doInstall,
+                             data: [git: [url: it.metadata.gitUrl]]] },
                         sections       : sections,
                         tests          : SortUtil.sortIssuesByKey(installationTestIssues.collect { testIssue ->
                             [
@@ -521,6 +525,8 @@ class LeVADocumentService {
 
         def keysInDoc = this.computeKeysInDocForTIP(projectData.getComponents())
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
+
+        updateRepositoriesData(data)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
@@ -753,14 +759,14 @@ class LeVADocumentService {
         def keysInDoc =  this.computeKeysInDocForIVR(installationTestIssues)
         def docHistory = this.getAndStoreDocumentHistory(documentType, keysInDoc, projectData)
 
-        def installedRepos = projectData.repositories.collect {
-            it << [ doInstall: !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())]
-        }
+        updateProjectRepositoriesDoInstall(projectData)
 
         def data_ = [
                 metadata: this.getDocumentMetadata(projectData, Constants.DOCUMENT_TYPE_NAMES[documentType]),
                 data    : [
-                        repositories   : installedRepos.collect { [id: it.id, type: it.type, doInstall: it.doInstall, data: [git: [url: it.data.git == null ? null : it.data.git.url]]] },
+                        repositories   : projectData.repositories.collect {
+                            [id: it.id, type: it.type, doInstall: it.doInstall,
+                             data: [git: [url: it.metadata.gitUrl]]] },
                         sections          : sections,
                         tests             : buildTestResultsIVR(installationTestIssues),
                         numAdditionalTests: getNumAdditionalTest(installationTestData, installationTestIssues),
@@ -944,6 +950,8 @@ class LeVADocumentService {
         def documentType = Constants.DocumentType.TIR as String
 
         def watermarkText = this.getWatermarkText(projectData)
+
+        updateRepositoriesData(data)
 
         def visitor = { data_ ->
             // Prepend a section for the Jenkins build log
@@ -1243,7 +1251,7 @@ class LeVADocumentService {
         projectData.repositories.collect {
             [
                 id: it.id,
-                description: it.metadata?.description,
+                description: it.metadata.description,
                 tests: componentTestMapping[it.id]? componentTestMapping[it.id].join(", "): "None defined"
             ]
         }
@@ -1639,4 +1647,21 @@ class LeVADocumentService {
         junit.getNumberOfTestCases(testData.testResults) - testIssues.count { !it.isUnexecuted }
     }
 
+    private void updateProjectRepositoriesDoInstall(ProjectData projectData) {
+        projectData.repositories.forEach({
+            it.doInstall = !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(it.type?.toLowerCase())
+        })
+    }
+
+    private updateRepositoriesData(Map data) {
+        String projectId = data.projectId as String
+
+        data.repositories.each { Map repo ->
+            String repoName = repo.id as String
+            repoName = "${projectId}-${repoName}"
+            repo["data"]["git"]["url"] = bitbucketService.buildRepositoryUrl(projectId, repoName)
+
+            repo["doInstall"] = !Constants.COMPONENT_TYPE_IS_NOT_INSTALLED.contains(repo.type?.toLowerCase())
+        }
+    }
 }

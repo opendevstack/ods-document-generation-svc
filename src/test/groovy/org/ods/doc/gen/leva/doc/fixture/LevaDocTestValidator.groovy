@@ -6,6 +6,11 @@ import de.redsix.pdfcompare.env.SimpleEnvironment
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+
 @Slf4j
 class LevaDocTestValidator {
 
@@ -23,7 +28,12 @@ class LevaDocTestValidator {
     boolean validatePDF(String buildId) {
         unzipGeneratedArtifact(buildId)
         if (GENERATE_EXPECTED_PDF_FILES) {
-            copyDocWhenRecording(buildId)
+            boolean comparisonResult = compareFiles(buildId)
+            if (! comparisonResult) {
+                log.info("validatePDF - Comparison returned differences.")
+                log.info("validatePDF - Updating expected pdf since GENERATE_EXPECTED_PDF_FILES=true.")
+                copyDocWhenRecording(buildId)
+            }
             return true
         } else {
             return compareFiles(buildId)
@@ -34,7 +44,7 @@ class LevaDocTestValidator {
         String actualPath = actualDoc(buildId).absolutePath
         File expectedFile = expectedDoc(buildId, projectFixture.component)
         String expectedPath = expectedFile.absolutePath
-        log.info("validatePDF - Expected pdf:${expectedPath}")
+        log.info("validatePDF - Expected pdf: ${expectedPath}")
 
         String diffFileName = pdfDiffFileName(expectedFile)
 
@@ -49,6 +59,17 @@ class LevaDocTestValidator {
         } else {
             FileUtils.copyFile(actualDoc(buildId), reportPdfDoc(buildId))
         }
+
+        if (!filesAreEqual) {
+            String generatedPdfSavedCopyFileName = generatedPdfSavedCopyFileName(actualPath)
+            Path generatedPdfSource = java.nio.file.Paths.get(actualPath)
+            Path generatedPdfSavedCopy = Paths.get(generatedPdfSavedCopyFileName)
+            Files.copy(generatedPdfSource, generatedPdfSavedCopy,
+                    StandardCopyOption.REPLACE_EXISTING)
+            log.info("validatePDF - Built pdf (saved because different from expected): " +
+                    "${generatedPdfSavedCopyFileName}")
+        }
+
         return filesAreEqual
     }
 
@@ -59,6 +80,10 @@ class LevaDocTestValidator {
 
     String pdfDiffFileName(File expectedFile){
         return "${SAVED_DOCUMENTS}/${expectedFile.name.take(expectedFile.name.lastIndexOf('.'))}-diff"
+    }
+
+    String generatedPdfSavedCopyFileName(String actualPath){
+        return "${SAVED_DOCUMENTS}/generated-${actualPath.substring(actualPath.lastIndexOf('/') +1)}"
     }
 
     private void unzipGeneratedArtifact(String buildId) {
