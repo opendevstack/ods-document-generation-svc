@@ -16,6 +16,7 @@
 - removed param jekins to jenkins
 - Removed byte[] use
 - Set test summary for empty description in TCR ([#837](https://github.com/opendevstack/ods-jenkins-shared-library/pull/837))
+- Set test summary for empty description in TCR for acceptance tests ([#837](https://github.com/opendevstack/ods-jenkins-shared-library/pull/844))
 
 ## [4.0] - 2021-18-11
 =======
