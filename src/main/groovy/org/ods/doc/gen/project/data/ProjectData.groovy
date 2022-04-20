@@ -38,6 +38,7 @@ class ProjectData {
     static final String DEFAULT_TEMPLATE_VERSION = '1.2'
     static final String BUILD_PARAM_VERSION_DEFAULT = 'WIP'
     static final String METADATA_FILE_NAME = 'metadata.yml'
+    private static final String DEFAULT_BRANCH_RELEASE_MANAGER = "master"
 
     protected Map config
     protected Boolean isVersioningEnabled = false
@@ -81,10 +82,11 @@ class ProjectData {
     }
 
     ProjectData load() {
-        bitbucketService.downloadRepo(
+        bitbucketService.downloadRepoWithFallBack(
                 data.projectId as String,
                 data.git.releaseManagerRepo as String,
                 data.git.releaseManagerBranch as String,
+                DEFAULT_BRANCH_RELEASE_MANAGER,
                 tmpFolder + "/releasemanager")
 
         this.data.metadata = loadMetadata(tmpFolder + "/releasemanager")
@@ -208,7 +210,6 @@ class ProjectData {
 
         log.debug(prettyPrint(toJson(repoMetadata)))
 
-        // TODO: is references values is just initialized
         return new RepoMetadata([
                 id: repo.id,
                 name: repoMetadata.name,
