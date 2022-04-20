@@ -58,7 +58,7 @@ class BitbucketService {
     void downloadRepoWithFallBack(String project, String repo, String branch, String defaultBranch,
                                             String tmpFolder) {
         log.info("downloadRepo: project:${project}, repo:${repo} and branch:${branch}")
-        Path zipArchive = Files.createTempFile("archive-", ".zip")
+        Path zipArchive = Files.createTempFile("archive-${repo}", ".zip")
         try {
             try {
                 bitBucketClientConfig
