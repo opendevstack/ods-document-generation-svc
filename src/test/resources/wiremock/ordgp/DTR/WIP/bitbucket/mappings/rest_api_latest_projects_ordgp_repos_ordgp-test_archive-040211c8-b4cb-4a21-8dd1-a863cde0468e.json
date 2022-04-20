@@ -1,0 +1,28 @@
+{
+  "id" : "040211c8-b4cb-4a21-8dd1-a863cde0468e",
+  "name" : "rest_api_latest_projects_ordgp_repos_ordgp-test_archive",
+  "request" : {
+    "url" : "/rest/api/latest/projects/ordgp/repos/ordgp-test/archive?at=workInProgressBranch&format=zip&path=metadata.yml",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 400,
+    "body" : "{\"errors\":[{\"context\":null,\"message\":\"'workInProgressBranch' is not a valid ref and may not be archived.\",\"exceptionName\":\"com.atlassian.bitbucket.repository.InvalidRefNameException\",\"refName\":\"workInProgressBranch\"}]}",
+    "headers" : {
+      "Server" : "nginx/1.20.1",
+      "Date" : "Wed, 20 Apr 2022 15:49:43 GMT",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "X-AREQUESTID" : "@1POZ2QTx1069x1147479x0",
+      "Set-Cookie" : [ "BITBUCKETSESSIONID=DCACD96D268887B0F0AB9AF335C35274; Max-Age=1209600; Expires=Wed, 04-May-2022 15:49:43 GMT; Path=/; Secure; HttpOnly", "crowd.dev.token_key=HAtPb21qBx0wsQG1okyyWAAAAAAAnoABdmljdG9yLnBhYmxvc19jZXJ1ZWxvLmV4dEBib2VocmluZ2VyLWluZ2VsaGVpbS5jb20; Path=/; HttpOnly" ],
+      "X-AUSERID" : "144448",
+      "X-AUSERNAME" : "victor.pablos_ceruelo.ext%40domain.com",
+      "X-ASESSIONID" : "1k54tog",
+      "Cache-Control" : [ "private, no-cache", "no-cache, no-transform" ],
+      "Pragma" : "no-cache",
+      "Vary" : "accept-encoding,x-auserid,cookie,x-ausername,accept-encoding"
+    }
+  },
+  "uuid" : "040211c8-b4cb-4a21-8dd1-a863cde0468e",
+  "persistent" : true,
+  "insertionIndex" : 7
+}
