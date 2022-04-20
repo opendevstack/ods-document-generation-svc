@@ -4,6 +4,7 @@ import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixture
 import org.ods.doc.gen.leva.doc.fixture.DocTypeProjectFixtureBase
 import org.ods.doc.gen.leva.doc.fixture.LevaDocTestValidator
 import org.ods.doc.gen.leva.doc.services.DocumentHistoryEntry
+import org.ods.doc.gen.leva.doc.services.LeVADocumentService
 import spock.lang.IgnoreIf
 
 /**
@@ -29,5 +30,23 @@ class LevaDocServiceSpec extends LevaDocServiceTestBase {
         projectFixture << new DocTypeProjectFixture().getProjects()
     }
 
+    def "getTestDescription"(testIssue, expected) {
+        given:
+        LeVADocumentService leVADocumentService = new LeVADocumentService(null, null, null,
+                null, null, null, null)
+
+        when:
+        def result = leVADocumentService.getTestDescription(testIssue)
+
+        then:
+        result == expected
+
+        where:
+        testIssue                                      |       expected
+        [name: '',description: '']                     |       'N/A'
+        [name: 'NAME',description: '']                 |       'NAME'
+        [name: '',description: 'DESCRIPTION']          |       'DESCRIPTION'
+        [name: 'NAME',description: 'DESCRIPTION']      |       'DESCRIPTION'
+    }
 }
 
