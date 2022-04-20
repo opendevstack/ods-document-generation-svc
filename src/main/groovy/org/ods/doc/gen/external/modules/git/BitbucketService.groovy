@@ -86,6 +86,35 @@ class BitbucketService {
 
     }
 
+    void downloadRepoMetadata(String project, String repo, String branch, String defaultBranch, String tmpFolder) {
+        log.info("downloadRepo: project:${project}, repo:${repo} and branch:${branch}")
+        Path zipArchive = Files.createTempFile("archive-${repo}", ".zip")
+        try {
+            try {
+                bitBucketClientConfig
+                        .getClient()
+                        .getRepoFileInZipArchive(project, repo, branch, "metadata.yml")
+                        .withCloseable { Response response ->
+                            streamResult(response, zipArchive)
+                        }
+            } catch (e) {
+                log.warn("Branch [${branch}] doesn't exist, using branch: [${defaultBranch}]")
+                bitBucketClientConfig
+                        .getClient()
+                        .getRepoFileInZipArchive(project, repo, defaultBranch, "metadata.yml")
+                        .withCloseable { Response response ->
+                            streamResult(response, zipArchive)
+                        }
+            }
+
+            zipFacade.extractZipArchive(zipArchive, Paths.get(tmpFolder))
+        } catch (FeignException callException) {
+            checkError(repo, branch, callException)
+        } finally {
+            Files.delete(zipArchive)
+        }
+    }
+
     protected void streamResult(Response response, Path zipArchive){
         if (response.status() >= 300) {
             throw new ErrorDecoder.Default().decode('downloadRepo', response)

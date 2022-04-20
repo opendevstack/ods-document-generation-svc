@@ -1251,7 +1251,7 @@ class LeVADocumentService {
         projectData.repositories.collect {
             [
                 id: it.id,
-                description: it.metadata?.description,
+                description: it.description,
                 tests: componentTestMapping[it.id]? componentTestMapping[it.id].join(", "): "None defined"
             ]
         }

@@ -18,6 +18,9 @@ import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.Paths
 
+import static groovy.json.JsonOutput.prettyPrint
+import static groovy.json.JsonOutput.toJson
+
 @SuppressWarnings(['LineLength',
         'AbcMetric',
         'IfStatementBraces',
@@ -186,22 +189,45 @@ class ProjectData {
                 repo.type = PipelineConfig.REPO_TYPE_ODS_CODE
             }
 
-            repo.metadata = loadMetadataRepo(repo)
+            repo.metadata = loadRepoMetadataFromRepo(repo)
         }
     }
 
-    private Map<String, String> loadMetadataRepo(repo) {
+    private RepoMetadata loadRepoMetadataFromRepo(repo) {
         if ((! repo) || (! repo.id)) {
             throw new RuntimeException("Repository id cannot be blank or null.")
         }
-        return  [
+        String projectId = data.projectId as String
+        String repoId = "${projectId}-${repo.id}"
+        String branch = data.git.releaseManagerBranch as String
+        String targetFolder = tmpFolder + "/" + repoId
+
+        String defaultBranch = repo.branch ?: "master"
+        bitbucketService.downloadRepoMetadata(projectId, repoId, branch, defaultBranch, targetFolder)
+        Map repoMetadata = parseRepoMetadataFile(targetFolder)
+
+        log.debug(prettyPrint(toJson(repoMetadata)))
+
+        // TODO: is references values is just initialized
+        return new RepoMetadata([
                 id: repo.id,
-                name: repo.name ? repo.name : repo.id,
-                description: "myDescription-${repo.id}",
-                supplier: "mySupplier-${repo.id}",
-                version: "myVersion-${repo.id}",
-                references: "myReferences-${repo.id}"
-        ]
+                name: repoMetadata.name,
+                description: repoMetadata.description,
+                supplier: repoMetadata.supplier,
+                version: repoMetadata.version,
+                references: repoMetadata.references,
+        ])
+    }
+
+    private Map parseRepoMetadataFile(String repoFolder) {
+        String filename = METADATA_FILE_NAME
+        def file = Paths.get(repoFolder, filename).toFile()
+        if (!file.exists()) {
+            throw new RuntimeException("Error: unable to load project meta data. File '${repoFolder}/${filename}' does not exist.")
+        }
+
+        Map result = new Yaml().load(file.text)
+        return result
     }
 
     private Map parseMetadataFile(String workspace) {

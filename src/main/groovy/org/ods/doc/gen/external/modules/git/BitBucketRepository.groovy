@@ -28,4 +28,11 @@ interface BitBucketRepository {
                                @Param("repo") String repo,
                                @Param("branch") String branch)
 
+    @Headers("Accept: application/octet-stream")
+    @RequestLine("GET /rest/api/latest/projects/{project}/repos/{repo}/archive?at={branch}&format=zip&path={filePath}")
+    Response getRepoFileInZipArchive(@Param("project") String project,
+                                     @Param("repo") String repo,
+                                     @Param("branch") String branch,
+                                     @Param("filePath") String filePath)
+
 }
