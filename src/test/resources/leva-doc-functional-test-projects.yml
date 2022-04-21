@@ -12,13 +12,14 @@
 #       all should be: CFTP, CFTR, CSD, DIL, DTP, DTR, IVP, IVR, RA, SSDS, TCP, TCR, TIP, TIR, TRC
 #          (overall are not needed to put here as put DTR, TIR is enough)
 
-#  - components: all ODS components in loweCase
+#   - components: all ODS components in loweCase
 #
 #  - validation: > Explain here what we are validating here
 #      ### Project validates
 #      * Large images
 #      * Discontinue tests
 #
+#  - Projects: ordgp, twrfdgp, trdgp, g3dgp, g4dgp
 #
 #   NOTE: We can have a project more than one time: with different "version", as will produce different pdfs
 #
@@ -48,14 +49,14 @@ projects:
 
   - id: twrfdgp
     description: Two releases Frozen DocGen
-    buildNumber: 666
-    releaseId: TRFDGP-179
-    version: 4.0
-    releaseManagerRepo: trfdgp-releasemanager
-    releaseManagerBranch: release/4.0
+    buildNumber: 17
+    releaseId: TWRFDGP-179
+    version: 3.0
+    releaseManagerRepo: twrfdgp-releasemanager
+    releaseManagerBranch: release/3.0
     docsToTest: CFTP, CSD, DTP, DTR, IVP, RA, SSDS, TCP, TIP, TIR
     testResults:
-    components: backend, frontend, test
+    components: thefirst
     templatesVersion: 1.2
     validation: >
       ### Project validates

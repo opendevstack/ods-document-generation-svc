@@ -1,7 +1,7 @@
 package org.ods.doc.gen.core.test.workspace
 
 import groovy.util.logging.Slf4j
-import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
+import org.ods.doc.gen.leva.doc.services.xunit.JUnitReportsService
 import org.ods.doc.gen.project.data.ProjectData
 import org.ods.doc.gen.project.data.TestType
 import org.springframework.stereotype.Service

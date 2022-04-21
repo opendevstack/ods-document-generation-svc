@@ -4,8 +4,8 @@ import feign.FeignException
 import feign.Request
 import feign.RequestTemplate
 import org.ods.doc.gen.BitBucketClientConfig
+import org.ods.doc.gen.adapters.git.BitbucketService
 import org.ods.doc.gen.core.ZipFacade
-import org.ods.doc.gen.external.modules.git.BitbucketService
 import org.springframework.beans.factory.annotation.Value
 import spock.lang.Specification
 

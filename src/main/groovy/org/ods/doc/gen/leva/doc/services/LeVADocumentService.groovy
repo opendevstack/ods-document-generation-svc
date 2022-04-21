@@ -2,13 +2,13 @@ package org.ods.doc.gen.leva.doc.services
 
 import groovy.util.logging.Slf4j
 import groovy.xml.XmlUtil
-import org.ods.doc.gen.external.modules.git.BitbucketTraceabilityUseCase
-import org.ods.doc.gen.external.modules.jira.CustomIssueFields
-import org.ods.doc.gen.external.modules.jira.IssueTypes
-import org.ods.doc.gen.external.modules.jira.JiraUseCase
-import org.ods.doc.gen.external.modules.jira.LabelPrefix
-import org.ods.doc.gen.external.modules.nexus.NexusService
-import org.ods.doc.gen.external.modules.xunit.JUnitReportsService
+import org.ods.doc.gen.adapters.jira.CustomIssueFields
+import org.ods.doc.gen.adapters.jira.IssueTypes
+import org.ods.doc.gen.adapters.jira.JiraUseCase
+import org.ods.doc.gen.adapters.jira.LabelPrefix
+import org.ods.doc.gen.adapters.nexus.NexusService
+import org.ods.doc.gen.core.SortUtil
+import org.ods.doc.gen.leva.doc.services.xunit.JUnitReportsService
 import org.ods.doc.gen.project.data.Environment
 import org.ods.doc.gen.project.data.JiraDataItem
 import org.ods.doc.gen.project.data.Project
@@ -24,29 +24,6 @@ import java.time.LocalDateTime
 import static groovy.json.JsonOutput.prettyPrint
 import static groovy.json.JsonOutput.toJson
 
-@SuppressWarnings([
-    'ClassSize',
-    'UnnecessaryDefInMethodDeclaration',
-    'UnnecessaryCollectCall',
-    'IfStatementBraces',
-    'LineLength',
-    'AbcMetric',
-    'Instanceof',
-    'VariableName',
-    'DuplicateListLiteral',
-    'UnusedMethodParameter',
-    'UnusedVariable',
-    'ParameterCount',
-    'ParameterReassignment',
-    'UnnecessaryElseStatement',
-    'NonFinalPublicField',
-    'PropertyName',
-    'MethodCount',
-    'UseCollectMany',
-    'ParameterName',
-    'TrailingComma',
-    'SpaceAroundMapEntryColon',
-    'PublicMethodsBeforeNonPublicMethods'])
 @Slf4j
 @Service
 class LeVADocumentService {
@@ -57,11 +34,11 @@ class LeVADocumentService {
     public static final String OVER_COVER = 'Overall-Cover'
 
     private final Project project
-    private final DocGenUseCase docGenUseCase
+    private final DocGenService docGenUseCase
     private final JiraUseCase jiraUseCase
     private final JUnitReportsService junit
     private final LeVADocumentChaptersFileService levaFiles
-    private final BitbucketTraceabilityUseCase bbt
+    private final BitbucketTraceabilityService bbt
     private final NexusService nexus
     
     @Inject
@@ -69,12 +46,12 @@ class LeVADocumentService {
 
     @Inject
     LeVADocumentService(Project project,
-                        DocGenUseCase docGenUseCase,
+                        DocGenService docGenUseCase,
                         NexusService nexus,
                         JiraUseCase jiraUseCase,
                         JUnitReportsService junit,
                         LeVADocumentChaptersFileService levaFiles,
-                        BitbucketTraceabilityUseCase bbt) {
+                        BitbucketTraceabilityService bbt) {
         this.project = project
         this.docGenUseCase = docGenUseCase
         this.nexus = nexus

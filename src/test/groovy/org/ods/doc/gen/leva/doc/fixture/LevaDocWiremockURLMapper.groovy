@@ -3,9 +3,8 @@ package org.ods.doc.gen.leva.doc.fixture
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import org.ods.doc.gen.BitBucketClientConfig
-import org.ods.doc.gen.external.modules.jira.JiraService
-import org.ods.doc.gen.external.modules.nexus.NexusService
-import org.ods.doc.gen.leva.doc.fixture.LevaDocWiremock
+import org.ods.doc.gen.adapters.jira.JiraService
+import org.ods.doc.gen.adapters.nexus.NexusService
 import org.springframework.stereotype.Service
 
 import javax.inject.Inject
