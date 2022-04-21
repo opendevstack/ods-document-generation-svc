@@ -1,0 +1,34 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  mvc.async.request-timeout: 750
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
+  main.allow-bean-definition-overriding: true
+
+cache:
+  documents.basePath: /tmp/doc-gen-templates
+  projectData.expiration.minutes: 30
+
+bitbucket:
+  url: ${BITBUCKET_URL:dummyURL}
+  username: ${BITBUCKET_USERNAME:dummy}
+  password: ${BITBUCKET_PASSWORD:dummy}
+  documents:
+    project: ${BITBUCKET_DOCUMENT_TEMPLATES_PROJECT:none}
+    repo:  ${BITBUCKET_DOCUMENT_TEMPLATES_REPO:none}
+
+jira:
+  url: ${JIRA_URL:dummyURL}
+  username: ${JIRA_USERNAME:dummy}
+  password: ${JIRA_PASSWORD:dummy}
+
+nexus:
+  url: ${NEXUS_URL:dummyURL}
+  username: ${NEXUS_USERNAME:dummy}
+  password: ${NEXUS_PASSWORD:dummy}
+
+github:
+  url: ${GITHUB_HOST:https://www.github.com}
+
+runWkHtmlToPdfInDockerContainer: ${RUN_WK_HTML_TO_PDF_IN_DOCKER_CONTAINER:false}

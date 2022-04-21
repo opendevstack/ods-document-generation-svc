@@ -1,0 +1,140 @@
+[
+  {
+    "date": "2021-03-16",
+    "authorEmail": "project-admin@edp.com",
+    "component": "edpt3-demo-app-backend",
+    "authorName": "project-admin",
+    "commit": "59d9348a4df5e40260ec930053409aba163ebb69",
+    "reviewers": [
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-backend\/pull-requests\/2"
+  },
+  {
+    "date": "2021-03-16",
+    "authorEmail": "openshift@example.com",
+    "component": "edpt3-demo-app-backend",
+    "authorName": "openshift",
+    "commit": "7da0c41dbbbe5c1af6d497a8fb31f87fbc55e33b",
+    "reviewers": [
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-backend\/pull-requests\/2"
+  },
+  {
+    "date": "2021-03-16",
+    "authorEmail": "project-team-member@edp.com",
+    "component": "edpt3-demo-app-backend",
+    "authorName": "project-team-member",
+    "commit": "c2193652ed488744560c686cdd0e7e3c1dfa6b0f",
+    "reviewers": [
+      {
+        "reviewerName": "project-team-member",
+        "reviewerEmail": "project-team-member@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-backend\/pull-requests\/1"
+  },
+  {
+    "date": "2021-03-16",
+    "authorEmail": "openshift@example.com",
+    "component": "edpt3-demo-app-backend",
+    "authorName": "openshift",
+    "commit": "7a87b0122c90478eabf481b2fc04059260715fee",
+    "reviewers": [
+      {
+        "reviewerName": "project-team-member",
+        "reviewerEmail": "project-team-member@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-backend\/pull-requests\/1"
+  },
+  {
+    "date": "2021-03-17",
+    "authorEmail": "project-admin@edp.com",
+    "component": "edpt3-demo-app-front-end",
+    "authorName": "project-admin",
+    "commit": "16770356fe981d00115e978ce31199f4371af5d9",
+    "reviewers": [
+      {
+        "reviewerName": "project-team-member",
+        "reviewerEmail": "project-team-member@edp.com"
+      },
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-front-end\/pull-requests\/2"
+  },
+  {
+    "date": "2021-03-17",
+    "authorEmail": "openshift@example.com",
+    "component": "edpt3-demo-app-front-end",
+    "authorName": "openshift",
+    "commit": "69a7c95ddb20bce08fbe01bf067927a1d7bf6e7c",
+    "reviewers": [
+      {
+        "reviewerName": "project-team-member",
+        "reviewerEmail": "project-team-member@edp.com"
+      },
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-front-end\/pull-requests\/2"
+  },
+  {
+    "date": "2021-03-17",
+    "authorEmail": "openshift@example.com",
+    "component": "edpt3-demo-app-front-end",
+    "authorName": "openshift",
+    "commit": "0e37d77af184bad786dcd07ee6e43c7430f66e7d",
+    "reviewers": [
+      {
+        "reviewerName": "project-team-member",
+        "reviewerEmail": "project-team-member@edp.com"
+      },
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-front-end\/pull-requests\/2"
+  },
+  {
+    "date": "2021-03-16",
+    "authorEmail": "project-admin@edp.com",
+    "component": "edpt3-demo-app-front-end",
+    "authorName": "project-admin",
+    "commit": "3e11de659989b1944a4b0528e467108f6373b755",
+    "reviewers": [
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-front-end\/pull-requests\/1"
+  },
+  {
+    "date": "2021-03-16",
+    "authorEmail": "openshift@example.com",
+    "component": "edpt3-demo-app-front-end",
+    "authorName": "openshift",
+    "commit": "34d300361c1ba798c0adec984b0dfe3e473b472e",
+    "reviewers": [
+      {
+        "reviewerName": "project-admin",
+        "reviewerEmail": "project-admin@edp.com"
+      }
+    ],
+    "url": "http:\/\/bitbucket.odsbox.lan:7990\/projects\/EDPT3\/repos\/edpt3-demo-app-front-end\/pull-requests\/1"
+  }
+]

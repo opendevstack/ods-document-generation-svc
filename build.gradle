@@ -1,180 +1,293 @@
 buildscript {
   ext {
-    nexus_url = "${project.findProperty('nexus_url') ?: System.getenv('NEXUS_HOST')}"
-    nexus_user = "${project.findProperty('nexus_user') ?: System.getenv('NEXUS_USERNAME')}"
-    nexus_pw = "${project.findProperty('nexus_pw') ?: System.getenv('NEXUS_PASSWORD')}"
-    no_nexus = (project.findProperty('no_nexus') ?: System.getenv('NO_NEXUS') ?: false).toBoolean()
-    if (!no_nexus && (nexus_url == "null" || nexus_user == "null" || nexus_pw == "null")) {
-      throw new GradleException("property no_nexus='false' (or not defined) but at least one of the properties nexus_url, nexus_user or nexus_pw is not configured. Please configure those properties!")
-    }
-
-    def folderRel = (String)("${project.findProperty('nexus_folder_releases') ?: System.getenv('NEXUS_FOLDER_RELEASES')}")
-    nexusFolderReleases = folderRel == "null" ? "maven-releases" : folderRel
-
-    def folderSnaps = (String)("${project.findProperty('nexus_folder_snapshots') ?: System.getenv('NEXUS_FOLDER_SNAPSHOTS')}")
-    nexusFolderSnapshots = folderSnaps == "null" ? "maven-snapshots" : folderSnaps
-
-    snippetsDir = file('build/generated-snippets')
+    groovyallVersion = '3.0.10'
+    springbootVersion = "2.6.6"
+    springCloudVersion = '3.1.1'
+    spockCoreVersion = "2.1-groovy-3.0"
+    spockReportsVersion = '2.3.0-groovy-3.0'
   }
 
   repositories {
-    if (no_nexus) {
-      println("using repositories 'jcenter' and 'mavenCentral', because property no_nexus=$no_nexus")
-      jcenter()
-      mavenCentral()
-    } else {
-      println("using nexus repositories")
-      maven() {
-        url "${nexus_url}/repository/jcenter/"
-        credentials {
-          username = "${nexus_user}"
-          password = "${nexus_pw}"
-        }
-      }
-
-      maven() {
-        url "${nexus_url}/repository/maven-public/"
-        credentials {
-          username = "${nexus_user}"
-          password = "${nexus_pw}"
-        }
-      }
-
-      maven() {
-        url "${nexus_url}/repository/atlassian_public/"
-        credentials {
-          username = "${nexus_user}"
-          password = "${nexus_pw}"
-        }
+    println("using repositories 'jcenter' and 'mavenCentral'")
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+      url "https://repo1.maven.org/maven2/"
+      mavenContent {
+        releasesOnly()
       }
     }
-  }
-}
-
-buildscript {
-  ext {
-    joobyVersion = "1.6.6"
-  }
-
-  dependencies {
-    classpath "org.jooby:jooby-gradle-plugin:$joobyVersion"
+    maven {
+      url "https://repo.jenkins-ci.org/releases/"
+      mavenContent {
+        releasesOnly()
+      }
+    }
   }
 }
 
 plugins {
-  id "com.github.johnrengelman.shadow"
-  id "com.google.osdetector" version "1.6.2"
-  id "io.spring.dependency-management" version "1.0.8.RELEASE"
+  id "groovy"
+  id 'com.adarshr.test-logger' version '3.2.0'
+  id 'jacoco'
+  id 'org.springframework.boot' version "${springbootVersion}"
+  id 'com.bmuschko.docker-spring-boot-application' version '7.3.0'
+  id "io.gatling.gradle" version "3.7.6.1"
 }
-
-apply plugin: "application"
-apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "groovy"
-apply plugin: "jooby"
-apply plugin: "jacoco"
+// related to gatling and Springboot
+ext['netty.version'] = '4.0.51.Final'
 
 repositories {
-  if (no_nexus) {
-    println("using repositories 'jcenter' and 'mavenCentral', because property no_nexus=$no_nexus")
-    jcenter()
-    mavenCentral()
-  } else {
-    println("using nexus repositories")
-    maven() {
-      url "${nexus_url}/repository/jcenter/"
-      credentials {
-        username = "${nexus_user}"
-        password = "${nexus_pw}"
-      }
-    }
-
-    maven() {
-      url "${nexus_url}/repository/maven-public/"
-      credentials {
-        username = "${nexus_user}"
-        password = "${nexus_pw}"
-      }
-    }
-
-    maven() {
-      url "${nexus_url}/repository/atlassian_public/"
-      credentials {
-        username = "${nexus_user}"
-        password = "${nexus_pw}"
-      }
-    }
-  }
+  mavenCentral()
+  println("using repositories 'jcenter' and 'mavenCentral'")
+  mavenCentral()
 }
 
 group = 'org.ods'
-version = '0.1'
-mainClassName = "app.App"
-sourceCompatibility = 1.8
+version = '1.0'
+ext {
+  // TODO https://github.com/opendevstack/ods-quickstarters/issues/766
+  imageBaseForApp ="s2obcn/jdk-11_openj9-wkhtmltopdf-ubi:main"
+  imageForTest = "jdk-11_openj9-wkhtmltopdf-ubi:local"
+}
 
-dependencyManagement {
-  imports {
-    mavenBom "org.jooby:jooby-bom:$joobyVersion"
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(11))
+  }
+}
+
+compileGroovy {
+  groovyOptions.javaAnnotationProcessing = true
+}
+
+configurations.all {
+  resolutionStrategy {
+    force (group: 'org.codehaus.groovy', name: 'groovy-all', version: groovyallVersion)
   }
 }
 
 dependencies {
-  implementation "com.github.ben-manes.caffeine:caffeine:2.7.0"
-  implementation "com.github.jknack:handlebars:4.1.2"
-  implementation "commons-io:commons-io:2.11.0"
-  implementation "io.github.openfeign:feign-core:10.2.3"
-  implementation "io.github.openfeign:feign-gson:10.2.3"
-  implementation "io.github.openfeign:feign-okhttp:10.2.3"
-  implementation "net.lingala.zip4j:zip4j:1.3.3"
-  implementation "org.apache.httpcomponents:httpclient:4.5.8"
-  implementation "org.codehaus.groovy:groovy-all:2.5.7"
-  implementation "org.jooby:jooby-jackson"
-  implementation "org.jooby:jooby-netty"
+  implementation('org.codehaus.groovy:groovy-json:3.0.10')
 
-  implementation "io.netty:netty-transport-native-epoll:${dependencyManagement.importedProperties['netty.version']}:${osdetector.classifier.contains('linux') ? 'linux-x86_64' : ''}"
-  implementation "io.netty:netty-tcnative-boringssl-static:${dependencyManagement.importedProperties['boringssl.version']}"
+  implementation (group: 'org.codehaus.groovy', name: 'groovy-all', version: groovyallVersion){
+    exclude group: "org.codehaus.groovy", module: "groovy-test-junit5"
+  }
 
-  implementation "org.apache.pdfbox:pdfbox:2.0.24"
+  implementation "org.springframework.boot:spring-boot-starter:${springbootVersion}"
+  implementation "org.springframework.boot:spring-boot-starter-web:${springbootVersion}"
+  implementation "org.springframework.boot:spring-boot-starter-cache:${springbootVersion}"
+  implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudVersion}"
 
-  testImplementation "junit:junit:4.12"
+  implementation("javax.inject:javax.inject:1")
+  implementation("javax.cache:cache-api:1.1.1")
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.github.ben-manes.caffeine:caffeine:3.0.5'
+  implementation 'com.github.jknack:handlebars:4.3.0'
+  implementation 'commons-io:commons-io:2.11.0'
+  implementation 'io.github.openfeign:feign-core:11.8'
+  implementation 'io.github.openfeign:feign-gson:11.8'
+  implementation 'io.github.openfeign:feign-okhttp:11.8'
+  implementation 'io.github.openfeign:feign-jackson:11.8'
+
+  implementation 'net.lingala.zip4j:zip4j:2.9.1'
+  implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+  implementation 'org.apache.pdfbox:pdfbox:2.0.25'
+
+  implementation('ch.qos.logback:logback-classic:1.2.11')
+  implementation 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
+
+  testImplementation "org.junit.jupiter:junit-jupiter-api"
+  testImplementation "org.junit.jupiter:junit-jupiter-engine"
+  testImplementation("uk.org.webcompere:system-stubs-core:1.2.0")
+  testImplementation "org.testcontainers:spock:1.16.3"
+  testImplementation("org.testcontainers:testcontainers:1.16.3")
+
+  testImplementation("org.spockframework:spock-core:${spockCoreVersion}")
+  testImplementation ("com.athaydes:spock-reports:$spockReportsVersion"){ transitive = false }
+  testImplementation "org.spockframework:spock-spring:${spockCoreVersion}"
+  testImplementation "org.springframework.boot:spring-boot-starter-test:${springbootVersion}"
+
+  testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
+  testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
+  testImplementation 'io.rest-assured:rest-assured:4.5.1'
+  testImplementation("de.redsix:pdfcompare:1.1.61")
+
+  gatlingImplementation 'org.awaitility:awaitility:4.2.0'
+  gatlingImplementation 'io.rest-assured:rest-assured:4.5.1'
+
+  // From shared lib
+  implementation('com.konghq:unirest-java:3.13.6')
+  implementation("org.yaml:snakeyaml:1.30")
+  implementation('com.vladsch.flexmark:flexmark-all:0.64.0')
+  implementation('fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.core:2.0.3')
+  implementation('fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.pdf:2.0.3')
+  implementation("org.apache.poi:poi-ooxml:4.1.2")
+  implementation("org.apache.pdfbox:pdfbox:2.0.25")
+  implementation("net.lingala.zip4j:zip4j:2.9.1")
+  implementation("com.xlson.groovycsv:groovycsv:1.3")
+
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.21.0'
+  testImplementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+
   testImplementation "com.github.stefanbirkner:system-rules:1.19.0" // for managing environment variables
-  testImplementation "com.github.tomakehurst:wiremock:2.23.2"       // for mocking HTTP server reponses
-  testImplementation "io.rest-assured:rest-assured:4.0.0"           // for validating REST services
-  testImplementation "org.spockframework:spock-core:1.3-groovy-2.5"
+  testImplementation 'org.hamcrest:hamcrest:2.2'
+  testImplementation "org.skyscreamer:jsonassert:1.5.0"
 
-  testImplementation "cglib:cglib-nodep:3.3.0"                      // for mocking classes
-  testImplementation "org.objenesis:objenesis:3.1"
-}
-
-import com.github.jengelman.gradle.plugins.shadow.transformers.NewGroovyExtensionModuleTransformer
-
-shadowJar {
-  mergeServiceFiles()
-  mergeGroovyExtensionModules()
-  transform(NewGroovyExtensionModuleTransformer)
+  testImplementation("au.com.dius:pact-jvm-provider:4.0.10")
+  testImplementation("au.com.dius:pact-jvm-provider-junit:4.0.10")
 }
 
 test {
-  outputs.dir snippetsDir
-
-  // Use overrides in conf/application.test.conf in ConfigFactory.load()
-  // TODO: setting application.env should be enough, but apparently isn't
-  systemProperty "application.env", "test"
-  systemProperty "config.resource", "application.test.conf"
-
   testLogging {
     showStandardStreams = true
+    exceptionFormat = 'full'
   }
+  filter {
+    excludeTestsMatching "*IT"
+  }
+  systemProperty "spock.configuration", "SpockConfig.groovy"
+  systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
+  systemProperty 'com.athaydes.spockframework.report.projectName', 'docGen'
+  systemProperty 'com.athaydes.spockframework.report.projectVersion', version
+  systemProperty "testRecordMode", project.findProperty('testRecordMode')?: false
+  systemProperty "generateExpectedPdfFiles", project.findProperty('generateExpectedPdfFiles')?: false
+  systemProperty "wiremock.textToReplace", project.findProperty('wiremock.textToReplace')?: ""
 
-  finalizedBy jacocoTestReport
+  systemProperties << propertiesForTest()
+
+  maxHeapSize = "4096m"
+  useJUnitPlatform()
+}
+
+task dockerTest(type: Test) {
+  group("verification")
+  filter {
+    includeTestsMatching "*IT"
+  }
+  systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/reports/spock'
+  useJUnitPlatform()
 }
 
 jacocoTestReport {
+  dependsOn test
   reports {
     xml.enabled true
+    html.enabled true
   }
 }
 
-/** We diverge from the default resources structure to adopt the Jooby standard: */
-sourceSets.main.resources {
-  srcDirs = ["conf", "public"]
+jacocoTestCoverageVerification {
+  dependsOn jacocoTestReport
+  violationRules {
+    rule {
+      limit {
+        minimum = 0.7
+      }
+    }
+  }
+}
+
+import com.bmuschko.gradle.docker.tasks.image.*
+task buildImageForTest(type: DockerBuildImage) {
+  group = "docker"
+  inputDir = file("docker")
+  images.add(project.ext.imageForTest as String)
+  buildArgs = getProxyMap()
+}
+
+def getProxyMap(){
+  def buildArgs = [:]
+  def http_proxy = "${project.findProperty('http_proxy') ?: System.getenv('HTTP_PROXY')}"
+  def https_proxy = "${project.findProperty('https_proxy') ?: System.getenv('HTTPS_PROXY')}"
+  if (http_proxy && http_proxy != "null")
+    buildArgs <<  ["http_proxy": http_proxy, "https_proxy": https_proxy]
+
+  return buildArgs
+}
+
+docker {
+  springBootApplication {
+    baseImage = project.ext.imageBaseForApp
+    ports = [8080]
+    images = ['ods-document-generation-svc:local']
+    jvmArgs = ["-XX:+UseCompressedOops", "-XX:+UseParallelGC", "-XX:+UseParallelOldGC"]
+  }
+}
+
+test.dependsOn(buildImageForTest)
+dockerBuildImage.dependsOn(bootJar)
+dockerTest.dependsOn(dockerBuildImage)
+dockerTest.mustRunAfter(test)
+
+bootRun {
+  systemProperties << executionProperties()
+}
+
+import com.bmuschko.gradle.docker.tasks.container.*
+
+task createServerForGalting(type: DockerCreateContainer) {
+  dependsOn dockerBuildImage
+  targetImageId dockerBuildImage.getImageId()
+  hostConfig.portBindings = ['1111:8080']
+  hostConfig.autoRemove = true
+}
+
+task startDocGenServerForGatling(type: DockerStartContainer) {
+  group = "docker"
+  dependsOn createServerForGalting
+  targetContainerId createServerForGalting.getContainerId()
+}
+
+task stopDocGenServerForGatling(type: DockerStopContainer) {
+  group = "docker"
+  targetContainerId createServerForGalting.getContainerId()
+}
+
+gatlingRun.group("verification")
+gatlingRun.mustRunAfter(dockerTest)
+gatlingRun.dependsOn(startDocGenServerForGatling)
+gatlingRun.finalizedBy(stopDocGenServerForGatling)
+
+check.dependsOn(jacocoTestCoverageVerification, dockerTest, gatlingRun)
+
+Map executionProperties(){
+  def bitbucket_url = "${project.findProperty('bitbucket_url') ?: System.getenv('BITBUCKET_HOST')}"
+  def bitbucket_username = "${project.findProperty('bitbucket_username') ?: System.getenv('BITBUCKET_USERNAME')}"
+  def bitbucket_password = "${project.findProperty('bitbucket_password') ?: System.getenv('BITBUCKET_PASSWORD')}"
+
+  def jira_url = "${project.findProperty('jira_url') ?: System.getenv('JIRA_HOST')}"
+  def jira_username = "${project.findProperty('jira_username') ?: System.getenv('JIRA_USERNAME')}"
+  def jira_password = "${project.findProperty('jira_password') ?: System.getenv('JIRA_PASSWORD')}"
+
+  def nexus_url = "${project.findProperty('nexus_url') ?: System.getenv('NEXUS_HOST')}"
+  def nexus_username = "${project.findProperty('nexus_username') ?: System.getenv('NEXUS_USERNAME')}"
+  def nexus_password = "${project.findProperty('nexus_password') ?: System.getenv('NEXUS_PASSWORD')}"
+
+  return [
+          "BITBUCKET_URL": bitbucket_url,
+          "BITBUCKET_USERNAME": bitbucket_username,
+          "BITBUCKET_PASSWORD": bitbucket_password,
+
+          "JIRA_URL": jira_url,
+          "JIRA_USERNAME": jira_username,
+          "JIRA_PASSWORD": jira_password,
+
+          "NEXUS_URL": nexus_url,
+          "NEXUS_USERNAME": nexus_username,
+          "NEXUS_PASSWORD": nexus_password
+  ]
+}
+
+Map propertiesForTest(){
+  List urls = ["BITBUCKET_URL", "JIRA_URL", "NEXUS_URL"]
+  Map execProp = executionProperties()
+  urls.each {
+    if (execProp[it] == "null"){
+      execProp[it] = "http://dummy"
+    }
+  }
+  return execProp
 }

@@ -1,0 +1,36 @@
+name: e2e and performance Test
+
+on: [ pull_request ]
+
+jobs:
+  e2eTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Docker test
+        run: ./gradlew dockerTest --stacktrace --no-daemon
+
+      - name: TestReport
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: JUnit e2e Report
+          path: build/reports/**/**
+
+  performanceTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Performance test
+        run: ./gradlew gatlingRun --stacktrace --no-daemon
+
+      - name: TestReport
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: JUnit performance test Report
+          path: build/reports/**/**
