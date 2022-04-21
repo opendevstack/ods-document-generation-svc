@@ -61,18 +61,14 @@ class DocGenController {
     }
 
     private Path convertToPdf(Map body, Path tmpDir) {
-        try {
-            Path documentPdf = pdfGeneration.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
-            Path tempFile = Files.createTempFile(tmpDir, 'temp', '.b64')
-            tempFile.toFile().withOutputStream { os ->
-                Base64.getEncoder().wrap(os).withStream { encOs ->
-                    Files.copy(documentPdf, encOs)
-                }
+        Path documentPdf = pdfGeneration.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
+        Path tempFile = Files.createTempFile(tmpDir, 'temp', '.b64')
+        tempFile.toFile().withOutputStream { os ->
+            Base64.getEncoder().wrap(os).withStream { encOs ->
+                Files.copy(documentPdf, encOs)
             }
-            return tempFile
-        } catch (Throwable e) {
-            throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.", e)
         }
+        return tempFile
     }
 
     private static void logData(Map body) {

@@ -13,16 +13,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = [ IllegalArgumentException.class ])
-    protected ResponseEntity<Object> handleArgumentError(RuntimeException ex, WebRequest request) {
-        log.error("ExceptionHandler, handleArgumentError:${ex.message}", ex)
-        return handleExceptionInternal(ex, ex.message, new HttpHeaders(), HttpStatus.PRECONDITION_FAILED, request)
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    protected ResponseEntity<Object> handleArgumentError(IllegalArgumentException ex, WebRequest request) {
+        log.error("Bad request: ", ex)
+        return handleExceptionInternal(ex, ex.message, new HttpHeaders(), HttpStatus.BAD_REQUEST, request)
     }
 
-    @ExceptionHandler(value = [ RuntimeException.class ])
+    @ExceptionHandler(value = RuntimeException.class)
     protected ResponseEntity<Object> runtimeError(RuntimeException ex, WebRequest request) {
-        log.error("ExceptionHandler, runtimeError:${ex.message}", ex)
-        return handleExceptionInternal(ex, ex.message, new HttpHeaders(), HttpStatus.CONFLICT, request)
+        log.error("Internal server error: ", ex)
+        return handleExceptionInternal(ex, ex.message, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request)
     }
 
 }

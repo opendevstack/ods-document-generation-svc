@@ -34,7 +34,7 @@ class HealthController {
         return result
     }
 
-    private generatePdfData() {
+    private void generatePdfData() {
         Path tmpDir = Files.createTempDirectory("generatePdfDataFolderTest")
         def documentHtmlFile = Files.createTempFile("document", ".html") << "<html>document</html>"
 
@@ -44,8 +44,6 @@ class HealthController {
             if (!new String(data).startsWith("%PDF-1.4\n")) {
                 throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.")
             }
-        } catch (e) {
-            throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.", e)
         } finally {
             Files.delete(documentHtmlFile)
             FileUtils.deleteDirectory(tmpDir.toFile())

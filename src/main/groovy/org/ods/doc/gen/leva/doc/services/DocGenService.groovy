@@ -33,12 +33,8 @@ class DocGenService {
     private Path convertToPdf(Map body) {
         Path tmpDir
         Path documentPdf
-        try {
-            tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
-            documentPdf = pdfGenerationService.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
-        } catch (Throwable e) {
-            throw new RuntimeException("Conversion form HTML to PDF failed, corrupt data.", e)
-        }
+        tmpDir = Files.createTempDirectory("${body.metadata.type}-v${body.metadata.version}")
+        documentPdf = pdfGenerationService.generatePdfFile(body.metadata as Map, body.data as Map, tmpDir)
 
         return documentPdf
     }
