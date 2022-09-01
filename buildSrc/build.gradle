@@ -18,18 +18,13 @@ ext {
 
 repositories {
     if (no_nexus) {
-        println("using repositories 'jcenter' and 'mavenCentral', because property no_nexus=$no_nexus")
-        jcenter()
+        println("INFO: using repository 'mavenCentral', because property no_nexus=$no_nexus")
         mavenCentral()
-    } else {
-        println("using nexus repositories")
         maven() {
-            url "${nexus_url}/repository/jcenter/"
-            credentials {
-                username = "${nexus_user}"
-                password = "${nexus_pw}"
-            }
+            url "https://plugins.gradle.org/m2/"
         }
+    } else {
+        println("INFO: using nexus repositories")
 
         maven() {
             url "${nexus_url}/repository/maven-public/"
@@ -46,6 +41,11 @@ repositories {
                 password = "${nexus_pw}"
             }
         }
+        
+        maven() {
+            url "https://plugins.gradle.org/m2/"
+        }
+
     }
 }
 
@@ -53,6 +53,6 @@ apply plugin: 'groovy'
 
 dependencies {
     implementation gradleApi()
-    implementation 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
     implementation "org.codehaus.plexus:plexus-utils:3.0.24"
+    implementation "com.github.jengelman.gradle.plugins:shadow:5.2.0"
 }

@@ -32,15 +32,37 @@ def stageBuild(def context) {
       // get wkhtml
       sh (
         script : """
-        curl -kLO https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+        curl -sSkLO https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
         tar vxf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
         mv wkhtmltox/bin/wkhtmlto* /usr/bin
+
+        source use-j11.sh || echo 'ERROR: We could NOT setup jdk 11.'
+        ./gradlew --version || echo 'ERROR: Could NOT get gradle version.'
+        java -version || echo 'ERROR: Could NOT get java version.'
+        echo "JAVA_HOME: $JAVA_HOME" || echo "ERROR: JAVA_HOME has NOT been set."
+
         """,
         label : "get and install wkhtml"
       )
 
       def status = sh(
-        script: "./gradlew clean test shadowJar --stacktrace --no-daemon",
+        script: '''
+                source use-j11.sh
+
+                retryNum=0
+                downloadResult=1
+                while [ 0 -ne $downloadResult ] && [ 5 -gt $retryNum ]; do
+                    set -x
+                    ./gradlew -i dependencies
+                    set +x
+                    downloadResult=$?
+                    let "retryNum=retryNum+1"
+                done
+
+                set -x
+                ./gradlew -i clean test shadowJar --full-stacktrace --no-daemon
+                set +x
+        ''',
         label : "gradle build",
         returnStatus: true
       )
