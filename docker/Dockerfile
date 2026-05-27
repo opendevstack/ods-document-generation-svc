@@ -3,7 +3,7 @@ FROM adoptopenjdk/openjdk8:ubi-jre
 MAINTAINER martin.etmajer@boehringer-ingelheim.com
 
 WORKDIR /app
-COPY build/libs/*all.jar ./app.jar
+COPY app.jar ./app.jar
 COPY entrypoint.sh ./entrypoint.sh
 
 RUN yum update -y && \
