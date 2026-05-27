@@ -16,10 +16,9 @@ jobs:
         distribution: 'temurin'
     - name: download and install wkhtml 
       run: | 
-        sudo apt install libX11 libXext libXrender libjpeg xz xorg-x11-fonts-Type1 git-core
+        sudo apt-get install -y libx11-6 libxext6 libxrender1 libjpeg-turbo8 xz-utils fonts-urw-base35 git
         sudo curl -kLO https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb
-        sudo apt install -y ./wkhtmltox_0.12.5-1.bionic_amd64.deb
-        sudo mv wkhtmltox/bin/wkhtmlto* /usr/bin
+        sudo apt-get install -y ./wkhtmltox_0.12.5-1.bionic_amd64.deb
     - name: Build with Gradle
       run: ./gradlew clean test shadowJar --stacktrace --no-daemon
       env:
