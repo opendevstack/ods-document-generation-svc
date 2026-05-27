@@ -17,8 +17,8 @@ jobs:
     - name: download and install wkhtml 
       run: | 
         sudo apt install curl
-        sudo curl -kLO https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos8.x86_64.rpm
-        sudo rpm -Uvh wkhtmltox-0.12.5-1.centos8.x86_64.rpm
+        sudo curl -kLO https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb
+        sudo apt install -y ./wkhtmltox_0.12.5-1.bionic_amd64.deb
         sudo mv wkhtmltox/bin/wkhtmlto* /usr/bin
     - name: Build with Gradle
       run: ./gradlew clean test shadowJar --stacktrace --no-daemon
