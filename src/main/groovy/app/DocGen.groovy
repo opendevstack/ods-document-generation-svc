@@ -141,7 +141,7 @@ class DocGen implements Jooby.Module {
 
         // Convert a HTML document, with an optional header and footer, into a PDF
         static Path convertHtmlToPDF(Path documentHtmlFile, Object data) {
-            def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type"]
+            def cmd = ["wkhtmltopdf", "--encoding", "UTF-8", "--no-outline", "--print-media-type", "--disable-smart-shrinking"]
             cmd << "--enable-local-file-access"
             cmd.addAll(["-T", "40", "-R", "25", "-B", "25", "-L", "25"])
 
